@@ -19,6 +19,14 @@ and tracking data.
 - infra/: deployment configuration
 - docs/: architecture, metrics and decisions
 
+## Planning documents
+
+- [Architecture Decision Brief](docs/Pulse-Architecture-Decision-Brief.docx)
+- [Hackathon Team Plan](docs/Pulse-Hackathon-Team-Plan.pdf)
+
+Both are team drafts. Current implementation choices and open recommendations
+are recorded in [docs/decisions](docs/decisions).
+
 ## Run the browser pitch
 
 Go 1.23 or newer is required. From the repository root:
