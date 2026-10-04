@@ -15,3 +15,10 @@ jobs:
           go-version-file: go.mod
       - run: go test ./...
       - run: go vet ./...
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run check:web
+      - run: npm run build:web
+      - run: git diff --exit-code -- app/web/static/pitch.js

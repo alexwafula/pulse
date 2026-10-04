@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "scripts": {
+    "build:web": "esbuild app/web/src/pitch.ts --bundle --format=iife --target=es2020 --outfile=app/web/static/pitch.js",
+    "check:web": "tsc --noEmit",
+    "test:web": "node tests/integration/pitch-browser.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.63.0",
+    "typescript": "^7.0.2"
+  }
+}

@@ -19,9 +19,29 @@ and tracking data.
 - infra/: deployment configuration
 - docs/: architecture, metrics and decisions
 
-## Run the first replay
+## Run the browser pitch
 
 Go 1.23 or newer is required. From the repository root:
+
+```powershell
+go run ./app/cmd/server
+```
+
+Open `http://127.0.0.1:8080`. The browser replays the fictional 27:00-28:00
+sequence with animated players and ball, a match clock, event timeline, play
+and pause, seeking and speed controls. The page is served by Go; its pitch
+renderer is TypeScript compiled to `app/web/static/pitch.js`.
+
+To edit the pitch renderer, install Node.js 20 or newer and run:
+
+```powershell
+npm ci
+npm run check:web
+npm run build:web
+```
+
+The compiled browser asset is committed so the Go server runs without an
+`npm` step. To run the terminal replay instead:
 
 ```powershell
 go run ./app/cmd/simulate -speed 10 -human
@@ -41,5 +61,7 @@ evidence-reference rules. The sample fact pack and cue are contract examples,
 not output from a fact builder yet.
 
 ## Status
-Shared contracts and a local Go replay are working. WebSocket delivery, the
-browser pitch, fact calculation and Python insights are the next milestones.
+Shared contracts, a local Go replay and the browser pitch are working. The
+pitch currently loads the authored fixture from Go and interpolates its
+tracking frames in the browser. Live delivery, fact calculation and Python
+insights are the next milestones.

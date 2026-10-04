@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17231f">
+  <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
+  <link rel="stylesheet" href="/static/pitch.css">
+  <script defer src="/static/pitch.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Pulse</div>
+      <span class="header-context">Match replay</span>
+      <span class="header-badge">Synthetic fixture</span>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="match-strip" aria-label="Match">
+      <div class="team-name home"><span class="team-swatch"></span><span>{{(index .Match.Teams 0).Name}}</span></div>
+      <div class="scoreboard">
+        <div class="score">0 <span>:</span> 0</div>
+        <time id="match-clock" class="match-clock">27:00</time>
+      </div>
+      <div class="team-name away"><span>{{(index .Match.Teams 1).Name}}</span><span class="team-swatch"></span></div>
+    </section>
+
+    <div class="workspace">
+      <section class="pitch-column" aria-labelledby="pitch-heading">
+        <div class="section-heading">
+          <h1 id="pitch-heading">Pitch replay</h1>
+          <span>First half</span>
+        </div>
+
+        <div class="pitch-shell">
+          <svg id="pitch" class="pitch" viewBox="0 0 1050 680" role="img" aria-label="Animated football pitch showing the fictional match">
+            <defs>
+              <pattern id="mow" width="197.2" height="640" patternUnits="userSpaceOnUse">
+                <rect width="197.2" height="640" fill="#206a49"></rect>
+                <rect width="98.6" height="640" fill="#267451"></rect>
+              </pattern>
+              <marker id="pass-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#f4f4d5"></path>
+              </marker>
+            </defs>
+            <rect width="1050" height="680" fill="#185c3e"></rect>
+            <rect x="32" y="20" width="986" height="640" fill="url(#mow)"></rect>
+            <g class="field-lines">
+              <rect x="32" y="20" width="986" height="640"></rect>
+              <line x1="525" y1="20" x2="525" y2="660"></line>
+              <circle cx="525" cy="340" r="86"></circle>
+              <circle cx="525" cy="340" r="3" class="filled-mark"></circle>
+              <rect x="32" y="150" width="155" height="380"></rect>
+              <rect x="863" y="150" width="155" height="380"></rect>
+              <rect x="32" y="254" width="52" height="172"></rect>
+              <rect x="966" y="254" width="52" height="172"></rect>
+              <circle cx="135" cy="340" r="3" class="filled-mark"></circle>
+              <circle cx="915" cy="340" r="3" class="filled-mark"></circle>
+              <path d="M 187 266 A 86 86 0 0 1 187 414"></path>
+              <path d="M 863 266 A 86 86 0 0 0 863 414"></path>
+              <path d="M 32 30 A 10 10 0 0 0 42 20"></path>
+              <path d="M 1008 20 A 10 10 0 0 0 1018 30"></path>
+              <path d="M 32 650 A 10 10 0 0 1 42 660"></path>
+              <path d="M 1008 660 A 10 10 0 0 1 1018 650"></path>
+            </g>
+            <rect class="goal" x="13" y="300" width="19" height="80"></rect>
+            <rect class="goal" x="1018" y="300" width="19" height="80"></rect>
+            <g id="event-path-layer" hidden>
+              <line id="event-path" class="event-path" marker-end="url(#pass-arrow)"></line>
+              <circle id="event-start" class="event-start" r="5"></circle>
+            </g>
+            <g id="player-layer"></g>
+            <circle id="ball-shadow" class="ball-shadow" r="12" cx="420" cy="200"></circle>
+            <circle id="ball" class="ball" r="8" cx="420" cy="200"></circle>
+          </svg>
+          <div id="pitch-stamp" class="pitch-stamp">AURORA VALE ATTACKING RIGHT</div>
+        </div>
+
+        <div class="transport">
+          <div class="transport-actions">
+            <button type="button" id="play-button" class="primary-button">Play</button>
+            <button type="button" id="restart-button" class="secondary-button">Restart</button>
+          </div>
+          <div class="seek-wrap">
+            <label for="seek" class="sr-only">Seek match replay</label>
+            <input id="seek" type="range" min="0" max="1000" value="0">
+            <div class="seek-labels"><span id="start-label">27:00</span><span id="end-label">28:00</span></div>
+          </div>
+          <div class="speed-control" role="group" aria-label="Playback speed">
+            <button type="button" data-speed="1" aria-pressed="false">1×</button>
+            <button type="button" data-speed="4" aria-pressed="true">4×</button>
+            <button type="button" data-speed="10" aria-pressed="false">10×</button>
+          </div>
+        </div>
+        <div class="now-playing" aria-live="polite">
+          <span class="now-label">On the pitch</span>
+          <span id="current-action">Loading replay…</span>
+        </div>
+      </section>
+
+      <aside class="events-panel" aria-labelledby="events-heading">
+        <div class="section-heading">
+          <h2 id="events-heading">Event timeline</h2>
+          <span id="event-count">7 actions</span>
+        </div>
+        <ol id="event-list" class="event-list"></ol>
+        <div class="event-detail">
+          <span class="detail-label">Selected action</span>
+          <strong id="detail-title">Waiting for replay</strong>
+          <p id="detail-description"></p>
+        </div>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
