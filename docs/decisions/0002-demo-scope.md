@@ -13,7 +13,9 @@ Build order:
 
 1. Versioned Match, Event, Tracking, Fact Pack and Overlay Cue contracts.
 2. Fictional 60-second replay with one match clock.
-3. Go WebSocket delivery and a browser pitch with play/pause.
+3. Go live delivery and a browser pitch with play/pause. The transport
+   recommendation from the architecture brief is recorded in
+   [0003](0003-architecture-brief-review.md).
 4. Deterministic attacking-lane and set-piece facts from Go, sent to a
    Python `/insights` endpoint that initially returns a template cue.
 5. Evidence-linked cue display, then the three agent responsibilities,
