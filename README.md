@@ -19,5 +19,27 @@ and tracking data.
 - infra/: deployment configuration
 - docs/: architecture, metrics and decisions
 
+## Run the first replay
+
+Go 1.23 or newer is required. From the repository root:
+
+```powershell
+go run ./app/cmd/simulate -speed 10 -human
+go test ./...
+```
+
+The command replays a fictional 27:00-28:00 sequence in six seconds. Omit
+`-human` to print newline-delimited JSON messages for downstream services.
+Use `-speed 0` to emit all messages immediately, or
+`-fixture path/to/file.json` for another fixture. On this machine Go is installed at
+`C:\Users\kwoba\tools\go\bin\go.exe`; use
+`& "C:\Users\kwoba\tools\go\bin\go.exe" run ./app/cmd/simulate -speed 10 -human`
+if `go` is not yet on your PATH.
+
+See [contracts/README.md](contracts/README.md) for the coordinate, clock and
+evidence-reference rules. The sample fact pack and cue are contract examples,
+not output from a fact builder yet.
+
 ## Status
-Initial scaffold. No runnable application yet.
+Shared contracts and a local Go replay are working. WebSocket delivery, the
+browser pitch, fact calculation and Python insights are the next milestones.

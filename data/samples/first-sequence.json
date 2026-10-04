@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0.0",
+  "match": {
+    "schema_version": "1.0.0",
+    "id": "match-vale-bastion-01",
+    "period": 1,
+    "start_ms": 1620000,
+    "end_ms": 1680000,
+    "pitch": { "length_m": 105, "width_m": 68 },
+    "teams": [
+      { "id": "vale", "name": "Aurora Vale", "attacking_direction": "right" },
+      { "id": "bastion", "name": "Bastion City", "attacking_direction": "left" }
+    ],
+    "players": [
+      { "id": "vale-1", "team_id": "vale", "name": "Nia", "number": 9 },
+      { "id": "vale-2", "team_id": "vale", "name": "Imani", "number": 8 },
+      { "id": "vale-3", "team_id": "vale", "name": "Tayo", "number": 10 },
+      { "id": "vale-4", "team_id": "vale", "name": "Leni", "number": 11 },
+      { "id": "bastion-1", "team_id": "bastion", "name": "Juma", "number": 4 },
+      { "id": "bastion-2", "team_id": "bastion", "name": "Ari", "number": 5 },
+      { "id": "bastion-3", "team_id": "bastion", "name": "Sam", "number": 6 },
+      { "id": "bastion-4", "team_id": "bastion", "name": "Mina", "number": 1 }
+    ]
+  },
+  "events": [
+    {
+      "schema_version": "1.0.0", "id": "evt-01", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-open-play", "period": 1, "time_ms": 1628000,
+      "type": "pass", "team_id": "vale", "actor_id": "vale-2", "recipient_id": "vale-3",
+      "from": { "x": 47, "y": 21 }, "to": { "x": 61, "y": 23 }, "outcome": "complete"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-02", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-open-play", "period": 1, "time_ms": 1638000,
+      "type": "carry", "team_id": "vale", "actor_id": "vale-3",
+      "from": { "x": 61, "y": 23 }, "to": { "x": 70, "y": 24 }, "outcome": "complete"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-03", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-open-play", "period": 1, "time_ms": 1647000,
+      "type": "pass", "team_id": "vale", "actor_id": "vale-3", "recipient_id": "vale-4",
+      "from": { "x": 70, "y": 24 }, "to": { "x": 81, "y": 51 }, "outcome": "complete"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-04", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-open-play", "period": 1, "time_ms": 1656000,
+      "type": "cross", "team_id": "vale", "actor_id": "vale-4",
+      "from": { "x": 81, "y": 51 }, "to": { "x": 94, "y": 34 }, "outcome": "blocked"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-05", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-open-play", "period": 1, "time_ms": 1663000,
+      "type": "clearance", "team_id": "bastion", "actor_id": "bastion-3",
+      "from": { "x": 94, "y": 34 }, "to": { "x": 105, "y": 65 }, "outcome": "complete"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-06", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-corner", "period": 1, "time_ms": 1672000,
+      "type": "corner", "team_id": "vale", "actor_id": "vale-4", "recipient_id": "vale-1",
+      "from": { "x": 105, "y": 68 }, "to": { "x": 92, "y": 34 }, "outcome": "complete"
+    },
+    {
+      "schema_version": "1.0.0", "id": "evt-07", "match_id": "match-vale-bastion-01",
+      "phase_id": "phase-corner", "period": 1, "time_ms": 1678000,
+      "type": "shot", "team_id": "vale", "actor_id": "vale-1",
+      "from": { "x": 92, "y": 34 }, "to": { "x": 105, "y": 31 }, "outcome": "blocked"
+    }
+  ],
+  "tracking": [
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1620000,
+      "ball": { "x": 42, "y": 20, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 83, "y": 34 }, { "player_id": "vale-2", "x": 42, "y": 20 },
+        { "player_id": "vale-3", "x": 56, "y": 22 }, { "player_id": "vale-4", "x": 72, "y": 50 },
+        { "player_id": "bastion-1", "x": 75, "y": 18 }, { "player_id": "bastion-2", "x": 78, "y": 34 },
+        { "player_id": "bastion-3", "x": 76, "y": 49 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1628000,
+      "ball": { "x": 47, "y": 21, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 86, "y": 33 }, { "player_id": "vale-2", "x": 47, "y": 21 },
+        { "player_id": "vale-3", "x": 61, "y": 23 }, { "player_id": "vale-4", "x": 75, "y": 51 },
+        { "player_id": "bastion-1", "x": 77, "y": 19 }, { "player_id": "bastion-2", "x": 80, "y": 34 },
+        { "player_id": "bastion-3", "x": 78, "y": 48 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1638000,
+      "ball": { "x": 61, "y": 23, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 87, "y": 34 }, { "player_id": "vale-2", "x": 54, "y": 26 },
+        { "player_id": "vale-3", "x": 61, "y": 23 }, { "player_id": "vale-4", "x": 77, "y": 51 },
+        { "player_id": "bastion-1", "x": 77, "y": 21 }, { "player_id": "bastion-2", "x": 81, "y": 34 },
+        { "player_id": "bastion-3", "x": 79, "y": 48 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1647000,
+      "ball": { "x": 70, "y": 24, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 88, "y": 34 }, { "player_id": "vale-2", "x": 61, "y": 31 },
+        { "player_id": "vale-3", "x": 70, "y": 24 }, { "player_id": "vale-4", "x": 81, "y": 51 },
+        { "player_id": "bastion-1", "x": 76, "y": 23 }, { "player_id": "bastion-2", "x": 82, "y": 34 },
+        { "player_id": "bastion-3", "x": 79, "y": 47 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1656000,
+      "ball": { "x": 81, "y": 51, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 91, "y": 34 }, { "player_id": "vale-2", "x": 67, "y": 33 },
+        { "player_id": "vale-3", "x": 76, "y": 27 }, { "player_id": "vale-4", "x": 81, "y": 51 },
+        { "player_id": "bastion-1", "x": 79, "y": 25 }, { "player_id": "bastion-2", "x": 86, "y": 35 },
+        { "player_id": "bastion-3", "x": 85, "y": 46 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1663000,
+      "ball": { "x": 94, "y": 34, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 92, "y": 34 }, { "player_id": "vale-2", "x": 72, "y": 33 },
+        { "player_id": "vale-3", "x": 80, "y": 29 }, { "player_id": "vale-4", "x": 85, "y": 51 },
+        { "player_id": "bastion-1", "x": 83, "y": 26 }, { "player_id": "bastion-2", "x": 88, "y": 35 },
+        { "player_id": "bastion-3", "x": 94, "y": 34 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1672000,
+      "ball": { "x": 105, "y": 68, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 92, "y": 34 }, { "player_id": "vale-2", "x": 77, "y": 32 },
+        { "player_id": "vale-3", "x": 88, "y": 25 }, { "player_id": "vale-4", "x": 105, "y": 68 },
+        { "player_id": "bastion-1", "x": 88, "y": 26 }, { "player_id": "bastion-2", "x": 91, "y": 38 },
+        { "player_id": "bastion-3", "x": 94, "y": 35 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1678000,
+      "ball": { "x": 92, "y": 34, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 92, "y": 34 }, { "player_id": "vale-2", "x": 82, "y": 32 },
+        { "player_id": "vale-3", "x": 91, "y": 26 }, { "player_id": "vale-4", "x": 96, "y": 55 },
+        { "player_id": "bastion-1", "x": 90, "y": 27 }, { "player_id": "bastion-2", "x": 93, "y": 38 },
+        { "player_id": "bastion-3", "x": 94, "y": 34 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    },
+    {
+      "schema_version": "1.0.0", "match_id": "match-vale-bastion-01", "period": 1, "time_ms": 1680000,
+      "ball": { "x": 98, "y": 33, "z": 0 },
+      "players": [
+        { "player_id": "vale-1", "x": 93, "y": 34 }, { "player_id": "vale-2", "x": 83, "y": 32 },
+        { "player_id": "vale-3", "x": 92, "y": 27 }, { "player_id": "vale-4", "x": 94, "y": 53 },
+        { "player_id": "bastion-1", "x": 91, "y": 28 }, { "player_id": "bastion-2", "x": 94, "y": 38 },
+        { "player_id": "bastion-3", "x": 96, "y": 34 }, { "player_id": "bastion-4", "x": 101, "y": 34 }
+      ]
+    }
+  ]
+}

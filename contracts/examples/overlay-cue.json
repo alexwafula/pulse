@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "id": "cue-vale-corner-01",
+  "match_id": "match-vale-bastion-01",
+  "period": 1,
+  "start_ms": 1678000,
+  "end_ms": 1680000,
+  "replay_start_ms": 1647000,
+  "replay_end_ms": 1678000,
+  "locale": "en",
+  "audience": "casual",
+  "priority": 5,
+  "text": "Vale switched right, then made a chance from the corner.",
+  "fact_ids": ["fact-route-switch", "fact-corner-shot"],
+  "event_ids": ["evt-03", "evt-06", "evt-07"]
+}

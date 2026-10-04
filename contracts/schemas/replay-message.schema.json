@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "replay-message.schema.json",
+  "title": "Pulse Replay Stream Message v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "kind", "match_id", "time_ms", "match"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "kind": { "const": "match" },
+        "match_id": { "type": "string", "minLength": 1 },
+        "time_ms": { "type": "integer", "minimum": 0 },
+        "match": { "$ref": "match.schema.json" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "kind", "match_id", "time_ms", "tracking"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "kind": { "const": "tracking" },
+        "match_id": { "type": "string", "minLength": 1 },
+        "time_ms": { "type": "integer", "minimum": 0 },
+        "tracking": { "$ref": "tracking.schema.json" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "kind", "match_id", "time_ms", "event"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "kind": { "const": "event" },
+        "match_id": { "type": "string", "minLength": 1 },
+        "time_ms": { "type": "integer", "minimum": 0 },
+        "event": { "$ref": "event.schema.json" }
+      }
+    }
+  ]
+}
