@@ -33,10 +33,12 @@ Delivery plan for Pulse, for a **team of two**. Read `AGENTS.md` first for rules
 | Tier | Items |
 |---|---|
 | **Must** | Golden path deployed on Azure with a public URL. Control vs Chaos index with three moment types. Explainer, Narrator, Verifier with template fallback. Evidence Trail. Casual and Analyst personas. Player Spotlight. English and Swahili text. Judge mode (seeded replay). Tests, CI, README. Demo video. |
-| **Should** | Event Hubs ingest. Speech voice with word-synced captions. Recap agent (half time and full time). Newcomer and Loyalist personas. Foundry traces shown in the demo. |
-| **Won't** | Web PubSub, Foundry hosted agents, Producer Rundown, Match Radio, heads-up mode, Cosmos DB (use cookies or local JSON for profiles), broadcast hardware adapters, auto-eventing from video. |
+| **Should** | Event Hubs ingest. Speech voice with word-synced captions. Recap agent (half time and full time). Newcomer and Loyalist personas. Foundry traces shown in the demo. **Play Fingerprint** ("Seen before", gated, see Phase 3). **Pulse Daily**: downloadable two-voice recap MP3, only after Speech and Recap work. |
+| **Won't** | Web PubSub, Foundry hosted agents, Producer Rundown, live Match Radio, heads-up mode, Cosmos DB (use cookies or local JSON for profiles), broadcast hardware adapters, auto-eventing from video. |
 
-**Cut order if behind** (first item goes first): Newcomer and Loyalist -> Recap agent -> Event Hubs (keep the in-process adapter) -> Speech audio (keep text captions) -> Player Spotlight -> Swahili (keep English).
+**Cut order if behind** (first item goes first): Pulse Daily MP3 -> Newcomer and Loyalist -> Recap agent -> **Play Fingerprint** -> Event Hubs (keep the in-process adapter) -> Speech audio (keep text captions) -> Player Spotlight -> Swahili (keep English).
+
+> Play Fingerprint's position is a proposal from `Pulse-Play-Fingerprint.docx`. Confirm it together, then delete this note.
 **Never cut:** the golden path, the Verifier with fallback, the Evidence Trail, deployment, tests.
 
 ---
@@ -48,9 +50,10 @@ Goal: both engineers can work independently for three days without colliding.
 **Both**
 - [ ] Confirm the agent set: Explainer, Narrator, Verifier. Analyst and Producer are deterministic code in the engine, not LLM agents.
 - [ ] Freeze **contract v1** for the golden path only. Events: PASS, SHOT, PRESSURE, CARRY, POSSESSION_CHANGE, WHISTLE. Cues: LOWER_THIRD, MOMENT_BANNER, PLAYER_TAG, STAT_CARD, COMMENTARY.
-- [ ] Define the **agent messages** in `contracts/schemas/`: `FactPack` in, `NarrationDraft` out, `VerificationResult` out. This is the seam most likely to be missing.
+- [ ] Define the **agent messages** in `contracts/schemas/`: `FactPack` in, `NarrationDraft` out, `VerificationResult` out. This is the seam most likely to be missing. Leave room in `FactPack` for an optional `similar_plays` block (Play Fingerprint, Phase 3) so adding it later is additive.
 - [ ] Choose the engine to agent boundary (HTTP service or MCP tool calls) and write a decision record in `docs/decisions/`.
 - [ ] Fill in the Commands section of `AGENTS.md` with what really runs.
+- [ ] Agree the Play Fingerprint gate and cut-order position (see Phase 3 and `Pulse-Play-Fingerprint.docx`).
 - [ ] Register for the hackathon, appoint the Representative, and create the project entry when the portal opens on Oct 6.
 
 **P**
@@ -111,6 +114,8 @@ Goal: the system is smart, not just connected.
 
 **Exit:** three scenarios run end to end with real agents. The Verifier visibly rejects a bad draft and recovers. Evals are reported and trace screenshots exist.
 
+**Play Fingerprint gate inputs, checked at the Tue Oct 13 stand-up:** (1) three scenarios run end to end with real agents, (2) Verifier false-accept rate is zero on the current evals, (3) Evidence Trail is started. All three true means go. Anything else means park it, no discussion.
+
 ---
 
 ## Phase 3: Experience and Azure (Tue Oct 13 to Sun Oct 18)
@@ -130,10 +135,31 @@ Goal: the demo path is complete and deployed.
 - [ ] SPOTLIGHT persona. NEWCOMER and LOYALIST if time allows.
 - [ ] Speech audio with word timings stored in Blob and referenced from the cue (Should).
 - [ ] Recap agent for half time and full time (Should).
+- [ ] Pulse Daily (Should, after Speech and Recap work): 3 to 4 minute two-voice recap as a downloadable MP3, chapters linking to each moment's Evidence Trail. No new agent. First to cut.
+
+### Play Fingerprint (Should, gated, Tue Oct 13 to Sat Oct 17)
+
+Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over earlier plays, so history claims become lookups the Verifier can check. Scope wording is a hard rule: always "in our match library", never "in football" or "this season".
+
+| ID | Task | Owner | Est. |
+|---|---|---|---|
+| FP1 | Generator: recurring pattern templates and variety knobs for about 30 seeded filler matches. Do this first. If it overruns half a day, hand-author the recurring plays for the three scenarios only. | P | 0.5 d |
+| FP2 | Tokeniser, attack-direction normalisation, pairing, 32-bit address | P | 0.5 d |
+| FP3 | Index build and lookup with coherence voting, deterministic ordering | P | 0.5 d |
+| FP4 | Golden, dropped-event, jitter and tempo, false-positive tests; config sweep | P | 0.5 d |
+| FP5 | `SimilarPlay` schema, shared fixtures (1 valid, 3 invalid), Go and Python models | S | 0.25 d |
+| FP6 | Fact pack fields and MCP tool `find_similar_plays` | P | 0.5 d |
+| FP7 | Prompts, four Verifier checks (`HISTORY_UNSUPPORTED`, `HISTORY_COUNT_MISMATCH`, `HISTORY_SCOPE`, `HISTORY_MATCH_UNKNOWN`), 10 new eval cases | A | 1 d |
+| FP8 | Viewer: "Seen before" chip and side-by-side mini pitch (list fallback) | P | 1 d |
+| FP9 | README wording, judge instructions, 20-second demo beat | A | 0.25 d |
+
+- [ ] Gate passed on Tue Oct 13.
+- [ ] FP4 pass bars met by Sat Oct 17 evening (self-match 100%, dropped events and jitter at least 90%, zero false positives on 200 or more unrelated plays). If not green, cut the feature and keep the work on a branch.
+- [ ] Stop at once if the Evidence Trail is not finished by Thu Oct 15.
 
 **Integration day: Thu Oct 15 and Sun Oct 18.**
 
-**Exit:** the full demo path runs on the public URL in judge mode, including Evidence Trail, two personas, Spotlight and Swahili.
+**Exit:** the full demo path runs on the public URL in judge mode, including Evidence Trail, two personas, Spotlight and Swahili. If Play Fingerprint is in, "Seen before" works on the Azure URL in judge mode.
 
 ---
 
@@ -144,7 +170,8 @@ Goal: the demo path is complete and deployed.
 - [ ] Cost controls: model choice, caching, per-match caps, budget alerts verified.
 - [ ] Accessibility pass: semantic HTML, aria-live captions, contrast, keyboard use.
 - [ ] README, architecture notes, decision records, data-quality report, judge instructions.
-- [ ] Public repo audit: no secrets, no real names or marks, licence present.
+- [ ] Public repo audit: no secrets, no real names or marks, licence present. Search the repo, UI strings, video script and README for third-party names (for example "Shazam") and remove them. Use "Play Fingerprint" and "Seen before".
+- [ ] README and UI footer state that the match library is synthetic with seeded recurring patterns.
 - [ ] Re-run the 15-minute SSE soak test and a cold-start test on the deployed app.
 - [ ] **Feature freeze Thu Oct 22.** Only fixes after this.
 
@@ -169,7 +196,8 @@ Goal: the demo path is complete and deployed.
 |---|---|
 | Daily, 15 minutes | What shipped, what is blocked, what changes in the contract |
 | Fri Oct 9 | Skeleton works end to end |
-| Tue Oct 13 | Real agents on real moments |
+| Tue Oct 13 | Real agents on real moments. Play Fingerprint go/no-go. |
+| Sat Oct 17 | Play Fingerprint hard stop: tests green or cut |
 | Sun Oct 18 | Demo path complete and deployed |
 | Thu Oct 22 | Freeze |
 | Sun Oct 25 | Submitted |
@@ -185,6 +213,8 @@ Goal: the demo path is complete and deployed.
 | Agent hallucination reaching viewers | Gate or Verifier bypassed | Treat as a release blocker |
 | Azure surprises (timeouts, quota, cost) | Skeleton deploy fails or soak test drops | Fall back to SSE only, smaller models, cached output |
 | Swahili quality | Reviewer rejects terms | Keep English term in glossary, cut Swahili per cut order |
+| Play Fingerprint crowds out Phase 3 | Evidence Trail not done by Thu Oct 15 | Stop it. Cut order position is fourth. |
+| History claims overreach or the data looks real | Narrator says "in football" or "this season"; judges ask if data is real | Verifier `HISTORY_SCOPE` check; say "synthetic library" in README, video and UI |
 | Demo does not match video | Features appear in video that are unstable | Cut the feature from the video, not the test |
 
 ## Change log
@@ -192,3 +222,4 @@ Goal: the demo path is complete and deployed.
 | Date | Change | By |
 |---|---|---|
 | Oct 5 | Initial plan for a two-person team | |
+| Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |
