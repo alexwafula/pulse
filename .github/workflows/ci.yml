@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'infra/**', 'feat/**']
+  pull_request:
+
+jobs:
+  check:
+    name: Run Pulse Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Ensure Bicep CLI is available
+        run: |
+          if ! command -v bicep >/dev/null 2>&1; then
+            az bicep install || true
+          fi
+
+      - name: Run all checks via scripts/check.sh
+        run: ./scripts/check.sh
