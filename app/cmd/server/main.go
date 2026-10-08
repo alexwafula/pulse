@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	handler, err := transporthttp.NewHandlerWithAgents(replay, *webDir, *agentsURL)
+	handler, err := transporthttp.NewDemoHandler(replay, *webDir, *agentsURL)
 	if err != nil {
 		log.Fatal(err)
 	}

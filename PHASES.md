@@ -82,9 +82,10 @@ Goal: one command shows a verified cue on screen, with either side stubbed.
 
 **A**
 - [x] Python HTTP skeleton with three deterministic, agent-shaped stages returning contract-valid templates. No model-backed agents yet.
-- [ ] Evaluation harness reads `contracts/examples/` and runs end to end with a trivial agent.
+- [x] Offline evaluation harness reads `contracts/examples/` and runs all three stages with a fake backend. Twelve recorded cases check the canonical guard, not model quality.
+- [x] Async shadow orchestration with file prompts, bounded calls, one narration retry and template fallback. Not wired to live model calls or viewer output.
 - [ ] First real model call through Foundry with tracing visible.
-- [ ] Draft the first 30 evaluation cases.
+- [x] Draft the first 30 recorded evaluation cases. Passing these fake-backend checks is not a live Verifier quality result.
 
 **Integration day: Fri Oct 9.** Wire real agent service to the engine. If it is not ready, ship with the template-only mode and keep going.
 
@@ -227,3 +228,4 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 | Oct 6 | Contract v2 aligns field names, enums, locales and coordinates; preserve the corner demo, start with COMMENTARY and direct HTTP; message models/tests ready, runtime agents pending. | Alex + Codex |
 | Oct 6 | Alex requested a local Three.js/PixiJS/SVG comparison before pushing. Replay clock and contracts unchanged; this experience spike does not complete the agent or SSE phases. | Alex + Codex |
 | Oct 8 | Local corner fact builder, Python template HTTP pipeline, conservative Go gate and browser evidence replay connected. SSE, Azure and real model calls remain pending. | Alex + Codex |
+| Oct 8 | Added three authored local scenario variants, attacking-route metrics, Casual/Analyst control, deterministic recap, opt-in mock-tested Foundry shadow adapter, container definitions, setup instructions and registration media. Goals need contract approval; Kiswahili needs review; live models, streaming and deployment remain pending. | Alex + Codex |

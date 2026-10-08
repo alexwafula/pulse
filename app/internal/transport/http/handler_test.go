@@ -30,6 +30,9 @@ func TestMatchPageAndReplayAPI(t *testing.T) {
 	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Aurora Vale") {
 		t.Fatalf("match page: status %d", page.Code)
 	}
+	if !strings.Contains(page.Body.String(), `data-pass-evidence="evt-01"`) || strings.Count(page.Body.String(), `class="passing-snapshot"`) != 3 || strings.Contains(page.Body.String(), `data-pass-evidence="evt-06"`) {
+		t.Fatal("passing snapshots or evidence incorrect")
+	}
 
 	api := httptest.NewRecorder()
 	handler.ServeHTTP(api, httptest.NewRequest(http.MethodGet, "/api/replay", nil))

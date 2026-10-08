@@ -1,11 +1,14 @@
-"""Local template HTTP adapter. No models, credentials or third-party packages."""
+"""Local HTTP adapter; template default, explicit opt-in Foundry shadow mode."""
 
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import logging
+import os
 from typing import Any
 
 from .pipeline import insights
+from .service import AgentService
 
 
 def reject_constant(value: str) -> None:
@@ -26,8 +29,9 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:
+        service = getattr(self.server, "service", None)
         self.send_json(200 if self.path == "/healthz" else 404,
-                       {"status": "ok", "mode": "template"} if self.path == "/healthz" else {"error": "Not found"})
+                       {"status": "ok", "mode": service.mode if service else "template"} if self.path == "/healthz" else {"error": "Not found"})
 
     def do_POST(self) -> None:
         if self.path != "/insights":
@@ -49,7 +53,8 @@ class Handler(BaseHTTPRequestHandler):
             if len(raw) != length:
                 raise ValueError("Incomplete request body")
             request = json.loads(raw, parse_constant=reject_constant)
-            self.send_json(200, insights(request))
+            service = getattr(self.server, "service", None)
+            self.send_json(200, service.respond(request) if service else insights(request))
         except (ValueError, TypeError, KeyError, AttributeError, OverflowError):
             self.send_json(422, {"error": "Invalid or unsupported insight request"})
 
@@ -58,9 +63,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8090)
+    parser.add_argument("--mode", choices=("template", "foundry-shadow"), default=os.getenv("PULSE_AGENT_MODE", "template"))
     args = parser.parse_args()
     with ThreadingHTTPServer((args.host, args.port), Handler) as server:
-        print(f"Pulse template insights: http://{args.host}:{args.port}", flush=True)
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
+        backend = None
+        if args.mode == "foundry-shadow":
+            from .foundry import FoundryBackend
+            backend = FoundryBackend.from_environment()
+        server.service = AgentService(backend, max_requests=int(os.getenv("PULSE_MODEL_REQUEST_CAP", "10")))
+        print(f"Pulse insights ({server.service.mode}): http://{args.host}:{args.port}", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

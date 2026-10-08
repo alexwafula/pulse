@@ -10,11 +10,16 @@ import (
 
 	"github.com/alexwafula/pulse/app/internal/ai"
 	"github.com/alexwafula/pulse/app/internal/domain"
+	"github.com/alexwafula/pulse/app/internal/engine/metrics"
 	"github.com/alexwafula/pulse/app/internal/facts"
 )
 
 type pageData struct {
-	Match domain.Match
+	Match    domain.Match
+	Graphs   []graphSnapshot
+	Attacks  []metrics.AttackSnapshot
+	Recap    []recapItem
+	Scenario string
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -23,6 +28,14 @@ func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
 
 func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
 	packs, err := facts.CornerPacks(replay)
+	if err != nil {
+		return nil, err
+	}
+	graphs, err := passingViews(replay)
+	if err != nil {
+		return nil, err
+	}
+	attacks, err := metrics.AttackSeries(replay)
 	if err != nil {
 		return nil, err
 	}
@@ -63,18 +76,26 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			http.Error(w, "unsupported persona", 400)
 			return
 		}
+		locale := r.URL.Query().Get("locale")
+		if locale == "" {
+			locale = "en-GB"
+		}
+		if locale != "en-GB" {
+			http.Error(w, "locale awaiting review", 400)
+			return
+		}
 		feed := domain.CueFeed{SchemaVersion: domain.SchemaVersion, Cues: []domain.OverlayCue{}}
 		source := "go-template"
 		for _, pack := range packs {
-			response, err := ai.Template(pack, "en-GB", persona)
+			response, err := ai.Template(pack, locale, persona)
 			if err != nil {
 				http.Error(w, "unsupported fact pack", 500)
 				return
 			}
 			if agentsURL != "" {
-				remote, remoteErr := ai.Request(r.Context(), agentsURL, pack, "en-GB", persona)
+				remote, remoteErr := ai.Request(r.Context(), agentsURL, pack, locale, persona)
 				if remoteErr == nil {
-					_, remoteErr = ai.Cue(replay, pack, remote, "en-GB", persona)
+					_, remoteErr = ai.Cue(replay, pack, remote, locale, persona)
 					if remoteErr == nil {
 						response = remote
 						source = "python-template"
@@ -84,7 +105,7 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 					log.Printf("Python insight rejected/unavailable; using Go template: %v", remoteErr)
 				}
 			}
-			cue, err := ai.Cue(replay, pack, response, "en-GB", persona)
+			cue, err := ai.Cue(replay, pack, response, locale, persona)
 			if err != nil {
 				http.Error(w, "cue validation failed", 500)
 				return
@@ -128,7 +149,11 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if err := page.Execute(w, pageData{Match: replay.Match}); err != nil {
+		scenario := r.URL.Query().Get("scenario")
+		if scenario == "" {
+			scenario = "corner"
+		}
+		if err := page.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: scenario}); err != nil {
 			return
 		}
 	})

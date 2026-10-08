@@ -1,0 +1,25 @@
+services:
+  agents:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
+    environment:
+      PULSE_AGENT_MODE: ${PULSE_AGENT_MODE:-template}
+      PULSE_FOUNDRY_ENDPOINT: ${PULSE_FOUNDRY_ENDPOINT:-}
+      PULSE_FOUNDRY_DEPLOYMENT: ${PULSE_FOUNDRY_DEPLOYMENT:-}
+      PULSE_FOUNDRY_API_KEY: ${PULSE_FOUNDRY_API_KEY:-}
+      PULSE_MODEL_REQUEST_CAP: ${PULSE_MODEL_REQUEST_CAP:-10}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      PULSE_AGENTS_URL: http://agents:8090
+    depends_on:
+      agents:
+        condition: service_healthy

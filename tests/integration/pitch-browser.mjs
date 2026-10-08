@@ -29,6 +29,15 @@ try {
   await desktop.waitForTimeout(450);
   assert.equal(await desktop.locator("#match-clock").textContent(), pausedClock);
 
+  for (const [value, expected] of [["0", 0], ["140", 1], ["450", 2], ["0", 0]]) {
+    await desktop.locator("#seek").evaluate((input, value) => {
+      input.value = value;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    }, value);
+    assert.equal(await desktop.locator('.passing-snapshot:not([hidden])').count(), 1);
+    assert.equal(await desktop.locator('.passing-snapshot:not([hidden]) .passing-links button').count(), expected, "passing evidence must follow the clock");
+  }
+
   await desktop.locator("#seek").evaluate((input) => {
     input.value = "450";
     input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -38,6 +47,14 @@ try {
   const expectedY = 20 + (1 - pass.from.y / 68) * 640;
   const renderedY = Number(await desktop.locator("#event-path").getAttribute("y1"));
   assert.ok(Math.abs(renderedY - expectedY) < 0.01, "bottom-left coordinates must be inverted for SVG");
+  await desktop.locator('.passing-snapshot:not([hidden]) [data-pass-evidence="evt-01"]').click();
+  assert.equal(await desktop.locator("#match-clock").textContent(), "27:08");
+  assert.equal(await desktop.locator('.event-list .evidence-event').count(), 1);
+  assert.equal(await desktop.locator('.passing-snapshot:not([hidden]) .passing-links button').count(), 1);
+  await desktop.locator("#seek").evaluate((input) => {
+    input.value = "450";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
   await desktop.screenshot({ path: path.join(os.tmpdir(), "pulse-pitch-desktop.png"), fullPage: true });
 
   await desktop.locator("#seek").evaluate((input) => {
@@ -51,7 +68,7 @@ try {
   await desktop.waitForFunction(() => document.querySelector("#insight-text")?.textContent === "The corner produced 1 shot.");
   assert.equal(await desktop.locator("#insight-status").textContent(), "Template");
   await desktop.screenshot({ path: path.join(os.tmpdir(), "pulse-insight-desktop.png"), fullPage: true });
-  await desktop.getByRole("button", { name: "Evidence", exact: true }).click();
+  await desktop.locator("#evidence-button").click();
   assert.match(await desktop.locator("#match-clock").textContent(), /27:5[2-3]/);
   assert.equal(await desktop.locator(".event-list .evidence-event").count(), 2);
   assert.equal(await desktop.locator('[data-speed="1"]').getAttribute("aria-pressed"), "true");

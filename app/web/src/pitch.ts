@@ -1,6 +1,6 @@
 export {};
 
-import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, ListVideo, Undo2 } from "lucide";
+import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } from "lucide";
 import { createThree } from "./renderers/three";
 import { createPixi } from "./renderers/pixi";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
@@ -81,6 +81,11 @@ let cues: Cue[] = [];
 let evidenceCue: Cue | undefined;
 let returnClock = 0;
 let displayedCueID: string | undefined;
+let persona = "CASUAL";
+let insightRequest = 0;
+const localePicker = required<HTMLSelectElement>("#locale");
+const scenarioPicker = required<HTMLSelectElement>("#scenario");
+function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenarioPicker.value)}`; }
 
 function clearEvidence(): void {
   evidenceCue = undefined;
@@ -101,15 +106,18 @@ function renderInsight(): void {
 }
 
 async function loadInsights(): Promise<void> {
+  const request = ++insightRequest;
   try {
-    const response = await fetch("/api/insights", { cache: "no-store" });
+    const response = await fetch(`/api/insights?${scenarioQuery()}&persona=${persona}&locale=${localePicker.value}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Insight request failed: ${response.status}`);
     const feed = await response.json() as CueFeed;
+    if (request !== insightRequest) return;
     if (feed.schemaVersion !== "2.0.0" || !Array.isArray(feed.cues)) throw new Error("Unsupported cue feed");
     cues = feed.cues;
     if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; insightStatus.textContent = "No moment"; }
     else { displayedCueID = undefined; renderInsight(); }
   } catch (error: unknown) {
+    if (request !== insightRequest) return;
     console.warn("Insight feed unavailable", error);
     insightText.textContent = "Insights unavailable";
     insightStatus.textContent = "Unavailable";
@@ -164,6 +172,13 @@ let previousFrameTime = 0;
 let currentEventId: string | null = null;
 const playerElements = new Map<string, SVGGElement>();
 const eventButtons = new Map<string, HTMLButtonElement>();
+const passingSnapshots = [...document.querySelectorAll<HTMLElement>(".passing-snapshot")];
+const passingClock = required<HTMLElement>("#passing-clock");
+let activePassingSnapshot: HTMLElement | undefined;
+const attackSnapshots = [...document.querySelectorAll<HTMLElement>(".attack-snapshot")];
+const attackClock = required<HTMLElement>("#attack-clock");
+let activeAttackSnapshot: HTMLElement | undefined;
+const recapPanel = required<HTMLElement>("#recap-panel");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
 
 function pitchPoint(point: Point): Point {
@@ -326,6 +341,21 @@ function render(): void {
   renderPositions();
   renderEvent();
   renderInsight();
+  const snapshot = [...passingSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
+  if (snapshot !== activePassingSnapshot) {
+    if (activePassingSnapshot) activePassingSnapshot.hidden = true;
+    if (snapshot) snapshot.hidden = false;
+    activePassingSnapshot = snapshot;
+  }
+  passingClock.textContent = `${matchTime(replay.match.startMs)} - ${matchTime(clock)}`;
+  const attack = [...attackSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
+  if (attack !== activeAttackSnapshot) {
+    if (activeAttackSnapshot) activeAttackSnapshot.hidden = true;
+    if (attack) attack.hidden = false;
+    activeAttackSnapshot = attack;
+  }
+  attackClock.textContent = matchTime(clock);
+  recapPanel.hidden = clock < replay.match.endMs;
   clockDisplay.textContent = matchTime(clock);
   seek.value = String(Math.round(((clock - replay.match.startMs) / (replay.match.endMs - replay.match.startMs)) * 1000));
   const nextPlayLabel = playing ? "Pause" : evidenceCue && clock >= evidenceCue.replayEndMs ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
@@ -356,7 +386,7 @@ function animate(time: number): void {
 }
 
 async function start(): Promise<void> {
-  const response = await fetch("/api/replay", { cache: "no-store" });
+  const response = await fetch(`/api/replay?${scenarioQuery()}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Replay request failed: ${response.status}`);
   replay = await response.json() as Replay;
   if (replay.schemaVersion !== "2.0.0" || replay.tracking.length < 2) {
@@ -372,7 +402,51 @@ async function start(): Promise<void> {
   pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
   createPlayers();
   createTimeline();
-  createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2 } });
+  scenarioPicker.addEventListener("change", () => {
+    const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
+  });
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]")) {
+    const id = button.dataset.passEvidence ?? "";
+    const event = replay.events.find((item) => item.id === id);
+    if (event) {
+      button.textContent = matchTime(event.timeMs);
+      button.setAttribute("aria-label", `Inspect pass at ${matchTime(event.timeMs)}: ${eventSentence(event)}`);
+    }
+    button.addEventListener("click", () => {
+      eventButtons.get(id)?.click();
+      eventButtons.get(id)?.classList.add("evidence-event");
+      required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+  createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } });
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]")) {
+    const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
+    if (event) {
+      const span = button.querySelector("span");
+      if (span) span.textContent = matchTime(event.timeMs);
+      button.setAttribute("aria-label", `Inspect recap evidence at ${matchTime(event.timeMs)}`);
+    }
+    button.addEventListener("click", () => {
+      eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
+      required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+  required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
+    const lines = [...recapPanel.querySelectorAll("li p")].map((item) => item.textContent ?? "");
+    const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, "Synthetic sequence recap", `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) {
+    button.addEventListener("click", () => {
+      if (evidenceCue) clock = returnClock;
+      clearEvidence(); playing = false;
+      persona = button.dataset.persona ?? "CASUAL";
+      for (const item of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) item.setAttribute("aria-pressed", String(item === button));
+      cues = []; displayedCueID = undefined; render(); void loadInsights();
+    });
+  }
   evidenceButton.addEventListener("click", () => {
     const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
     if (!cue) return;

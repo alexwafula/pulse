@@ -73,8 +73,8 @@ Use `-speed 0` to emit all messages immediately, or
 if `go` is not yet on your PATH.
 
 See [contracts/README.md](contracts/README.md) for the coordinate, clock and
-evidence-reference rules. The sample fact pack and cue are contract examples,
-not output from a fact builder yet.
+evidence-reference rules. Authored examples are contract fixtures; the running
+Go server separately computes the corner fact pack from the replay.
 
 ## Status
 Shared contracts, local replay, the browser pitch and one computed corner-shot
@@ -131,3 +131,46 @@ template through the same gate. `FALLBACK_TEMPLATE` means deterministic output,
 not completed LLM verification. The gate currently rejects all noncanonical
 prose, including model output labelled VERIFIED. Expand it only alongside the
 real agent verification work and adversarial evaluations.
+
+## Passing network and agent preparation
+
+Below the pitch, Go-calculated passing networks show each team's completed
+passes, directed links and sent/received totals. They follow the match clock;
+rewinding removes future links. Click a pass timestamp to inspect its action.
+The two-pass sample is intentionally small: no influence or centrality claims.
+
+The Python agent backend interface, three prompt files and async shadow
+workflow are ready for an approved Foundry adapter. Shadow runs retry the
+Narrator once and fall back on rejection or timeout. The HTTP service and
+browser still publish templates only; no live AI calls are configured.
+
+```powershell
+py tests/evaluations/run_agents.py
+```
+
+These recorded, fake-backend checks exercise the canonical safety boundary,
+not model quality. See [decision 0007](docs/decisions/0007-passing-network-and-agent-shadow.md).
+
+## Core demo additions
+
+The scenario selector offers Corner chance, Central entry and Passing exchange.
+The latter two are authored variants of the first fixture, not a general seeded
+match generator or evidence of validated football intelligence. Go calculates
+attacking-relative lane counts for completed passes/carries, penalty-area
+entries and entry-to-shot conversion. Statistics follow rewind and evidence
+playback; conversion is N/A when there are no qualifying entries.
+
+Casual/Analyst buttons request the corresponding English insight wording.
+Kiswahili remains disabled until native-speaker review. At the sequence end,
+a deterministic recap appears with event evidence and a text download. No
+goal outcome has been added pending shared-contract approval.
+
+Additional browser check: `node tests/integration/core-browser.mjs` with
+`PULSE_URL` pointing to the running server. The offline agent evaluation now
+has 30 recorded cases, not a live model accuracy measurement.
+
+Foundry is opt-in, shadow-only and bounded by a per-process request cap. The
+default mode makes no model calls. See [Foundry/Azure setup](docs/FOUNDRY-AZURE-SETUP.md)
+for credentials, direct shadow testing, Docker Compose and deployment steps.
+Dockerfiles and `compose.yaml` are prepared but not yet container-tested here.
+See [project-page copy](docs/PROJECT-PAGE.md) and [uploadable media](docs/media/README.md).

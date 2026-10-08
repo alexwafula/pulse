@@ -53,6 +53,13 @@ Go/Python agent-message models and dependency-free contract tests. A local
 Three.js/PixiJS comparison now sits beside the SVG view, using the same replay.
 The corner-to-first-shot builder, conservative canonical-template Go cue gate,
 Python template HTTP service and browser Evidence replay now work locally.
+Go-calculated passing snapshots and pass evidence are rendered below the pitch.
+Python has file prompts and a tested async shadow workflow; it does not publish
+model output, and the HTTP endpoint remains template-only.
+Three authored local scenarios, attacking-route metrics, persona controls and
+a deterministic downloadable recap are available. An opt-in Foundry REST
+shadow adapter is mock-tested; no live calls or cloud deployment have been
+verified. Dockerfiles/Compose and setup/project-page docs are prepared.
 SSE, model-backed runtime agents and Azure remain unimplemented. The Python
 Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
 
@@ -164,6 +171,8 @@ Local checks:
 
 - Go: `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...`
 - Python: `py -m unittest discover -s agents/tests -v` (standard library; pytest is not configured)
+- Offline agent boundary evaluation: `py tests/evaluations/run_agents.py` (fake backend, not model accuracy)
+- Core UI: `node tests/integration/core-browser.mjs` (running local Go server required)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions
