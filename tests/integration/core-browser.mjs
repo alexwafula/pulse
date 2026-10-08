@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { chromium } from "playwright-core";
 
 const url = process.env.PULSE_URL ?? "http://127.0.0.1:8083";
-const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: true });
+const defaultChrome = process.platform === "linux" ? "/usr/bin/chromium-browser" : "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? defaultChrome, headless: true });
 try {
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     const page = await browser.newPage({ viewport, acceptDownloads: true });
@@ -14,7 +15,7 @@ try {
     await seek("667");
     assert.equal(await page.locator('.attack-snapshot:not([hidden]) .attack-stats dd').nth(0).textContent(), "1");
     assert.equal(await page.locator('.attack-snapshot:not([hidden]) .attack-stats dd').nth(1).textContent(), "1");
-    assert.equal(await page.locator('.attack-snapshot:not([hidden]) .attack-stats dd').nth(2).textContent(), "100%");
+    assert.equal(await page.locator('.attack-snapshot:not([hidden]) .attack-stats dd').nth(2).textContent(), "1 of 1");
     assert.equal(await page.locator("#recap-panel").isVisible(), false);
     await seek("0");
     assert.equal(await page.locator('.attack-snapshot:not([hidden]) .attack-stats dd').nth(0).textContent(), "0");

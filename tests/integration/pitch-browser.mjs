@@ -4,7 +4,8 @@ import path from "node:path";
 import { chromium } from "playwright-core";
 
 const url = process.env.PULSE_URL ?? "http://127.0.0.1:8080";
-const executablePath = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const defaultChrome = process.platform === "linux" ? "/usr/bin/chromium-browser" : "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const executablePath = process.env.CHROME_PATH ?? defaultChrome;
 const browser = await chromium.launch({ executablePath, headless: true });
 
 try {

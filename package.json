@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build:web": "esbuild app/web/src/pitch.ts --bundle --minify --format=iife --target=es2020 --outfile=app/web/static/pitch.js",
+    "build:web": "esbuild app/web/src/renderers/three.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/three-renderer.js && esbuild app/web/src/renderers/pixi.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/pixi-renderer.js && esbuild app/web/src/pitch.ts --bundle --minify --format=esm --target=es2020 --external:./*-renderer.js --outfile=app/web/static/pitch.js",
     "check:web": "tsc --noEmit",
     "test:web": "node tests/integration/pitch-browser.mjs"
   },

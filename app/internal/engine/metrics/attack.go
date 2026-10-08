@@ -10,6 +10,7 @@ type LaneCount struct {
 type AttackTeam struct {
 	Team                          domain.Team
 	Lanes                         []LaneCount
+	TotalLanes                    int
 	BoxEntries, EntryShots, Shots int
 	EntryEventIDs, ShotEventIDs   []string
 	Conversion                    float64
@@ -73,6 +74,7 @@ func AttackSeries(replay domain.Replay) ([]AttackSnapshot, error) {
 					lane = 2
 				}
 				stats.Lanes[lane].Count++
+				stats.TotalLanes++
 				stats.Lanes[lane].EventIDs = append(stats.Lanes[lane].EventIDs, e.ID)
 				if !insideBox(e.From, team.AttackingDirection) && insideBox(e.To, team.AttackingDirection) {
 					stats.BoxEntries++

@@ -204,11 +204,120 @@ button:focus-visible, input:focus-visible { outline: 2px solid #368899; outline-
 .passing-links strong { font-weight: 600; overflow-wrap: anywhere; }
 .passing-links li > span, .passing-empty { color: #627568; }
 .passing-links button { border: 0; border-bottom: 1px solid #218597; background: transparent; color: #186374; padding: 8px 4px; min-height: 34px; font-size: 12px; }
-@media (max-width: 560px) {
-  .header-inner { flex-wrap: wrap; height: auto !important; min-height: 84px; padding-top: 8px !important; padding-bottom: 8px !important; }
-  .scenario-picker { order: 3; width: 100%; max-width: none; }
-  .passing-panel { margin-left: 14px; margin-right: 14px; }
-  .passing-snapshot:not([hidden]) { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.demo-button {
+  background: #c8e46d;
+  color: #17231f;
+  font-weight: 750;
+  border-radius: 4px;
+  border: 1px solid #b3d154;
+  padding: 0 12px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.demo-button svg { width: 14px; height: 14px; }
+.demo-button:hover { background: #d9ed9a; transform: translateY(-1px); }
+.demo-button:active { transform: translateY(0); }
+.demo-button.demo-active {
+  background: #ea705c;
+  color: #fff;
+  border-color: #d85c47;
+  box-shadow: 0 0 0 2px rgba(234, 112, 92, 0.4);
+}
+
+.pitch-loading, .pitch-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 24px;
+  text-align: center;
+}
+.pitch-loading {
+  background: rgba(20, 36, 31, 0.88);
+  backdrop-filter: blur(4px);
+  color: #f4f7f2;
+  font-size: 15px;
+  font-weight: 650;
+  gap: 14px;
+}
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(213, 236, 131, 0.25);
+  border-top-color: #d5ec83;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.pitch-error {
+  background: rgba(23, 35, 31, 0.95);
+  color: #fff;
+  gap: 10px;
+}
+.pitch-error strong { font-size: 18px; color: #f47761; }
+.pitch-error p { color: #d8e5dc; font-size: 13px; margin: 0 0 6px; max-width: 380px; }
+
+.passing-node { cursor: pointer; outline: none; }
+.passing-node circle { fill: #fff; stroke: currentColor; stroke-width: 2; transition: all 0.15s ease; }
+.passing-node .node-number { fill: #23332b; font-size: 13px; font-weight: 800; pointer-events: none; }
+.passing-node .node-name { fill: #23332b; font-size: 9px; font-weight: 600; opacity: 0.85; pointer-events: none; transition: all 0.15s ease; }
+.passing-node:hover circle, .passing-node:focus-visible circle {
+  fill: #f4faee;
+  stroke: #218597;
+  stroke-width: 3.5px;
+  filter: drop-shadow(0 2px 5px rgba(33, 133, 151, 0.45));
+}
+.passing-node:hover .node-name, .passing-node:focus-visible .node-name {
+  opacity: 1;
+  font-weight: 800;
+  fill: #14241f;
+  font-size: 10px;
+}
+.passing-node:focus-visible { outline: none; }
+
+button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:focus-visible {
+  outline: 2px solid #186374;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(24, 99, 116, 0.25);
+}
+.evidence-button:focus-visible, .passing-links button:focus-visible, [data-recap-evidence]:focus-visible, [data-pass-evidence]:focus-visible {
+  outline: 2px solid #186374;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(24, 99, 116, 0.35);
+  background: #ecf3e7;
+}
+
+.renderer-status {
+  padding: 10px 24px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5c3b00;
+  background: #fff8e6;
+  border-left: 4px solid #d97706;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .loading-spinner { animation: none; border-top-color: #d5ec83; opacity: 0.7; }
+  .event-path { stroke-dasharray: none; }
 }
 
 @media (max-width: 1100px) {
@@ -227,41 +336,52 @@ button:focus-visible, input:focus-visible { outline: 2px solid #368899; outline-
 }
 
 @media (max-width: 560px) {
-  .header-inner { height: 54px; padding: 0 15px; gap: 12px; }
-  .brand { font-size: 19px; }
-  .brand-mark { width: 21px; height: 21px; }
+  .header-inner {
+    height: auto !important;
+    min-height: 88px;
+    padding: 10px 14px !important;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .brand { font-size: 18px; }
+  .brand-mark { width: 20px; height: 20px; }
   .header-context { display: none; }
   .header-badge { display: none; }
-  .audience-controls { gap: 3px; }
-  .audience-controls button, .audience-controls select { font-size: 11px; padding: 4px 5px; }
-  .header-badge { font-size: 10px; }
-  .match-strip { min-height: 78px; gap: 9px; padding: 8px 14px; }
-  .team-name { gap: 7px; font-size: 13px; line-height: 1.15; }
-  .team-swatch { flex-basis: 5px; width: 5px; height: 28px; }
-  .scoreboard { min-width: 62px; }
-  .score { font-size: 23px; }
+  .scenario-picker { order: 3; width: 100%; max-width: none; min-height: 36px; }
+  .demo-button { order: 2; height: 32px; padding: 0 10px; font-size: 11px; }
+  .audience-controls { order: 2; margin-left: auto; gap: 3px; }
+  .audience-controls button, .audience-controls select { font-size: 11px; padding: 4px 6px; min-height: 32px; }
+  .match-strip { min-height: 74px; gap: 8px; padding: 8px 12px; }
+  .team-name { gap: 6px; font-size: 13px; line-height: 1.15; }
+  .team-swatch { flex-basis: 5px; width: 5px; height: 26px; }
+  .scoreboard { min-width: 58px; }
+  .score { font-size: 22px; }
   .match-clock { font-size: 11px; }
-  .pitch-column { padding: 0 0 18px; }
-  .pitch-column > .section-heading { padding: 12px 14px; }
+  .pitch-column { padding: 0 0 16px; }
+  .pitch-column > .section-heading { padding: 10px 12px; }
   .section-heading h1 { font-size: 14px; }
   .half-label { display: none; }
   .pitch-shell { aspect-ratio: 4 / 3; }
-  .transport { margin: 0 14px; }
-  .now-playing { padding-left: 14px; padding-right: 14px; }
-  .scene-tools { right: 10px; top: 10px; }
-  .scene-tools .icon-button { width: 32px; min-width: 32px; height: 32px; }
-  .events-panel { padding: 17px 12px 22px; }
-  .pitch-stamp { left: 10px; bottom: 8px; font-size: 8px; }
-  .pitch-stamp span { display: none; }
-  .action-result { left: 14px; bottom: 44px; max-width: calc(100% - 28px); padding: 7px 10px; }
-  .action-result strong { font-size: 14px; }
-  .action-result span { font-size: 11px; }
-  .player-number { display: none; }
-  .transport { grid-template-columns: 1fr auto; gap: 12px; padding-top: 13px; }
+  .transport { margin: 0 12px; grid-template-columns: 1fr auto; gap: 10px; padding: 12px 0; }
   .seek-wrap { grid-row: 1; grid-column: 1 / 3; }
   .transport-actions { grid-row: 2; }
   .speed-control { grid-row: 2; }
-  .primary-button, .secondary-button { min-width: 40px; padding: 0; }
-  .now-playing { gap: 10px; }
+  .primary-button, .secondary-button { min-width: 44px; min-height: 38px; padding: 0 10px; }
+  .now-playing { padding-left: 12px; padding-right: 12px; min-height: 44px; gap: 8px; }
+  .scene-tools { right: 8px; top: 8px; }
+  .scene-tools .icon-button { width: 34px; min-width: 34px; height: 34px; }
+  .events-panel { padding: 16px 12px 20px; }
+  .pitch-stamp { left: 8px; bottom: 8px; font-size: 8px; }
+  .pitch-stamp span { display: none; }
+  .action-result { left: 10px; bottom: 40px; max-width: calc(100% - 20px); padding: 7px 10px; }
+  .action-result strong { font-size: 14px; }
+  .action-result span { font-size: 11px; }
+  .player-number { display: none; }
   .event-list { grid-template-columns: 1fr; }
+  .passing-panel { margin-left: 12px; margin-right: 12px; }
+  .passing-snapshot:not([hidden]) { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .passing-table { font-size: 11px; }
+  .passing-table th, .passing-table td { padding: 6px 2px; }
+  .attack-panel { margin-top: 18px; padding-top: 14px; }
+  .recap-panel { padding: 18px 12px; }
 }
