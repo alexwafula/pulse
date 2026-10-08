@@ -1,9 +1,10 @@
 export {};
 
 import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } from "lucide";
-import { createThree } from "./renderers/three";
-import { createPixi } from "./renderers/pixi";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
+
+type ThreeModule = typeof import("./renderers/three");
+type PixiModule = typeof import("./renderers/pixi");
 
 type Point = { x: number; y: number };
 type Ball = Point & { z: number };
@@ -61,8 +62,8 @@ const eventCount = required<HTMLElement>("#event-count");
 const pitchStamp = required<HTMLElement>("#pitch-stamp");
 const startLabel = required<HTMLElement>("#start-label");
 const endLabel = required<HTMLElement>("#end-label");
-const speedButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-speed]")];
-const viewButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-view]")];
+const speedButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-speed]"));
+const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-view]"));
 const canvasHost = required<HTMLElement>("#canvas-host");
 const svgPitch = required<SVGSVGElement>("#pitch");
 const cameraReset = required<HTMLButtonElement>("#camera-reset");
@@ -77,6 +78,10 @@ const insightEvidence = required<HTMLElement>("#insight-evidence");
 const insightWindow = required<HTMLElement>("#insight-window");
 const evidenceButton = required<HTMLButtonElement>("#evidence-button");
 const evidenceReturn = required<HTMLButtonElement>("#evidence-return");
+const pitchLoading = document.querySelector<HTMLElement>("#pitch-loading");
+const pitchError = document.querySelector<HTMLElement>("#pitch-error");
+const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
+const runDemoButton = document.querySelector<HTMLButtonElement>("#run-demo-button");
 let cues: Cue[] = [];
 let evidenceCue: Cue | undefined;
 let returnClock = 0;
@@ -142,8 +147,13 @@ async function switchView(view: string): Promise<void> {
     const players: RenderPlayer[] = replay.match.players.map((player) => ({
       ...player, home: player.teamId === replay.match.teams[0].id,
     }));
-    if (view === "three") pitchRenderer = createThree(canvasHost, players);
-    else if (view === "pixi") pitchRenderer = await createPixi(canvasHost, players);
+    if (view === "three") {
+      const { createThree } = (await import("./three-renderer.js" as string)) as unknown as ThreeModule;
+      pitchRenderer = createThree(canvasHost, players);
+    } else if (view === "pixi") {
+      const { createPixi } = (await import("./pixi-renderer.js" as string)) as unknown as PixiModule;
+      pitchRenderer = await createPixi(canvasHost, players);
+    }
   } catch (error: unknown) {
     console.warn("Pitch renderer unavailable", error);
     canvasHost.replaceChildren();
@@ -172,10 +182,10 @@ let previousFrameTime = 0;
 let currentEventId: string | null = null;
 const playerElements = new Map<string, SVGGElement>();
 const eventButtons = new Map<string, HTMLButtonElement>();
-const passingSnapshots = [...document.querySelectorAll<HTMLElement>(".passing-snapshot")];
+const passingSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".passing-snapshot"));
 const passingClock = required<HTMLElement>("#passing-clock");
 let activePassingSnapshot: HTMLElement | undefined;
-const attackSnapshots = [...document.querySelectorAll<HTMLElement>(".attack-snapshot")];
+const attackSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".attack-snapshot"));
 const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
@@ -385,127 +395,264 @@ function animate(time: number): void {
   requestAnimationFrame(animate);
 }
 
-async function start(): Promise<void> {
-  const response = await fetch(`/api/replay?${scenarioQuery()}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Replay request failed: ${response.status}`);
-  replay = await response.json() as Replay;
-  if (replay.schemaVersion !== "2.0.0" || replay.tracking.length < 2) {
-    throw new Error("Unsupported replay data");
-  }
-  for (const frame of replay.tracking) {
-    framePlayers.set(frame.timeMs, new Map(frame.players.map((player) => [player.playerId, player])));
-  }
-  clock = replay.match.startMs;
-  eventCount.textContent = `${replay.events.length} actions`;
-  startLabel.textContent = matchTime(replay.match.startMs);
-  endLabel.textContent = matchTime(replay.match.endMs);
-  pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
-  createPlayers();
-  createTimeline();
-  scenarioPicker.addEventListener("change", () => {
-    const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
-  });
-  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]")) {
-    const id = button.dataset.passEvidence ?? "";
-    const event = replay.events.find((item) => item.id === id);
-    if (event) {
-      button.textContent = matchTime(event.timeMs);
-      button.setAttribute("aria-label", `Inspect pass at ${matchTime(event.timeMs)}: ${eventSentence(event)}`);
-    }
-    button.addEventListener("click", () => {
-      eventButtons.get(id)?.click();
-      eventButtons.get(id)?.classList.add("evidence-event");
-      required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  }
-  createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } });
-  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]")) {
-    const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
-    if (event) {
-      const span = button.querySelector("span");
-      if (span) span.textContent = matchTime(event.timeMs);
-      button.setAttribute("aria-label", `Inspect recap evidence at ${matchTime(event.timeMs)}`);
-    }
-    button.addEventListener("click", () => {
-      eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
-      required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-  }
-  required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
-    const lines = [...recapPanel.querySelectorAll("li p")].map((item) => item.textContent ?? "");
-    const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, "Synthetic sequence recap", `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
-    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
-    const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  });
-  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) {
-    button.addEventListener("click", () => {
-      if (evidenceCue) clock = returnClock;
-      clearEvidence(); playing = false;
-      persona = button.dataset.persona ?? "CASUAL";
-      for (const item of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) item.setAttribute("aria-pressed", String(item === button));
-      cues = []; displayedCueID = undefined; render(); void loadInsights();
-    });
-  }
-  evidenceButton.addEventListener("click", () => {
-    const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
-    if (!cue) return;
-    if (!evidenceCue) returnClock = clock;
-    clearEvidence(); evidenceCue = cue;
-    for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
-    clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
-    evidenceReturn.hidden = false;
-    for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
-    render();
-  });
-  evidenceReturn.addEventListener("click", () => { clearEvidence(); clock = returnClock; playing = false; previousFrameTime = 0; render(); });
-  for (const button of viewButtons) button.addEventListener("click", () => { void switchView(button.dataset.view ?? "svg"); });
-  cameraReset.addEventListener("click", () => pitchRenderer?.resetCamera());
-  fullscreen.addEventListener("click", () => {
-    const shell = required<HTMLElement>(".pitch-shell");
-    const operation = document.fullscreenElement ? document.exitFullscreen() : shell.requestFullscreen();
-    void operation.catch(() => {
-      rendererStatus.textContent = "Fullscreen is unavailable in this browser.";
-      rendererStatus.hidden = false;
-    });
-  });
+let demoRunning = false;
+let demoAbortController: AbortController | null = null;
 
-  playButton.addEventListener("click", () => {
-    if (evidenceCue && clock >= evidenceCue.replayEndMs) clock = evidenceCue.replayStartMs;
-    if (clock >= replay.match.endMs) clock = replay.match.startMs;
-    playing = !playing;
-    render();
-  });
-  restartButton.addEventListener("click", () => {
-    clearEvidence();
-    clock = replay.match.startMs;
-    playing = true;
-    render();
-  });
-  seek.addEventListener("input", () => {
-    clearEvidence();
-    clock = replay.match.startMs + (Number(seek.value) / 1000) * (replay.match.endMs - replay.match.startMs);
-    render();
-  });
-  for (const button of speedButtons) {
-    button.addEventListener("click", () => {
-      speed = Number(button.dataset.speed);
-      for (const option of speedButtons) option.setAttribute("aria-pressed", String(option === button));
-    });
+function stopDemo(): void {
+  if (!demoRunning) return;
+  demoRunning = false;
+  if (demoAbortController) {
+    demoAbortController.abort();
+    demoAbortController = null;
   }
-  playing = true;
-  render();
-  const preferredView = new URLSearchParams(location.search).get("view") ?? "three";
-  await switchView(["three", "pixi", "svg"].includes(preferredView) ? preferredView : "three");
-  requestAnimationFrame(animate);
-  void loadInsights();
+  if (runDemoButton) {
+    runDemoButton.textContent = "Run demo";
+    runDemoButton.setAttribute("aria-pressed", "false");
+  }
 }
 
-start().catch((error: unknown) => {
-  currentAction.textContent = "Replay unavailable";
-  detailTitle.textContent = "Could not load the match";
-  detailDescription.textContent = error instanceof Error ? error.message : String(error);
-  playButton.disabled = true;
-  restartButton.disabled = true;
-  seek.disabled = true;
-});
+async function startDemo(): Promise<void> {
+  if (demoRunning) {
+    stopDemo();
+    return;
+  }
+  demoRunning = true;
+  if (runDemoButton) {
+    runDemoButton.textContent = "Stop demo";
+    runDemoButton.setAttribute("aria-pressed", "true");
+  }
+  const controller = new AbortController();
+  demoAbortController = controller;
+  const { signal } = controller;
+
+  const waitMs = (ms: number) => new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    signal.addEventListener("abort", () => {
+      clearTimeout(timer);
+      reject(new Error("Demo aborted"));
+    });
+  });
+
+  try {
+    clearEvidence();
+    clock = replay.match.startMs;
+    speed = 4;
+    for (const option of speedButtons) option.setAttribute("aria-pressed", String(option.dataset.speed === "4"));
+    playing = true;
+    render();
+
+    if (!cues.length) {
+      await loadInsights();
+    }
+    const momentCue = cues[0];
+    const targetMomentMs = momentCue ? momentCue.startMs : replay.match.startMs + 8000;
+
+    while (clock < targetMomentMs && playing && !signal.aborted) {
+      await waitMs(100);
+    }
+    if (signal.aborted) return;
+
+    if (momentCue) {
+      if (!evidenceCue) returnClock = clock;
+      clearEvidence();
+      evidenceCue = momentCue;
+      for (const button of speedButtons) {
+        button.disabled = true;
+        button.setAttribute("aria-pressed", String(button.dataset.speed === "1"));
+      }
+      clock = momentCue.replayStartMs;
+      playing = true;
+      previousFrameTime = 0;
+      evidenceReturn.hidden = false;
+      for (const id of momentCue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+      render();
+
+      while (clock < momentCue.replayEndMs && playing && !signal.aborted) {
+        await waitMs(100);
+      }
+      if (signal.aborted) return;
+
+      await waitMs(1200);
+      if (signal.aborted) return;
+
+      clearEvidence();
+      clock = returnClock;
+      playing = true;
+      speed = 8;
+      for (const option of speedButtons) option.setAttribute("aria-pressed", String(option.dataset.speed === "8"));
+      previousFrameTime = 0;
+      render();
+    }
+
+    while (clock < replay.match.endMs && playing && !signal.aborted) {
+      await waitMs(100);
+    }
+    if (signal.aborted) return;
+
+    playing = false;
+    clock = replay.match.endMs;
+    render();
+    recapPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (_e) {
+    // Aborted or cancelled
+  } finally {
+    demoRunning = false;
+    demoAbortController = null;
+    if (runDemoButton) {
+      runDemoButton.textContent = "Run demo";
+      runDemoButton.setAttribute("aria-pressed", "false");
+    }
+  }
+}
+
+async function start(): Promise<void> {
+  if (pitchLoading) pitchLoading.hidden = false;
+  if (pitchError) pitchError.hidden = true;
+  try {
+    const response = await fetch(`/api/replay?${scenarioQuery()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Replay request failed: ${response.status}`);
+    replay = await response.json() as Replay;
+    if (replay.schemaVersion !== "2.0.0" || replay.tracking.length < 2) {
+      throw new Error("Unsupported replay data");
+    }
+    for (const frame of replay.tracking) {
+      framePlayers.set(frame.timeMs, new Map(frame.players.map((player) => [player.playerId, player])));
+    }
+    clock = replay.match.startMs;
+    eventCount.textContent = `${replay.events.length} actions`;
+    startLabel.textContent = matchTime(replay.match.startMs);
+    endLabel.textContent = matchTime(replay.match.endMs);
+    pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
+    createPlayers();
+    createTimeline();
+    scenarioPicker.addEventListener("change", () => {
+      stopDemo();
+      const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
+    });
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]"))) {
+      const id = button.dataset.passEvidence ?? "";
+      const event = replay.events.find((item) => item.id === id);
+      if (event) {
+        button.textContent = matchTime(event.timeMs);
+        button.setAttribute("aria-label", `Show events at ${matchTime(event.timeMs)}`);
+      }
+      button.addEventListener("click", () => {
+        stopDemo();
+        eventButtons.get(id)?.click();
+        eventButtons.get(id)?.classList.add("evidence-event");
+        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } });
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]"))) {
+      const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
+      if (event) {
+        const span = button.querySelector("span");
+        if (span) span.textContent = matchTime(event.timeMs);
+        button.setAttribute("aria-label", `Show events at ${matchTime(event.timeMs)}`);
+      }
+      button.addEventListener("click", () => {
+        stopDemo();
+        eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
+        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+    required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
+      const lines = Array.from(recapPanel.querySelectorAll("li p")).map((item) => item.textContent ?? "");
+      const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, "Synthetic sequence recap", `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
+      const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+      const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) {
+      button.addEventListener("click", () => {
+        stopDemo();
+        if (evidenceCue) clock = returnClock;
+        clearEvidence(); playing = false;
+        persona = button.dataset.persona ?? "CASUAL";
+        for (const item of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) item.setAttribute("aria-pressed", String(item === button));
+        cues = []; displayedCueID = undefined; render(); void loadInsights();
+      });
+    }
+    evidenceButton.addEventListener("click", () => {
+      stopDemo();
+      const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
+      if (!cue) return;
+      if (!evidenceCue) returnClock = clock;
+      clearEvidence(); evidenceCue = cue;
+      for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
+      clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
+      evidenceReturn.hidden = false;
+      for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+      render();
+    });
+    evidenceReturn.addEventListener("click", () => { stopDemo(); clearEvidence(); clock = returnClock; playing = false; previousFrameTime = 0; render(); });
+    for (const button of viewButtons) button.addEventListener("click", () => { void switchView(button.dataset.view ?? "svg"); });
+    cameraReset.addEventListener("click", () => pitchRenderer?.resetCamera());
+    fullscreen.addEventListener("click", () => {
+      const shell = required<HTMLElement>(".pitch-shell");
+      const operation = document.fullscreenElement ? document.exitFullscreen() : shell.requestFullscreen();
+      void operation.catch(() => {
+        rendererStatus.textContent = "Fullscreen is unavailable in this browser.";
+        rendererStatus.hidden = false;
+      });
+    });
+
+    playButton.addEventListener("click", () => {
+      stopDemo();
+      if (evidenceCue && clock >= evidenceCue.replayEndMs) clock = evidenceCue.replayStartMs;
+      if (clock >= replay.match.endMs) clock = replay.match.startMs;
+      playing = !playing;
+      render();
+    });
+    restartButton.addEventListener("click", () => {
+      stopDemo();
+      clearEvidence();
+      clock = replay.match.startMs;
+      playing = true;
+      render();
+    });
+    seek.addEventListener("input", () => {
+      stopDemo();
+      clearEvidence();
+      clock = replay.match.startMs + (Number(seek.value) / 1000) * (replay.match.endMs - replay.match.startMs);
+      render();
+    });
+    for (const button of speedButtons) {
+      button.addEventListener("click", () => {
+        stopDemo();
+        speed = Number(button.dataset.speed);
+        for (const option of speedButtons) option.setAttribute("aria-pressed", String(option === button));
+      });
+    }
+    runDemoButton?.addEventListener("click", () => {
+      void (demoRunning ? stopDemo() : startDemo());
+    });
+    retryButton?.addEventListener("click", () => {
+      void start();
+    });
+
+    playing = true;
+    render();
+    const preferredView = new URLSearchParams(location.search).get("view") ?? "three";
+    await switchView(["three", "pixi", "svg"].includes(preferredView) ? preferredView : "three");
+    if (pitchLoading) pitchLoading.hidden = true;
+    requestAnimationFrame(animate);
+    void loadInsights();
+  } catch (error: unknown) {
+    if (pitchLoading) pitchLoading.hidden = true;
+    if (pitchError) {
+      pitchError.hidden = false;
+      const textEl = pitchError.querySelector(".pitch-error-text");
+      if (textEl) textEl.textContent = error instanceof Error ? error.message : String(error);
+    }
+    currentAction.textContent = "Replay unavailable";
+    detailTitle.textContent = "Could not load the match";
+    detailDescription.textContent = error instanceof Error ? error.message : String(error);
+    playButton.disabled = true;
+    restartButton.disabled = true;
+    seek.disabled = true;
+  }
+}
+
+void start();

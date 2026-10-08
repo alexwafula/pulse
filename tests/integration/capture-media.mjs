@@ -6,7 +6,8 @@ const root = process.cwd();
 const output = path.join(root, "docs", "media");
 await mkdir(output, { recursive: true });
 const url = process.env.PULSE_URL ?? "http://127.0.0.1:8083";
-const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: true });
+const defaultChrome = process.platform === "linux" ? "/usr/bin/chromium-browser" : "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? defaultChrome, headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
   await page.goto(`${url}/?scenario=central`, { waitUntil: "networkidle" });

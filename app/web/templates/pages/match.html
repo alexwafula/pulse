@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#17231f">
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
   <link rel="stylesheet" href="/static/pitch.css">
-  <script defer src="/static/pitch.js"></script>
+  <script type="module" src="/static/pitch.js"></script>
 </head>
 <body>
   <header class="app-header">
@@ -19,6 +19,7 @@
         <option value="central" {{if eq .Scenario "central"}}selected{{end}}>Central entry</option>
         <option value="exchange" {{if eq .Scenario "exchange"}}selected{{end}}>Passing exchange</option>
       </select>
+      <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo"><i data-lucide="play-circle"></i><span>Run demo</span></button>
       <div class="audience-controls" role="group" aria-label="Audience">
         <button type="button" data-persona="CASUAL" aria-pressed="true">Casual</button>
         <button type="button" data-persona="ANALYST" aria-pressed="false">Analyst</button>
@@ -51,6 +52,12 @@
         </div>
 
         <div class="pitch-shell">
+          <div id="pitch-loading" class="pitch-loading" role="status" aria-live="polite" hidden><span class="loading-spinner" aria-hidden="true"></span><span>Loading match data…</span></div>
+          <div id="pitch-error" class="pitch-error" role="alert" hidden>
+            <strong id="error-title">Replay unavailable</strong>
+            <p id="error-message" class="pitch-error-text">Could not load the match replay.</p>
+            <button type="button" id="pitch-retry" class="secondary-button">Retry</button>
+          </div>
           <div id="canvas-host" hidden></div>
           <svg id="pitch" class="pitch" viewBox="0 0 1050 680" role="img" aria-label="Animated football pitch showing the fictional match">
             <defs>
@@ -135,10 +142,10 @@
                 <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
                 {{$marker := .Marker}}
                 {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
-                {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})"><title>{{.Name}}: {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5">{{.Number}}</text></g>{{end}}
+                {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} passes sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
               </svg>
               <table class="passing-table"><thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead><tbody>{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}</tbody></table>
-              <ul class="passing-links">{{range .Edges}}<li><strong>{{.From}} &rarr; {{.To}}</strong><span>{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span><div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}"><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li class="passing-empty">No completed passes yet</li>{{end}}</ul>
+              <ul class="passing-links">{{range .Edges}}<li><strong>{{.From}} &rarr; {{.To}}</strong><span>{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span><div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}" aria-label="Show events for {{.}}"><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li class="passing-empty">No completed passes yet</li>{{end}}</ul>
             </div>
             {{end}}
           </div>
@@ -170,15 +177,15 @@
           <div class="section-heading"><h2 id="attack-heading">Attacking routes</h2><span id="attack-clock"></span></div>
           {{range .Attacks}}<div class="attack-snapshot" data-cutoff="{{.TimeMS}}" hidden>{{range .Teams}}
             <h3>{{.Team.Name}}</h3>
-            <div class="lane-bars">{{range .Lanes}}<div class="lane-row"><span>{{.Name}}</span><meter min="0" max="10" value="{{.Count}}" aria-label="{{.Name}} completed pass and carry destinations"></meter><strong>{{.Count}}</strong></div>{{end}}</div>
-            <dl class="attack-stats"><div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div><div><dt>Shots</dt><dd>{{.Shots}}</dd></div><div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{printf "%.0f" .Conversion}}%{{else}}N/A{{end}}</dd></div></dl>
+            <div class="lane-bars">{{$total := .TotalLanes}}{{range .Lanes}}<div class="lane-row"><span>{{.Name}}</span><meter min="0" max="{{if $total}}{{$total}}{{else}}1{{end}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} of {{if $total}}{{$total}}{{else}}0{{end}} completed actions"></meter><strong>{{.Count}}</strong></div>{{end}}</div>
+            <dl class="attack-stats"><div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div><div><dt>Shots</dt><dd>{{.Shots}}</dd></div><div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}{{.EntryShots}} of {{.BoxEntries}}{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div></dl>
           {{end}}</div>{{end}}
         </section>
       </aside>
     </div>
     <section id="recap-panel" class="recap-panel" aria-labelledby="recap-heading" hidden>
       <div class="section-heading"><h2 id="recap-heading">Sequence recap</h2><button type="button" id="download-recap" class="evidence-button"><i data-lucide="download"></i><span>Download</span></button></div>
-      <ol>{{range .Recap}}<li><p>{{.Text}}</p>{{range .EventIDs}}<button type="button" class="evidence-button" data-recap-evidence="{{.}}"><i data-lucide="list-video"></i><span>Evidence</span></button>{{end}}</li>{{end}}</ol>
+      <ol>{{range .Recap}}<li><p>{{.Text}}</p>{{range .EventIDs}}<button type="button" class="evidence-button" data-recap-evidence="{{.}}" aria-label="Show events for {{.}}"><i data-lucide="list-video"></i><span>Evidence</span></button>{{end}}</li>{{end}}</ol>
     </section>
   </main>
 </body>
