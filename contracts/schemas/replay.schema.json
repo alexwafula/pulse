@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "replay.schema.json",
-  "title": "Pulse Replay Fixture v1",
+  "title": "Pulse Replay Fixture v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "match", "events", "tracking"],
+  "required": ["schemaVersion", "match", "events", "tracking"],
   "properties": {
-    "schema_version": { "const": "1.0.0" },
+    "schemaVersion": { "const": "2.0.0" },
     "match": { "$ref": "match.schema.json" },
     "events": {
       "type": "array",

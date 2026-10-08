@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "cue-feed.schema.json",
+  "title": "Pulse Replay Cue Feed v2", "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "cues"],
+  "properties": { "schemaVersion": { "const": "2.0.0" }, "cues": { "type": "array", "items": { "$ref": "overlay-cue.schema.json" } } }
+}

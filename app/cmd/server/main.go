@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/alexwafula/pulse/app/internal/simulator"
@@ -14,13 +15,14 @@ func main() {
 	addr := flag.String("addr", "127.0.0.1:8080", "HTTP listen address")
 	fixture := flag.String("fixture", "data/samples/first-sequence.json", "replay fixture path")
 	webDir := flag.String("web", "app/web", "web templates and static assets")
+	agentsURL := flag.String("agents-url", os.Getenv("PULSE_AGENTS_URL"), "Python insight service base URL; empty uses local templates")
 	flag.Parse()
 
 	replay, err := simulator.Load(*fixture)
 	if err != nil {
 		log.Fatal(err)
 	}
-	handler, err := transporthttp.NewHandler(replay, *webDir)
+	handler, err := transporthttp.NewHandlerWithAgents(replay, *webDir, *agentsURL)
 	if err != nil {
 		log.Fatal(err)
 	}

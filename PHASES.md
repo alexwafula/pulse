@@ -49,10 +49,11 @@ Goal: both engineers can work independently for three days without colliding.
 
 **Both**
 - [ ] Confirm the agent set: Explainer, Narrator, Verifier. Analyst and Producer are deterministic code in the engine, not LLM agents.
-- [ ] Freeze **contract v1** for the golden path only. Events: PASS, SHOT, PRESSURE, CARRY, POSSESSION_CHANGE, WHISTLE. Cues: LOWER_THIRD, MOMENT_BANNER, PLAYER_TAG, STAT_CARD, COMMENTARY.
-- [ ] Define the **agent messages** in `contracts/schemas/`: `FactPack` in, `NarrationDraft` out, `VerificationResult` out. This is the seam most likely to be missing. Leave room in `FactPack` for an optional `similar_plays` block (Play Fingerprint, Phase 3) so adding it later is additive.
-- [ ] Choose the engine to agent boundary (HTTP service or MCP tool calls) and write a decision record in `docs/decisions/`.
-- [ ] Fill in the Commands section of `AGENTS.md` with what really runs.
+- [ ] Tag **contract v2** after teammate review. Implemented golden-path events: PASS, SHOT, CARRY, CROSS, CLEARANCE, CORNER. Cue: COMMENTARY. The broader event/cue list needs new schemas and examples before implementation.
+- [x] Define the **agent messages** in `contracts/schemas/`: `FactPack` in, `NarrationDraft` out, `VerificationResult` out. Go/Python models and shared positive/negative examples added.
+- [ ] Plan an optional similar-plays block in `FactPack` (Play Fingerprint, Phase 3) so adding it later is additive. The incoming proposal calls it `similar_plays`; agree its v2 camelCase name and schema before implementation.
+- [x] Choose the engine to agent boundary: direct HTTP first, recorded in `docs/decisions/0004-agent-contract-alignment.md`. The v2 request envelope and local template endpoint are implemented; real models remain later work.
+- [x] Fill in the Commands section of `AGENTS.md` with what really runs.
 - [ ] Agree the Play Fingerprint gate and cut-order position (see Phase 3 and `Pulse-Play-Fingerprint.docx`).
 - [ ] Register for the hackathon, appoint the Representative, and create the project entry when the portal opens on Oct 6.
 
@@ -63,7 +64,7 @@ Goal: both engineers can work independently for three days without colliding.
 **A**
 - [ ] List the cases the evaluation set must cover (supported claim, invented claim, wrong number, over-long text, persona, locale).
 
-**Exit:** contract v1 tagged, agent messages defined, boundary decision recorded, both registered.
+**Exit:** contract v2 tagged, agent messages defined, boundary decision recorded, both registered.
 
 ---
 
@@ -73,14 +74,14 @@ Goal: one command shows a verified cue on screen, with either side stubbed.
 
 **P**
 - [ ] Replayer reads `data/samples/first-sequence.json` and streams events in order (1x and 10x).
-- [ ] Engine keeps match state and detects **one** moment (for example a line-breaking pass leading to a shot) with event IDs.
-- [ ] Engine builds a fact pack and exposes it at the agreed boundary.
-- [ ] Deterministic template builds a cue. **Cue gate** validates it against the contract.
+- [x] Offline replay detects **one** corner-to-first-shot moment with source event IDs. Live engine state remains later work.
+- [x] Go builds the fact pack and exposes it through the HTTP boundary.
+- [x] Deterministic template builds a cue. The conservative **cue gate** recomputes evidence and accepts canonical templates only.
 - [ ] SSE delivery with heartbeats. `app/web/src/pitch.ts` shows the cue over a placeholder video or pitch.
 - [ ] Deploy the skeleton to Azure Container Apps (even ugly) and run a 15-minute SSE soak test. Azure is the biggest unknown, so do it now.
 
 **A**
-- [ ] Agent service skeleton with the three agents returning canned, contract-valid output. Template-only mode works with no model.
+- [x] Python HTTP skeleton with three deterministic, agent-shaped stages returning contract-valid templates. No model-backed agents yet.
 - [ ] Evaluation harness reads `contracts/examples/` and runs end to end with a trivial agent.
 - [ ] First real model call through Foundry with tracing visible.
 - [ ] Draft the first 30 evaluation cases.
@@ -223,3 +224,6 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 |---|---|---|
 | Oct 5 | Initial plan for a two-person team | |
 | Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |
+| Oct 6 | Contract v2 aligns field names, enums, locales and coordinates; preserve the corner demo, start with COMMENTARY and direct HTTP; message models/tests ready, runtime agents pending. | Alex + Codex |
+| Oct 6 | Alex requested a local Three.js/PixiJS/SVG comparison before pushing. Replay clock and contracts unchanged; this experience spike does not complete the agent or SSE phases. | Alex + Codex |
+| Oct 8 | Local corner fact builder, Python template HTTP pipeline, conservative Go gate and browser evidence replay connected. SSE, Azure and real model calls remain pending. | Alex + Codex |

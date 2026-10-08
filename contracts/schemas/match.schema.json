@@ -1,23 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "match.schema.json",
-  "title": "Pulse Match v1",
+  "title": "Pulse Match v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "id", "period", "start_ms", "end_ms", "pitch", "teams", "players"],
+  "required": ["schemaVersion", "id", "period", "startMs", "endMs", "pitch", "teams", "players"],
   "properties": {
-    "schema_version": { "const": "1.0.0" },
-    "id": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "2.0.0" },
+    "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
     "period": { "type": "integer", "minimum": 1, "maximum": 4 },
-    "start_ms": { "type": "integer", "minimum": 0 },
-    "end_ms": { "type": "integer", "minimum": 1 },
+    "startMs": { "type": "integer", "minimum": 0 },
+    "endMs": { "type": "integer", "minimum": 1 },
     "pitch": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["length_m", "width_m"],
+      "required": ["lengthM", "widthM"],
       "properties": {
-        "length_m": { "type": "number", "exclusiveMinimum": 0 },
-        "width_m": { "type": "number", "exclusiveMinimum": 0 }
+        "lengthM": { "const": 105 },
+        "widthM": { "const": 68 }
       }
     },
     "teams": {
@@ -27,11 +27,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "name", "attacking_direction"],
+        "required": ["id", "name", "attackingDirection"],
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
           "name": { "type": "string", "minLength": 1 },
-          "attacking_direction": { "enum": ["left", "right"] }
+          "attackingDirection": { "enum": ["LEFT", "RIGHT"] }
         }
       }
     },
@@ -41,10 +41,10 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "team_id", "name", "number"],
+        "required": ["id", "teamId", "name", "number"],
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
-          "team_id": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+          "teamId": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
           "name": { "type": "string", "minLength": 1 },
           "number": { "type": "integer", "minimum": 1, "maximum": 99 }
         }

@@ -30,11 +30,16 @@
     <div class="workspace">
       <section class="pitch-column" aria-labelledby="pitch-heading">
         <div class="section-heading">
-          <h1 id="pitch-heading">Pitch replay</h1>
-          <span>First half</span>
+          <h1 id="pitch-heading">Match centre <span class="half-label">First half</span></h1>
+          <div class="view-controls" role="group" aria-label="Pitch view">
+            <button type="button" data-view="three" aria-pressed="false" title="Three.js stadium view">3D</button>
+            <button type="button" data-view="pixi" aria-pressed="false" title="PixiJS tactical view">2D</button>
+            <button type="button" data-view="svg" aria-pressed="true" title="Original SVG view">SVG</button>
+          </div>
         </div>
 
         <div class="pitch-shell">
+          <div id="canvas-host" hidden></div>
           <svg id="pitch" class="pitch" viewBox="0 0 1050 680" role="img" aria-label="Animated football pitch showing the fictional match">
             <defs>
               <pattern id="mow" width="197.2" height="640" patternUnits="userSpaceOnUse">
@@ -76,12 +81,21 @@
             <circle id="ball" class="ball" r="8" cx="420" cy="200"></circle>
           </svg>
           <div id="pitch-stamp" class="pitch-stamp">AURORA VALE ATTACKING RIGHT</div>
+          <div id="action-result" class="action-result" role="status" hidden>
+            <strong id="result-title"></strong>
+            <span id="result-detail"></span>
+          </div>
+          <div class="scene-tools">
+            <button type="button" id="camera-reset" class="icon-button" aria-label="Reset camera" title="Reset camera" hidden><i data-lucide="scan"></i></button>
+            <button type="button" id="fullscreen-button" class="icon-button" aria-label="Fullscreen pitch" title="Fullscreen pitch"><i data-lucide="maximize"></i></button>
+          </div>
         </div>
+        <p id="renderer-status" class="renderer-status" role="status" hidden></p>
 
         <div class="transport">
           <div class="transport-actions">
-            <button type="button" id="play-button" class="primary-button">Play</button>
-            <button type="button" id="restart-button" class="secondary-button">Restart</button>
+            <button type="button" id="play-button" class="primary-button icon-button" aria-label="Play" title="Play"><i data-lucide="play"></i></button>
+            <button type="button" id="restart-button" class="secondary-button icon-button" aria-label="Restart" title="Restart"><i data-lucide="rotate-ccw"></i></button>
           </div>
           <div class="seek-wrap">
             <label for="seek" class="sr-only">Seek match replay</label>
@@ -111,6 +125,15 @@
           <strong id="detail-title">Waiting for replay</strong>
           <p id="detail-description"></p>
         </div>
+        <section class="insight-panel" aria-labelledby="insight-heading">
+          <div class="section-heading"><h2 id="insight-heading">Match insight</h2><span id="insight-status">Waiting</span></div>
+          <p id="insight-text" aria-live="polite">Awaiting next moment</p>
+          <div id="insight-evidence" hidden>
+            <p id="insight-window"></p>
+            <button type="button" id="evidence-button" class="evidence-button"><i data-lucide="list-video"></i><span>Evidence</span></button>
+            <button type="button" id="evidence-return" class="evidence-button" hidden><i data-lucide="undo-2"></i><span>Return to match</span></button>
+          </div>
+        </section>
       </aside>
     </div>
   </main>

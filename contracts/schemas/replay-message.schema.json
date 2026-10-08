@@ -1,41 +1,41 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "replay-message.schema.json",
-  "title": "Pulse Replay Stream Message v1",
+  "title": "Pulse Replay Stream Message v2",
   "oneOf": [
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_version", "kind", "match_id", "time_ms", "match"],
+      "required": ["schemaVersion", "kind", "matchId", "timeMs", "match"],
       "properties": {
-        "schema_version": { "const": "1.0.0" },
-        "kind": { "const": "match" },
-        "match_id": { "type": "string", "minLength": 1 },
-        "time_ms": { "type": "integer", "minimum": 0 },
+        "schemaVersion": { "const": "2.0.0" },
+        "kind": { "const": "MATCH" },
+        "matchId": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+        "timeMs": { "type": "integer", "minimum": 0 },
         "match": { "$ref": "match.schema.json" }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_version", "kind", "match_id", "time_ms", "tracking"],
+      "required": ["schemaVersion", "kind", "matchId", "timeMs", "tracking"],
       "properties": {
-        "schema_version": { "const": "1.0.0" },
-        "kind": { "const": "tracking" },
-        "match_id": { "type": "string", "minLength": 1 },
-        "time_ms": { "type": "integer", "minimum": 0 },
+        "schemaVersion": { "const": "2.0.0" },
+        "kind": { "const": "TRACKING" },
+        "matchId": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+        "timeMs": { "type": "integer", "minimum": 0 },
         "tracking": { "$ref": "tracking.schema.json" }
       }
     },
     {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_version", "kind", "match_id", "time_ms", "event"],
+      "required": ["schemaVersion", "kind", "matchId", "timeMs", "event"],
       "properties": {
-        "schema_version": { "const": "1.0.0" },
-        "kind": { "const": "event" },
-        "match_id": { "type": "string", "minLength": 1 },
-        "time_ms": { "type": "integer", "minimum": 0 },
+        "schemaVersion": { "const": "2.0.0" },
+        "kind": { "const": "EVENT" },
+        "matchId": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+        "timeMs": { "type": "integer", "minimum": 0 },
         "event": { "$ref": "event.schema.json" }
       }
     }

@@ -2,6 +2,8 @@ package simulator
 
 import (
 	"context"
+	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -24,8 +26,8 @@ func TestSampleReplayMessages(t *testing.T) {
 	if len(messages) != 1+len(replay.Events)+len(replay.Tracking) {
 		t.Fatalf("got %d messages", len(messages))
 	}
-	if messages[0].Kind != "match" || messages[0].Match == nil ||
-		messages[1].Kind != "tracking" {
+	if messages[0].Kind != "MATCH" || messages[0].Match == nil ||
+		messages[1].Kind != "TRACKING" {
 		t.Fatal("stream must start with match metadata and first tracking frame")
 	}
 	if messages[0].TimeMS != replay.Match.StartMS || messages[len(messages)-1].TimeMS != replay.Match.EndMS {
@@ -67,5 +69,60 @@ func TestFixtureRejectsBrokenReferencesAndClock(t *testing.T) {
 	replay.Tracking[1].Players = replay.Tracking[1].Players[:1]
 	if err := replay.Validate(); err == nil {
 		t.Fatal("incomplete tracking frame accepted")
+	}
+}
+
+func TestMarkdownReplayConventions(t *testing.T) {
+	var fixture struct {
+		BaseFixture string `json:"baseFixture"`
+		Cases       []struct {
+			Name          string   `json:"name"`
+			SchemaVersion *string  `json:"schemaVersion"`
+			EventType     *string  `json:"eventType"`
+			RecipientID   *string  `json:"recipientId"`
+			MatchID       *string  `json:"matchId"`
+			WidthM        *float64 `json:"widthM"`
+			Period        *int     `json:"period"`
+		} `json:"cases"`
+	}
+	root := filepath.Join("..", "..", "..")
+	data, err := os.ReadFile(filepath.Join(root, "contracts", "examples", "invalid-replay-cases.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(data, &fixture); err != nil {
+		t.Fatal(err)
+	}
+	if len(fixture.Cases) == 0 {
+		t.Fatal("missing invalid replay examples")
+	}
+	for _, tc := range fixture.Cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			replay, err := Load(filepath.Join(root, fixture.BaseFixture))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tc.SchemaVersion != nil {
+				replay.SchemaVersion = *tc.SchemaVersion
+			}
+			if tc.EventType != nil {
+				replay.Events[0].Type = *tc.EventType
+			}
+			if tc.RecipientID != nil {
+				replay.Events[0].RecipientID = *tc.RecipientID
+			}
+			if tc.MatchID != nil {
+				replay.Match.ID = *tc.MatchID
+			}
+			if tc.WidthM != nil {
+				replay.Match.Pitch.WidthM = *tc.WidthM
+			}
+			if tc.Period != nil {
+				replay.Match.Period = *tc.Period
+			}
+			if replay.Validate() == nil {
+				t.Fatal("invalid replay accepted")
+			}
+		})
 	}
 }

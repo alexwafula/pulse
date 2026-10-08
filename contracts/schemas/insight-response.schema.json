@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "insight-response.schema.json",
+  "title": "Pulse Insight Response v2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "draft", "verification"],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0" },
+    "draft": { "$ref": "narration-draft.schema.json" },
+    "verification": { "$ref": "verification-result.schema.json" }
+  }
+}

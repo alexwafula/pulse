@@ -1,0 +1,5 @@
+{
+  "schemaVersion": "2.0.0", "id": "draft-corner-01", "factPackId": "pack-vale-corner-01",
+  "locale": "en-GB", "persona": "CASUAL", "text": "The corner produced 1 shot.",
+  "claims": [{ "id": "claim-corner-shot", "text": "The corner produced 1 shot.", "factIds": ["fact-does-not-exist"], "eventIds": ["evt-06", "evt-07"] }]
+}

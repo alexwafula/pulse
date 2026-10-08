@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/alexwafula/pulse/app/internal/ai"
 	"github.com/alexwafula/pulse/app/internal/domain"
 	"github.com/alexwafula/pulse/app/internal/simulator"
 )
@@ -42,5 +43,61 @@ func TestMatchPageAndReplayAPI(t *testing.T) {
 	handler.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/static/pitch.js", nil))
 	if asset.Code != http.StatusOK || !strings.Contains(asset.Body.String(), "/api/replay") {
 		t.Fatalf("browser asset: status %d", asset.Code)
+	}
+}
+
+func TestInsightFeedAndFallback(t *testing.T) {
+	replay, err := simulator.Load("../../../../data/samples/first-sequence.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, mode := range []string{"local", "python", "malicious", "unavailable"} {
+		t.Run(mode, func(t *testing.T) {
+			endpoint := ""
+			if mode != "local" {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if mode == "unavailable" {
+						http.Error(w, "down", 503)
+						return
+					}
+					var request domain.InsightRequest
+					if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+						t.Error(err)
+					}
+					response, _ := ai.Template(request.FactPack, request.Locale, request.Persona)
+					if mode == "malicious" {
+						response.Draft.Text = "The corner produced 9 shots."
+					}
+					json.NewEncoder(w).Encode(response)
+				}))
+				defer server.Close()
+				endpoint = server.URL
+			}
+			handler, err := NewHandlerWithAgents(replay, "../../../web", endpoint)
+			if err != nil {
+				t.Fatal(err)
+			}
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, httptest.NewRequest("GET", "/api/insights", nil))
+			var feed domain.CueFeed
+			if recorder.Code != 200 || json.Unmarshal(recorder.Body.Bytes(), &feed) != nil || len(feed.Cues) != 1 {
+				t.Fatalf("feed: %d %s", recorder.Code, recorder.Body.String())
+			}
+			if feed.Cues[0].Text != "The corner produced 1 shot." || feed.Cues[0].Verification.Status != "FALLBACK_TEMPLATE" {
+				t.Fatal("unsafe insight published")
+			}
+			want := "go-template"
+			if mode == "python" {
+				want = "python-template"
+			}
+			if recorder.Header().Get("X-Pulse-Insight-Source") != want {
+				t.Fatal("wrong insight source")
+			}
+			bad := httptest.NewRecorder()
+			handler.ServeHTTP(bad, httptest.NewRequest("GET", "/api/insights?persona=UNKNOWN", nil))
+			if bad.Code != 400 {
+				t.Fatal("unsupported persona accepted")
+			}
+		})
 	}
 }

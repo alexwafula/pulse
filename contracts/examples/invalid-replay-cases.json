@@ -1,0 +1,11 @@
+{
+  "baseFixture": "data/samples/first-sequence.json",
+  "cases": [
+    { "name": "old version", "schemaVersion": "1.0.0" },
+    { "name": "lowercase event", "eventType": "pass" },
+    { "name": "missing recipient", "recipientId": "" },
+    { "name": "invalid identifier", "matchId": "invalid id" },
+    { "name": "wrong pitch", "widthM": 70 },
+    { "name": "invalid period", "period": 5 }
+  ]
+}

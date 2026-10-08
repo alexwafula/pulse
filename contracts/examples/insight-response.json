@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0.0",
+  "draft": {
+    "schemaVersion": "2.0.0", "id": "draft-pack-vale-corner-01", "factPackId": "pack-vale-corner-01",
+    "locale": "en-GB", "persona": "CASUAL", "text": "The corner produced 1 shot.",
+    "claims": [{ "id": "claim-fact-corner-shot", "text": "The corner produced 1 shot.", "factIds": ["fact-corner-shot"], "eventIds": ["evt-06", "evt-07"] }]
+  },
+  "verification": { "schemaVersion": "2.0.0", "draftId": "draft-pack-vale-corner-01", "status": "FALLBACK_TEMPLATE", "claimsChecked": 0, "claimsPassed": 0, "claims": [] }
+}

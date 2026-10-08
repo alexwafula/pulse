@@ -3,9 +3,14 @@ package domain
 import (
 	"fmt"
 	"math"
+	"regexp"
 )
 
-const SchemaVersion = "1.0.0"
+const SchemaVersion = "2.0.0"
+
+var identifier = regexp.MustCompile(`^[A-Za-z0-9_.:-]{1,64}$`)
+
+func validID(value string) bool { return identifier.MatchString(value) }
 
 type Point struct {
 	X float64 `json:"x"`
@@ -19,67 +24,67 @@ type Ball struct {
 }
 
 type Pitch struct {
-	LengthM float64 `json:"length_m"`
-	WidthM  float64 `json:"width_m"`
+	LengthM float64 `json:"lengthM"`
+	WidthM  float64 `json:"widthM"`
 }
 
 type Team struct {
 	ID                 string `json:"id"`
 	Name               string `json:"name"`
-	AttackingDirection string `json:"attacking_direction"`
+	AttackingDirection string `json:"attackingDirection"`
 }
 
 type Player struct {
 	ID     string `json:"id"`
-	TeamID string `json:"team_id"`
+	TeamID string `json:"teamId"`
 	Name   string `json:"name"`
 	Number int    `json:"number"`
 }
 
 type Match struct {
-	SchemaVersion string   `json:"schema_version"`
+	SchemaVersion string   `json:"schemaVersion"`
 	ID            string   `json:"id"`
 	Period        int      `json:"period"`
-	StartMS       int64    `json:"start_ms"`
-	EndMS         int64    `json:"end_ms"`
+	StartMS       int64    `json:"startMs"`
+	EndMS         int64    `json:"endMs"`
 	Pitch         Pitch    `json:"pitch"`
 	Teams         []Team   `json:"teams"`
 	Players       []Player `json:"players"`
 }
 
 type Event struct {
-	SchemaVersion string `json:"schema_version"`
+	SchemaVersion string `json:"schemaVersion"`
 	ID            string `json:"id"`
-	MatchID       string `json:"match_id"`
-	PhaseID       string `json:"phase_id"`
+	MatchID       string `json:"matchId"`
+	PhaseID       string `json:"phaseId"`
 	Period        int    `json:"period"`
-	TimeMS        int64  `json:"time_ms"`
+	TimeMS        int64  `json:"timeMs"`
 	Type          string `json:"type"`
-	TeamID        string `json:"team_id"`
-	ActorID       string `json:"actor_id"`
-	RecipientID   string `json:"recipient_id,omitempty"`
+	TeamID        string `json:"teamId"`
+	ActorID       string `json:"actorId"`
+	RecipientID   string `json:"recipientId,omitempty"`
 	From          Point  `json:"from"`
 	To            Point  `json:"to"`
 	Outcome       string `json:"outcome"`
 }
 
 type TrackedPlayer struct {
-	PlayerID string  `json:"player_id"`
+	PlayerID string  `json:"playerId"`
 	X        float64 `json:"x"`
 	Y        float64 `json:"y"`
 }
 
 type TrackingFrame struct {
-	SchemaVersion string          `json:"schema_version"`
-	MatchID       string          `json:"match_id"`
+	SchemaVersion string          `json:"schemaVersion"`
+	MatchID       string          `json:"matchId"`
 	Period        int             `json:"period"`
-	TimeMS        int64           `json:"time_ms"`
+	TimeMS        int64           `json:"timeMs"`
 	Ball          Ball            `json:"ball"`
 	Players       []TrackedPlayer `json:"players"`
 }
 
 type Replay struct {
-	SchemaVersion string          `json:"schema_version"`
+	SchemaVersion string          `json:"schemaVersion"`
 	Match         Match           `json:"match"`
 	Events        []Event         `json:"events"`
 	Tracking      []TrackingFrame `json:"tracking"`
@@ -91,10 +96,10 @@ func (r Replay) Validate() error {
 	if r.SchemaVersion != SchemaVersion || m.SchemaVersion != SchemaVersion {
 		return fmt.Errorf("unsupported replay or match schema version")
 	}
-	if m.ID == "" || m.Period < 1 || m.StartMS < 0 || m.EndMS <= m.StartMS {
+	if !validID(m.ID) || m.Period < 1 || m.Period > 4 || m.StartMS < 0 || m.EndMS <= m.StartMS {
 		return fmt.Errorf("invalid match identity or time window")
 	}
-	if !finitePositive(m.Pitch.LengthM) || !finitePositive(m.Pitch.WidthM) {
+	if m.Pitch.LengthM != 105 || m.Pitch.WidthM != 68 {
 		return fmt.Errorf("invalid pitch dimensions")
 	}
 	if len(m.Teams) != 2 || m.Teams[0].ID == m.Teams[1].ID {
@@ -102,7 +107,7 @@ func (r Replay) Validate() error {
 	}
 	teams := make(map[string]bool, 2)
 	for _, team := range m.Teams {
-		if team.ID == "" || team.Name == "" || (team.AttackingDirection != "left" && team.AttackingDirection != "right") {
+		if !validID(team.ID) || team.Name == "" || (team.AttackingDirection != "LEFT" && team.AttackingDirection != "RIGHT") {
 			return fmt.Errorf("invalid team %q", team.ID)
 		}
 		teams[team.ID] = true
@@ -112,7 +117,7 @@ func (r Replay) Validate() error {
 	}
 	players := make(map[string]string, len(m.Players))
 	for _, player := range m.Players {
-		if player.ID == "" || player.Name == "" || !teams[player.TeamID] || players[player.ID] != "" {
+		if !validID(player.ID) || player.Name == "" || player.Number < 1 || player.Number > 99 || !teams[player.TeamID] || players[player.ID] != "" {
 			return fmt.Errorf("invalid or duplicate player %q", player.ID)
 		}
 		players[player.ID] = player.TeamID
@@ -123,12 +128,13 @@ func (r Replay) Validate() error {
 	ids := make(map[string]bool, len(r.Events))
 	last := m.StartMS
 	for _, event := range r.Events {
-		if event.SchemaVersion != SchemaVersion || event.ID == "" || ids[event.ID] ||
+		if event.SchemaVersion != SchemaVersion || !validID(event.ID) || ids[event.ID] ||
 			event.MatchID != m.ID || event.Period != m.Period ||
 			event.TimeMS < last || event.TimeMS > m.EndMS ||
-			event.PhaseID == "" || !teams[event.TeamID] ||
+			!validID(event.PhaseID) || !teams[event.TeamID] ||
 			players[event.ActorID] != event.TeamID ||
 			(event.RecipientID != "" && players[event.RecipientID] != event.TeamID) ||
+			(event.Type == "PASS" && event.Outcome == "COMPLETE" && event.RecipientID == "") ||
 			!validPoint(event.From, m.Pitch) || !validPoint(event.To, m.Pitch) ||
 			!validEventType(event.Type) || !validOutcome(event.Outcome) {
 			return fmt.Errorf("invalid event %q at %d ms", event.ID, event.TimeMS)
@@ -164,10 +170,6 @@ func (r Replay) Validate() error {
 	return nil
 }
 
-func finitePositive(v float64) bool {
-	return !math.IsNaN(v) && !math.IsInf(v, 0) && v > 0
-}
-
 func validPoint(p Point, pitch Pitch) bool {
 	return !math.IsNaN(p.X) && !math.IsInf(p.X, 0) && !math.IsNaN(p.Y) && !math.IsInf(p.Y, 0) &&
 		p.X >= 0 && p.X <= pitch.LengthM && p.Y >= 0 && p.Y <= pitch.WidthM
@@ -175,12 +177,12 @@ func validPoint(p Point, pitch Pitch) bool {
 
 func validEventType(v string) bool {
 	switch v {
-	case "pass", "carry", "cross", "clearance", "corner", "shot":
+	case "PASS", "CARRY", "CROSS", "CLEARANCE", "CORNER", "SHOT":
 		return true
 	}
 	return false
 }
 
 func validOutcome(v string) bool {
-	return v == "complete" || v == "incomplete" || v == "blocked"
+	return v == "COMPLETE" || v == "INCOMPLETE" || v == "BLOCKED"
 }

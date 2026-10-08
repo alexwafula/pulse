@@ -47,6 +47,15 @@ Confirm against the tree before relying on it.
 
 ## 4. Architecture on one screen
 
+This is the target architecture, not the current implementation. Current: Go
+replay and HTTP fixture API, Go templates, TypeScript pitch, contract v2,
+Go/Python agent-message models and dependency-free contract tests. A local
+Three.js/PixiJS comparison now sits beside the SVG view, using the same replay.
+The corner-to-first-shot builder, conservative canonical-template Go cue gate,
+Python template HTTP service and browser Evidence replay now work locally.
+SSE, model-backed runtime agents and Azure remain unimplemented. The Python
+Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
+
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
                                                                                       |  Foundry models, traces
@@ -74,7 +83,9 @@ Deterministic work (metrics, moment detection, cue building, validation) is **co
 - Changing a contract: update the schema, the examples, `contracts/README.md`, and both Go and Python models in the same change. Bump `schemaVersion` for breaking changes. Tell the other engineer first.
 - Conventions: IDs are strings matching `[A-Za-z0-9_.:-]{1,64}`; timestamps are UTC ISO-8601 with milliseconds; pitch is 105 by 68 metres with origin bottom-left; scores and probabilities are 0 to 1; enums are `UPPER_SNAKE`.
 
-Rules from the contract draft (verify in `contracts/`):
+Rules from the broader contract draft (verify in `contracts/`; several below
+remain future work). Current golden path supports the six existing replay
+event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE only:
 
 - A completed pass has a recipient. A possession change is between two different teams and `teamId` is the team that gains the ball.
 - Narrative cues need at least one evidence event and verification status `VERIFIED` or `FALLBACK_TEMPLATE`. Data-only cues use `NOT_REQUIRED`.
@@ -102,7 +113,7 @@ Rules from the contract draft (verify in `contracts/`):
 
 ## 7. Pulse runtime agents
 
-Current set (confirm): **Explainer, Narrator, Verifier**, run by a thin orchestrator workflow on Microsoft Agent Framework with Foundry models. Candidates after the golden path works: Recap agent, and splitting Persona/Locale out of the Narrator.
+Planned set: **Explainer, Narrator, Verifier**, run by a thin orchestrator workflow on Microsoft Agent Framework with Foundry models. The runtime agents are not implemented yet. Candidates after the golden path works: Recap agent, and splitting Persona/Locale out of the Narrator.
 
 ### 7.1 Rules for every Pulse agent
 
@@ -149,11 +160,11 @@ Known from `package.json`:
 - `npm run check:web` runs `tsc --noEmit`.
 - `npm run test:web` runs `tests/integration/pitch-browser.mjs`.
 
-Expected, confirm and update in Phase 0:
+Local checks:
 
 - Go: `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...`
-- Python: run the agent tests in `agents/tests/` with pytest
-- Contract examples: one command that validates every example in every language
+- Python: `py -m unittest discover -s agents/tests -v` (standard library; pytest is not configured)
+- Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions
 

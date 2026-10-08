@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "2.0.0",
+  "draftId": "draft-corner-01",
+  "status": "VERIFIED",
+  "claimsChecked": 1,
+  "claimsPassed": 1,
+  "claims": [{ "claimId": "claim-corner-shot", "supported": true, "eventIds": ["evt-06", "evt-07"], "reason": "Matches fact-corner-shot and its source events." }]
+}

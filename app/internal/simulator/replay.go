@@ -14,10 +14,10 @@ import (
 )
 
 type Message struct {
-	SchemaVersion string                `json:"schema_version"`
+	SchemaVersion string                `json:"schemaVersion"`
 	Kind          string                `json:"kind"`
-	MatchID       string                `json:"match_id"`
-	TimeMS        int64                 `json:"time_ms"`
+	MatchID       string                `json:"matchId"`
+	TimeMS        int64                 `json:"timeMs"`
 	Match         *domain.Match         `json:"match,omitempty"`
 	Event         *domain.Event         `json:"event,omitempty"`
 	Tracking      *domain.TrackingFrame `json:"tracking,omitempty"`
@@ -49,7 +49,7 @@ func Messages(replay domain.Replay) []Message {
 	messages := make([]Message, 0, 1+len(replay.Events)+len(replay.Tracking))
 	messages = append(messages, Message{
 		SchemaVersion: domain.SchemaVersion,
-		Kind:          "match",
+		Kind:          "MATCH",
 		MatchID:       replay.Match.ID,
 		TimeMS:        replay.Match.StartMS,
 		Match:         &replay.Match,
@@ -58,7 +58,7 @@ func Messages(replay domain.Replay) []Message {
 		frame := &replay.Tracking[i]
 		messages = append(messages, Message{
 			SchemaVersion: domain.SchemaVersion,
-			Kind:          "tracking",
+			Kind:          "TRACKING",
 			MatchID:       replay.Match.ID,
 			TimeMS:        frame.TimeMS,
 			Tracking:      frame,
@@ -68,7 +68,7 @@ func Messages(replay domain.Replay) []Message {
 		event := &replay.Events[i]
 		messages = append(messages, Message{
 			SchemaVersion: domain.SchemaVersion,
-			Kind:          "event",
+			Kind:          "EVENT",
 			MatchID:       replay.Match.ID,
 			TimeMS:        event.TimeMS,
 			Event:         event,
@@ -85,9 +85,9 @@ func Messages(replay domain.Replay) []Message {
 
 func messageOrder(kind string) int {
 	switch kind {
-	case "match":
+	case "MATCH":
 		return 0
-	case "tracking":
+	case "TRACKING":
 		return 1
 	default:
 		return 2

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "2.0.0", "locale": "en-GB", "persona": "CASUAL",
+  "factPack": {
+    "schemaVersion": "2.0.0", "id": "pack-vale-corner-01", "matchId": "match-vale-bastion-01", "period": 1,
+    "windowStartMs": 1672000, "windowEndMs": 1678000,
+    "facts": [{ "id": "fact-corner-shot", "metric": "set_piece_shots", "value": 1, "unit": "shots", "teamId": "vale",
+      "timeStartMs": 1672000, "timeEndMs": 1678000, "eventIds": ["evt-06", "evt-07"] }]
+  }
+}

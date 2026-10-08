@@ -1,0 +1,13 @@
+{
+  "baseRequest": "insight-request.json", "baseResponse": "insight-response.json",
+  "cases": [
+    { "name": "wrong count", "target": "request", "path": ["factPack", "facts", 0, "value"], "value": 2 },
+    { "name": "inverted window", "target": "request", "path": ["factPack", "windowEndMs"], "value": 1671000 },
+    { "name": "duplicate evidence", "target": "request", "path": ["factPack", "facts", 0, "eventIds"], "value": ["evt-06", "evt-06"] },
+    { "name": "unsupported locale", "target": "request", "path": ["locale"], "value": "fr-FR" },
+    { "name": "invented number", "target": "response", "path": ["draft", "text"], "value": "The corner produced 9 shots." },
+    { "name": "invented event", "target": "response", "path": ["draft", "claims", 0, "eventIds"], "value": ["evt-unknown"] },
+    { "name": "false verified status", "target": "response", "path": ["verification", "status"], "value": "VERIFIED" },
+    { "name": "wrong counts", "target": "response", "path": ["verification", "claimsPassed"], "value": 1 }
+  ]
+}

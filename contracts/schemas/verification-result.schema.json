@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification-result.schema.json",
+  "title": "Pulse Verification Result v2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "draftId", "status", "claimsChecked", "claimsPassed", "claims"],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0" },
+    "draftId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+    "status": { "enum": ["VERIFIED", "REJECTED", "FALLBACK_TEMPLATE"] },
+    "claimsChecked": { "type": "integer", "minimum": 0 },
+    "claimsPassed": { "type": "integer", "minimum": 0 },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["claimId", "supported", "eventIds", "reason"],
+        "properties": {
+          "claimId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+          "supported": { "type": "boolean" },
+          "eventIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" } },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "allOf": [{ "if": { "properties": { "status": { "const": "VERIFIED" } }, "required": ["status"] }, "then": { "properties": { "claimsChecked": { "minimum": 1 }, "claimsPassed": { "minimum": 1 }, "claims": { "minItems": 1 } } } }]
+}

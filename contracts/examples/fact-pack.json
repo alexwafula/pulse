@@ -1,31 +1,31 @@
 {
-  "schema_version": "1.0.0",
+  "schemaVersion": "2.0.0",
   "id": "pack-vale-corner-01",
-  "match_id": "match-vale-bastion-01",
+  "matchId": "match-vale-bastion-01",
   "period": 1,
-  "window_start_ms": 1628000,
-  "window_end_ms": 1678000,
+  "windowStartMs": 1628000,
+  "windowEndMs": 1678000,
   "facts": [
     {
       "id": "fact-route-switch",
       "metric": "attacking_lane_shift",
-      "value": "right",
+      "value": "RIGHT",
       "unit": "lane",
-      "team_id": "vale",
-      "time_start_ms": 1628000,
-      "time_end_ms": 1647000,
-      "event_ids": ["evt-01", "evt-03"],
-      "attributes": { "from_lane": "left", "to_lane": "right" }
+      "teamId": "vale",
+      "timeStartMs": 1628000,
+      "timeEndMs": 1647000,
+      "eventIds": ["evt-01", "evt-03"],
+      "attributes": { "fromLane": "LEFT", "toLane": "RIGHT" }
     },
     {
       "id": "fact-corner-shot",
       "metric": "set_piece_shots",
       "value": 1,
       "unit": "shots",
-      "team_id": "vale",
-      "time_start_ms": 1672000,
-      "time_end_ms": 1678000,
-      "event_ids": ["evt-06", "evt-07"]
+      "teamId": "vale",
+      "timeStartMs": 1672000,
+      "timeEndMs": 1678000,
+      "eventIds": ["evt-06", "evt-07"]
     }
   ]
 }

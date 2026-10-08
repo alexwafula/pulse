@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "insight-request.schema.json",
+  "title": "Pulse Insight Request v2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "factPack", "locale", "persona"],
+  "properties": {
+    "schemaVersion": { "const": "2.0.0" },
+    "factPack": { "$ref": "fact-pack.schema.json" },
+    "locale": { "enum": ["en-GB", "sw-KE"] },
+    "persona": { "enum": ["CASUAL", "ANALYST"] }
+  }
+}

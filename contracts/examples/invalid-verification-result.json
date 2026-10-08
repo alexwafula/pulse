@@ -1,0 +1,5 @@
+{
+  "schemaVersion": "2.0.0", "draftId": "draft-corner-01", "status": "VERIFIED",
+  "claimsChecked": 1, "claimsPassed": 2,
+  "claims": [{ "claimId": "claim-corner-shot", "supported": true, "eventIds": ["evt-06", "evt-07"], "reason": "Inconsistent counts must be rejected." }]
+}
