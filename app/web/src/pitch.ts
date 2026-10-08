@@ -62,8 +62,8 @@ const eventCount = required<HTMLElement>("#event-count");
 const pitchStamp = required<HTMLElement>("#pitch-stamp");
 const startLabel = required<HTMLElement>("#start-label");
 const endLabel = required<HTMLElement>("#end-label");
-const speedButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-speed]")];
-const viewButtons = [...document.querySelectorAll<HTMLButtonElement>("[data-view]")];
+const speedButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-speed]"));
+const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-view]"));
 const canvasHost = required<HTMLElement>("#canvas-host");
 const svgPitch = required<SVGSVGElement>("#pitch");
 const cameraReset = required<HTMLButtonElement>("#camera-reset");
@@ -182,10 +182,10 @@ let previousFrameTime = 0;
 let currentEventId: string | null = null;
 const playerElements = new Map<string, SVGGElement>();
 const eventButtons = new Map<string, HTMLButtonElement>();
-const passingSnapshots = [...document.querySelectorAll<HTMLElement>(".passing-snapshot")];
+const passingSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".passing-snapshot"));
 const passingClock = required<HTMLElement>("#passing-clock");
 let activePassingSnapshot: HTMLElement | undefined;
-const attackSnapshots = [...document.querySelectorAll<HTMLElement>(".attack-snapshot")];
+const attackSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".attack-snapshot"));
 const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
@@ -529,7 +529,7 @@ async function start(): Promise<void> {
       stopDemo();
       const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
     });
-    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]")) {
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]"))) {
       const id = button.dataset.passEvidence ?? "";
       const event = replay.events.find((item) => item.id === id);
       if (event) {
@@ -544,7 +544,7 @@ async function start(): Promise<void> {
       });
     }
     createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } });
-    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]")) {
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]"))) {
       const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
       if (event) {
         const span = button.querySelector("span");
@@ -558,19 +558,19 @@ async function start(): Promise<void> {
       });
     }
     required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
-      const lines = [...recapPanel.querySelectorAll("li p")].map((item) => item.textContent ?? "");
+      const lines = Array.from(recapPanel.querySelectorAll("li p")).map((item) => item.textContent ?? "");
       const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, "Synthetic sequence recap", `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
       const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
       const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
-    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) {
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) {
       button.addEventListener("click", () => {
         stopDemo();
         if (evidenceCue) clock = returnClock;
         clearEvidence(); playing = false;
         persona = button.dataset.persona ?? "CASUAL";
-        for (const item of document.querySelectorAll<HTMLButtonElement>("[data-persona]")) item.setAttribute("aria-pressed", String(item === button));
+        for (const item of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) item.setAttribute("aria-pressed", String(item === button));
         cues = []; displayedCueID = undefined; render(); void loadInsights();
       });
     }
