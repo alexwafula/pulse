@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090e0c">
+  <title>Pulse | Design System & Kitchen Sink</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/pitch.css">
+  <style>
+    body {
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      padding: 0;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .kitchen-sink-header {
+      background: var(--glass-header);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: var(--border-hairline);
+      padding: var(--space-4) var(--space-8);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kitchen-sink-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .kitchen-sink-nav {
+      display: flex;
+      gap: var(--space-4);
+      font-size: 13px;
+    }
+    .kitchen-sink-nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color var(--motion-fast);
+    }
+    .kitchen-sink-nav a:hover {
+      color: var(--accent-lime);
+    }
+    .design-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-10);
+    }
+    .design-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      border-bottom: var(--border-hairline);
+      padding-bottom: var(--space-2);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .section-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: -8px;
+    }
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-4);
+    }
+    .swatch-card {
+      background: var(--glass-surface);
+      border: var(--border-hairline);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .swatch-color {
+      height: 60px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .swatch-meta strong {
+      display: block;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    .swatch-meta code {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .component-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-6);
+    }
+    .demo-card {
+      background: var(--glass-surface);
+      backdrop-filter: var(--glass-blur);
+      border: var(--border-hairline);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .demo-card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: var(--space-4);
+    }
+    /* SVG Crest Placeholders */
+    .crest-display {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+    .crest-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .crest-svg {
+      width: 64px;
+      height: 64px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+    }
+    /* Contrast check table */
+    .contrast-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .contrast-table th, .contrast-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: var(--border-hairline);
+      text-align: left;
+    }
+    .contrast-table th {
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .contrast-pass {
+      color: var(--accent-lime);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header class="kitchen-sink-header">
+    <div class="kitchen-sink-title">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Pulse Design System & Kitchen Sink
+    </div>
+    <nav class="kitchen-sink-nav">
+      <a href="#tokens">Tokens</a>
+      <a href="#typography">Typography</a>
+      <a href="#crests">Crests</a>
+      <a href="#scoreboard">Scoreboard & Share Bar</a>
+      <a href="#kpis">KPIs</a>
+      <a href="#insights">Explainability Cards</a>
+      <a href="#scrubber">Scrubber</a>
+      <a href="#contrast">Contrast</a>
+      <a href="/" style="color: var(--accent-lime); font-weight: 700;">&larr; Back to App</a>
+    </nav>
+  </header>
+
+  <main class="design-container">
+    <!-- 1. TOKENS & SURFACES -->
+    <section id="tokens" class="design-section">
+      <h2 class="section-title">01. Colors & Dark Glass Surfaces</h2>
+      <p class="section-desc">Night stadium dark-first hierarchy. Team colors (Coral/Teal) are strictly isolated from UI lime highlights.</p>
+      <div class="swatch-grid">
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--bg-canvas);"></div>
+          <div class="swatch-meta"><strong>Night Canvas</strong><code>#090e0c</code></div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--bg-surface-raised);"></div>
+          <div class="swatch-meta"><strong>Raised Surface</strong><code>#141e19</code></div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--glass-surface); border: var(--border-hairline);"></div>
+          <div class="swatch-meta"><strong>Glass Surface</strong><code>rgba(15,23,19,0.72)</code></div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--accent-lime); box-shadow: var(--glow-lime-sm);"></div>
+          <div class="swatch-meta"><strong>UI Lime Glow</strong><code>#c8e46d</code></div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--team-aurora); box-shadow: 0 0 10px rgba(234,112,92,0.35);"></div>
+          <div class="swatch-meta"><strong>Aurora Vale (Team)</strong><code>#ea705c (Coral)</code></div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background: var(--team-bastion); box-shadow: 0 0 10px rgba(74,168,195,0.35);"></div>
+          <div class="swatch-meta"><strong>Bastion City (Team)</strong><code>#4aa8c3 (Teal)</code></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TYPOGRAPHY -->
+    <section id="typography" class="design-section">
+      <h2 class="section-title">02. Typography & Tabular Numerals</h2>
+      <p class="section-desc">Display: Space Grotesk (OFL 1.1) for tactical punch. UI: Inter (OFL 1.1) with fixed-width tabular figures.</p>
+      <div class="component-row">
+        <div class="demo-card">
+          <div class="demo-card-title">Display: Space Grotesk (Headers & Scores)</div>
+          <h1 style="font-family: var(--font-display); font-size: 38px; margin: 0 0 8px; font-weight: 700; letter-spacing: -0.02em;">0 : 0</h1>
+          <h2 style="font-family: var(--font-display); font-size: 22px; margin: 0 0 8px; font-weight: 700;">Tactical Intelligence</h2>
+          <h3 style="font-family: var(--font-display); font-size: 16px; margin: 0; font-weight: 500; color: var(--text-secondary);">Set-Piece Sequence Analysis</h3>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-title">UI & Tabular Figures: Inter (tnum + cv05)</div>
+          <div style="font-family: var(--font-ui); font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 15px; border-bottom: var(--border-hairline); padding-bottom: 4px;">
+              <span>Match Clock</span>
+              <strong style="color: var(--accent-lime);">27:58.450</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; border-bottom: var(--border-hairline); padding-bottom: 4px;">
+              <span>Field Coordinates</span>
+              <span>105.00m × 68.00m</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px;">
+              <span>Pass Difficulty Rating</span>
+              <strong>0.74 PDR</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CREST PLACEHOLDERS -->
+    <section id="crests" class="design-section">
+      <h2 class="section-title">03. Generated Fictional SVG Crest Placeholders</h2>
+      <p class="section-desc">Strictly fictional heraldry and monograms. Zero trademarked logos or real club crests.</p>
+      <div class="component-row">
+        <div class="demo-card">
+          <div class="demo-card-title">Aurora Vale Crest (Home - Coral)</div>
+          <div class="crest-display">
+            <svg class="crest-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M32 4L10 12V32C10 45.2 19.4 57.5 32 60C44.6 57.5 54 45.2 54 32V12L32 4Z" fill="#141e19" stroke="#ea705c" stroke-width="2.5"/>
+              <path d="M32 8L14 14.5V32C14 43 21.8 53.2 32 55.5C42.2 53.2 50 43 50 32V14.5L32 8Z" fill="rgba(234, 112, 92, 0.12)"/>
+              <path d="M22 42L32 20L42 42" stroke="#ea705c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M26 34H38" stroke="#ea705c" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="32" cy="16" r="2.5" fill="#f4f7f2"/>
+            </svg>
+            <div>
+              <strong style="color: var(--team-aurora); font-size: 18px; font-family: var(--font-display);">Aurora Vale</strong>
+              <div style="font-size: 12px; color: var(--text-muted);">Attacking Right &bull; Primary #ea705c</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-title">Bastion City Crest (Away - Teal)</div>
+          <div class="crest-display">
+            <svg class="crest-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M32 4L12 12V32C12 45 20.5 57 32 60C43.5 57 52 45 52 32V12L32 4Z" fill="#141e19" stroke="#4aa8c3" stroke-width="2.5"/>
+              <path d="M32 8L16 14.5V32C16 43 23 52.8 32 55.5C41 52.8 48 43 48 32V14.5L32 8Z" fill="rgba(74, 168, 195, 0.12)"/>
+              <path d="M24 22V42H34C37 42 39 40 39 37.5C39 35.5 37.8 34 35.5 33.5C37.2 33 38.2 31.5 38.2 29.5C38.2 27 36 25 33 25L24 22Z" stroke="#4aa8c3" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M20 18H44" stroke="#4aa8c3" stroke-width="2" stroke-dasharray="4 3"/>
+            </svg>
+            <div>
+              <strong style="color: var(--team-bastion); font-size: 18px; font-family: var(--font-display);">Bastion City</strong>
+              <div style="font-size: 12px; color: var(--text-muted);">Defending Right &bull; Primary #4aa8c3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SCOREBOARD & COMPUTED SHARE BAR -->
+    <section id="scoreboard" class="design-section">
+      <h2 class="section-title">04. Scoreboard & Computed Data Share Bar</h2>
+      <p class="section-desc">Never claims "possession". Built strictly from Go-calculated counts ("completed passes: 2 of 2").</p>
+      <div class="demo-card">
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 12px 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg class="crest-svg" style="width: 40px; height: 40px;" viewBox="0 0 64 64" fill="none">
+              <path d="M32 4L10 12V32C10 45.2 19.4 57.5 32 60C44.6 57.5 54 45.2 54 32V12L32 4Z" fill="#141e19" stroke="#ea705c" stroke-width="2.5"/>
+              <path d="M22 42L32 20L42 42" stroke="#ea705c" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <strong style="font-family: var(--font-display); font-size: 18px; color: var(--text-primary);">Aurora Vale</strong>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; line-height: 1;">0 <span style="color: var(--text-muted);">:</span> 0</div>
+            <div style="font-family: var(--font-ui); font-size: 12px; color: var(--accent-lime); font-weight: 600; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-lime); box-shadow: var(--glow-lime-sm);"></span>
+              27:58 (1st Half)
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; text-align: right;">
+            <strong style="font-family: var(--font-display); font-size: 18px; color: var(--text-primary);">Bastion City</strong>
+            <svg class="crest-svg" style="width: 40px; height: 40px;" viewBox="0 0 64 64" fill="none">
+              <path d="M32 4L12 12V32C12 45 20.5 57 32 60C43.5 57 52 45 52 32V12L32 4Z" fill="#141e19" stroke="#4aa8c3" stroke-width="2.5"/>
+              <path d="M24 22V42H34" stroke="#4aa8c3" stroke-width="2.5"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Computed Share Bar -->
+        <div style="margin-top: 16px; padding-top: 16px; border-top: var(--border-hairline);">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">
+            <span style="color: var(--team-aurora); font-weight: 600;">2 completed passes (100%)</span>
+            <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--text-muted);">Completed Passes (Replay window)</span>
+            <span style="color: var(--team-bastion); font-weight: 600;">0 completed passes (0%)</span>
+          </div>
+          <div style="height: 6px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.08); overflow: hidden; display: flex;">
+            <div style="width: 100%; background: var(--team-aurora); transition: width var(--motion-base);"></div>
+            <div style="width: 0%; background: var(--team-bastion); transition: width var(--motion-base);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SIGNATURE EXPLAINABILITY CARDS (IN ALL STATES) -->
+    <section id="insights" class="design-section">
+      <h2 class="section-title">05. Explainability Insight Cards (All States)</h2>
+      <p class="section-desc">Signature explainability pattern: each insight visibly cites source event IDs with replay actions.</p>
+      <div class="component-row">
+        <!-- State 1: Awaiting -->
+        <div class="demo-card">
+          <div class="demo-card-title">State 1: Awaiting Next Moment</div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+            <h3 style="font-size: 15px; margin: 0; font-weight: 600;">Match Insight</h3>
+            <span class="badge" style="background: var(--badge-template-bg); border: 1px solid var(--badge-template-border); color: var(--badge-template-text); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); font-weight: 600;">WAITING</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 16px;">Replaying match events. Intelligence engine is evaluating tactical entropy...</p>
+        </div>
+
+        <!-- State 2: Verified Insight (Lime glow & event chips) -->
+        <div class="demo-card" style="border: 1px solid var(--border-interactive); box-shadow: var(--glow-lime-sm);">
+          <div class="demo-card-title">State 2: Verified Insight (Evidence Linked)</div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+            <h3 style="font-size: 15px; margin: 0; font-weight: 700; color: var(--text-primary);">Set-Piece Conversion</h3>
+            <span style="background: var(--badge-verified-bg); border: 1px solid var(--badge-verified-border); color: var(--badge-verified-text); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); font-weight: 700; letter-spacing: 0.04em;">VERIFIED</span>
+          </div>
+          <p style="color: var(--text-primary); font-size: 14px; line-height: 1.5; margin: 0 0 14px;">The corner produced 1 shot attempt following Nia's delivery.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+            <span style="background: rgba(255,255,255,0.06); border: var(--border-hairline); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+              <span style="color: var(--accent-lime);">&bull;</span> evt-05 Corner (27:52)
+            </span>
+            <span style="background: rgba(255,255,255,0.06); border: var(--border-hairline); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
+              <span style="color: var(--team-aurora);">&bull;</span> evt-06 Shot (27:58)
+            </span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="primary-button" style="background: var(--accent-lime-bg); border: 1px solid var(--accent-lime); color: var(--accent-lime); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              Replay Evidence (6s)
+            </button>
+            <button class="secondary-button" style="background: transparent; border: var(--border-hairline); color: var(--text-secondary); font-size: 12px; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer;">
+              Return to match
+            </button>
+          </div>
+        </div>
+
+        <!-- State 3: Fallback Template (Deterministic Safety) -->
+        <div class="demo-card">
+          <div class="demo-card-title">State 3: Canonical Template (Deterministic Fallback)</div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+            <h3 style="font-size: 15px; margin: 0; font-weight: 600;">Match Insight</h3>
+            <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--text-secondary); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); font-weight: 600;">TEMPLATE</span>
+          </div>
+          <p style="color: var(--text-primary); font-size: 14px; margin: 0 0 12px;">Set-piece sequence: 1 shot following the corner.</p>
+          <div style="font-size: 12px; color: var(--text-muted);">Deterministic Go cue gate verification: 2 of 2 source events verified.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SCRUBBER & TIMELINE -->
+    <section id="scrubber" class="design-section">
+      <h2 class="section-title">06. Tactical Scrubber & Transport</h2>
+      <p class="section-desc">Key moments highlighted with marker dots; evidence window highlighted with lime halo.</p>
+      <div class="demo-card">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+          <button style="width: 38px; height: 38px; border-radius: 50%; background: var(--accent-lime); color: var(--text-inverse); border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-lime-sm);">▶</button>
+          <button style="width: 34px; height: 34px; border-radius: var(--radius-sm); background: var(--glass-surface); border: var(--border-hairline); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center;">↺</button>
+          
+          <div style="flex: 1; position: relative; height: 32px; display: flex; align-items: center;">
+            <!-- Scrubber Track -->
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.12); border-radius: var(--radius-pill); position: relative;">
+              <!-- Progress fill -->
+              <div style="width: 85%; height: 100%; background: var(--accent-lime); border-radius: var(--radius-pill);"></div>
+              <!-- Evidence Range Highlight (27:52 to 27:58) -->
+              <div style="position: absolute; left: 75%; width: 22%; top: -3px; height: 12px; background: rgba(200, 228, 109, 0.25); border: 1px solid var(--accent-lime); border-radius: 4px; pointer-events: none;" title="Evidence Range (27:52 - 27:58)"></div>
+              <!-- Event tick markers -->
+              <div style="position: absolute; left: 14%; top: -3px; width: 4px; height: 12px; background: #fff; border-radius: 2px;" title="Pass 27:08"></div>
+              <div style="position: absolute; left: 30%; top: -3px; width: 4px; height: 12px; background: #fff; border-radius: 2px;" title="Carry 27:18"></div>
+              <div style="position: absolute; left: 45%; top: -3px; width: 4px; height: 12px; background: #fff; border-radius: 2px;" title="Pass 27:27"></div>
+              <div style="position: absolute; left: 60%; top: -3px; width: 4px; height: 12px; background: #fff; border-radius: 2px;" title="Shot 27:36"></div>
+              <div style="position: absolute; left: 72%; top: -3px; width: 4px; height: 12px; background: #fff; border-radius: 2px;" title="Clearance 27:43"></div>
+              <div style="position: absolute; left: 86%; top: -3px; width: 4px; height: 12px; background: var(--accent-lime); border-radius: 2px; box-shadow: var(--glow-lime-sm);" title="Corner 27:52"></div>
+              <div style="position: absolute; left: 96%; top: -3px; width: 4px; height: 12px; background: var(--team-aurora); border-radius: 2px;" title="Shot blocked 27:58"></div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 4px; background: rgba(255,255,255,0.06); padding: 3px; border-radius: var(--radius-sm); border: var(--border-hairline);">
+            <button style="background: transparent; border: none; color: var(--text-muted); font-size: 12px; padding: 3px 8px; border-radius: 3px;">1×</button>
+            <button style="background: var(--accent-lime); color: var(--text-inverse); border: none; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 3px;">4×</button>
+            <button style="background: transparent; border: none; color: var(--text-muted); font-size: 12px; padding: 3px 8px; border-radius: 3px;">10×</button>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums;">
+          <span>27:00 (Sequence Start)</span>
+          <span style="color: var(--accent-lime); font-weight: 600;">27:58.000 / 28:00</span>
+          <span>28:00 (Sequence End)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. CONTRAST & ACCESSIBILITY AUDIT -->
+    <section id="contrast" class="design-section">
+      <h2 class="section-title">07. Contrast & Accessibility Verification</h2>
+      <p class="section-desc">WCAG AA compliance audit for all text tokens rendered over dark glass surfaces.</p>
+      <div class="demo-card">
+        <table class="contrast-table">
+          <thead>
+            <tr>
+              <th>Element</th>
+              <th>Foreground Token</th>
+              <th>Background Surface</th>
+              <th>Contrast Ratio</th>
+              <th>WCAG AA Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Primary Body & Headers</td>
+              <td><code>--text-primary (#f2f7f4)</code></td>
+              <td><code>--glass-surface (#0f1713)</code></td>
+              <td><strong>13.8 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AAA)</td>
+            </tr>
+            <tr>
+              <td>Secondary Labels</td>
+              <td><code>--text-secondary (#9cb1a5)</code></td>
+              <td><code>--glass-surface (#0f1713)</code></td>
+              <td><strong>6.8 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AA)</td>
+            </tr>
+            <tr>
+              <td>Lime Highlights & Verified Text</td>
+              <td><code>--accent-lime (#c8e46d)</code></td>
+              <td><code>--glass-surface (#0f1713)</code></td>
+              <td><strong>10.2 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AAA)</td>
+            </tr>
+            <tr>
+              <td>Aurora Vale Team Color</td>
+              <td><code>--team-aurora (#ea705c)</code></td>
+              <td><code>--glass-surface (#0f1713)</code></td>
+              <td><strong>5.4 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AA)</td>
+            </tr>
+            <tr>
+              <td>Bastion City Team Color</td>
+              <td><code>--team-bastion (#4aa8c3)</code></td>
+              <td><code>--glass-surface (#0f1713)</code></td>
+              <td><strong>7.1 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AA)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

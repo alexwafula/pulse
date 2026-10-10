@@ -3,44 +3,146 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#17231f">
+  <meta name="theme-color" content="#090e0c">
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
+  <link rel="stylesheet" href="/static/tokens.css">
   <link rel="stylesheet" href="/static/pitch.css">
   <script type="module" src="/static/pitch.js"></script>
 </head>
 <body>
+  <!-- PROCEDURAL BACKDROP (No photos, pure dark stadium glow & architectural stands) -->
+  <div class="stadium-backdrop" aria-hidden="true">
+    <div class="floodlight-beam left"></div>
+    <div class="floodlight-beam right"></div>
+    <div class="stands-silhouette"></div>
+  </div>
+
+  <!-- APPLICATION HEADER -->
   <header class="app-header">
     <div class="header-inner">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Pulse</div>
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Pulse</span>
+      </div>
       <span class="header-context">Match replay</span>
+      
       <label for="scenario" class="sr-only">Scenario</label>
       <select id="scenario" class="scenario-picker" aria-label="Scenario">
         <option value="corner" {{if eq .Scenario "corner"}}selected{{end}}>Corner chance</option>
         <option value="central" {{if eq .Scenario "central"}}selected{{end}}>Central entry</option>
         <option value="exchange" {{if eq .Scenario "exchange"}}selected{{end}}>Passing exchange</option>
       </select>
-      <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo"><i data-lucide="play-circle"></i><span>Run demo</span></button>
+      
+      <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo">
+        <i data-lucide="play"></i><span>Run demo</span>
+      </button>
+      
       <div class="audience-controls" role="group" aria-label="Audience">
         <button type="button" data-persona="CASUAL" aria-pressed="true">Casual</button>
         <button type="button" data-persona="ANALYST" aria-pressed="false">Analyst</button>
         <label class="sr-only" for="locale">Language</label>
-        <select id="locale" aria-label="Language"><option value="en-GB">English</option><option value="sw-KE" disabled>Kiswahili</option></select>
+        <select id="locale" aria-label="Language">
+          <option value="en-GB">English</option>
+          <option value="sw-KE" disabled>Kiswahili</option>
+        </select>
       </div>
+      
       <span class="header-badge">Synthetic fixture</span>
     </div>
   </header>
 
   <main class="app-main">
-    <section class="match-strip" aria-label="Match">
-      <div class="team-name home"><span class="team-swatch"></span><span>{{(index .Match.Teams 0).Name}}</span></div>
+    <!-- MATCH STRIP / SCOREBOARD & COMPUTED SHARE BAR -->
+    <section class="match-strip" aria-label="Match scoreboard and pass share">
+      <!-- Home Team: Aurora Vale (Coral #ea705c) -->
+      <div class="team-name home">
+        <svg class="crest-svg home" viewBox="0 0 64 64" fill="none" aria-hidden="true" role="img">
+          <path d="M32 4L10 12V32C10 45.2 19.4 57.5 32 60C44.6 57.5 54 45.2 54 32V12L32 4Z" fill="#141e19" stroke="#ea705c" stroke-width="2.5"/>
+          <path d="M32 8L14 14.5V32C14 43 21.8 53.2 32 55.5C42.2 53.2 50 43 50 32V14.5L32 8Z" fill="rgba(234, 112, 92, 0.12)"/>
+          <path d="M22 42L32 20L42 42" stroke="#ea705c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M26 34H38" stroke="#ea705c" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="32" cy="16" r="2.5" fill="#f4f7f2"/>
+        </svg>
+        <div class="team-meta">
+          <div class="team-title-row">
+            <span class="team-swatch home"></span>
+            <span class="team-name-text">{{(index .Match.Teams 0).Name}}</span>
+          </div>
+          <span class="team-sub">Aurora Vale &bull; Attacking Right</span>
+        </div>
+      </div>
+
+      <!-- Center Scoreboard -->
       <div class="scoreboard">
         <div class="score">0 <span>:</span> 0</div>
-        <time id="match-clock" class="match-clock">27:00</time>
+        <div class="clock-badge">
+          <span class="live-pulse-dot" aria-hidden="true"></span>
+          <time id="match-clock" class="match-clock">27:00</time>
+          <span class="clock-period">1st Half</span>
+        </div>
       </div>
-      <div class="team-name away"><span>{{(index .Match.Teams 1).Name}}</span><span class="team-swatch"></span></div>
+
+      <!-- Away Team: Bastion City (Teal #4aa8c3) -->
+      <div class="team-name away">
+        <div class="team-meta away-meta">
+          <div class="team-title-row">
+            <span class="team-name-text">{{(index .Match.Teams 1).Name}}</span>
+            <span class="team-swatch away"></span>
+          </div>
+          <span class="team-sub">Bastion City &bull; Defending Right</span>
+        </div>
+        <svg class="crest-svg away" viewBox="0 0 64 64" fill="none" aria-hidden="true" role="img">
+          <path d="M32 4L12 12V32C12 45 20.5 57 32 60C43.5 57 52 45 52 32V12L32 4Z" fill="#141e19" stroke="#4aa8c3" stroke-width="2.5"/>
+          <path d="M32 8L16 14.5V32C16 43 23 52.8 32 55.5C41 52.8 48 43 48 32V14.5L32 8Z" fill="rgba(74, 168, 195, 0.12)"/>
+          <path d="M24 22V42H34C37 42 39 40 39 37.5C39 35.5 37.8 34 35.5 33.5C37.2 33 38.2 31.5 38.2 29.5C38.2 27 36 25 33 25L24 22Z" stroke="#4aa8c3" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M20 18H44" stroke="#4aa8c3" stroke-width="2" stroke-dasharray="4 3"/>
+        </svg>
+      </div>
+
+      <!-- Computed Share Bar (strict computed numbers: completed passes, NEVER possession) -->
+      <div class="computed-share-bar" role="region" aria-label="Completed passes share">
+        <div class="share-labels">
+          <span class="share-home-val">2 completed passes</span>
+          <span class="share-title">Completed passes (replay window)</span>
+          <span class="share-away-val">0 completed passes</span>
+        </div>
+        <div class="share-track">
+          <div class="share-fill-home" style="width: 100%;"></div>
+          <div class="share-fill-away" style="width: 0%;"></div>
+        </div>
+      </div>
     </section>
 
+    <!-- MAIN WORKSPACE: Floating Glass Panels Layout -->
     <div class="workspace">
+      <!-- LEFT RAIL: Key Numbers & Match Pulse -->
+      <aside class="left-rail" aria-label="Match sequence metrics">
+        <div class="rail-card">
+          <span class="rail-label">Sequence Phase</span>
+          <strong class="rail-value">{{if eq .Scenario "corner"}}Corner Chance{{else if eq .Scenario "central"}}Central Entry{{else}}Passing Exchange{{end}}</strong>
+          <span class="rail-sub">Aurora Vale &rarr; Attacking Right</span>
+        </div>
+
+        <div class="rail-card">
+          <span class="rail-label">Events In Window</span>
+          <strong class="rail-value">7 <span class="rail-unit">actions</span></strong>
+          <span class="rail-sub">27:00 &ndash; 28:00 (105m &times; 68m)</span>
+        </div>
+
+        <div class="rail-card">
+          <span class="rail-label">Pass Completion</span>
+          <strong class="rail-value">2 / 2 <span class="rail-unit">100%</span></strong>
+          <div class="rail-mini-bar"><div style="width: 100%; background: var(--team-aurora);"></div></div>
+        </div>
+
+        <div class="rail-card">
+          <span class="rail-label">Box Entries &rarr; Shots</span>
+          <strong class="rail-value">1 <span class="rail-unit">entry</span> &bull; 1 <span class="rail-unit">shot</span></strong>
+          <span class="rail-sub">100% entry-to-shot conversion</span>
+        </div>
+      </aside>
+
+      <!-- CENTER HERO: Pitch Arena -->
       <section class="pitch-column" aria-labelledby="pitch-heading">
         <div class="section-heading">
           <h1 id="pitch-heading">Match centre <span class="half-label">First half</span></h1>
@@ -52,24 +154,30 @@
         </div>
 
         <div class="pitch-shell">
-          <div id="pitch-loading" class="pitch-loading" role="status" aria-live="polite" hidden><span class="loading-spinner" aria-hidden="true"></span><span>Loading match data…</span></div>
+          <div id="pitch-loading" class="pitch-loading" role="status" aria-live="polite" hidden>
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Loading match data…</span>
+          </div>
+          
           <div id="pitch-error" class="pitch-error" role="alert" hidden>
             <strong id="error-title">Replay unavailable</strong>
             <p id="error-message" class="pitch-error-text">Could not load the match replay.</p>
             <button type="button" id="pitch-retry" class="secondary-button">Retry</button>
           </div>
+          
           <div id="canvas-host" hidden></div>
+          
           <svg id="pitch" class="pitch" viewBox="0 0 1050 680" role="img" aria-label="Animated football pitch showing the fictional match">
             <defs>
               <pattern id="mow" width="197.2" height="640" patternUnits="userSpaceOnUse">
-                <rect width="197.2" height="640" fill="#206a49"></rect>
-                <rect width="98.6" height="640" fill="#267451"></rect>
+                <rect width="197.2" height="640" fill="#143b28"></rect>
+                <rect width="98.6" height="640" fill="#184731"></rect>
               </pattern>
               <marker id="pass-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#f4f4d5"></path>
               </marker>
             </defs>
-            <rect width="1050" height="680" fill="#185c3e"></rect>
+            <rect width="1050" height="680" fill="#102f20"></rect>
             <rect x="32" y="20" width="986" height="640" fill="url(#mow)"></rect>
             <g class="field-lines">
               <rect x="32" y="20" width="986" height="640"></rect>
@@ -99,94 +207,224 @@
             <circle id="ball-shadow" class="ball-shadow" r="12" cx="420" cy="200"></circle>
             <circle id="ball" class="ball" r="8" cx="420" cy="200"></circle>
           </svg>
+          
           <div id="pitch-stamp" class="pitch-stamp">AURORA VALE ATTACKING RIGHT</div>
+          
           <div id="action-result" class="action-result" role="status" hidden>
             <strong id="result-title"></strong>
             <span id="result-detail"></span>
           </div>
+          
           <div class="scene-tools">
             <button type="button" id="camera-reset" class="icon-button" aria-label="Reset camera" title="Reset camera" hidden><i data-lucide="scan"></i></button>
             <button type="button" id="fullscreen-button" class="icon-button" aria-label="Fullscreen pitch" title="Fullscreen pitch"><i data-lucide="maximize"></i></button>
           </div>
+
+          <!-- Empty slot for future pitch-control heatmap (Render nothing per Stage 3 rule) -->
+          <div id="heatmap-slot" class="heatmap-slot" aria-hidden="true"></div>
         </div>
+        
         <p id="renderer-status" class="renderer-status" role="status" hidden></p>
 
+        <!-- BOTTOM SCRUBBER & TRANSPORT -->
         <div class="transport">
           <div class="transport-actions">
             <button type="button" id="play-button" class="primary-button icon-button" aria-label="Play" title="Play"><i data-lucide="play"></i></button>
             <button type="button" id="restart-button" class="secondary-button icon-button" aria-label="Restart" title="Restart"><i data-lucide="rotate-ccw"></i></button>
           </div>
+          
           <div class="seek-wrap">
             <label for="seek" class="sr-only">Seek match replay</label>
-            <input id="seek" type="range" min="0" max="1000" value="0">
-            <div class="seek-labels"><span id="start-label">27:00</span><span id="end-label">28:00</span></div>
+            <div class="seek-track-wrapper">
+              <input id="seek" type="range" min="0" max="1000" value="0">
+              <div class="evidence-range-marker" aria-hidden="true" title="Evidence window (27:52 - 27:58)"></div>
+            </div>
+            <div class="seek-labels">
+              <span id="start-label">27:00</span>
+              <span id="end-label">28:00</span>
+            </div>
           </div>
+          
           <div class="speed-control" role="group" aria-label="Playback speed">
             <button type="button" data-speed="1" aria-pressed="false">1×</button>
             <button type="button" data-speed="4" aria-pressed="true">4×</button>
             <button type="button" data-speed="10" aria-pressed="false">10×</button>
           </div>
         </div>
+        
         <div class="now-playing" aria-live="polite">
           <span class="now-label">On the pitch</span>
           <span id="current-action">Loading replay…</span>
         </div>
-        <section class="passing-panel" aria-labelledby="passing-heading">
-          <div class="section-heading"><h2 id="passing-heading">Passing network</h2><span id="passing-clock"></span></div>
-          {{range .Graphs}}
-          <div class="passing-snapshot" data-cutoff="{{.TimeMS}}" hidden>
-            {{range .Teams}}
-            <div class="passing-team">
-              <h3>{{.Name}} <span>{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h3>
-              <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
-                <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
-                {{$marker := .Marker}}
-                {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
-                {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} passes sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
-              </svg>
-              <table class="passing-table"><thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead><tbody>{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}</tbody></table>
-              <ul class="passing-links">{{range .Edges}}<li><strong>{{.From}} &rarr; {{.To}}</strong><span>{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span><div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}" aria-label="Show events for {{.}}"><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li class="passing-empty">No completed passes yet</li>{{end}}</ul>
-            </div>
-            {{end}}
-          </div>
-          {{end}}
-        </section>
       </section>
 
-      <aside class="events-panel" aria-labelledby="events-heading">
-        <div class="section-heading">
-          <h2 id="events-heading">Event timeline</h2>
-          <span id="event-count">7 actions</span>
-        </div>
-        <ol id="event-list" class="event-list"></ol>
-        <div class="event-detail">
-          <span class="detail-label">Selected action</span>
-          <strong id="detail-title">Waiting for replay</strong>
-          <p id="detail-description"></p>
-        </div>
+      <!-- RIGHT DRAWER: Tabbed Intelligence replacing the long scroll -->
+      <aside class="events-panel right-drawer" aria-labelledby="drawer-heading">
+        <h2 id="drawer-heading" class="sr-only">Tactical Intelligence Drawer</h2>
+        
+        <!-- Pinned Signature Match Insight Card -->
         <section class="insight-panel" aria-labelledby="insight-heading">
-          <div class="section-heading"><h2 id="insight-heading">Match insight</h2><span id="insight-status">Waiting</span></div>
+          <div class="section-heading">
+            <h2 id="insight-heading">Match insight</h2>
+            <span id="insight-status">Waiting</span>
+          </div>
           <p id="insight-text" aria-live="polite">Awaiting next moment</p>
           <div id="insight-evidence" hidden>
             <p id="insight-window"></p>
-            <button type="button" id="evidence-button" class="evidence-button"><i data-lucide="list-video"></i><span>Evidence</span></button>
-            <button type="button" id="evidence-return" class="evidence-button" hidden><i data-lucide="undo-2"></i><span>Return to match</span></button>
+            <div class="insight-actions">
+              <button type="button" id="evidence-button" class="evidence-button"><i data-lucide="list-video"></i><span>Evidence</span></button>
+              <button type="button" id="evidence-return" class="evidence-button" hidden><i data-lucide="undo-2"></i><span>Return to match</span></button>
+            </div>
           </div>
         </section>
-        <section class="attack-panel" aria-labelledby="attack-heading">
-          <div class="section-heading"><h2 id="attack-heading">Attacking routes</h2><span id="attack-clock"></span></div>
-          {{range .Attacks}}<div class="attack-snapshot" data-cutoff="{{.TimeMS}}" hidden>{{range .Teams}}
-            <h3>{{.Team.Name}}</h3>
-            <div class="lane-bars">{{$total := .TotalLanes}}{{range .Lanes}}<div class="lane-row"><span>{{.Name}}</span><meter min="0" max="{{if $total}}{{$total}}{{else}}1{{end}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} of {{if $total}}{{$total}}{{else}}0{{end}} completed actions"></meter><strong>{{.Count}}</strong></div>{{end}}</div>
-            <dl class="attack-stats"><div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div><div><dt>Shots</dt><dd>{{.Shots}}</dd></div><div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}{{.EntryShots}} of {{.BoxEntries}}{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div></dl>
-          {{end}}</div>{{end}}
-        </section>
+
+        <!-- Drawer Navigation Tabs -->
+        <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">
+          <button type="button" role="tab" id="tab-timeline" class="drawer-tab active" data-tab="timeline" aria-selected="true" aria-controls="pane-timeline">Timeline</button>
+          <button type="button" role="tab" id="tab-passing" class="drawer-tab" data-tab="passing" aria-selected="false" aria-controls="pane-passing">Passing</button>
+          <button type="button" role="tab" id="tab-routes" class="drawer-tab" data-tab="routes" aria-selected="false" aria-controls="pane-routes">Routes</button>
+          <button type="button" role="tab" id="tab-recap" class="drawer-tab" data-tab="recap" aria-selected="false" aria-controls="pane-recap">Recap</button>
+          <button type="button" role="tab" id="tab-evidence" class="drawer-tab" data-tab="evidence" aria-selected="false" aria-controls="pane-evidence">Evidence</button>
+        </div>
+
+        <!-- Drawer Tab Panes -->
+        <div class="drawer-panes">
+          <!-- Pane 1: Event Timeline -->
+          <div id="pane-timeline" class="drawer-pane active" data-pane="timeline" role="tabpanel" aria-labelledby="tab-timeline">
+            <div class="section-heading">
+              <h3 id="events-heading">Event timeline</h3>
+              <span id="event-count">7 actions</span>
+            </div>
+            <ol id="event-list" class="event-list"></ol>
+            <div class="event-detail">
+              <span class="detail-label">Selected action</span>
+              <strong id="detail-title">Waiting for replay</strong>
+              <p id="detail-description"></p>
+            </div>
+          </div>
+
+          <!-- Pane 2: Passing Network -->
+          <div id="pane-passing" class="drawer-pane" data-pane="passing" role="tabpanel" aria-labelledby="tab-passing">
+            <section class="passing-panel" aria-labelledby="passing-heading">
+              <div class="section-heading">
+                <h3 id="passing-heading">Passing network</h3>
+                <span id="passing-clock"></span>
+              </div>
+              {{range .Graphs}}
+              <div class="passing-snapshot" data-cutoff="{{.TimeMS}}" hidden>
+                {{range .Teams}}
+                <div class="passing-team">
+                  <h4>{{.Name}} <span>{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
+                  <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
+                    <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
+                    {{$marker := .Marker}}
+                    {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
+                    {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} passes sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
+                  </svg>
+                  <table class="passing-table">
+                    <thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead>
+                    <tbody>{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}</tbody>
+                  </table>
+                  <ul class="passing-links">
+                    {{range .Edges}}
+                    <li>
+                      <strong>{{.From}} &rarr; {{.To}}</strong>
+                      <span>{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span>
+                      <div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}" aria-label="Show events for {{.}}"><span>{{.}}</span></button>{{end}}</div>
+                    </li>
+                    {{else}}
+                    <li class="passing-empty">No completed passes yet</li>
+                    {{end}}
+                  </ul>
+                </div>
+                {{end}}
+              </div>
+              {{end}}
+            </section>
+          </div>
+
+          <!-- Pane 3: Attacking Routes -->
+          <div id="pane-routes" class="drawer-pane" data-pane="routes" role="tabpanel" aria-labelledby="tab-routes">
+            <section class="attack-panel" aria-labelledby="attack-heading">
+              <div class="section-heading">
+                <h3 id="attack-heading">Attacking routes</h3>
+                <span id="attack-clock"></span>
+              </div>
+              {{range .Attacks}}
+              <div class="attack-snapshot" data-cutoff="{{.TimeMS}}" hidden>
+                {{range .Teams}}
+                <h4>{{.Team.Name}}</h4>
+                <div class="lane-bars">
+                  {{$total := .TotalLanes}}
+                  {{range .Lanes}}
+                  <div class="lane-row">
+                    <span>{{.Name}}</span>
+                    <meter min="0" max="{{if $total}}{{$total}}{{else}}1{{end}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} of {{if $total}}{{$total}}{{else}}0{{end}} completed actions"></meter>
+                    <strong>{{.Count}}</strong>
+                  </div>
+                  {{end}}
+                </div>
+                <dl class="attack-stats">
+                  <div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div>
+                  <div><dt>Shots</dt><dd>{{.Shots}}</dd></div>
+                  <div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}{{.EntryShots}} of {{.BoxEntries}}{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div>
+                </dl>
+                {{end}}
+              </div>
+              {{end}}
+            </section>
+          </div>
+
+          <!-- Pane 4: Sequence Recap -->
+          <div id="pane-recap" class="drawer-pane" data-pane="recap" role="tabpanel" aria-labelledby="tab-recap">
+            <section id="recap-panel" class="recap-panel" aria-labelledby="recap-heading" hidden>
+              <div class="section-heading">
+                <h3 id="recap-heading">Sequence recap</h3>
+                <button type="button" id="download-recap" class="evidence-button"><i data-lucide="download"></i><span>Download</span></button>
+              </div>
+              <ol>
+                {{range .Recap}}
+                <li>
+                  <p>{{.Text}}</p>
+                  {{range .EventIDs}}
+                  <button type="button" class="evidence-button" data-recap-evidence="{{.}}" aria-label="Show events for {{.}}">
+                    <i data-lucide="list-video"></i><span>Evidence</span>
+                  </button>
+                  {{end}}
+                </li>
+                {{end}}
+              </ol>
+            </section>
+          </div>
+
+          <!-- Pane 5: Evidence Trail Inspector -->
+          <div id="pane-evidence" class="drawer-pane" data-pane="evidence" role="tabpanel" aria-labelledby="tab-evidence">
+            <div class="section-heading">
+              <h3>Evidence trail</h3>
+              <span class="evidence-counter">Cited events</span>
+            </div>
+            <div class="evidence-trail-list">
+              <div class="evidence-card">
+                <div class="evidence-card-header">
+                  <span class="evidence-id">evt-06</span>
+                  <span class="evidence-type">Corner</span>
+                  <time class="evidence-time">27:52</time>
+                </div>
+                <p class="evidence-desc">Leni delivers an outswinging corner to Nia in the penalty area.</p>
+              </div>
+              <div class="evidence-card">
+                <div class="evidence-card-header">
+                  <span class="evidence-id">evt-07</span>
+                  <span class="evidence-type">Shot</span>
+                  <time class="evidence-time">27:58</time>
+                </div>
+                <p class="evidence-desc">Nia shoots from 14.2m; shot blocked by Mina.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </aside>
     </div>
-    <section id="recap-panel" class="recap-panel" aria-labelledby="recap-heading" hidden>
-      <div class="section-heading"><h2 id="recap-heading">Sequence recap</h2><button type="button" id="download-recap" class="evidence-button"><i data-lucide="download"></i><span>Download</span></button></div>
-      <ol>{{range .Recap}}<li><p>{{.Text}}</p>{{range .EventIDs}}<button type="button" class="evidence-button" data-recap-evidence="{{.}}" aria-label="Show events for {{.}}"><i data-lucide="list-video"></i><span>Evidence</span></button>{{end}}</li>{{end}}</ol>
-    </section>
   </main>
 </body>
 </html>

@@ -43,8 +43,13 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 	if err != nil {
 		return nil, err
 	}
+	designPath := filepath.Join(webDir, "templates", "pages", "design.html")
+	var designPage *template.Template
+	if _, err := os.Stat(designPath); err == nil {
+		designPage, _ = template.ParseFiles(designPath)
+	}
 	staticDir := filepath.Join(webDir, "static")
-	for _, name := range []string{"pitch.css", "pitch.js"} {
+	for _, name := range []string{"pitch.css", "pitch.js", "tokens.css"} {
 		if _, err := os.Stat(filepath.Join(staticDir, name)); err != nil {
 			return nil, err
 		}
@@ -52,6 +57,19 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
+	mux.HandleFunc("/design", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if designPage == nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_ = designPage.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: "corner"})
+	})
 	mux.HandleFunc("/api/fact-packs", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", "GET")

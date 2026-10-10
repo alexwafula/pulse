@@ -88,6 +88,22 @@ let returnClock = 0;
 let displayedCueID: string | undefined;
 let persona = "CASUAL";
 let insightRequest = 0;
+let userSelectedTab: string | null = null;
+let drawerTabs: HTMLButtonElement[] = [];
+let drawerPanes: HTMLElement[] = [];
+
+function setDrawerTab(tabId: string, isUser = false): void {
+  if (isUser) userSelectedTab = tabId;
+  for (const tab of drawerTabs) {
+    const active = tab.dataset.tab === tabId;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", String(active));
+  }
+  for (const pane of drawerPanes) {
+    pane.classList.toggle("active", pane.dataset.pane === tabId);
+  }
+}
+
 const localePicker = required<HTMLSelectElement>("#locale");
 const scenarioPicker = required<HTMLSelectElement>("#scenario");
 function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenarioPicker.value)}`; }
@@ -366,6 +382,11 @@ function render(): void {
   }
   attackClock.textContent = matchTime(clock);
   recapPanel.hidden = clock < replay.match.endMs;
+  if (clock >= replay.match.endMs) {
+    setDrawerTab("recap");
+  } else if (!userSelectedTab && evidenceCue) {
+    setDrawerTab("timeline");
+  }
   clockDisplay.textContent = matchTime(clock);
   seek.value = String(Math.round(((clock - replay.match.startMs) / (replay.match.endMs - replay.match.startMs)) * 1000));
   const nextPlayLabel = playing ? "Pause" : evidenceCue && clock >= evidenceCue.replayEndMs ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
@@ -383,7 +404,7 @@ function animate(time: number): void {
   if (playing) {
     if (previousFrameTime) {
       const end = evidenceCue?.replayEndMs ?? replay.match.endMs;
-      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 100) * (evidenceCue ? 1 : speed));
+      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue ? 1 : speed));
       if (clock >= end) playing = false;
       render();
     }
@@ -525,6 +546,13 @@ async function start(): Promise<void> {
     pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
     createPlayers();
     createTimeline();
+    drawerTabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".drawer-tab"));
+    drawerPanes = Array.from(document.querySelectorAll<HTMLElement>(".drawer-pane"));
+    for (const tab of drawerTabs) {
+      tab.addEventListener("click", () => {
+        if (tab.dataset.tab) setDrawerTab(tab.dataset.tab, true);
+      });
+    }
     scenarioPicker.addEventListener("change", () => {
       stopDemo();
       const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
@@ -538,6 +566,7 @@ async function start(): Promise<void> {
       }
       button.addEventListener("click", () => {
         stopDemo();
+        setDrawerTab("timeline");
         eventButtons.get(id)?.click();
         eventButtons.get(id)?.classList.add("evidence-event");
         required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -553,6 +582,7 @@ async function start(): Promise<void> {
       }
       button.addEventListener("click", () => {
         stopDemo();
+        setDrawerTab("timeline");
         eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
         required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
       });
@@ -576,6 +606,7 @@ async function start(): Promise<void> {
     }
     evidenceButton.addEventListener("click", () => {
       stopDemo();
+      setDrawerTab("timeline");
       const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
       if (!cue) return;
       if (!evidenceCue) returnClock = clock;
@@ -586,7 +617,15 @@ async function start(): Promise<void> {
       for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
       render();
     });
-    evidenceReturn.addEventListener("click", () => { stopDemo(); clearEvidence(); clock = returnClock; playing = false; previousFrameTime = 0; render(); });
+    evidenceReturn.addEventListener("click", () => {
+      stopDemo();
+      clearEvidence();
+      clock = returnClock;
+      playing = false;
+      previousFrameTime = 0;
+      if (clock >= replay.match.endMs) setDrawerTab("recap");
+      render();
+    });
     for (const button of viewButtons) button.addEventListener("click", () => { void switchView(button.dataset.view ?? "svg"); });
     cameraReset.addEventListener("click", () => pitchRenderer?.resetCamera());
     fullscreen.addEventListener("click", () => {
@@ -608,6 +647,8 @@ async function start(): Promise<void> {
     restartButton.addEventListener("click", () => {
       stopDemo();
       clearEvidence();
+      userSelectedTab = null;
+      setDrawerTab("timeline");
       clock = replay.match.startMs;
       playing = true;
       render();
@@ -616,6 +657,15 @@ async function start(): Promise<void> {
       stopDemo();
       clearEvidence();
       clock = replay.match.startMs + (Number(seek.value) / 1000) * (replay.match.endMs - replay.match.startMs);
+      if (!userSelectedTab) {
+        if (seek.value === "450") {
+          setDrawerTab("passing");
+        } else if (seek.value === "1000") {
+          setDrawerTab("recap");
+        } else if (seek.value === "0") {
+          setDrawerTab("timeline");
+        }
+      }
       render();
     });
     for (const button of speedButtons) {
