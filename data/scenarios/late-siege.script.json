@@ -1,0 +1,290 @@
+{
+  "schemaVersion": "2.0.0",
+  "name": "late-siege",
+  "matchId": "match-vale-bastion-siege",
+  "seed": 42,
+  "period": 2,
+  "startMs": 5280000,
+  "endMs": 5360000,
+  "pitch": {
+    "lengthM": 105.0,
+    "widthM": 68.0
+  },
+  "squadPath": "data/squads/fictional-league.json",
+  "teams": [
+    {
+      "id": "vale",
+      "name": "Aurora Vale",
+      "attackingDirection": "RIGHT",
+      "formation": "4-4-2",
+      "lineHeightM": 68.0,
+      "compactness": 0.85
+    },
+    {
+      "id": "bastion",
+      "name": "Bastion City",
+      "attackingDirection": "LEFT",
+      "formation": "4-4-2",
+      "lineHeightM": 22.0,
+      "compactness": 0.70
+    }
+  ],
+  "beats": [
+    {
+      "id": "evt-01",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-4",
+      "from": { "x": 58.0, "y": 28.0 },
+      "target": { "x": 62.0, "y": 24.0 },
+      "holdTimeMs": 1200,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-02",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-4",
+      "recipientId": "vale-5",
+      "target": { "x": 68.0, "y": 12.0 },
+      "holdTimeMs": 400,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-03",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-5",
+      "target": { "x": 73.0, "y": 11.0 },
+      "holdTimeMs": 600,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-04",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-5",
+      "recipientId": "vale-8",
+      "target": { "x": 72.0, "y": 26.0 },
+      "holdTimeMs": 450,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-05",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-8",
+      "target": { "x": 75.0, "y": 30.0 },
+      "holdTimeMs": 500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-06",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-8",
+      "recipientId": "vale-7",
+      "target": { "x": 76.0, "y": 42.0 },
+      "holdTimeMs": 500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-07",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-7",
+      "target": { "x": 79.0, "y": 45.0 },
+      "holdTimeMs": 600,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-08",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-7",
+      "recipientId": "vale-2",
+      "target": { "x": 80.0, "y": 57.0 },
+      "holdTimeMs": 400,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-09",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-2",
+      "target": { "x": 84.0, "y": 57.0 },
+      "holdTimeMs": 600,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-10",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-2",
+      "recipientId": "vale-6",
+      "target": { "x": 90.0, "y": 58.0 },
+      "holdTimeMs": 450,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-11",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-6",
+      "target": { "x": 95.0, "y": 55.0 },
+      "holdTimeMs": 700,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-12",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-6",
+      "recipientId": "vale-7",
+      "target": { "x": 84.0, "y": 42.0 },
+      "holdTimeMs": 500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-13",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-7",
+      "target": { "x": 86.0, "y": 38.0 },
+      "holdTimeMs": 550,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-14",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-7",
+      "recipientId": "vale-10",
+      "target": { "x": 92.0, "y": 38.0 },
+      "holdTimeMs": 400,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-15",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-10",
+      "target": { "x": 90.0, "y": 35.0 },
+      "holdTimeMs": 500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-16",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-10",
+      "recipientId": "vale-8",
+      "target": { "x": 84.0, "y": 28.0 },
+      "holdTimeMs": 400,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-17",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-8",
+      "target": { "x": 85.0, "y": 22.0 },
+      "holdTimeMs": 600,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-18",
+      "kind": "PASS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-8",
+      "recipientId": "vale-9",
+      "target": { "x": 88.0, "y": 12.0 },
+      "holdTimeMs": 450,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-19",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-9",
+      "target": { "x": 94.0, "y": 11.0 },
+      "holdTimeMs": 700,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-20",
+      "kind": "CROSS",
+      "phaseId": "phase-siege-build",
+      "actorId": "vale-9",
+      "target": { "x": 96.0, "y": 32.0 },
+      "holdTimeMs": 650,
+      "outcome": "BLOCKED"
+    },
+    {
+      "id": "evt-21",
+      "kind": "CLEARANCE",
+      "phaseId": "phase-siege-build",
+      "actorId": "bastion-3",
+      "target": { "x": 105.0, "y": 0.0 },
+      "holdTimeMs": 900,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-22",
+      "kind": "CORNER",
+      "phaseId": "phase-siege-corner",
+      "actorId": "vale-9",
+      "recipientId": "vale-10",
+      "from": { "x": 105.0, "y": 0.0 },
+      "target": { "x": 93.0, "y": 34.0 },
+      "holdTimeMs": 3800,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-23",
+      "kind": "SHOT",
+      "phaseId": "phase-siege-corner",
+      "actorId": "vale-10",
+      "target": { "x": 96.0, "y": 35.0 },
+      "holdTimeMs": 500,
+      "outcome": "BLOCKED"
+    },
+    {
+      "id": "evt-24",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-rebound",
+      "actorId": "vale-10",
+      "target": { "x": 94.0, "y": 33.0 },
+      "holdTimeMs": 900,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-25",
+      "kind": "PASS",
+      "phaseId": "phase-siege-rebound",
+      "actorId": "vale-10",
+      "recipientId": "vale-11",
+      "target": { "x": 92.0, "y": 30.0 },
+      "holdTimeMs": 750,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-26",
+      "kind": "CARRY",
+      "phaseId": "phase-siege-rebound",
+      "actorId": "vale-11",
+      "target": { "x": 94.0, "y": 29.0 },
+      "holdTimeMs": 400,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "evt-27",
+      "kind": "SHOT",
+      "phaseId": "phase-siege-rebound",
+      "actorId": "vale-11",
+      "target": { "x": 105.0, "y": 33.0 },
+      "holdTimeMs": 400,
+      "outcome": "INCOMPLETE"
+    }
+  ]
+}

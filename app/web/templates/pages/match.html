@@ -31,6 +31,7 @@
         <option value="corner" {{if eq .Scenario "corner"}}selected{{end}}>Corner chance</option>
         <option value="central" {{if eq .Scenario "central"}}selected{{end}}>Central entry</option>
         <option value="exchange" {{if eq .Scenario "exchange"}}selected{{end}}>Passing exchange</option>
+        <option value="late-siege" {{if eq .Scenario "late-siege"}}selected{{end}}>Late siege (11v11)</option>
       </select>
       
       <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo">
@@ -74,11 +75,10 @@
 
       <!-- Center Scoreboard -->
       <div class="scoreboard">
-        <div class="score">0 <span>:</span> 0</div>
         <div class="clock-badge">
           <span class="live-pulse-dot" aria-hidden="true"></span>
           <time id="match-clock" class="match-clock">27:00</time>
-          <span class="clock-period">1st Half</span>
+          <span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span>
         </div>
       </div>
 
@@ -102,14 +102,21 @@
       <!-- Computed Share Bar (strict computed numbers: completed passes, NEVER possession) -->
       <div class="computed-share-bar" role="region" aria-label="Completed passes share">
         <div class="share-labels">
-          <span class="share-home-val">2 completed passes</span>
+          <span class="share-home-val">
+            <span class="share-desktop">2 completed passes</span>
+            <span class="share-mobile">2 passes</span>
+          </span>
           <span class="share-title">Completed passes (replay window)</span>
-          <span class="share-away-val">0 completed passes</span>
+          <span class="share-away-val">
+            <span class="share-desktop">0 completed passes</span>
+            <span class="share-mobile">0 passes</span>
+          </span>
         </div>
         <div class="share-track">
           <div class="share-fill-home" style="width: 100%;"></div>
           <div class="share-fill-away" style="width: 0%;"></div>
         </div>
+        <span class="share-caption">Completed passes (replay window)</span>
       </div>
     </section>
 
@@ -131,21 +138,21 @@
 
         <div class="rail-card">
           <span class="rail-label">Pass Completion</span>
-          <strong class="rail-value">2 / 2 <span class="rail-unit">100%</span></strong>
+          <strong class="rail-value">2 of 2</strong>
           <div class="rail-mini-bar"><div style="width: 100%; background: var(--team-aurora);"></div></div>
         </div>
 
         <div class="rail-card">
           <span class="rail-label">Box Entries &rarr; Shots</span>
           <strong class="rail-value">1 <span class="rail-unit">entry</span> &bull; 1 <span class="rail-unit">shot</span></strong>
-          <span class="rail-sub">100% entry-to-shot conversion</span>
+          <span class="rail-sub">1 of 1 converted</span>
         </div>
       </aside>
 
       <!-- CENTER HERO: Pitch Arena -->
       <section class="pitch-column" aria-labelledby="pitch-heading">
         <div class="section-heading">
-          <h1 id="pitch-heading">Match centre <span class="half-label">First half</span></h1>
+          <h1 id="pitch-heading">Match centre <span class="half-label">{{if eq .Match.Period 2}}Second half{{else}}First half{{end}}</span></h1>
           <div class="view-controls" role="group" aria-label="Pitch view">
             <button type="button" data-view="three" aria-pressed="false" title="Three.js stadium view">3D</button>
             <button type="button" data-view="pixi" aria-pressed="false" title="PixiJS tactical view">2D</button>
@@ -216,8 +223,8 @@
           </div>
           
           <div class="scene-tools">
-            <button type="button" id="camera-reset" class="icon-button" aria-label="Reset camera" title="Reset camera" hidden><i data-lucide="scan"></i></button>
-            <button type="button" id="fullscreen-button" class="icon-button" aria-label="Fullscreen pitch" title="Fullscreen pitch"><i data-lucide="maximize"></i></button>
+            <button type="button" id="camera-reset" class="icon-button" aria-label="Reset 3D camera angle" title="Reset 3D camera angle" hidden><i data-lucide="camera"></i></button>
+            <button type="button" id="fullscreen-button" class="icon-button" aria-label="Toggle pitch fullscreen" title="Toggle pitch fullscreen"><i data-lucide="maximize"></i></button>
           </div>
 
           <!-- Empty slot for future pitch-control heatmap (Render nothing per Stage 3 rule) -->
@@ -278,8 +285,9 @@
           </div>
         </section>
 
-        <!-- Drawer Navigation Tabs -->
-        <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">
+        <div class="drawer-main">
+          <!-- Drawer Navigation Tabs -->
+          <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">
           <button type="button" role="tab" id="tab-timeline" class="drawer-tab active" data-tab="timeline" aria-selected="true" aria-controls="pane-timeline">Timeline</button>
           <button type="button" role="tab" id="tab-passing" class="drawer-tab" data-tab="passing" aria-selected="false" aria-controls="pane-passing">Passing</button>
           <button type="button" role="tab" id="tab-routes" class="drawer-tab" data-tab="routes" aria-selected="false" aria-controls="pane-routes">Routes</button>
@@ -423,6 +431,7 @@
             </div>
           </div>
         </div>
+      </div>
       </aside>
     </div>
   </main>

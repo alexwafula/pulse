@@ -63,7 +63,7 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if designPage == nil {
+		if os.Getenv("PULSE_DEV") != "1" || designPage == nil {
 			http.NotFound(w, r)
 			return
 		}
