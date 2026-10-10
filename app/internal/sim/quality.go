@@ -26,18 +26,40 @@ type QualityMetrics struct {
 	ClearanceCount   int
 	CornerCount      int
 	BallSpeedPerKind map[string]float64
+	// ShotRuleWaived is true when the script set expect.minShots to 0.
+	ShotRuleWaived bool
 }
 
-// ValidateQuality performs comprehensive data-quality checks on a replay.
+// QualityOptions are the per-script knobs of the data-quality check.
+type QualityOptions struct {
+	MinShots int
+}
+
+// DefaultQualityOptions is the rule set for scripts without expectations.
+func DefaultQualityOptions() QualityOptions {
+	return QualityOptions{MinShots: DefaultMinShots}
+}
+
+// ValidateQuality performs comprehensive data-quality checks on a replay
+// with the default rules.
 func ValidateQuality(replay *domain.Replay) (*QualityMetrics, error) {
+	return ValidateQualityWith(replay, DefaultQualityOptions())
+}
+
+// ValidateQualityWith performs the checks with per-script options.
+func ValidateQualityWith(replay *domain.Replay, opts QualityOptions) (*QualityMetrics, error) {
 	if replay == nil {
 		return nil, fmt.Errorf("replay is nil")
+	}
+	if opts.MinShots < 0 {
+		return nil, fmt.Errorf("expect.minShots must be >= 0, got %d", opts.MinShots)
 	}
 
 	metrics := &QualityMetrics{
 		TotalFrames:      len(replay.Tracking),
 		BallSpeedPerKind: make(map[string]float64),
 		MinPlayerDist:    math.MaxFloat64,
+		ShotRuleWaived:   opts.MinShots == 0,
 	}
 
 	// 1. Contract IDs
@@ -81,8 +103,8 @@ func ValidateQuality(replay *domain.Replay) (*QualityMetrics, error) {
 	if metrics.PassCount < 1 {
 		return nil, fmt.Errorf("insane pass count: %d (expected at least 1)", metrics.PassCount)
 	}
-	if metrics.ShotCount < 1 {
-		return nil, fmt.Errorf("insane shot count: %d (expected at least 1)", metrics.ShotCount)
+	if metrics.ShotCount < opts.MinShots {
+		return nil, fmt.Errorf("insane shot count: %d (expected at least %d)", metrics.ShotCount, opts.MinShots)
 	}
 
 	// 3. Tracking frame spacing exactly 200 ms and positions inside pitch

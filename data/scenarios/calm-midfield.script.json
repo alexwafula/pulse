@@ -8,6 +8,7 @@
   "endMs": 1860000,
   "pitch": { "lengthM": 105.0, "widthM": 68.0 },
   "squadPath": "data/squads/fictional-league.json",
+  "expect": { "minShots": 0 },
   "teams": [
     { "id": "vale", "name": "Aurora Vale", "attackingDirection": "RIGHT", "formation": "4-4-2", "lineHeightM": 50.0, "compactness": 0.8 },
     { "id": "bastion", "name": "Bastion City", "attackingDirection": "LEFT", "formation": "4-4-2", "lineHeightM": 45.0, "compactness": 0.8 }
