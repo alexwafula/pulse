@@ -348,8 +348,14 @@ func TestMetricsAPI_Grid(t *testing.T) {
 		}
 	}
 	checkBodyStyle(t, "late-siege metrics grid", rec.Body.Bytes())
-	if plain := get(t, demo, "/api/metrics?scenario=late-siege", nil); bytes.Contains(plain.Body.Bytes(), []byte(`"grid"`)) {
-		t.Error("grid present without grid=1")
+	plain := decode[apiMetrics](t, get(t, demo, "/api/metrics?scenario=late-siege", nil))
+	if plain.GridLayout != nil {
+		t.Error("gridLayout present without grid=1")
+	}
+	for k, tk := range *plain.Ticks {
+		if _, ok := tk["grid"]; ok {
+			t.Fatalf("tick %d has a grid without grid=1", k)
+		}
 	}
 }
 
