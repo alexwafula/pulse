@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "2.0.0",
+  "name": "calm-midfield",
+  "matchId": "match-vale-bastion-calm",
+  "seed": 7,
+  "period": 1,
+  "startMs": 1800000,
+  "endMs": 1860000,
+  "pitch": { "lengthM": 105.0, "widthM": 68.0 },
+  "squadPath": "data/squads/fictional-league.json",
+  "teams": [
+    { "id": "vale", "name": "Aurora Vale", "attackingDirection": "RIGHT", "formation": "4-4-2", "lineHeightM": 50.0, "compactness": 0.8 },
+    { "id": "bastion", "name": "Bastion City", "attackingDirection": "LEFT", "formation": "4-4-2", "lineHeightM": 45.0, "compactness": 0.8 }
+  ],
+  "beats": [
+    { "id": "evt-01", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-4", "recipientId": "vale-3", "from": { "x": 48.0, "y": 30.0 }, "target": { "x": 50.0, "y": 42.0 }, "holdTimeMs": 1500, "outcome": "COMPLETE" },
+    { "id": "evt-02", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-3", "target": { "x": 54.0, "y": 44.0 }, "holdTimeMs": 1200, "outcome": "COMPLETE" },
+    { "id": "evt-03", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-3", "recipientId": "vale-2", "target": { "x": 58.0, "y": 55.0 }, "holdTimeMs": 1800, "outcome": "COMPLETE" },
+    { "id": "evt-04", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-2", "target": { "x": 61.0, "y": 54.0 }, "holdTimeMs": 1400, "outcome": "COMPLETE" },
+    { "id": "evt-05", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-2", "recipientId": "vale-7", "target": { "x": 57.0, "y": 40.0 }, "holdTimeMs": 2000, "outcome": "COMPLETE" },
+    { "id": "evt-06", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-7", "recipientId": "vale-8", "target": { "x": 55.0, "y": 27.0 }, "holdTimeMs": 1600, "outcome": "COMPLETE" },
+    { "id": "evt-07", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-8", "target": { "x": 58.0, "y": 24.0 }, "holdTimeMs": 1200, "outcome": "COMPLETE" },
+    { "id": "evt-08", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-8", "recipientId": "vale-5", "target": { "x": 52.0, "y": 12.0 }, "holdTimeMs": 1800, "outcome": "COMPLETE" },
+    { "id": "evt-09", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-5", "target": { "x": 55.0, "y": 11.0 }, "holdTimeMs": 1500, "outcome": "COMPLETE" },
+    { "id": "evt-10", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-5", "recipientId": "vale-4", "target": { "x": 44.0, "y": 26.0 }, "holdTimeMs": 2200, "outcome": "COMPLETE" },
+    { "id": "evt-11", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-4", "recipientId": "vale-3", "target": { "x": 45.0, "y": 40.0 }, "holdTimeMs": 2500, "outcome": "COMPLETE" },
+    { "id": "evt-12", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-3", "target": { "x": 49.0, "y": 38.0 }, "holdTimeMs": 1500, "outcome": "COMPLETE" },
+    { "id": "evt-13", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-3", "recipientId": "vale-7", "target": { "x": 54.0, "y": 36.0 }, "holdTimeMs": 1800, "outcome": "COMPLETE" },
+    { "id": "evt-14", "kind": "PASS", "phaseId": "phase-calm-01", "actorId": "vale-7", "recipientId": "vale-4", "target": { "x": 42.0, "y": 30.0 }, "holdTimeMs": 2000, "outcome": "COMPLETE" },
+    { "id": "evt-15", "kind": "CARRY", "phaseId": "phase-calm-01", "actorId": "vale-4", "target": { "x": 46.0, "y": 32.0 }, "holdTimeMs": 2500, "outcome": "COMPLETE" }
+  ]
+}
