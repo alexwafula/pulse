@@ -247,7 +247,7 @@
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 14px;">
               <span>Pass Difficulty Rating</span>
-              <strong>0.74 PDR</strong>
+              <strong>0.74 PDR (SAMPLE)</strong>
             </div>
           </div>
         </div>
@@ -325,9 +325,9 @@
         <!-- Computed Share Bar -->
         <div style="margin-top: 16px; padding-top: 16px; border-top: var(--border-hairline);">
           <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">
-            <span style="color: var(--team-aurora); font-weight: 600;">2 completed passes (100%)</span>
+            <span style="color: var(--team-aurora); font-weight: 600;">2 completed passes</span>
             <span style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; color: var(--text-muted);">Completed Passes (Replay window)</span>
-            <span style="color: var(--team-bastion); font-weight: 600;">0 completed passes (0%)</span>
+            <span style="color: var(--team-bastion); font-weight: 600;">0 completed passes</span>
           </div>
           <div style="height: 6px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.08); overflow: hidden; display: flex;">
             <div style="width: 100%; background: var(--team-aurora); transition: width var(--motion-base);"></div>
@@ -344,7 +344,7 @@
       <div class="component-row">
         <!-- State 1: Awaiting -->
         <div class="demo-card">
-          <div class="demo-card-title">State 1: Awaiting Next Moment</div>
+          <div class="demo-card-title">State 1: Awaiting Next Moment (SAMPLE)</div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
             <h3 style="font-size: 15px; margin: 0; font-weight: 600;">Match Insight</h3>
             <span class="badge" style="background: var(--badge-template-bg); border: 1px solid var(--badge-template-border); color: var(--badge-template-text); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); font-weight: 600;">WAITING</span>
@@ -354,18 +354,18 @@
 
         <!-- State 2: Verified Insight (Lime glow & event chips) -->
         <div class="demo-card" style="border: 1px solid var(--border-interactive); box-shadow: var(--glow-lime-sm);">
-          <div class="demo-card-title">State 2: Verified Insight (Evidence Linked)</div>
+          <div class="demo-card-title">State 2: Verified Insight (Evidence Linked) (SAMPLE)</div>
           <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
             <h3 style="font-size: 15px; margin: 0; font-weight: 700; color: var(--text-primary);">Set-Piece Conversion</h3>
             <span style="background: var(--badge-verified-bg); border: 1px solid var(--badge-verified-border); color: var(--badge-verified-text); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); font-weight: 700; letter-spacing: 0.04em;">VERIFIED</span>
           </div>
-          <p style="color: var(--text-primary); font-size: 14px; line-height: 1.5; margin: 0 0 14px;">The corner produced 1 shot attempt following Nia's delivery.</p>
+          <p style="color: var(--text-primary); font-size: 14px; line-height: 1.5; margin: 0 0 14px;">The corner produced 1 shot attempt following Leni's delivery.</p>
           <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
             <span style="background: rgba(255,255,255,0.06); border: var(--border-hairline); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
-              <span style="color: var(--accent-lime);">&bull;</span> evt-05 Corner (27:52)
+              <span style="color: var(--accent-lime);">&bull;</span> evt-06 Corner (27:52)
             </span>
             <span style="background: rgba(255,255,255,0.06); border: var(--border-hairline); border-radius: var(--radius-sm); padding: 3px 8px; font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px;">
-              <span style="color: var(--team-aurora);">&bull;</span> evt-06 Shot (27:58)
+              <span style="color: var(--team-aurora);">&bull;</span> evt-07 Shot (27:58)
             </span>
           </div>
           <div style="display: flex; gap: 8px;">
@@ -435,7 +435,7 @@
     <!-- 7. CONTRAST & ACCESSIBILITY AUDIT -->
     <section id="contrast" class="design-section">
       <h2 class="section-title">07. Contrast & Accessibility Verification</h2>
-      <p class="section-desc">WCAG AA compliance audit for all text tokens rendered over dark glass surfaces.</p>
+      <p class="section-desc">Computed directly in code from design tokens over dark glass surfaces.</p>
       <div class="demo-card">
         <table class="contrast-table">
           <thead>
@@ -447,46 +447,121 @@
               <th>WCAG AA Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="contrast-rows">
             <tr>
               <td>Primary Body & Headers</td>
               <td><code>--text-primary (#f2f7f4)</code></td>
-              <td><code>--glass-surface (#0f1713)</code></td>
-              <td><strong>13.8 : 1</strong></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>16.8 : 1</strong></td>
               <td class="contrast-pass">&check; PASS (AAA)</td>
             </tr>
             <tr>
               <td>Secondary Labels</td>
               <td><code>--text-secondary (#9cb1a5)</code></td>
-              <td><code>--glass-surface (#0f1713)</code></td>
-              <td><strong>6.8 : 1</strong></td>
-              <td class="contrast-pass">&check; PASS (AA)</td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>8.0 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AAA)</td>
             </tr>
             <tr>
-              <td>Lime Highlights & Verified Text</td>
+              <td>Lime Highlights & Accent</td>
               <td><code>--accent-lime (#c8e46d)</code></td>
-              <td><code>--glass-surface (#0f1713)</code></td>
-              <td><strong>10.2 : 1</strong></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>12.8 : 1</strong></td>
               <td class="contrast-pass">&check; PASS (AAA)</td>
             </tr>
             <tr>
               <td>Aurora Vale Team Color</td>
               <td><code>--team-aurora (#ea705c)</code></td>
-              <td><code>--glass-surface (#0f1713)</code></td>
-              <td><strong>5.4 : 1</strong></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>6.05 : 1</strong></td>
               <td class="contrast-pass">&check; PASS (AA)</td>
             </tr>
             <tr>
               <td>Bastion City Team Color</td>
               <td><code>--team-bastion (#4aa8c3)</code></td>
-              <td><code>--glass-surface (#0f1713)</code></td>
-              <td><strong>7.1 : 1</strong></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>6.7 : 1</strong></td>
               <td class="contrast-pass">&check; PASS (AA)</td>
+            </tr>
+            <tr>
+              <td>KPI Captions & Scrubber Times (Normal Text)</td>
+              <td><code>--text-muted (#758a7e)</code></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>4.97 : 1</strong></td>
+              <td class="contrast-pass">&check; PASS (AA)</td>
+            </tr>
+            <tr>
+              <td>Subtle Tracks & Graphic Faint</td>
+              <td><code>--text-faint (#5a6e63)</code></td>
+              <td><code>--bg-surface-base (#0f1613)</code></td>
+              <td><strong>3.36 : 1</strong></td>
+              <td style="color: var(--text-muted);">Informational / Graphic</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
   </main>
+
+  <script>
+    (function() {
+      function sRGBtoLin(c) {
+        c = c / 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      }
+      function getRGB(str) {
+        if (str.startsWith('#')) {
+          const hex = str.slice(1);
+          return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+        }
+        const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        return m ? [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])] : [15, 22, 19];
+      }
+      function lum(rgb) {
+        return 0.2126 * sRGBtoLin(rgb[0]) + 0.7152 * sRGBtoLin(rgb[1]) + 0.0722 * sRGBtoLin(rgb[2]);
+      }
+      function contrastRatio(fgHex, bgHex) {
+        const l1 = lum(getRGB(fgHex));
+        const l2 = lum(getRGB(bgHex));
+        const top = Math.max(l1, l2);
+        const bot = Math.min(l1, l2);
+        return (top + 0.05) / (bot + 0.05);
+      }
+
+      const cs = getComputedStyle(document.documentElement);
+      const bg = cs.getPropertyValue('--bg-surface-base').trim() || '#0f1613';
+      
+      const tokens = [
+        { name: "Primary Body & Headers", varName: "--text-primary", desc: "Main copy & score numbers" },
+        { name: "Secondary Labels", varName: "--text-secondary", desc: "Subheadings & action details" },
+        { name: "Lime Highlights & Accent", varName: "--accent-lime", desc: "Interactive controls & live badge" },
+        { name: "Aurora Vale Team Color", varName: "--team-aurora", desc: "Home team crest & share bar" },
+        { name: "Bastion City Team Color", varName: "--team-bastion", desc: "Away team crest & share bar" },
+        { name: "KPI Captions & Scrubber Times (Normal Text)", varName: "--text-muted", desc: "Metric descriptions & sublabels" },
+        { name: "Subtle Tracks & Graphic Faint", varName: "--text-faint", desc: "Auxiliary track timestamps & borders" }
+      ];
+
+      const tbody = document.getElementById("contrast-rows");
+      if (tbody) {
+        tbody.innerHTML = "";
+        tokens.forEach(t => {
+          const val = cs.getPropertyValue(t.varName).trim();
+          const ratio = contrastRatio(val, bg);
+          const passAA = ratio >= 4.5;
+          const passAAA = ratio >= 7.0;
+          const status = passAAA ? "✓ PASS (AAA)" : passAA ? "✓ PASS (AA)" : (ratio >= 3.0 ? "✓ PASS (AA-Large)" : "Informational (Secondary)");
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${t.desc}</small></td>
+            <td><code>${t.varName} (${val})</code></td>
+            <td><code>--bg-surface-base (${bg})</code></td>
+            <td><strong>${ratio.toFixed(1)} : 1</strong></td>
+            <td class="${ratio >= 4.5 ? 'contrast-pass' : ''}" style="${ratio < 4.5 ? 'color: var(--text-secondary);' : ''}">${status}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

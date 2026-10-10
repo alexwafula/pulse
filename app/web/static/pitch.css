@@ -52,44 +52,46 @@ button {
   z-index: 0;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200, 228, 109, 0.08), transparent 70%),
-    radial-gradient(ellipse 65% 55% at 50% 115%, rgba(18, 55, 38, 0.25), transparent 75%),
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(200, 228, 109, 0.16), transparent 70%),
+    radial-gradient(ellipse 75% 65% at 50% 110%, rgba(24, 75, 52, 0.40), transparent 75%),
     var(--bg-canvas);
 }
 
 .stadium-backdrop .floodlight-beam {
   position: absolute;
-  top: -150px;
-  width: 400px;
-  height: 600px;
-  opacity: 0.12;
-  filter: blur(60px);
+  top: -100px;
+  width: 480px;
+  height: 750px;
+  opacity: 0.32;
+  filter: blur(45px);
   pointer-events: none;
 }
 
 .stadium-backdrop .floodlight-beam.left {
-  left: 5%;
-  background: conic-gradient(from 140deg at 50% 0%, var(--accent-lime), transparent 60deg);
-  transform: rotate(-15deg);
+  left: 3%;
+  background: conic-gradient(from 135deg at 50% 0%, rgba(200, 228, 109, 0.45), transparent 70deg);
+  transform: rotate(-18deg);
 }
 
 .stadium-backdrop .floodlight-beam.right {
-  right: 5%;
-  background: conic-gradient(from 160deg at 50% 0%, var(--accent-lime), transparent 60deg);
-  transform: rotate(15deg);
+  right: 3%;
+  background: conic-gradient(from 155deg at 50% 0%, rgba(200, 228, 109, 0.45), transparent 70deg);
+  transform: rotate(18deg);
 }
 
 .stadium-backdrop .stands-silhouette {
   position: absolute;
-  top: 60px;
+  top: 50px;
   left: 0;
   right: 0;
-  height: 120px;
+  height: 180px;
   background-image: 
-    repeating-linear-gradient(65deg, rgba(255, 255, 255, 0.012) 0, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 32px),
-    repeating-linear-gradient(-65deg, rgba(255, 255, 255, 0.012) 0, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 32px);
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    repeating-linear-gradient(65deg, rgba(200, 228, 109, 0.04) 0, rgba(200, 228, 109, 0.04) 1px, transparent 1px, transparent 28px),
+    repeating-linear-gradient(-65deg, rgba(200, 228, 109, 0.04) 0, rgba(200, 228, 109, 0.04) 1px, transparent 1px, transparent 28px),
+    linear-gradient(to bottom, rgba(20, 35, 27, 0.6) 0%, rgba(9, 14, 12, 0.95) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+  border-bottom: 1px solid rgba(200, 228, 109, 0.08);
 }
 
 /* ==========================================================================
@@ -457,6 +459,14 @@ button {
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
   display: flex;
+}
+
+.share-mobile {
+  display: none;
+}
+
+.share-caption {
+  display: none;
 }
 
 .share-fill-home {
@@ -1110,17 +1120,16 @@ button {
 
 .event-list li {
   border-radius: var(--radius-xs);
-  overflow: hidden;
 }
 
 .event-list button {
   width: 100%;
-  min-height: 52px;
+  min-height: 56px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: flex-start;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 0;
   border-left: 3px solid transparent;
   background: rgba(255, 255, 255, 0.02);
@@ -1149,25 +1158,32 @@ button {
   font-family: var(--font-tabular);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  padding-top: 1px;
 }
 
 .event-copy {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .event-copy strong {
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .event-copy span {
   color: var(--text-secondary);
   font-size: 11px;
-  white-space: nowrap;
+  line-height: 1.35;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1536,19 +1552,63 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
   .rail-value {
     font-size: 16px;
   }
+  .event-list button {
+    min-height: 58px;
+    padding: 10px 10px;
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 860px) {
-  .left-rail {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .workspace {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .left-rail {
+    order: 1;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    width: 100%;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .left-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail-card {
+    flex: 1 0 130px;
+    min-width: 120px;
+  }
+  .hero-center {
+    order: 2;
+    width: 100%;
   }
   .pitch-shell {
     height: auto;
     aspect-ratio: 16 / 10;
     min-height: 360px;
+  }
+  .right-drawer {
+    display: contents;
+  }
+  .insight-panel {
+    order: 3;
+    width: 100%;
+    margin-bottom: var(--space-3);
+  }
+  .drawer-main {
+    order: 4;
+    width: 100%;
+    background: var(--glass-panel);
+    backdrop-filter: var(--glass-blur);
+    border: var(--border-hairline);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-card);
   }
 }
 
@@ -1619,19 +1679,48 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
   .clock-period {
     display: none;
   }
+  .share-desktop {
+    display: none;
+  }
+  .share-mobile {
+    display: inline;
+  }
+  .share-title {
+    display: none;
+  }
+  .share-caption {
+    display: block;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
   .workspace {
     padding: 8px 12px 24px;
-    gap: 12px;
+    gap: 10px;
   }
   .left-rail {
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
     gap: 6px;
+    width: 100%;
+    padding-bottom: 2px;
   }
   .rail-card {
-    padding: 8px 10px;
+    flex: 1 0 100px;
+    min-width: 95px;
+    padding: 6px 8px;
+  }
+  .rail-label {
+    font-size: 9px;
   }
   .rail-value {
-    font-size: 14px;
+    font-size: 12px;
+  }
+  .rail-sub {
+    font-size: 9px;
   }
   .pitch-shell {
     aspect-ratio: 4 / 3;

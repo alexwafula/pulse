@@ -1,6 +1,6 @@
 export {};
 
-import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } from "lucide";
+import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download } from "lucide";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
 
 type ThreeModule = typeof import("./renderers/three");
@@ -12,6 +12,7 @@ type Team = { id: string; name: string; attackingDirection: "LEFT" | "RIGHT" };
 type Player = { id: string; teamId: string; name: string; number: number };
 type Match = {
   id: string;
+  period?: number;
   startMs: number;
   endMs: number;
   pitch: { lengthM: number; widthM: number };
@@ -544,6 +545,14 @@ async function start(): Promise<void> {
     startLabel.textContent = matchTime(replay.match.startMs);
     endLabel.textContent = matchTime(replay.match.endMs);
     pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
+    const clockPeriod = document.querySelector<HTMLElement>(".clock-period");
+    if (clockPeriod) {
+      clockPeriod.textContent = replay.match.period === 2 ? "2nd Half" : "1st Half";
+    }
+    const halfLabel = document.querySelector<HTMLElement>(".half-label");
+    if (halfLabel) {
+      halfLabel.textContent = replay.match.period === 2 ? "Second half" : "First half";
+    }
     createPlayers();
     createTimeline();
     drawerTabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".drawer-tab"));
@@ -572,7 +581,7 @@ async function start(): Promise<void> {
         required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
       });
     }
-    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, ListVideo, Undo2, Download } });
+    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download } });
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]"))) {
       const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
       if (event) {

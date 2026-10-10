@@ -140,7 +140,7 @@ try {
         await page.mouse.up();
         await page.waitForTimeout(250);
         assert.notEqual(await canvas.evaluate((element) => element.toDataURL()), prior, "camera drag must change the view");
-        await page.getByRole("button", { name: "Reset camera" }).click();
+        await page.getByRole("button", { name: /Reset.*camera/i }).click();
         await page.waitForTimeout(200);
       }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
