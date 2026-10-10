@@ -26,6 +26,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error loading script file: %v\n", err)
 		os.Exit(1)
 	}
+	for _, w := range script.ReservedFieldWarnings() {
+		fmt.Fprintf(os.Stderr, "WARNING: %s\n", w)
+	}
 
 	seed := *seedFlag
 	if flag.Lookup("seed").Value.String() == flag.Lookup("seed").DefValue && script.Seed != 0 {
