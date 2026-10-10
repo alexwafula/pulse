@@ -117,11 +117,13 @@ All tests read `metrics.DefaultParams()`. Toy replays are built in code.
 | T6b | **Ten defenders at 15 m**, standing / closing at 6 m/s | intensity ∈ [0.11, 0.14] / [0.27, 0.32] (0.122 / 0.296). This documents accumulation |
 | T7 | No player within 1.5 m of the ball, or ball z > 1.0 m | `pressing` is `null`; index `press` is held up to 2 s with `pressHeldFromMs`, then `null` |
 | T8 | **Mirror:** late-siege and calm-midfield, roles and `attackingDirection` swapped, x → 105 − x | every per-team value of team X equals the original for team X bit for bit; entropy identical; same moments, reasons and ticks |
+| T8b | **Mirror, off-grid toy** (added in the PR #16 fix pass): velocities with many significant bits, p and 105 − p in different binades | cells, shares, finalThird, entropy and pressing bit-exact. Needed because the fixtures' v·τ is exactly representable, so T8 cannot detect the forbidden `c − (p + v·τ)` order (teeth check, PR #16) |
 | T9a | **Late-siege, within-team contrast** | mean finalThird_vale over the siege window [5290000, 5325000] − mean finalThird_vale over the pre-siege window [5280000, 5289500] **≥ 0.10** |
 | T9b | **Late-siege moments** | `SUSTAINED_PRESSURE` fires for vale with `timeMs` inside [5290000, 5325000], and never for bastion anywhere in the replay |
 | T10 | Unsupported: `corner`, `central`, `exchange` | `trackingMetrics: "unsupported"` with a `reason`; no tracking values; `SET_PIECE_SHOT` returned for `corner` |
 | T11 | Calm-midfield | no `SUSTAINED_PRESSURE` and no `CONTROL_SWING` for either team (and no moment at all, per the expected outcome above) |
 | T12 | Hysteresis: synthetic series crossing the thresholds twice inside the cooldown | exactly one `SUSTAINED_PRESSURE` / one `CONTROL_SWING` |
+| T12c | `SUSTAINED_PRESSURE` conditions (PR #16 fix pass): high share with no completed final-third actions; many actions with share just below `OnShare` | neither fires; control case at share = `OnShare` fires |
 | T13 | Golden: late-siege per-tick output at 4 dp vs `app/testdata/metrics/late-siege.golden.json` | byte-identical; CI fails on drift |
 | T14 | Determinism: compute twice, and once with players shuffled in every frame | identical bytes |
 | T15 | API: `/api/metrics` and `/api/moments` for every scenario including calm-midfield; unknown scenario | `model`, `label` and `trackingMetrics` in every response; routing as in `TestDemoHandler_ScenarioRouting`; unknown gives 404 |
@@ -203,7 +205,7 @@ Rule: **a fact cites only events that are actually its inputs.**
   (`insane shot count: 0 (expected at least 1)`). The calm spec forbids shots. The checker
   was not weakened. With only that rule skipped locally (not committed), every physical check
   passed: 301 frames at 200 ms, max player speed 6.80 m/s, max ball 15.14 m/s, min player
-  distance 0.61 m. This needs a decision (see the PR).
+  distance 0.61 m. Resolved by `expect.minShots` (bullet above).
 - **T8 passed bit-exact on the first run**; no tolerance was added and no evaluation-order fix
   was needed.
 - **Golden file** generated on amd64 only; arm64 is unchecked.

@@ -326,6 +326,14 @@ This holds because:
 - final-third sums run from the goal line outward (§2.1);
 - defenders are ordered by ID, not by side.
 
+**Which test guards which item (teeth check, PR #16).**
+- On the current fixtures, positions sit on a 0.5 dm grid and velocities on a 1.25 dm/s grid,
+  so `v·τ` is exactly representable and `p + v·τ` never rounds. The forbidden order therefore
+  gives the same bits there, and **T8 passes with it**. The off-grid toy T8b fails with it
+  (`cell (5,13): 0.88977730974946201 vs mirrored 0.88977730974946179`), so T8b is the guard.
+- Flipping one direction's final-third column order fails T8 on both fixtures.
+- Removing the press hold fails `TestT7_PressHoldInclusive`.
+
 ## 9. Measured outputs
 
 Measured on G2 Stage 1 code, default parameters, amd64 (Intel i7-1185G7), Go test binary.

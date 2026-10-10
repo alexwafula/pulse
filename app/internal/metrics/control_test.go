@@ -104,6 +104,66 @@ func TestT1_MirrorSymmetricToyEqualShares(t *testing.T) {
 	}
 }
 
+// T8b: the x-mirror is exact for off-grid velocities too. On the fixtures,
+// positions are on a 0.5 dm grid and velocities on a 1.25 dm/s grid, so v·τ is
+// exactly representable and p + v·τ never rounds; T8 alone cannot detect the
+// forbidden c − (p + v·τ) order. Here velocities have many significant bits and
+// p and 1050 − p fall in different binades, so that order breaks the mirror.
+func TestT8b_MirrorExactOffGridVelocities(t *testing.T) {
+	p := metrics.DefaultParams()
+	base := []struct{ x, y, vx, vy float64 }{
+		{30.5, 20, 1.37, -0.91}, {41.5, 34, -2.713, 0.333}, {12, 50.5, 3.141, 1.618}, {70.5, 10, -1.234567, 2.71828},
+		{88, 34, 0.577, -0.1}, {52.5, 60, 4.4444, 0.7071}, {25, 5, -0.3, 3.3}, {95.5, 47, 2.2, -2.9},
+	}
+	var players, mirrored []metrics.PlayerState
+	for i, b := range base {
+		team := "a"
+		if i%2 == 1 {
+			team = "b"
+		}
+		pl := metrics.PlayerState{ID: fmt.Sprintf("p%d", i), TeamID: team, X: dm(b.x), Y: dm(b.y), VX: dm(b.vx), VY: dm(b.vy)}
+		players = append(players, pl)
+		m := pl
+		m.X, m.VX = 1050-pl.X, -pl.VX
+		mirrored = append(mirrored, m)
+	}
+	ball := metrics.BallState{X: dm(41.5), Y: dm(34.5)}
+	mball := ball
+	mball.X = 1050 - ball.X
+	sides := toySides()
+	msides := [2]metrics.TeamSide{{ID: "a", AttacksRight: false}, {ID: "b", AttacksRight: true}}
+	s := metrics.ControlSurface(metrics.Snapshot{Players: players, Ball: ball}, sides, p)
+	ms := metrics.ControlSurface(metrics.Snapshot{Players: mirrored, Ball: mball}, msides, p)
+	for team := 0; team < 2; team++ {
+		for i := 0; i < p.Grid.Cols; i++ {
+			for j := 0; j < p.Grid.Rows; j++ {
+				a := s.Control[team][i*p.Grid.Rows+j]
+				b := ms.Control[team][(p.Grid.Cols-1-i)*p.Grid.Rows+j]
+				if a != b {
+					t.Fatalf("team %d cell (%d,%d): %.17g vs mirrored %.17g", team, i, j, a, b)
+				}
+			}
+		}
+		if s.Share(team) != ms.Share(team) || s.FinalThird(team) != ms.FinalThird(team) {
+			t.Fatalf("team %d share/finalThird %.17g/%.17g vs %.17g/%.17g",
+				team, s.Share(team), s.FinalThird(team), ms.Share(team), ms.FinalThird(team))
+		}
+	}
+	if s.Entropy() != ms.Entropy() {
+		t.Fatalf("entropy %.17g vs %.17g", s.Entropy(), ms.Entropy())
+	}
+	c, ok := metrics.FindCarrier(metrics.Snapshot{Players: players, Ball: ball}, p)
+	mc, mok := metrics.FindCarrier(metrics.Snapshot{Players: mirrored, Ball: mball}, p)
+	if !ok || !mok || c.ID != mc.ID {
+		t.Fatalf("carrier %v/%v %q/%q", ok, mok, c.ID, mc.ID)
+	}
+	pa := metrics.PressingIntensity(c, metrics.Snapshot{Players: players, Ball: ball}, p)
+	pb := metrics.PressingIntensity(mc, metrics.Snapshot{Players: mirrored, Ball: mball}, p)
+	if pa != pb {
+		t.Fatalf("pressing %.17g vs mirrored %.17g", pa, pb)
+	}
+}
+
 // T2: coincident players give exactly 0.5 everywhere and entropy 1.
 func TestT2_CoincidentToyMaxEntropy(t *testing.T) {
 	p := metrics.DefaultParams()
