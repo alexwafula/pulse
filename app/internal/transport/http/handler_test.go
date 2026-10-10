@@ -11,6 +11,7 @@ import (
 
 	"github.com/alexwafula/pulse/app/internal/ai"
 	"github.com/alexwafula/pulse/app/internal/domain"
+	"github.com/alexwafula/pulse/app/internal/facts"
 	"github.com/alexwafula/pulse/app/internal/simulator"
 )
 
@@ -156,5 +157,106 @@ func TestNewDemoHandler_LateSiege(t *testing.T) {
 	}
 	if len(siegeReplay.Events) != 27 || len(siegeReplay.Tracking) != 401 {
 		t.Fatalf("expected 27 events and 401 frames, got %d events and %d frames", len(siegeReplay.Events), len(siegeReplay.Tracking))
+	}
+}
+
+// TestDemoHandler_ScenarioRouting proves the scenario query selects the
+// matching replay's fact pack and that unknown scenarios never fall back.
+// /api/metrics and /api/moments do not exist on this branch; G2 must add the
+// same routing assertions when it introduces them.
+func TestDemoHandler_ScenarioRouting(t *testing.T) {
+	base, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "samples", "first-sequence.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	siege, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "scenarios", "late-siege.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	demo, err := NewDemoHandler(base, filepath.Join("..", "..", "..", "web"), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type cueJSON struct {
+		MatchID      string   `json:"matchId"`
+		EventIDs     []string `json:"eventIds"`
+		FactIDs      []string `json:"factIds"`
+		Verification struct {
+			DraftID string `json:"draftId"`
+			Status  string `json:"status"`
+		} `json:"verification"`
+	}
+	fetch := func(t *testing.T, scenario string) []cueJSON {
+		t.Helper()
+		rec := httptest.NewRecorder()
+		demo.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/api/insights?scenario="+scenario, nil))
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s: status %d: %s", scenario, rec.Code, rec.Body.String())
+		}
+		var feed struct {
+			Cues []cueJSON `json:"cues"`
+		}
+		if err := json.Unmarshal(rec.Body.Bytes(), &feed); err != nil {
+			t.Fatal(err)
+		}
+		if len(feed.Cues) == 0 {
+			t.Fatalf("%s: no cues", scenario)
+		}
+		return feed.Cues
+	}
+
+	for _, tc := range []struct {
+		scenario string
+		replay   domain.Replay
+	}{{"corner", base}, {"late-siege", siege}} {
+		t.Run(tc.scenario, func(t *testing.T) {
+			packs, err := facts.CornerPacks(tc.replay)
+			if err != nil {
+				t.Fatal(err)
+			}
+			packEvents := map[string]bool{}
+			draftIDs := map[string]bool{}
+			for _, p := range packs {
+				draftIDs["draft-"+p.ID] = true
+				for _, f := range p.Facts {
+					for _, id := range f.EventIDs {
+						packEvents[id] = true
+					}
+				}
+			}
+			for _, cue := range fetch(t, tc.scenario) {
+				if cue.MatchID != tc.replay.Match.ID {
+					t.Errorf("matchId %q, want %q", cue.MatchID, tc.replay.Match.ID)
+				}
+				if !draftIDs[cue.Verification.DraftID] {
+					t.Errorf("draftId %q not from %s fact pack (%v)", cue.Verification.DraftID, tc.scenario, draftIDs)
+				}
+				if cue.Verification.Status != "FALLBACK_TEMPLATE" {
+					t.Errorf("template cue status %q, want FALLBACK_TEMPLATE", cue.Verification.Status)
+				}
+				for _, id := range cue.EventIDs {
+					if !packEvents[id] {
+						t.Errorf("evidence %q not in %s fact pack", id, tc.scenario)
+					}
+				}
+			}
+		})
+	}
+
+	cornerCues, siegeCues := fetch(t, "corner"), fetch(t, "late-siege")
+	if cornerCues[0].Verification.DraftID == siegeCues[0].Verification.DraftID {
+		t.Fatalf("late-siege returned the corner draft %q", siegeCues[0].Verification.DraftID)
+	}
+
+	for _, path := range []string{"/api/insights?scenario=nope", "/api/replay?scenario=nope", "/?scenario=nope"} {
+		rec := httptest.NewRecorder()
+		demo.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if rec.Code != http.StatusNotFound {
+			t.Errorf("%s: status %d, want 404", path, rec.Code)
+		}
+		if !strings.Contains(rec.Body.String(), `unknown scenario "nope"`) {
+			t.Errorf("%s: body %q lacks clear error", path, rec.Body.String())
+		}
 	}
 }
