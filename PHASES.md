@@ -10,11 +10,13 @@ Delivery plan for Pulse, for a **team of two**. Read `AGENTS.md` first for rules
 4. **Evals before prompts.** The agents engineer builds the evaluation set first, then tunes prompts against it.
 5. **Cut lines are pre-agreed.** When behind at a checkpoint, cut in the order given below. Do not negotiate under pressure.
 
-| Role | Owns |
-|---|---|
-| **Pipeline (P)** | `app/`, `data/`, `infra/azure/`, web shell, overlay island, metrics, moments, MCP tools, cue gate, delivery |
-| **Agents (A)** | `agents/`, prompts, locales, `tests/evaluations/`, Speech, Foundry wiring and tracing |
-| **Shared (S)** | `contracts/`, `tests/integration/`, `docs/`, CI |
+Owner codes used throughout this document: **P** (Pipeline engineer), **A** (Agents engineer), **S** (Shared / both engineers).
+
+| Code | Role | Owns |
+|---|---|---|
+| **P** | Pipeline | `app/`, `data/`, `infra/azure/`, web shell, overlay island, metrics, moments, MCP tools, cue gate, delivery |
+| **A** | Agents | `agents/`, prompts, locales, `tests/evaluations/`, Speech, Foundry wiring and tracing |
+| **S** | Shared | `contracts/`, `tests/integration/`, `docs/`, CI |
 
 ## Key dates (EAT)
 
@@ -98,11 +100,11 @@ Goal: one command shows a verified cue on screen, with either side stubbed.
 Goal: the system is smart, not just connected.
 
 **P**
-- [x] **Scenario generator & kinematics (ADR 0009)**: Deterministic 11v11 generator (`app/internal/sim/`, `app/cmd/gen/`), shared squads (`data/squads/squads.json`), universal `to`-semantics rule across all 6 event kinds, and `late-siege` fixture (401 frames at 200 ms, 22 players, 5 Hz) (merged in PR #8, commit `a5c48e9`). Scenario-parameter routing fix (`83fb33d`) returns 404 for unknown scenarios and tests fact-pack isolation.
-- [x] **Data-quality checks (`checkdata`)**: Pitch bounds, 200 ms spacing, speed/acceleration caps, actor proximity, receiver arrival, min separation, and contract validity (merged in PR #8, commit `684ad95`). Per-script `expect.minShots` (waived for `calm-midfield`) and wired into `scripts/check.sh` step 4/10 over every scenario in `data/scenarios/` (merged in PR #16, commits `37d1260`, `c8ba306`), expanding `check.sh` to 10 steps.
+- [x] **Scenario generator & kinematics (ADR 0009)**: Deterministic 11v11 generator (`app/internal/sim/`, `app/cmd/gen/`), shared squads (`data/squads/fictional-league.json`), universal `to`-semantics rule across all 6 event kinds, and `late-siege` fixture (401 frames at 200 ms, 22 players, 5 Hz) (merged in PR #8, commit `a5c48e9`). Scenario-parameter routing fix (`83fb33d`) returns 404 for unknown scenarios and tests fact-pack isolation.
+- [x] **Data-quality checks (`checkdata`)**: Pitch bounds, 200 ms spacing, speed/acceleration caps, actor proximity, receiver arrival, min separation, and contract validity implemented in `app/internal/sim/quality.go` (CLI: `app/cmd/checkdata/`) (merged in PR #8, commit `684ad95`). Per-script `expect.minShots` (waived for `calm-midfield`) and wired into `scripts/check.sh` step 4/10 over every scenario in `data/scenarios/` (merged in PR #16, commits `37d1260`, `c8ba306`), expanding `check.sh` to 10 steps.
 - [x] **Metrics v1 core on coarse grid every 500 ms (ADR 0010, docs/metrics.md)**: Time-to-reach pitch control (`model: "time-to-reach-control-v1"`, `label: "model estimate, uncalibrated"`), normalised tactical entropy, and pressing intensity implemented in pure package `app/internal/metrics` (merged in PR #16, commit `4e5c54e`; spec in PR #15, commit `a452c08`). PDR deferred to v2.1 per ADR 0010 §11.
 - [x] **Control vs Chaos index**: Evaluated from control share, inverse entropy, and pressing intensity with a 2 s inclusive hold (`pressHeldFromMs`) over a 3-tick median (merged in PR #16, commit `4e5c54e`).
-- [x] **Three moment types & two 11v11 scenarios**: `SET_PIECE_SHOT`, `SUSTAINED_PRESSURE`, and `CONTROL_SWING` with hysteresis implemented in `app/internal/moments` (merged in PR #16, commit `df2b340`). Scripted scenarios: `late-siege` (PR #8) and `calm-midfield` (PR #16, commit `b4338cf`). Red-card and pressing-trap deferred to v2.1 per ADR 0009 §5 and ADR 0010 §11. `CONTROL_SWING.reasons` strictly `[]` (tick evidence) with nearby events moved to `contextEventIds` ("not evidence", PR #16 commit `f7163f3`).
+- [x] **Three moment types & two 11v11 scenarios**: `SET_PIECE_SHOT`, `SUSTAINED_PRESSURE`, and `CONTROL_SWING` with hysteresis implemented in `app/internal/moments` (merged in PR #16, commit `df2b340`). Scripted scenarios: `late-siege` (PR #8) and `calm-midfield` (PR #16, commit `b4338cf`). Pressing trap deferred to v2.1 per ADR 0009 §5.2 and ADR 0010 §11; red-card tactical swing deferred per ADR 0009 §5.3 (requires 10v11 structural deformation and card/whistle events not in v2.0; not scheduled for v2.1). `CONTROL_SWING.reasons` strictly `[]` (tick evidence) with nearby events moved to `contextEventIds` ("not evidence", PR #16 commit `f7163f3`).
 - [x] **Replay-based tests and golden file**: Tests T1-T14 against compiling stubs (commit `a141dd2`), T8b off-grid mirror toy (commit `a5d137c`), and amd64 golden file `app/testdata/metrics/late-siege.golden.json` (161225 bytes) (merged in PR #16, commit `2c7bcac`).
 - [ ] **HTTP Metrics & Moments API (G2 Stage 2)**: `GET /api/metrics?scenario=<id>[&grid=1]` and `GET /api/moments?scenario=<id>`, compute-once cache (`sync.Once`), gzip compression, ETag / 304, T15, calm-midfield routing, `trackingMetrics: "supported"|"unsupported"` + `reason`. Status: **in review (PR #18 on `feat/g2-metrics-api`, not merged)**.
 - [ ] MCP tool server exposing facts and calculations to agents.
@@ -139,7 +141,7 @@ Goal: the demo path is complete and deployed.
 **P**
 - [x] **UI sports-analytics reskin (Stage 0 & 1)**: Dark sports-analytics design tokens (`tokens.css`), typography (OFL Syne, Outfit, JetBrains Mono), glass panels, computed share bar (merged in PR #6, commit `7b7b0fc`).
 - [x] **UI Stage 1 review fixes**: Accessible contrast tokens raising `--text-muted` to `#758a7e` (4.97:1 contrast on `#0f1613`, passes WCAG AA 4.5:1), `/design` route gated behind `PULSE_DEV=1` with unit tests, responsive scrubber, card ordering, and horizontal KPI strip (merged in PR #8, commit `601bf45`).
-- [ ] **UI Control Field pass**: Overlay pitch control surface, contours, and moment markers (`feat/ui-control-field`, open item) [Owner: P].
+- [ ] **UI Control Field pass**: Overlay pitch control surface, contours, and moment markers (`feat/ui-control-field`; can run in parallel on a fixture; only the data-source switch waits for PR #18) [Owner: P].
 - [ ] htmx shell: persona picker, language switch, analyst panels, stat cards.
 - [ ] Overlay island: lower thirds, moment banner, player tags, captions region.
 - [ ] **Evidence Trail**: click an insight to replay the events behind it on a mini pitch.
@@ -234,7 +236,7 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 | History claims overreach or the data looks real | Narrator says "in football" or "this season"; judges ask if data is real | Verifier `HISTORY_SCOPE` check; say "synthetic library" in README, video and UI |
 | Demo does not match video | Features appear in video that are unstable | Cut the feature from the video, not the test |
 | Formation geometry dominates absolute shares | Issue #17: generator ignores `lineHeightM`/`compactness`; vale share > 0.70 even in calm-midfield | Never display shares as headline numbers; use only as within-team delta over time, labeled uncalibrated. Tracked in issue #17. |
-| Fragile swing threshold margins | Late-siege CONTROL_SWING signals (0.3026, 0.3148) are within 0.0026-0.0148 of 0.30 threshold | Do not assert exact swing count in regression tests; treat 2 swings as property of specific fixture and parameters. |
+| Fragile swing threshold margins | Late-siege CONTROL_SWING signals (0.3026, 0.3148) are within 0.0026-0.0148 of 0.30 threshold | Golden regression test T13 asserts the full moments list byte-for-byte (including both swings), so T13 fails if either swing flips. However, no standalone unit test bounds or isolates the count, and the thin margins mean minor input variations will break the golden file. |
 | Mid-range pressing intensity unverified on real fixtures | 25 of 68 late-siege non-null ticks fall in [0.2, 0.8) without ground-truth validation; calm-midfield max 0.0081 | Hand-checked toys (T5, T6, T6b) verify formulas; treat real-fixture continuous values as uncalibrated model estimates. |
 | Cross-architecture golden file parity | Go math library bit-equality on arm64 is unverified (golden file generated on amd64 only) | Run golden check on arm64 before relying on it cross-platform; mirror test T8b provides local invariant. |
 | Two-fixture tuning limit | Metrics thresholds tuned exclusively against synthetic `late-siege` and `calm-midfield` | Acknowledge separation of two authored stories only; do not claim calibration for general football. |
@@ -244,15 +246,25 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 | Item | Owner | Branch / Ref | Status |
 |---|---|---|---|
 | Stage 2 API (HTTP endpoints, cache, gzip, ETag, T15) | P | `feat/g2-metrics-api` | In review ([PR #18](https://github.com/alexwafula/pulse/pull/18)) |
-| UI Control Field pass (pitch control surface overlay) | P | `feat/ui-control-field` | Pending Stage 2 API merge |
-| Contract v2.1 & C1 "tick evidence kind" | S / A | `contracts/` | Awaiting agents engineer collaboration for FactPack schema alignment |
+| UI Control Field pass (pitch control surface overlay) | P | `feat/ui-control-field` | Can run in parallel on a fixture; only the data-source switch waits for PR #18 |
+| Contract v2.1 pending items | S / A | `contracts/` | Needs both engineers' approval; not implemented (see consolidated list below) |
 | Azure deployment & SSE soak test | P | `infra/azure/` | Blocked: Contributor subscription access unresolved (Bicep builds cleanly) |
 | Agents A2 work (Foundry models, structured output, prompt tuning) | A | `agents/` | Pending live model wiring and evaluation run against Foundry |
 | Play Fingerprint gate on Oct 13 | S | Stand-up checkpoint | Decision pending Oct 13 based on 3 gate criteria; do not pre-decide |
 | Hackathon registration and Representative | S | Portal | Must complete well before Oct 20 10:00 PM EAT deadline |
 | Swahili reviewer | A | `agents/src/pulse_agents/locales/` | Native speaker review of football glossary required before demo |
 
-## Issues opened so far
+### Contract v2.1 pending items (needs both engineers' approval; not implemented)
+- **C1 tick evidence kind**: `TICK` evidence kind with `tickTimesMs`, `model`, and `paramsHash` instead of `eventIds` for tick-derived metrics (ADR 0010 §10).
+- **`POSSESSION_CHANGE`**: Event schema and semantics for turnover tracking.
+- **`PRESSURE`**: Discrete pressure event definition and continuous kinematics non-circularity alignment (issue #10, ADR 0009 §4.3).
+- **Player `role`**: Lineup and player entity role field.
+- **Single `to` rule with optional `intendedTarget`**: Standardize `to` as terminal coordinate across all event kinds (ADR 0009 §4.1) with optional `intendedTarget` for incomplete passes/crosses.
+- **`frameIntervalMs: 200`**: Explicit tracking frame cadence assertion (issue #13).
+
+## Issues opened so far (as of 2026-10-11)
+
+GitHub issue tracker: [https://github.com/alexwafula/pulse/issues](https://github.com/alexwafula/pulse/issues)
 
 | Issue | Title | Status | Notes |
 |---|---|---|---|
@@ -279,4 +291,5 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 | Oct 8 | Local corner fact builder, Python template HTTP pipeline, conservative Go gate and browser evidence replay connected. SSE, Azure and real model calls remain pending. | Alex + Codex |
 | Oct 8 | Added three authored local scenario variants, attacking-route metrics, Casual/Analyst control, deterministic recap, opt-in mock-tested Foundry shadow adapter, container definitions, setup instructions and registration media. Goals need contract approval; Kiswahili needs review; live models, streaming and deployment remain pending. | Alex + Codex |
 | Oct 11 | Updated delivery plan to reflect current repo state: PR #8 (11v11 scenario generator, shared squads, checkdata, late-siege fixture, routing fix, to-semantics), PR #15 (G2 Stage 0 docs), and PR #16 (G2 Stage 1 metrics/moments core, calm-midfield, T1-T14+T8b, amd64 golden file, checkdata in check.sh) merged; G2 Stage 2 API in review (PR #18); recorded decisions D1-D5, swing 0.30, 2s press hold, trackingMetrics flag, model ID bumping; documented 5 metrics risks, 8 open items with owners, and issues #1-#17. Dates and scopes unchanged. | Alex + Codex |
+| Oct 11 | Fix pass: corrected squads path (`data/squads/fictional-league.json`) and checker location (`quality.go` in `app/internal/sim/`); cited ADR 0009 §5.3 for deferred red-card scenario; clarified that golden regression T13 asserts exact swings byte-for-byte; updated UI Control Field dependency note; consolidated pending Contract v2.1 items; added issues page link and explicit owner code definitions. | Alex + Codex |
 
