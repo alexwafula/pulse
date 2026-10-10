@@ -1,15 +1,28 @@
 package transporthttp
 
 import (
-	"github.com/alexwafula/pulse/app/internal/domain"
-	"github.com/alexwafula/pulse/app/internal/simulator/scenarios"
 	"net/http"
+
+	"github.com/alexwafula/pulse/app/internal/domain"
+	"github.com/alexwafula/pulse/app/internal/simulator"
+	"github.com/alexwafula/pulse/app/internal/simulator/scenarios"
 )
 
 func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler, error) {
 	catalog, err := scenarios.Catalog(base)
 	if err != nil {
 		return nil, err
+	}
+	for _, lateSiegePath := range []string{
+		"data/scenarios/late-siege.json",
+		"../../../../data/scenarios/late-siege.json",
+		"../../../data/scenarios/late-siege.json",
+		"../../data/scenarios/late-siege.json",
+	} {
+		if lateSiege, err := simulator.Load(lateSiegePath); err == nil {
+			catalog["late-siege"] = lateSiege
+			break
+		}
 	}
 	handlers := make(map[string]http.Handler)
 	for id, replay := range catalog {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -48,10 +49,20 @@ func TestMatchPageAndReplayAPI(t *testing.T) {
 		t.Fatalf("browser asset: status %d", asset.Code)
 	}
 
+	// /design should return 404 when PULSE_DEV is not set
+	os.Unsetenv("PULSE_DEV")
+	designUnset := httptest.NewRecorder()
+	handler.ServeHTTP(designUnset, httptest.NewRequest(http.MethodGet, "/design", nil))
+	if designUnset.Code != http.StatusNotFound {
+		t.Fatalf("design page without PULSE_DEV: expected 404, got %d", designUnset.Code)
+	}
+
+	// /design should return 200 when PULSE_DEV=1
+	t.Setenv("PULSE_DEV", "1")
 	design := httptest.NewRecorder()
 	handler.ServeHTTP(design, httptest.NewRequest(http.MethodGet, "/design", nil))
 	if design.Code != http.StatusOK || !strings.Contains(design.Body.String(), "Pulse Design System") {
-		t.Fatalf("design page: status %d", design.Code)
+		t.Fatalf("design page with PULSE_DEV=1: status %d", design.Code)
 	}
 }
 
@@ -108,5 +119,42 @@ func TestInsightFeedAndFallback(t *testing.T) {
 				t.Fatal("unsupported persona accepted")
 			}
 		})
+	}
+}
+
+func TestNewDemoHandler_LateSiege(t *testing.T) {
+	fixture := filepath.Join("..", "..", "..", "..", "data", "samples", "first-sequence.json")
+	replay, err := simulator.Load(fixture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	webDir := filepath.Join("..", "..", "..", "web")
+	demoHandler, err := NewDemoHandler(replay, webDir, "")
+	if err != nil {
+		t.Fatalf("NewDemoHandler error: %v", err)
+	}
+
+	// Request late-siege scenario
+	rec := httptest.NewRecorder()
+	demoHandler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/?scenario=late-siege", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 for late-siege, got %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "late-siege") {
+		t.Fatalf("expected page body to contain late-siege")
+	}
+
+	// Request late-siege replay API
+	apiRec := httptest.NewRecorder()
+	demoHandler.ServeHTTP(apiRec, httptest.NewRequest(http.MethodGet, "/api/replay?scenario=late-siege", nil))
+	if apiRec.Code != http.StatusOK {
+		t.Fatalf("expected 200 for /api/replay?scenario=late-siege, got %d", apiRec.Code)
+	}
+	var siegeReplay domain.Replay
+	if err := json.Unmarshal(apiRec.Body.Bytes(), &siegeReplay); err != nil {
+		t.Fatalf("failed to decode replay JSON: %v", err)
+	}
+	if len(siegeReplay.Events) != 27 || len(siegeReplay.Tracking) != 401 {
+		t.Fatalf("expected 27 events and 401 frames, got %d events and %d frames", len(siegeReplay.Events), len(siegeReplay.Tracking))
 	}
 }

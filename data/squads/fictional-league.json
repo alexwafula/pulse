@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "2.0.0",
+  "teams": [
+    {
+      "id": "vale",
+      "name": "Aurora Vale",
+      "attackingDirection": "RIGHT",
+      "formation": "4-4-2",
+      "lineHeightM": 68.0,
+      "compactness": 0.85,
+      "players": [
+        { "id": "vale-1", "teamId": "vale", "name": "Nia", "number": 1, "role": "GK", "slot": "GK" },
+        { "id": "vale-2", "teamId": "vale", "name": "Kofi", "number": 2, "role": "DF", "slot": "RB" },
+        { "id": "vale-3", "teamId": "vale", "name": "Musa", "number": 4, "role": "DF", "slot": "RCB" },
+        { "id": "vale-4", "teamId": "vale", "name": "Leni", "number": 5, "role": "DF", "slot": "LCB" },
+        { "id": "vale-5", "teamId": "vale", "name": "Tariq", "number": 3, "role": "DF", "slot": "LB" },
+        { "id": "vale-6", "teamId": "vale", "name": "Zayd", "number": 7, "role": "MF", "slot": "RM" },
+        { "id": "vale-7", "teamId": "vale", "name": "Imani", "number": 8, "role": "MF", "slot": "RCM" },
+        { "id": "vale-8", "teamId": "vale", "name": "Tayo", "number": 10, "role": "MF", "slot": "LCM" },
+        { "id": "vale-9", "teamId": "vale", "name": "Malik", "number": 11, "role": "MF", "slot": "LM" },
+        { "id": "vale-10", "teamId": "vale", "name": "Dax", "number": 9, "role": "FW", "slot": "RF" },
+        { "id": "vale-11", "teamId": "vale", "name": "Kael", "number": 19, "role": "FW", "slot": "LF" }
+      ]
+    },
+    {
+      "id": "bastion",
+      "name": "Bastion City",
+      "attackingDirection": "LEFT",
+      "formation": "4-4-2",
+      "lineHeightM": 22.0,
+      "compactness": 0.70,
+      "players": [
+        { "id": "bastion-1", "teamId": "bastion", "name": "Mina", "number": 1, "role": "GK", "slot": "GK" },
+        { "id": "bastion-2", "teamId": "bastion", "name": "Juma", "number": 2, "role": "DF", "slot": "RB" },
+        { "id": "bastion-3", "teamId": "bastion", "name": "Ari", "number": 4, "role": "DF", "slot": "RCB" },
+        { "id": "bastion-4", "teamId": "bastion", "name": "Sam", "number": 5, "role": "DF", "slot": "LCB" },
+        { "id": "bastion-5", "teamId": "bastion", "name": "Leo", "number": 3, "role": "DF", "slot": "LB" },
+        { "id": "bastion-6", "teamId": "bastion", "name": "Noah", "number": 7, "role": "MF", "slot": "RM" },
+        { "id": "bastion-7", "teamId": "bastion", "name": "Kian", "number": 6, "role": "MF", "slot": "RCM" },
+        { "id": "bastion-8", "teamId": "bastion", "name": "Enzo", "number": 8, "role": "MF", "slot": "LCM" },
+        { "id": "bastion-9", "teamId": "bastion", "name": "Luca", "number": 11, "role": "MF", "slot": "LM" },
+        { "id": "bastion-10", "teamId": "bastion", "name": "Bram", "number": 9, "role": "FW", "slot": "RF" },
+        { "id": "bastion-11", "teamId": "bastion", "name": "Theo", "number": 10, "role": "FW", "slot": "LF" }
+      ]
+    }
+  ]
+}
