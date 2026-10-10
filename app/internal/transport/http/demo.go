@@ -16,20 +16,17 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 	if err != nil {
 		return nil, err
 	}
-	for _, lateSiegePath := range []string{
-		"data/scenarios/late-siege.json",
-		"../../../../data/scenarios/late-siege.json",
-		"../../../data/scenarios/late-siege.json",
-		"../../data/scenarios/late-siege.json",
-	} {
-		if lateSiege, err := simulator.Load(lateSiegePath); err == nil {
-			catalog["late-siege"] = lateSiege
-			break
+	for _, name := range []string{"late-siege", "calm-midfield"} {
+		for _, dir := range []string{"data/scenarios", "../../../../data/scenarios", "../../../data/scenarios", "../../data/scenarios"} {
+			if replay, err := simulator.Load(dir + "/" + name + ".json"); err == nil {
+				catalog[name] = replay
+				break
+			}
 		}
 	}
 	handlers := make(map[string]http.Handler)
 	for id, replay := range catalog {
-		handler, err := NewHandlerWithAgents(replay, webDir, agentsURL)
+		handler, err := newScenarioHandler(id, replay, webDir, agentsURL)
 		if err != nil {
 			return nil, err
 		}
