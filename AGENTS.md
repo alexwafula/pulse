@@ -169,6 +169,7 @@ Known from `package.json`:
 
 Local checks:
 
+- Full gate: `./scripts/check.sh` runs 10 steps: gofmt, go vet, Go tests, checkdata on every generated scenario in `data/scenarios`, Python tests, agent evaluations, tsc, esbuild, web bundle reproducibility, Bicep.
 - Go: `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...`
 - Python: `py -m unittest discover -s agents/tests -v` (standard library; pytest is not configured)
 - Offline agent boundary evaluation: `py tests/evaluations/run_agents.py` (fake backend, not model accuracy)

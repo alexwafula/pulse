@@ -5,8 +5,8 @@ or validated against real football. They describe the synthetic replay that prod
 nothing more. API responses carry `model: "time-to-reach-control-v1"` and
 `label: "model estimate, uncalibrated"`.
 
-Status: **implemented in G2 Stage 1** (`app/internal/metrics`, `app/internal/moments`; no API
-or UI yet). All parameters below are the initial values, chosen before any metric was
+Status: **implemented** (G2 Stage 1: `app/internal/metrics`, `app/internal/moments`; G2 Stage 2:
+`GET /api/metrics` and `GET /api/moments`; no UI yet). All parameters below are the initial values, chosen before any metric was
 computed, and **none changed after the first run**. Any later change is logged with
 before/after values in
 [ADR 0010](decisions/0010-metrics-and-moments.md#parameter-change-log). Measured outputs are
@@ -336,10 +336,17 @@ This holds because:
 
 ## 9. Measured outputs
 
-Measured on G2 Stage 1 code, default parameters, amd64 (Intel i7-1185G7), Go test binary.
-Every value is a model estimate, uncalibrated, and describes our synthetic replays only.
+Measured on amd64 (Intel i7-1185G7), default parameters, Go test binary. Every value is a model
+estimate, uncalibrated, and describes our synthetic replays only.
 
-**Ranges over all ticks**
+**What changed since Stage 1:** no metric value and no moment. Stage 2 did not touch
+`app/internal/metrics` or `app/internal/moments`; the golden file is byte-identical and T1-T14
+are unchanged. The only change to the moment table below is from the PR #16 fix pass:
+CONTROL_SWING `reasons` are `[]` and its window events moved to `contextEventIds`. The
+ranges and moments tables are copied from Stage 1. The **API** subsection at the end is new in
+Stage 2.
+
+**Ranges over all ticks** (unchanged since Stage 1)
 
 | Scenario (ticks) | Team | share | finalThird | index | indexDelta |
 |---|---|---|---|---|---|
@@ -356,7 +363,8 @@ Every value is a model estimate, uncalibrated, and describes our synthetic repla
 **Late-siege T9a:** mean finalThird_vale is 0.3811 pre-siege (20 ticks) and 0.6050 in the
 siege (71 ticks); the difference is **0.2239** (bound ≥ 0.10).
 
-**Moments**
+**Moments** (unchanged since Stage 1 except the CONTROL_SWING `reasons` / `contextEventIds`
+split from the PR #16 fix pass)
 
 | Scenario | Type | Team | timeMs | Window | Evidence | Reasons | contextEventIds (not evidence) | Values |
 |---|---|---|---|---|---|---|---|---|
@@ -393,4 +401,56 @@ Golden file `app/testdata/metrics/late-siege.golden.json`: 161225 bytes.
 Other notes:
 - The SUSTAINED_PRESSURE tick run starts at 5289000, two ticks before the siege window. The
   firing time (5291500) is inside it.
-- Still unmeasured: arm64 golden equality, API payload sizes (Stage 2), browser rendering.
+
+### API (new in Stage 2)
+
+Measured in-process: `httptest` against the handler, no network, same machine as above.
+Cold means a fresh scenario cache, so the request includes `Compute`, `Detect`, encoding of
+all three bodies and gzip at best compression. Cold is the median of 5 runs; warm is p50/p99
+of 200 requests.
+
+**Payload sizes** (bytes)
+
+| Scenario | /api/metrics raw | gzip | /api/metrics?grid=1 raw | gzip | /api/moments raw | gzip |
+|---|---|---|---|---|---|---|
+| late-siege | 79804 | 6118 (7.7%) | 342145 | 49979 (14.6%) | 1252 | 528 (42.2%) |
+| calm-midfield | 62686 | 5121 (8.2%) | 276738 | 47135 (17.0%) | 181 | 160 (88.4%) |
+| corner | 766 | 475 | 860 | 519 | 460 | 325 |
+| central | 775 | 477 | 869 | 521 | 469 | 326 |
+| exchange | 777 | 479 | 871 | 525 | 471 | 329 |
+
+**Response time**
+
+| Scenario | Endpoint | Cold (median of 5) | Warm p50 (raw / gzip) | Warm p99 (raw) |
+|---|---|---|---|---|
+| late-siege | metrics | 281 ms | 21 µs / 7 µs | 493 µs |
+| late-siege | metrics grid=1 | 271 ms | 89 µs / 26 µs | 1.41 ms |
+| late-siege | moments | 268 ms | 3.3 µs / 3.5 µs | 26 µs |
+| calm-midfield | metrics | 212 ms | 16 µs / 7 µs | 371 µs |
+| calm-midfield | metrics grid=1 | 209 ms | 64 µs / 20 µs | 732 µs |
+| calm-midfield | moments | 215 ms | 3.0 µs / 3.3 µs | 271 µs |
+| corner / central / exchange | any | 1.7-3.0 ms | 3.3-7.1 µs | 28-107 µs |
+
+The cold cost is paid once per scenario per process, by whichever endpoint is hit first; the
+other two endpoints are then warm.
+
+**Cache memory** (per scenario, after first request)
+
+| Scenario | Encoded bodies held (raw + gzip, 3 endpoints) | Retained heap delta after GC |
+|---|---|---|
+| late-siege | 479826 B | 503336 B |
+| calm-midfield | 392021 B | 941528 B |
+| corner / central / exchange | 3405 / 3437 / 3452 B | 2064 / 2288 / 3320 B |
+
+The encoded-bytes column is exact: it is what the cache stores. The heap delta is a single
+`runtime.MemStats` reading and is noisy (calm-midfield's delta exceeds its encoded bytes), so
+treat it as an order of magnitude. Total for all five scenarios is about 0.88 MB of encoded
+bodies.
+
+**Still unmeasured:**
+- golden-file equality on arm64;
+- response time over a real network, through a reverse proxy, or under concurrent load (only
+  in-process single-request timings above; concurrency is tested for correctness with
+  `-race`, not for throughput);
+- client-side decode and render cost of the `grid=1` payload (no UI in Stage 2);
+- correctness of mid-range pressing values (limitation 2 above).
