@@ -47,6 +47,12 @@ func TestMatchPageAndReplayAPI(t *testing.T) {
 	if asset.Code != http.StatusOK || !strings.Contains(asset.Body.String(), "/api/replay") {
 		t.Fatalf("browser asset: status %d", asset.Code)
 	}
+
+	design := httptest.NewRecorder()
+	handler.ServeHTTP(design, httptest.NewRequest(http.MethodGet, "/design", nil))
+	if design.Code != http.StatusOK || !strings.Contains(design.Body.String(), "Pulse Design System") {
+		t.Fatalf("design page: status %d", design.Code)
+	}
 }
 
 func TestInsightFeedAndFallback(t *testing.T) {
