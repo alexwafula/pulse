@@ -70,7 +70,38 @@ func TestT12_SustainedPressureHysteresis(t *testing.T) {
 	}
 }
 
-// T12b: CONTROL_SWING fires once per swing, carries evidenceKind "tick".
+// Both SUSTAINED_PRESSURE conditions are necessary on their own.
+func TestSustainedPressure_BothConditionsRequired(t *testing.T) {
+	p := metrics.DefaultParams()
+	q := p.Moments.Pressure
+
+	// High final-third share on every tick, but the only actions are
+	// unrelated: none is a completed final-third action, so none is passed in.
+	times, high := series(seg{0.9, 120})
+	if got := moments.SustainedPressureFor("a", times, high, nil, p); len(got) != 0 {
+		t.Errorf("high share, no actions: %d moments, want 0: %+v", len(got), got)
+	}
+
+	// Plenty of completed final-third actions (one per second, far above K),
+	// but share stays just below OnShare.
+	times, low := series(seg{q.OnShare - 0.01, 120})
+	actions := everySecond(times[len(times)-1])
+	if len(actions) < 4*q.K {
+		t.Fatalf("toy has only %d actions", len(actions))
+	}
+	if got := moments.SustainedPressureFor("a", times, low, actions, p); len(got) != 0 {
+		t.Errorf("actions, low share: %d moments, want 0: %+v", len(got), got)
+	}
+
+	// Control: the same actions with share at OnShare exactly do fire (>=).
+	times, at := series(seg{q.OnShare, 120})
+	if got := moments.SustainedPressureFor("a", times, at, actions, p); len(got) == 0 {
+		t.Error("control: share == OnShare with actions must fire")
+	}
+}
+
+// T12b: CONTROL_SWING fires once per swing, carries evidenceKind "tick",
+// empty reasons and the window's events as contextEventIds.
 func TestT12_ControlSwingHysteresis(t *testing.T) {
 	p := metrics.DefaultParams()
 	inWindow := []domain.Event{{ID: "evt-in", TimeMS: 4800}, {ID: "evt-out", TimeMS: 100}}
@@ -96,14 +127,18 @@ func TestT12_ControlSwingHysteresis(t *testing.T) {
 		}
 		m := got[0]
 		if m.Type != moments.ControlSwing || m.EvidenceKind != moments.EvidenceTick || m.TimeMS != 5000 ||
-			len(m.TickTimesMS) != 2 || m.Reasons == nil {
+			len(m.TickTimesMS) != 2 || m.ContextEventIDs == nil {
 			t.Errorf("%s: first moment %+v", tc.name, m)
 		}
-		if tc.events != nil && (len(m.Reasons) != 1 || m.Reasons[0] != "evt-in") {
-			t.Errorf("%s: reasons %v, want [evt-in]", tc.name, m.Reasons)
+		// Tick-derived: reasons are never populated, even when events sit in the window.
+		if m.Reasons == nil || len(m.Reasons) != 0 {
+			t.Errorf("%s: reasons %v, want [] (non-nil, empty)", tc.name, m.Reasons)
 		}
-		if tc.events == nil && len(m.Reasons) != 0 {
-			t.Errorf("%s: reasons %v, want empty", tc.name, m.Reasons)
+		if tc.events != nil && (len(m.ContextEventIDs) != 1 || m.ContextEventIDs[0] != "evt-in") {
+			t.Errorf("%s: contextEventIds %v, want [evt-in]", tc.name, m.ContextEventIDs)
+		}
+		if tc.events == nil && len(m.ContextEventIDs) != 0 {
+			t.Errorf("%s: contextEventIds %v, want empty", tc.name, m.ContextEventIDs)
 		}
 	}
 }

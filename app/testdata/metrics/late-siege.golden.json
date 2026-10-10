@@ -6123,6 +6123,7 @@
         "evt-04",
         "evt-05"
       ],
+      "contextEventIds": [],
       "tickTimesMs": [
         5289000,
         5289500,
@@ -6143,7 +6144,8 @@
       "windowStartMs": 5297000,
       "windowEndMs": 5302000,
       "evidenceKind": "tick",
-      "reasons": [
+      "reasons": [],
+      "contextEventIds": [
         "evt-10",
         "evt-11",
         "evt-12"
@@ -6165,7 +6167,8 @@
       "windowStartMs": 5308500,
       "windowEndMs": 5313500,
       "evidenceKind": "tick",
-      "reasons": [
+      "reasons": [],
+      "contextEventIds": [
         "evt-18",
         "evt-19",
         "evt-20"
@@ -6191,6 +6194,7 @@
         "evt-22",
         "evt-23"
       ],
+      "contextEventIds": [],
       "tickTimesMs": [],
       "values": {}
     }

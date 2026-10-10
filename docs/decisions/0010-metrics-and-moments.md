@@ -65,8 +65,9 @@ Agents may only cite facts that Go computed. So every metric must be:
     - The schema requires `eventIds` with `minItems: 1`. Shares, entropy, pressing and the
       index come from ticks, not events.
     - They must not cite unrelated action events just to satisfy the schema.
-    - `CONTROL_SWING.reasons` lists only events inside the swing window, and may be empty.
-      Its evidence is `tickTimesMs`.
+    - `CONTROL_SWING.reasons` is always `[]`. Its evidence is `tickTimesMs` and `values`.
+      Events inside the swing window go to a separate `contextEventIds` field, documented
+      as **not evidence** (PR #16 review). Agents and the Verifier must never cite them.
     - See the FactPack proposal and contract item C1 below.
 11. **Deferred:**
     - pass difficulty rating;
@@ -163,7 +164,7 @@ Rule: **a fact cites only events that are actually its inputs.**
   - The grid (row-major `cols*rows`, team-A control) is included only with `grid=1`.
   - On an unsupported replay, `ticks` is `[]`.
 - `GET /api/moments?scenario=<id>` returns
-  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, reasons, tickTimesMs, values}]}`.
+  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, evidenceKind, reasons, contextEventIds, tickTimesMs, values}]}`.
   - Unsupported replays still return their `SET_PIECE_SHOT` moments.
 - An unknown scenario gives 404 (existing demo router).
 
@@ -191,6 +192,13 @@ Rule: **a fact cites only events that are actually its inputs.**
   `lineHeightM`/`compactness` in the script are never read. So the spec item "bastion holds a
   mid-block" is **not met**, and vale's share stays above 0.70 in calm-midfield too. The
   generator was not changed: that is out of scope and would change the late-siege bytes.
+  Tracked in **issue #17**. Both committed scripts set the fields (late-siege: vale 68.0/0.85,
+  bastion 22.0/0.70), so implementing or rejecting them must keep late-siege byte-identical.
+- **checkdata and calm-midfield (resolved in the PR #16 fix pass).** Scripts may set
+  `expect.minShots` (default 1). Only calm-midfield sets 0, and checkdata prints "shot rule
+  waived by script" when it applies. A script without the field still fails on zero shots
+  (`TestShotRule_ScriptExpectation`). `scripts/check.sh` now runs checkdata over every
+  generated scenario in `data/scenarios`.
 - **checkdata rejects calm-midfield.** `sim/quality.go` requires at least one shot
   (`insane shot count: 0 (expected at least 1)`). The calm spec forbids shots. The checker
   was not weakened. With only that rule skipped locally (not committed), every physical check
@@ -199,6 +207,18 @@ Rule: **a fact cites only events that are actually its inputs.**
 - **T8 passed bit-exact on the first run**; no tolerance was added and no evaluation-order fix
   was needed.
 - **Golden file** generated on amd64 only; arm64 is unchecked.
+
+### Recorded limitations (PR #16 review)
+
+1. **Swing count is fragile.** The late-siege CONTROL_SWING signals are 0.3026 and 0.3148
+   against `Swing.Delta` = 0.30 (margins 0.0026 / 0.0148). The number of swings on this
+   replay can change with small input changes; it is not asserted by any test.
+2. **Pressing is unverified in the mid-range on real fixtures.** Hand-checked values are
+   toys (T5, T6, T6b). late-siege has 25 of 68 non-null ticks in [0.2, 0.8), none checked
+   independently; calm-midfield peaks at 0.0081.
+3. **Absolute shares reflect formation geometry** because the generator ignores
+   `lineHeightM`/`compactness` (issue #17). **Shares must not be shown as headline
+   numbers**; use them only as within-team change over time, with the uncalibrated label.
 
 ## Parameter change log
 

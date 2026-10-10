@@ -19,22 +19,27 @@ const (
 
 	// EvidenceEvent: the moment's reasons are the events that caused it.
 	EvidenceEvent = "event"
-	// EvidenceTick: the moment is derived from metric ticks; reasons are only
-	// the events that happened inside its window (possibly none).
+	// EvidenceTick: the moment is derived from metric ticks. Its reasons are
+	// empty; tickTimesMs is the evidence.
 	EvidenceTick = "tick"
 )
 
 // Moment is one detected significant point with its evidence.
+//
+// Reasons are evidence: the events the moment is computed from. ContextEventIDs
+// are NOT evidence: events that merely happened inside the window of a
+// tick-derived moment, for display only. They must never be cited as support.
 type Moment struct {
-	Type          string             `json:"type"`
-	TeamID        string             `json:"teamId"`
-	TimeMS        int64              `json:"timeMs"`
-	WindowStartMS int64              `json:"windowStartMs"`
-	WindowEndMS   int64              `json:"windowEndMs"`
-	EvidenceKind  string             `json:"evidenceKind"`
-	Reasons       []string           `json:"reasons"`
-	TickTimesMS   []int64            `json:"tickTimesMs"`
-	Values        map[string]float64 `json:"values"`
+	Type            string             `json:"type"`
+	TeamID          string             `json:"teamId"`
+	TimeMS          int64              `json:"timeMs"`
+	WindowStartMS   int64              `json:"windowStartMs"`
+	WindowEndMS     int64              `json:"windowEndMs"`
+	EvidenceKind    string             `json:"evidenceKind"`
+	Reasons         []string           `json:"reasons"`
+	ContextEventIDs []string           `json:"contextEventIds"`
+	TickTimesMS     []int64            `json:"tickTimesMs"`
+	Values          map[string]float64 `json:"values"`
 }
 
 // Action is a completed final-third action counted toward K.
@@ -65,7 +70,8 @@ func Detect(replay domain.Replay, res metrics.Result, p metrics.Params) ([]Momen
 		for _, f := range pack.Facts {
 			out = append(out, Moment{Type: SetPieceShot, TeamID: f.TeamID, TimeMS: f.TimeEndMS,
 				WindowStartMS: f.TimeStartMS, WindowEndMS: f.TimeEndMS, EvidenceKind: EvidenceEvent,
-				Reasons: append([]string{}, f.EventIDs...), TickTimesMS: []int64{}, Values: map[string]float64{}})
+				Reasons: append([]string{}, f.EventIDs...), ContextEventIDs: []string{}, TickTimesMS: []int64{},
+				Values: map[string]float64{}})
 		}
 	}
 	if res.TrackingMetrics == metrics.TrackingSupported {
@@ -169,8 +175,9 @@ func SustainedPressureFor(teamID string, times []int64, finalThird []float64, ac
 		}
 		out = append(out, Moment{Type: SustainedPressure, TeamID: teamID, TimeMS: t,
 			WindowStartMS: t - window, WindowEndMS: t, EvidenceKind: EvidenceEvent, Reasons: reasons,
-			TickTimesMS: append([]int64{}, times[k-q.N+1:k+1]...),
-			Values:      map[string]float64{"finalThird": round4(v), "actions": float64(len(reasons))}})
+			ContextEventIDs: []string{},
+			TickTimesMS:     append([]int64{}, times[k-q.N+1:k+1]...),
+			Values:          map[string]float64{"finalThird": round4(v), "actions": float64(len(reasons))}})
 		armed, settled, offRun, lastFire = false, false, 0, t
 	}
 	return out
@@ -199,9 +206,10 @@ func SwingSignal(times []int64, delta []float64, p metrics.Params) []float64 {
 }
 
 // ControlSwingFor runs the CONTROL_SWING detector for one team on its index
-// difference series. Evidence is always "tick"; reasons are the events in
-// [t_min, t]. After firing it re-arms once RearmTicks consecutive ticks after
-// the firing span at most RearmRange AND the cooldown has elapsed.
+// difference series. Evidence is always "tick": reasons are empty and the
+// events in [t_min, t] go to ContextEventIDs (not evidence). After firing it
+// re-arms once RearmTicks consecutive ticks after the firing span at most
+// RearmRange AND the cooldown has elapsed.
 func ControlSwingFor(teamID string, times []int64, delta []float64, events []domain.Event, p metrics.Params) []Moment {
 	s := p.Moments.Swing
 	window, cooldown := ms(s.WindowS), ms(s.CooldownS)
@@ -231,15 +239,15 @@ func ControlSwingFor(teamID string, times []int64, delta []float64, events []dom
 			continue
 		}
 		tMin := times[jmin]
-		reasons := []string{}
+		context := []string{}
 		for _, e := range events {
 			if e.TimeMS >= tMin && e.TimeMS <= t {
-				reasons = append(reasons, e.ID)
+				context = append(context, e.ID)
 			}
 		}
 		out = append(out, Moment{Type: ControlSwing, TeamID: teamID, TimeMS: t,
-			WindowStartMS: tMin, WindowEndMS: t, EvidenceKind: EvidenceTick, Reasons: reasons,
-			TickTimesMS: []int64{tMin, t},
+			WindowStartMS: tMin, WindowEndMS: t, EvidenceKind: EvidenceTick, Reasons: []string{},
+			ContextEventIDs: context, TickTimesMS: []int64{tMin, t},
 			Values: map[string]float64{"signal": round4(signal), "deltaFrom": round4(delta[jmin]),
 				"deltaTo": round4(delta[k])}})
 		armed, settled, lastFire = false, false, t

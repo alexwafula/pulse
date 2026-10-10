@@ -134,8 +134,11 @@ func TestT9b_LateSiegeSustainedPressure(t *testing.T) {
 	ms := detect(t, r, mustCompute(t, r))
 	vale := false
 	for _, m := range ms {
-		t.Logf("MEASURED moment %s team=%s t=%d window=[%d,%d] evidence=%s reasons=%v ticks=%v values=%v",
-			m.Type, m.TeamID, m.TimeMS, m.WindowStartMS, m.WindowEndMS, m.EvidenceKind, m.Reasons, m.TickTimesMS, m.Values)
+		t.Logf("MEASURED moment %s team=%s t=%d window=[%d,%d] evidence=%s reasons=%v context=%v ticks=%v values=%v",
+			m.Type, m.TeamID, m.TimeMS, m.WindowStartMS, m.WindowEndMS, m.EvidenceKind, m.Reasons, m.ContextEventIDs, m.TickTimesMS, m.Values)
+		if m.EvidenceKind == moments.EvidenceTick && len(m.Reasons) != 0 {
+			t.Errorf("%s at %d: tick-derived moment has reasons %v; nearby events belong in contextEventIds", m.Type, m.TimeMS, m.Reasons)
+		}
 		if m.Type != moments.SustainedPressure {
 			continue
 		}

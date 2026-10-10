@@ -230,20 +230,23 @@ index_T = Σ_k w_k·x_k / Σ_k w_k        over components k whose value is not n
 ## 6. Moments
 
 Every moment carries:
-- `reasons`: source event IDs
+- `reasons`: **evidence**, the source event IDs the moment is computed from
+- `contextEventIds`: **not evidence**. Events that merely happened inside the window of a
+  tick-derived moment, for display only. Agents, the Verifier and any UI must never cite them
+  as support for the moment. Empty (`[]`) for event-derived moments.
 - `tickTimesMs`: the ticks used
 - `windowStartMs` and `windowEndMs`
 - `evidenceKind`: `"event"` when the reasons are the events that caused the moment
-  (`SET_PIECE_SHOT`, `SUSTAINED_PRESSURE`), `"tick"` when the moment comes from metric ticks
-  and the reasons are only the events that happened inside its window. `CONTROL_SWING` is
-  always `"tick"`.
+  (`SET_PIECE_SHOT`, `SUSTAINED_PRESSURE`), `"tick"` when the moment comes from metric ticks.
+  A `"tick"` moment always has `reasons: []`; its evidence is `tickTimesMs` and `values`.
+  `CONTROL_SWING` is always `"tick"`.
 - `values`: the measured numbers behind the decision, rounded to 4 dp
 
-| Type | Fires when | Reasons |
+| Type | Fires when | Reasons (evidence) |
 |---|---|---|
 | `SET_PIECE_SHOT` | The existing rule in `facts.CornerPacks`: a COMPLETE corner, then a shot by the same team in the same phase within 12 s, with no other team touching the ball in between. Event-only, so it also runs on unsupported replays | `[cornerId, shotId]`, no ticks |
 | `SUSTAINED_PRESSURE` | For team T: `finalThird_T ≥ OnShare` for `N` consecutive ticks, **and** at least `K` completed final-third actions by T in the `W` seconds ending at the last of those ticks | The K-window action event IDs and the N tick times |
-| `CONTROL_SWING` | For team T, on the **difference** `Δ_T = index_T − index_opp`: `Δ_T(t) − min(Δ_T over [t − W, t]) ≥ Delta` | The events whose `timeMs` lies in `[t_min, t]` (empty list allowed, see ADR 0010 decision 10) and the two tick times |
+| `CONTROL_SWING` | For team T, on the **difference** `Δ_T = index_T − index_opp`: `Δ_T(t) − min(Δ_T over [t − W, t]) ≥ Delta` | `[]` always. The two tick times are the evidence. Events whose `timeMs` lies in `[t_min, t]` go to `contextEventIds` (not evidence) |
 
 **Completed final-third action:** an event by T with `outcome = COMPLETE`, type PASS, CARRY,
 CROSS or CORNER, and `to` inside T's attacking final third. Shots are excluded.
@@ -347,23 +350,39 @@ siege (71 ticks); the difference is **0.2239** (bound ≥ 0.10).
 
 **Moments**
 
-| Scenario | Type | Team | timeMs | Window | Evidence | Reasons | Values |
-|---|---|---|---|---|---|---|---|
-| late-siege | SUSTAINED_PRESSURE | vale | 5291500 | 5276500-5291500 | event | evt-03, evt-04, evt-05 | finalThird 0.4728, actions 3 |
-| late-siege | CONTROL_SWING | bastion | 5302000 | 5297000-5302000 | tick | evt-10, evt-11, evt-12 | signal 0.3026 (Δ −0.5059 → −0.2033) |
-| late-siege | CONTROL_SWING | vale | 5313500 | 5308500-5313500 | tick | evt-18, evt-19, evt-20 | signal 0.3148 (Δ 0.2078 → 0.5226) |
-| late-siege | SET_PIECE_SHOT | vale | 5321488 | 5319185-5321488 | event | evt-22, evt-23 | none |
-| calm-midfield | none | none | none | none | none | none | max swing signal: bastion 0.0525, vale 0.0402 |
-| corner / central / exchange | SET_PIECE_SHOT only (1 each) | none | none | none | event | 2 IDs each | trackingMetrics unsupported (8000 ms frame gaps) |
+| Scenario | Type | Team | timeMs | Window | Evidence | Reasons | contextEventIds (not evidence) | Values |
+|---|---|---|---|---|---|---|---|---|
+| late-siege | SUSTAINED_PRESSURE | vale | 5291500 | 5276500-5291500 | event | evt-03, evt-04, evt-05 | [] | finalThird 0.4728, actions 3 |
+| late-siege | CONTROL_SWING | bastion | 5302000 | 5297000-5302000 | tick | [] | evt-10, evt-11, evt-12 | signal 0.3026 (Δ −0.5059 → −0.2033) |
+| late-siege | CONTROL_SWING | vale | 5313500 | 5308500-5313500 | tick | [] | evt-18, evt-19, evt-20 | signal 0.3148 (Δ 0.2078 → 0.5226) |
+| late-siege | SET_PIECE_SHOT | vale | 5321488 | 5319185-5321488 | event | evt-22, evt-23 | [] | none |
+| calm-midfield | none | none | none | none | none | none | none | max swing signal: bastion 0.0525, vale 0.0402 |
+| corner / central / exchange | SET_PIECE_SHOT only (1 each) | none | none | none | event | 2 IDs each | [] | trackingMetrics unsupported (8000 ms frame gaps) |
 
 **Cost:** `Compute` takes about 142 ms for late-siege (161 ticks) and about 104 ms for
 calm-midfield (121 ticks); `Detect` takes about 2.6 / 1.5 ms (mean of 20 runs).
-Golden file `app/testdata/metrics/late-siege.golden.json`: 161109 bytes.
+Golden file `app/testdata/metrics/late-siege.golden.json`: 161225 bytes.
 
-**Read with care:**
-- vale's share stays above 0.70 in both scenarios, and bastion's finalThird stays below
-  0.003. The generator places teams by fixed formation templates (ADR 0010, Stage 1 notes),
-  so share mostly reflects that geometry, not play.
+**Limitations of these measurements (read before using any number):**
+
+1. **The swing count is fragile.** The two late-siege CONTROL_SWING signals are 0.3026 and
+   0.3148 against a threshold of 0.30, margins of 0.0026 and 0.0148. A small change to the
+   fixture, the generator or any index input can add or remove a swing. Treat "two swings"
+   as a property of this replay at these parameters, not a stable result. No test asserts
+   the swing count on late-siege, and none should until the margin is understood.
+2. **Pressing is not verified in the mid-range on real fixtures.** The hand-checked values
+   (T5, T6, T6b) are toys at about 0.97, 0.01-0.03 and 0.12/0.30. On late-siege, 25 of the
+   68 non-null ticks fall in [0.2, 0.8) (0.2027 to 0.7913), but no test checks any of them
+   against an independent calculation. calm-midfield never exceeds 0.0081. Mid-range
+   pressing values are produced but unmeasured for correctness.
+3. **Absolute shares reflect formation geometry, not play.** The generator ignores
+   `lineHeightM` and `compactness` (ADR 0010, Stage 1 notes; issue #17). vale's share
+   stays above 0.70 in both scenarios, and bastion's finalThird stays below 0.003, including
+   in calm-midfield, where bastion was meant to hold a mid-block.
+   **Shares must not be shown as headline numbers** in the UI, recaps or agent text. Use them
+   only as within-team changes over time (as T9a does), with the uncalibrated label.
+
+Other notes:
 - The SUSTAINED_PRESSURE tick run starts at 5289000, two ticks before the siege window. The
   firing time (5291500) is inside it.
 - Still unmeasured: arm64 golden equality, API payload sizes (Stage 2), browser rendering.
