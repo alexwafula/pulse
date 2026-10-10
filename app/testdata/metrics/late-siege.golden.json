@@ -1,0 +1,6202 @@
+{
+  "scenario": "late-siege",
+  "metrics": {
+    "model": "time-to-reach-control-v1",
+    "label": "model estimate, uncalibrated",
+    "trackingMetrics": "supported",
+    "teams": [
+      "bastion",
+      "vale"
+    ],
+    "params": {
+      "frameMs": 200,
+      "tickMs": 500,
+      "grid": {
+        "cols": 21,
+        "rows": 14
+      },
+      "control": {
+        "tauS": 0.3,
+        "vMaxMs": 6,
+        "sigmaS": 0.5
+      },
+      "pressing": {
+        "reachS": 1.5,
+        "widthS": 0.3,
+        "carrierRadiusM": 1.5,
+        "carrierMaxBallZM": 1
+      },
+      "index": {
+        "wShare": 0.35,
+        "wFinalThird": 0.25,
+        "wStructure": 0.2,
+        "wPress": 0.2,
+        "wShotQuality": 0,
+        "pressHoldS": 2
+      },
+      "moments": {
+        "pressure": {
+          "onShare": 0.4,
+          "offShare": 0.3,
+          "offTicks": 4,
+          "n": 6,
+          "k": 3,
+          "windowS": 15,
+          "cooldownS": 30
+        },
+        "swing": {
+          "delta": 0.3,
+          "windowS": 5,
+          "rearmRange": 0.1,
+          "rearmTicks": 4,
+          "cooldownS": 20
+        }
+      }
+    },
+    "ticks": [
+      {
+        "timeMs": 5280000,
+        "teams": {
+          "bastion": {
+            "share": 0.2469,
+            "finalThird": 0.0024,
+            "index": 0.2284,
+            "indexDelta": -0.4499,
+            "components": {
+              "share": 0.2469,
+              "finalThird": 0.0024,
+              "structure": 0.6886,
+              "press": 0.0182,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7531,
+            "finalThird": 0.3222,
+            "index": 0.6782,
+            "indexDelta": 0.4499,
+            "components": {
+              "share": 0.7531,
+              "finalThird": 0.3222,
+              "structure": 0.6886,
+              "press": 0.9818,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3114,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0182
+      },
+      {
+        "timeMs": 5280500,
+        "teams": {
+          "bastion": {
+            "share": 0.2356,
+            "finalThird": 0.0023,
+            "index": 0.2234,
+            "indexDelta": -0.4671,
+            "components": {
+              "share": 0.2356,
+              "finalThird": 0.0023,
+              "structure": 0.6928,
+              "press": 0.0091,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7644,
+            "finalThird": 0.3448,
+            "index": 0.6905,
+            "indexDelta": 0.4671,
+            "components": {
+              "share": 0.7644,
+              "finalThird": 0.3448,
+              "structure": 0.6928,
+              "press": 0.9909,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3072,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0091
+      },
+      {
+        "timeMs": 5281000,
+        "teams": {
+          "bastion": {
+            "share": 0.2344,
+            "finalThird": 0.0024,
+            "index": 0.2229,
+            "indexDelta": -0.4687,
+            "components": {
+              "share": 0.2344,
+              "finalThird": 0.0024,
+              "structure": 0.6927,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7656,
+            "finalThird": 0.3471,
+            "index": 0.6916,
+            "indexDelta": 0.4687,
+            "components": {
+              "share": 0.7656,
+              "finalThird": 0.3471,
+              "structure": 0.6927,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3073,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5281500,
+        "teams": {
+          "bastion": {
+            "share": 0.2344,
+            "finalThird": 0.0022,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2344,
+              "finalThird": 0.0022,
+              "structure": 0.693,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7656,
+            "finalThird": 0.3471,
+            "index": 0.6916,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7656,
+              "finalThird": 0.3471,
+              "structure": 0.693,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.307,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5282000,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6933,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6933,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3067,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5282500,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5283000,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5283500,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5284000,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5284500,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5285000,
+        "teams": {
+          "bastion": {
+            "share": 0.2343,
+            "finalThird": 0.0021,
+            "index": 0.2229,
+            "indexDelta": -0.4688,
+            "components": {
+              "share": 0.2343,
+              "finalThird": 0.0021,
+              "structure": 0.6932,
+              "press": 0.0085,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7657,
+            "finalThird": 0.3471,
+            "index": 0.6917,
+            "indexDelta": 0.4688,
+            "components": {
+              "share": 0.7657,
+              "finalThird": 0.3471,
+              "structure": 0.6932,
+              "press": 0.9915,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3068,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0085
+      },
+      {
+        "timeMs": 5285500,
+        "teams": {
+          "bastion": {
+            "share": 0.2268,
+            "finalThird": 0.0019,
+            "index": 0.2199,
+            "indexDelta": -0.4776,
+            "components": {
+              "share": 0.2268,
+              "finalThird": 0.0019,
+              "structure": 0.6902,
+              "press": 0.0097,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7732,
+            "finalThird": 0.3629,
+            "index": 0.6974,
+            "indexDelta": 0.4776,
+            "components": {
+              "share": 0.7732,
+              "finalThird": 0.3629,
+              "structure": 0.6902,
+              "press": 0.9903,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3098,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0097
+      },
+      {
+        "timeMs": 5286000,
+        "teams": {
+          "bastion": {
+            "share": 0.2199,
+            "finalThird": 0.0017,
+            "index": 0.2184,
+            "indexDelta": -0.484,
+            "components": {
+              "share": 0.2199,
+              "finalThird": 0.0017,
+              "structure": 0.6892,
+              "press": 0.0156,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7801,
+            "finalThird": 0.3785,
+            "index": 0.7024,
+            "indexDelta": 0.484,
+            "components": {
+              "share": 0.7801,
+              "finalThird": 0.3785,
+              "structure": 0.6892,
+              "press": 0.9844,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3108,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0156
+      },
+      {
+        "timeMs": 5286500,
+        "teams": {
+          "bastion": {
+            "share": 0.2186,
+            "finalThird": 0.0017,
+            "index": 0.2199,
+            "indexDelta": -0.4818,
+            "components": {
+              "share": 0.2186,
+              "finalThird": 0.0017,
+              "structure": 0.6894,
+              "press": 0.0252,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.7814,
+            "finalThird": 0.3816,
+            "index": 0.7017,
+            "indexDelta": 0.4818,
+            "components": {
+              "share": 0.7814,
+              "finalThird": 0.3816,
+              "structure": 0.6894,
+              "press": 0.9748,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3106,
+        "carrier": {
+          "playerId": "vale-4",
+          "teamId": "vale"
+        },
+        "pressing": 0.0252
+      },
+      {
+        "timeMs": 5287000,
+        "teams": {
+          "bastion": {
+            "share": 0.2132,
+            "finalThird": 0.0015,
+            "index": 0.2187,
+            "indexDelta": -0.489,
+            "components": {
+              "share": 0.2132,
+              "finalThird": 0.0015,
+              "structure": 0.6931,
+              "press": 0.0252,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5286500
+          },
+          "vale": {
+            "share": 0.7868,
+            "finalThird": 0.395,
+            "index": 0.7077,
+            "indexDelta": 0.489,
+            "components": {
+              "share": 0.7868,
+              "finalThird": 0.395,
+              "structure": 0.6931,
+              "press": 0.9748,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5286500
+          }
+        },
+        "entropy": 0.3069,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5287500,
+        "teams": {
+          "bastion": {
+            "share": 0.2005,
+            "finalThird": 0.001,
+            "index": 0.2161,
+            "indexDelta": -0.5058,
+            "components": {
+              "share": 0.2005,
+              "finalThird": 0.001,
+              "structure": 0.7031,
+              "press": 0.0252,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5286500
+          },
+          "vale": {
+            "share": 0.7995,
+            "finalThird": 0.4258,
+            "index": 0.7219,
+            "indexDelta": 0.5058,
+            "components": {
+              "share": 0.7995,
+              "finalThird": 0.4258,
+              "structure": 0.7031,
+              "press": 0.9748,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5286500
+          }
+        },
+        "entropy": 0.2969,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5288000,
+        "teams": {
+          "bastion": {
+            "share": 0.1906,
+            "finalThird": 0.0007,
+            "index": 0.214,
+            "indexDelta": -0.5168,
+            "components": {
+              "share": 0.1906,
+              "finalThird": 0.0007,
+              "structure": 0.7048,
+              "press": 0.0308,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8094,
+            "finalThird": 0.451,
+            "index": 0.7309,
+            "indexDelta": 0.5168,
+            "components": {
+              "share": 0.8094,
+              "finalThird": 0.451,
+              "structure": 0.7048,
+              "press": 0.9692,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2952,
+        "carrier": {
+          "playerId": "vale-5",
+          "teamId": "vale"
+        },
+        "pressing": 0.0308
+      },
+      {
+        "timeMs": 5288500,
+        "teams": {
+          "bastion": {
+            "share": 0.186,
+            "finalThird": 0.0007,
+            "index": 0.2142,
+            "indexDelta": -0.5179,
+            "components": {
+              "share": 0.186,
+              "finalThird": 0.0007,
+              "structure": 0.6974,
+              "press": 0.047,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.814,
+            "finalThird": 0.4682,
+            "index": 0.732,
+            "indexDelta": 0.5179,
+            "components": {
+              "share": 0.814,
+              "finalThird": 0.4682,
+              "structure": 0.6974,
+              "press": 0.953,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3026,
+        "carrier": {
+          "playerId": "vale-5",
+          "teamId": "vale"
+        },
+        "pressing": 0.047
+      },
+      {
+        "timeMs": 5289000,
+        "teams": {
+          "bastion": {
+            "share": 0.1848,
+            "finalThird": 0.0006,
+            "index": 0.2182,
+            "indexDelta": -0.5087,
+            "components": {
+              "share": 0.1848,
+              "finalThird": 0.0006,
+              "structure": 0.6872,
+              "press": 0.0796,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8152,
+            "finalThird": 0.4803,
+            "index": 0.7269,
+            "indexDelta": 0.5087,
+            "components": {
+              "share": 0.8152,
+              "finalThird": 0.4803,
+              "structure": 0.6872,
+              "press": 0.9204,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3128,
+        "carrier": {
+          "playerId": "vale-5",
+          "teamId": "vale"
+        },
+        "pressing": 0.0796
+      },
+      {
+        "timeMs": 5289500,
+        "teams": {
+          "bastion": {
+            "share": 0.1847,
+            "finalThird": 0.0006,
+            "index": 0.2112,
+            "indexDelta": -0.5219,
+            "components": {
+              "share": 0.1847,
+              "finalThird": 0.0006,
+              "structure": 0.6803,
+              "press": 0.0517,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8153,
+            "finalThird": 0.4878,
+            "index": 0.733,
+            "indexDelta": 0.5219,
+            "components": {
+              "share": 0.8153,
+              "finalThird": 0.4878,
+              "structure": 0.6803,
+              "press": 0.9483,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3197,
+        "carrier": {
+          "playerId": "vale-5",
+          "teamId": "vale"
+        },
+        "pressing": 0.0517
+      },
+      {
+        "timeMs": 5290000,
+        "teams": {
+          "bastion": {
+            "share": 0.1914,
+            "finalThird": 0.0007,
+            "index": 0.2125,
+            "indexDelta": -0.514,
+            "components": {
+              "share": 0.1914,
+              "finalThird": 0.0007,
+              "structure": 0.675,
+              "press": 0.0517,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5289500
+          },
+          "vale": {
+            "share": 0.8086,
+            "finalThird": 0.4751,
+            "index": 0.7265,
+            "indexDelta": 0.514,
+            "components": {
+              "share": 0.8086,
+              "finalThird": 0.4751,
+              "structure": 0.675,
+              "press": 0.9483,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5289500
+          }
+        },
+        "entropy": 0.325,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5290500,
+        "teams": {
+          "bastion": {
+            "share": 0.1906,
+            "finalThird": 0.0008,
+            "index": 0.2145,
+            "indexDelta": -0.5136,
+            "components": {
+              "share": 0.1906,
+              "finalThird": 0.0008,
+              "structure": 0.6862,
+              "press": 0.0517,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5289500
+          },
+          "vale": {
+            "share": 0.8094,
+            "finalThird": 0.4715,
+            "index": 0.7281,
+            "indexDelta": 0.5136,
+            "components": {
+              "share": 0.8094,
+              "finalThird": 0.4715,
+              "structure": 0.6862,
+              "press": 0.9483,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5289500
+          }
+        },
+        "entropy": 0.3138,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5291000,
+        "teams": {
+          "bastion": {
+            "share": 0.1933,
+            "finalThird": 0.0008,
+            "index": 0.2881,
+            "indexDelta": -0.3638,
+            "components": {
+              "share": 0.1933,
+              "finalThird": 0.0008,
+              "structure": 0.6818,
+              "press": 0.4193,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8067,
+            "finalThird": 0.4679,
+            "index": 0.6518,
+            "indexDelta": 0.3638,
+            "components": {
+              "share": 0.8067,
+              "finalThird": 0.4679,
+              "structure": 0.6818,
+              "press": 0.5807,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3182,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.4193
+      },
+      {
+        "timeMs": 5291500,
+        "teams": {
+          "bastion": {
+            "share": 0.1941,
+            "finalThird": 0.0007,
+            "index": 0.3127,
+            "indexDelta": -0.3132,
+            "components": {
+              "share": 0.1941,
+              "finalThird": 0.0007,
+              "structure": 0.6756,
+              "press": 0.5473,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8059,
+            "finalThird": 0.4728,
+            "index": 0.6259,
+            "indexDelta": 0.3132,
+            "components": {
+              "share": 0.8059,
+              "finalThird": 0.4728,
+              "structure": 0.6756,
+              "press": 0.4527,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3244,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.5473
+      },
+      {
+        "timeMs": 5292000,
+        "teams": {
+          "bastion": {
+            "share": 0.1828,
+            "finalThird": 0.0005,
+            "index": 0.319,
+            "indexDelta": -0.314,
+            "components": {
+              "share": 0.1828,
+              "finalThird": 0.0005,
+              "structure": 0.6961,
+              "press": 0.5782,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8172,
+            "finalThird": 0.4936,
+            "index": 0.633,
+            "indexDelta": 0.314,
+            "components": {
+              "share": 0.8172,
+              "finalThird": 0.4936,
+              "structure": 0.6961,
+              "press": 0.4218,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3039,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.5782
+      },
+      {
+        "timeMs": 5292500,
+        "teams": {
+          "bastion": {
+            "share": 0.1807,
+            "finalThird": 0.0005,
+            "index": 0.3307,
+            "indexDelta": -0.293,
+            "components": {
+              "share": 0.1807,
+              "finalThird": 0.0005,
+              "structure": 0.7006,
+              "press": 0.6359,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8193,
+            "finalThird": 0.4957,
+            "index": 0.6236,
+            "indexDelta": 0.293,
+            "components": {
+              "share": 0.8193,
+              "finalThird": 0.4957,
+              "structure": 0.7006,
+              "press": 0.3641,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2994,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.6359
+      },
+      {
+        "timeMs": 5293000,
+        "teams": {
+          "bastion": {
+            "share": 0.1826,
+            "finalThird": 0.0005,
+            "index": 0.3301,
+            "indexDelta": -0.2908,
+            "components": {
+              "share": 0.1826,
+              "finalThird": 0.0005,
+              "structure": 0.6946,
+              "press": 0.6359,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5292500
+          },
+          "vale": {
+            "share": 0.8174,
+            "finalThird": 0.4923,
+            "index": 0.6209,
+            "indexDelta": 0.2908,
+            "components": {
+              "share": 0.8174,
+              "finalThird": 0.4923,
+              "structure": 0.6946,
+              "press": 0.3641,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5292500
+          }
+        },
+        "entropy": 0.3054,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5293500,
+        "teams": {
+          "bastion": {
+            "share": 0.1819,
+            "finalThird": 0.0005,
+            "index": 0.3535,
+            "indexDelta": -0.2431,
+            "components": {
+              "share": 0.1819,
+              "finalThird": 0.0005,
+              "structure": 0.6884,
+              "press": 0.7604,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8181,
+            "finalThird": 0.4987,
+            "index": 0.5966,
+            "indexDelta": 0.2431,
+            "components": {
+              "share": 0.8181,
+              "finalThird": 0.4987,
+              "structure": 0.6884,
+              "press": 0.2396,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3116,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.7604
+      },
+      {
+        "timeMs": 5294000,
+        "teams": {
+          "bastion": {
+            "share": 0.1825,
+            "finalThird": 0.0004,
+            "index": 0.3498,
+            "indexDelta": -0.2481,
+            "components": {
+              "share": 0.1825,
+              "finalThird": 0.0004,
+              "structure": 0.68,
+              "press": 0.7492,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8175,
+            "finalThird": 0.5024,
+            "index": 0.5979,
+            "indexDelta": 0.2481,
+            "components": {
+              "share": 0.8175,
+              "finalThird": 0.5024,
+              "structure": 0.68,
+              "press": 0.2508,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.32,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.7492
+      },
+      {
+        "timeMs": 5294500,
+        "teams": {
+          "bastion": {
+            "share": 0.1713,
+            "finalThird": 0.0003,
+            "index": 0.3539,
+            "indexDelta": -0.2472,
+            "components": {
+              "share": 0.1713,
+              "finalThird": 0.0003,
+              "structure": 0.6782,
+              "press": 0.7913,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8287,
+            "finalThird": 0.5347,
+            "index": 0.6011,
+            "indexDelta": 0.2472,
+            "components": {
+              "share": 0.8287,
+              "finalThird": 0.5347,
+              "structure": 0.6782,
+              "press": 0.2087,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3218,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.7913
+      },
+      {
+        "timeMs": 5295000,
+        "teams": {
+          "bastion": {
+            "share": 0.1666,
+            "finalThird": 0.0003,
+            "index": 0.3636,
+            "indexDelta": -0.2301,
+            "components": {
+              "share": 0.1666,
+              "finalThird": 0.0003,
+              "structure": 0.6741,
+              "press": 0.8521,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8334,
+            "finalThird": 0.5505,
+            "index": 0.5937,
+            "indexDelta": 0.2301,
+            "components": {
+              "share": 0.8334,
+              "finalThird": 0.5505,
+              "structure": 0.6741,
+              "press": 0.1479,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3259,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.8521
+      },
+      {
+        "timeMs": 5295500,
+        "teams": {
+          "bastion": {
+            "share": 0.1666,
+            "finalThird": 0.0003,
+            "index": 0.3641,
+            "indexDelta": -0.2296,
+            "components": {
+              "share": 0.1666,
+              "finalThird": 0.0003,
+              "structure": 0.6765,
+              "press": 0.8521,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5295000
+          },
+          "vale": {
+            "share": 0.8334,
+            "finalThird": 0.5485,
+            "index": 0.5937,
+            "indexDelta": 0.2296,
+            "components": {
+              "share": 0.8334,
+              "finalThird": 0.5485,
+              "structure": 0.6765,
+              "press": 0.1479,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5295000
+          }
+        },
+        "entropy": 0.3235,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5296000,
+        "teams": {
+          "bastion": {
+            "share": 0.165,
+            "finalThird": 0.0003,
+            "index": 0.3635,
+            "indexDelta": -0.2321,
+            "components": {
+              "share": 0.165,
+              "finalThird": 0.0003,
+              "structure": 0.6764,
+              "press": 0.8521,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5295000
+          },
+          "vale": {
+            "share": 0.835,
+            "finalThird": 0.5539,
+            "index": 0.5956,
+            "indexDelta": 0.2321,
+            "components": {
+              "share": 0.835,
+              "finalThird": 0.5539,
+              "structure": 0.6764,
+              "press": 0.1479,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5295000
+          }
+        },
+        "entropy": 0.3236,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5296500,
+        "teams": {
+          "bastion": {
+            "share": 0.1622,
+            "finalThird": 0.0002,
+            "index": 0.2347,
+            "indexDelta": -0.4908,
+            "components": {
+              "share": 0.1622,
+              "finalThird": 0.0002,
+              "structure": 0.6747,
+              "press": 0.2148,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8378,
+            "finalThird": 0.5612,
+            "index": 0.7255,
+            "indexDelta": 0.4908,
+            "components": {
+              "share": 0.8378,
+              "finalThird": 0.5612,
+              "structure": 0.6747,
+              "press": 0.7852,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3253,
+        "carrier": {
+          "playerId": "vale-2",
+          "teamId": "vale"
+        },
+        "pressing": 0.2148
+      },
+      {
+        "timeMs": 5297000,
+        "teams": {
+          "bastion": {
+            "share": 0.1552,
+            "finalThird": 0.0002,
+            "index": 0.2298,
+            "indexDelta": -0.5059,
+            "components": {
+              "share": 0.1552,
+              "finalThird": 0.0002,
+              "structure": 0.6746,
+              "press": 0.2027,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8448,
+            "finalThird": 0.5827,
+            "index": 0.7357,
+            "indexDelta": 0.5059,
+            "components": {
+              "share": 0.8448,
+              "finalThird": 0.5827,
+              "structure": 0.6746,
+              "press": 0.7973,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3254,
+        "carrier": {
+          "playerId": "vale-2",
+          "teamId": "vale"
+        },
+        "pressing": 0.2027
+      },
+      {
+        "timeMs": 5297500,
+        "teams": {
+          "bastion": {
+            "share": 0.1485,
+            "finalThird": 0.0001,
+            "index": 0.2428,
+            "indexDelta": -0.4872,
+            "components": {
+              "share": 0.1485,
+              "finalThird": 0.0001,
+              "structure": 0.6826,
+              "press": 0.2714,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8515,
+            "finalThird": 0.599,
+            "index": 0.73,
+            "indexDelta": 0.4872,
+            "components": {
+              "share": 0.8515,
+              "finalThird": 0.599,
+              "structure": 0.6826,
+              "press": 0.7286,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3174,
+        "carrier": {
+          "playerId": "vale-2",
+          "teamId": "vale"
+        },
+        "pressing": 0.2714
+      },
+      {
+        "timeMs": 5298000,
+        "teams": {
+          "bastion": {
+            "share": 0.1493,
+            "finalThird": 0.0001,
+            "index": 0.2508,
+            "indexDelta": -0.4724,
+            "components": {
+              "share": 0.1493,
+              "finalThird": 0.0001,
+              "structure": 0.6874,
+              "press": 0.3051,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8507,
+            "finalThird": 0.5957,
+            "index": 0.7232,
+            "indexDelta": 0.4724,
+            "components": {
+              "share": 0.8507,
+              "finalThird": 0.5957,
+              "structure": 0.6874,
+              "press": 0.6949,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3126,
+        "carrier": {
+          "playerId": "vale-2",
+          "teamId": "vale"
+        },
+        "pressing": 0.3051
+      },
+      {
+        "timeMs": 5298500,
+        "teams": {
+          "bastion": {
+            "share": 0.1395,
+            "finalThird": 0.0001,
+            "index": 0.3442,
+            "indexDelta": -0.2969,
+            "components": {
+              "share": 0.1395,
+              "finalThird": 0.0001,
+              "structure": 0.6978,
+              "press": 0.779,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8605,
+            "finalThird": 0.6246,
+            "index": 0.6411,
+            "indexDelta": 0.2969,
+            "components": {
+              "share": 0.8605,
+              "finalThird": 0.6246,
+              "structure": 0.6978,
+              "press": 0.221,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3022,
+        "carrier": {
+          "playerId": "vale-6",
+          "teamId": "vale"
+        },
+        "pressing": 0.779
+      },
+      {
+        "timeMs": 5299000,
+        "teams": {
+          "bastion": {
+            "share": 0.1404,
+            "finalThird": 0.0001,
+            "index": 0.3263,
+            "indexDelta": -0.3318,
+            "components": {
+              "share": 0.1404,
+              "finalThird": 0.0001,
+              "structure": 0.6938,
+              "press": 0.6919,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8596,
+            "finalThird": 0.6276,
+            "index": 0.6581,
+            "indexDelta": 0.3318,
+            "components": {
+              "share": 0.8596,
+              "finalThird": 0.6276,
+              "structure": 0.6938,
+              "press": 0.3081,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3062,
+        "carrier": {
+          "playerId": "vale-6",
+          "teamId": "vale"
+        },
+        "pressing": 0.6919
+      },
+      {
+        "timeMs": 5299500,
+        "teams": {
+          "bastion": {
+            "share": 0.1352,
+            "finalThird": 0,
+            "index": 0.3525,
+            "indexDelta": -0.287,
+            "components": {
+              "share": 0.1352,
+              "finalThird": 0,
+              "structure": 0.7081,
+              "press": 0.8178,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8648,
+            "finalThird": 0.6351,
+            "index": 0.6395,
+            "indexDelta": 0.287,
+            "components": {
+              "share": 0.8648,
+              "finalThird": 0.6351,
+              "structure": 0.7081,
+              "press": 0.1822,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2919,
+        "carrier": {
+          "playerId": "vale-6",
+          "teamId": "vale"
+        },
+        "pressing": 0.8178
+      },
+      {
+        "timeMs": 5300000,
+        "teams": {
+          "bastion": {
+            "share": 0.1311,
+            "finalThird": 0,
+            "index": 0.3721,
+            "indexDelta": -0.2497,
+            "components": {
+              "share": 0.1311,
+              "finalThird": 0,
+              "structure": 0.7061,
+              "press": 0.9251,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8689,
+            "finalThird": 0.6461,
+            "index": 0.6219,
+            "indexDelta": 0.2497,
+            "components": {
+              "share": 0.8689,
+              "finalThird": 0.6461,
+              "structure": 0.7061,
+              "press": 0.0749,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2939,
+        "carrier": {
+          "playerId": "vale-6",
+          "teamId": "vale"
+        },
+        "pressing": 0.9251
+      },
+      {
+        "timeMs": 5300500,
+        "teams": {
+          "bastion": {
+            "share": 0.1316,
+            "finalThird": 0,
+            "index": 0.375,
+            "indexDelta": -0.242,
+            "components": {
+              "share": 0.1316,
+              "finalThird": 0,
+              "structure": 0.7016,
+              "press": 0.9432,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8684,
+            "finalThird": 0.6457,
+            "index": 0.6171,
+            "indexDelta": 0.242,
+            "components": {
+              "share": 0.8684,
+              "finalThird": 0.6457,
+              "structure": 0.7016,
+              "press": 0.0568,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2984,
+        "carrier": {
+          "playerId": "vale-6",
+          "teamId": "vale"
+        },
+        "pressing": 0.9432
+      },
+      {
+        "timeMs": 5301000,
+        "teams": {
+          "bastion": {
+            "share": 0.1338,
+            "finalThird": 0.0001,
+            "index": 0.3759,
+            "indexDelta": -0.2386,
+            "components": {
+              "share": 0.1338,
+              "finalThird": 0.0001,
+              "structure": 0.7023,
+              "press": 0.9432,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5300500
+          },
+          "vale": {
+            "share": 0.8662,
+            "finalThird": 0.6384,
+            "index": 0.6146,
+            "indexDelta": 0.2386,
+            "components": {
+              "share": 0.8662,
+              "finalThird": 0.6384,
+              "structure": 0.7023,
+              "press": 0.0568,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5300500
+          }
+        },
+        "entropy": 0.2977,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5301500,
+        "teams": {
+          "bastion": {
+            "share": 0.1397,
+            "finalThird": 0.0001,
+            "index": 0.3769,
+            "indexDelta": -0.231,
+            "components": {
+              "share": 0.1397,
+              "finalThird": 0.0001,
+              "structure": 0.6965,
+              "press": 0.9432,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5300500
+          },
+          "vale": {
+            "share": 0.8603,
+            "finalThird": 0.6243,
+            "index": 0.6079,
+            "indexDelta": 0.231,
+            "components": {
+              "share": 0.8603,
+              "finalThird": 0.6243,
+              "structure": 0.6965,
+              "press": 0.0568,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5300500
+          }
+        },
+        "entropy": 0.3035,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5302000,
+        "teams": {
+          "bastion": {
+            "share": 0.1484,
+            "finalThird": 0.0002,
+            "index": 0.3842,
+            "indexDelta": -0.2033,
+            "components": {
+              "share": 0.1484,
+              "finalThird": 0.0002,
+              "structure": 0.6792,
+              "press": 0.9817,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8516,
+            "finalThird": 0.5999,
+            "index": 0.5875,
+            "indexDelta": 0.2033,
+            "components": {
+              "share": 0.8516,
+              "finalThird": 0.5999,
+              "structure": 0.6792,
+              "press": 0.0183,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3208,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.9817
+      },
+      {
+        "timeMs": 5302500,
+        "teams": {
+          "bastion": {
+            "share": 0.1546,
+            "finalThird": 0.0003,
+            "index": 0.3826,
+            "indexDelta": -0.1992,
+            "components": {
+              "share": 0.1546,
+              "finalThird": 0.0003,
+              "structure": 0.6733,
+              "press": 0.9691,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8454,
+            "finalThird": 0.5806,
+            "index": 0.5819,
+            "indexDelta": 0.1992,
+            "components": {
+              "share": 0.8454,
+              "finalThird": 0.5806,
+              "structure": 0.6733,
+              "press": 0.0309,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3267,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.9691
+      },
+      {
+        "timeMs": 5303000,
+        "teams": {
+          "bastion": {
+            "share": 0.1603,
+            "finalThird": 0.0002,
+            "index": 0.3878,
+            "indexDelta": -0.1876,
+            "components": {
+              "share": 0.1603,
+              "finalThird": 0.0002,
+              "structure": 0.6814,
+              "press": 0.9769,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8397,
+            "finalThird": 0.5627,
+            "index": 0.5755,
+            "indexDelta": 0.1876,
+            "components": {
+              "share": 0.8397,
+              "finalThird": 0.5627,
+              "structure": 0.6814,
+              "press": 0.0231,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3186,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.9769
+      },
+      {
+        "timeMs": 5303500,
+        "teams": {
+          "bastion": {
+            "share": 0.1555,
+            "finalThird": 0.0002,
+            "index": 0.39,
+            "indexDelta": -0.194,
+            "components": {
+              "share": 0.1555,
+              "finalThird": 0.0002,
+              "structure": 0.7005,
+              "press": 0.9769,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8445,
+            "finalThird": 0.5746,
+            "index": 0.5839,
+            "indexDelta": 0.194,
+            "components": {
+              "share": 0.8445,
+              "finalThird": 0.5746,
+              "structure": 0.7005,
+              "press": 0.0231,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2995,
+        "carrier": {
+          "playerId": "vale-7",
+          "teamId": "vale"
+        },
+        "pressing": 0.9769
+      },
+      {
+        "timeMs": 5304000,
+        "teams": {
+          "bastion": {
+            "share": 0.1412,
+            "finalThird": 0.0001,
+            "index": 0.3888,
+            "indexDelta": -0.2136,
+            "components": {
+              "share": 0.1412,
+              "finalThird": 0.0001,
+              "structure": 0.72,
+              "press": 0.9769,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5303500
+          },
+          "vale": {
+            "share": 0.8588,
+            "finalThird": 0.6131,
+            "index": 0.6025,
+            "indexDelta": 0.2136,
+            "components": {
+              "share": 0.8588,
+              "finalThird": 0.6131,
+              "structure": 0.72,
+              "press": 0.0231,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5303500
+          }
+        },
+        "entropy": 0.28,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5304500,
+        "teams": {
+          "bastion": {
+            "share": 0.1348,
+            "finalThird": 0,
+            "index": 0.3928,
+            "indexDelta": -0.2138,
+            "components": {
+              "share": 0.1348,
+              "finalThird": 0,
+              "structure": 0.7302,
+              "press": 0.9978,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8652,
+            "finalThird": 0.6292,
+            "index": 0.6066,
+            "indexDelta": 0.2138,
+            "components": {
+              "share": 0.8652,
+              "finalThird": 0.6292,
+              "structure": 0.7302,
+              "press": 0.0022,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2698,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9978
+      },
+      {
+        "timeMs": 5305000,
+        "teams": {
+          "bastion": {
+            "share": 0.1343,
+            "finalThird": 0.0001,
+            "index": 0.3927,
+            "indexDelta": -0.2153,
+            "components": {
+              "share": 0.1343,
+              "finalThird": 0.0001,
+              "structure": 0.7326,
+              "press": 0.9957,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8657,
+            "finalThird": 0.6305,
+            "index": 0.608,
+            "indexDelta": 0.2153,
+            "components": {
+              "share": 0.8657,
+              "finalThird": 0.6305,
+              "structure": 0.7326,
+              "press": 0.0043,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2674,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9957
+      },
+      {
+        "timeMs": 5305500,
+        "teams": {
+          "bastion": {
+            "share": 0.1334,
+            "finalThird": 0.0001,
+            "index": 0.3881,
+            "indexDelta": -0.2201,
+            "components": {
+              "share": 0.1334,
+              "finalThird": 0.0001,
+              "structure": 0.7183,
+              "press": 0.9884,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8666,
+            "finalThird": 0.6353,
+            "index": 0.6081,
+            "indexDelta": 0.2201,
+            "components": {
+              "share": 0.8666,
+              "finalThird": 0.6353,
+              "structure": 0.7183,
+              "press": 0.0116,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2817,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9884
+      },
+      {
+        "timeMs": 5306000,
+        "teams": {
+          "bastion": {
+            "share": 0.1381,
+            "finalThird": 0.0001,
+            "index": 0.3855,
+            "indexDelta": -0.2148,
+            "components": {
+              "share": 0.1381,
+              "finalThird": 0.0001,
+              "structure": 0.6974,
+              "press": 0.9884,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5305500
+          },
+          "vale": {
+            "share": 0.8619,
+            "finalThird": 0.6275,
+            "index": 0.6003,
+            "indexDelta": 0.2148,
+            "components": {
+              "share": 0.8619,
+              "finalThird": 0.6275,
+              "structure": 0.6974,
+              "press": 0.0116,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5305500
+          }
+        },
+        "entropy": 0.3026,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5306500,
+        "teams": {
+          "bastion": {
+            "share": 0.149,
+            "finalThird": 0.0002,
+            "index": 0.3844,
+            "indexDelta": -0.2035,
+            "components": {
+              "share": 0.149,
+              "finalThird": 0.0002,
+              "structure": 0.6817,
+              "press": 0.9796,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.851,
+            "finalThird": 0.5988,
+            "index": 0.588,
+            "indexDelta": 0.2035,
+            "components": {
+              "share": 0.851,
+              "finalThird": 0.5988,
+              "structure": 0.6817,
+              "press": 0.0204,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3183,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.9796
+      },
+      {
+        "timeMs": 5307000,
+        "teams": {
+          "bastion": {
+            "share": 0.1576,
+            "finalThird": 0.0002,
+            "index": 0.3881,
+            "indexDelta": -0.1901,
+            "components": {
+              "share": 0.1576,
+              "finalThird": 0.0002,
+              "structure": 0.6828,
+              "press": 0.9815,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8424,
+            "finalThird": 0.5724,
+            "index": 0.5782,
+            "indexDelta": 0.1901,
+            "components": {
+              "share": 0.8424,
+              "finalThird": 0.5724,
+              "structure": 0.6828,
+              "press": 0.0185,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3172,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.9815
+      },
+      {
+        "timeMs": 5307500,
+        "teams": {
+          "bastion": {
+            "share": 0.1618,
+            "finalThird": 0.0002,
+            "index": 0.3911,
+            "indexDelta": -0.1822,
+            "components": {
+              "share": 0.1618,
+              "finalThird": 0.0002,
+              "structure": 0.6841,
+              "press": 0.9882,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8382,
+            "finalThird": 0.563,
+            "index": 0.5733,
+            "indexDelta": 0.1822,
+            "components": {
+              "share": 0.8382,
+              "finalThird": 0.563,
+              "structure": 0.6841,
+              "press": 0.0118,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3159,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.9882
+      },
+      {
+        "timeMs": 5308000,
+        "teams": {
+          "bastion": {
+            "share": 0.1596,
+            "finalThird": 0.0001,
+            "index": 0.3883,
+            "indexDelta": -0.194,
+            "components": {
+              "share": 0.1596,
+              "finalThird": 0.0001,
+              "structure": 0.6964,
+              "press": 0.9658,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8404,
+            "finalThird": 0.5683,
+            "index": 0.5823,
+            "indexDelta": 0.194,
+            "components": {
+              "share": 0.8404,
+              "finalThird": 0.5683,
+              "structure": 0.6964,
+              "press": 0.0342,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3036,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.9658
+      },
+      {
+        "timeMs": 5308500,
+        "teams": {
+          "bastion": {
+            "share": 0.1512,
+            "finalThird": 0.0001,
+            "index": 0.3869,
+            "indexDelta": -0.2078,
+            "components": {
+              "share": 0.1512,
+              "finalThird": 0.0001,
+              "structure": 0.7142,
+              "press": 0.9555,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8488,
+            "finalThird": 0.5836,
+            "index": 0.5947,
+            "indexDelta": 0.2078,
+            "components": {
+              "share": 0.8488,
+              "finalThird": 0.5836,
+              "structure": 0.7142,
+              "press": 0.0445,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2858,
+        "carrier": {
+          "playerId": "vale-8",
+          "teamId": "vale"
+        },
+        "pressing": 0.9555
+      },
+      {
+        "timeMs": 5309000,
+        "teams": {
+          "bastion": {
+            "share": 0.1464,
+            "finalThird": 0.0001,
+            "index": 0.3844,
+            "indexDelta": -0.2156,
+            "components": {
+              "share": 0.1464,
+              "finalThird": 0.0001,
+              "structure": 0.7101,
+              "press": 0.9555,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5308500
+          },
+          "vale": {
+            "share": 0.8536,
+            "finalThird": 0.6009,
+            "index": 0.5999,
+            "indexDelta": 0.2156,
+            "components": {
+              "share": 0.8536,
+              "finalThird": 0.6009,
+              "structure": 0.7101,
+              "press": 0.0445,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5308500
+          }
+        },
+        "entropy": 0.2899,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5309500,
+        "teams": {
+          "bastion": {
+            "share": 0.1413,
+            "finalThird": 0.0001,
+            "index": 0.3052,
+            "indexDelta": -0.3756,
+            "components": {
+              "share": 0.1413,
+              "finalThird": 0.0001,
+              "structure": 0.7019,
+              "press": 0.5765,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8587,
+            "finalThird": 0.6205,
+            "index": 0.6808,
+            "indexDelta": 0.3756,
+            "components": {
+              "share": 0.8587,
+              "finalThird": 0.6205,
+              "structure": 0.7019,
+              "press": 0.4235,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2981,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.5765
+      },
+      {
+        "timeMs": 5310000,
+        "teams": {
+          "bastion": {
+            "share": 0.141,
+            "finalThird": 0.0001,
+            "index": 0.2917,
+            "indexDelta": -0.4003,
+            "components": {
+              "share": 0.141,
+              "finalThird": 0.0001,
+              "structure": 0.6927,
+              "press": 0.5188,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.859,
+            "finalThird": 0.6261,
+            "index": 0.692,
+            "indexDelta": 0.4003,
+            "components": {
+              "share": 0.859,
+              "finalThird": 0.6261,
+              "structure": 0.6927,
+              "press": 0.4812,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3073,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.5188
+      },
+      {
+        "timeMs": 5310500,
+        "teams": {
+          "bastion": {
+            "share": 0.1363,
+            "finalThird": 0.0001,
+            "index": 0.329,
+            "indexDelta": -0.3309,
+            "components": {
+              "share": 0.1363,
+              "finalThird": 0.0001,
+              "structure": 0.7011,
+              "press": 0.7051,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8637,
+            "finalThird": 0.6335,
+            "index": 0.6599,
+            "indexDelta": 0.3309,
+            "components": {
+              "share": 0.8637,
+              "finalThird": 0.6335,
+              "structure": 0.7011,
+              "press": 0.2949,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2989,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.7051
+      },
+      {
+        "timeMs": 5311000,
+        "teams": {
+          "bastion": {
+            "share": 0.1343,
+            "finalThird": 0,
+            "index": 0.3686,
+            "indexDelta": -0.2516,
+            "components": {
+              "share": 0.1343,
+              "finalThird": 0,
+              "structure": 0.6976,
+              "press": 0.9105,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8657,
+            "finalThird": 0.6394,
+            "index": 0.6203,
+            "indexDelta": 0.2516,
+            "components": {
+              "share": 0.8657,
+              "finalThird": 0.6394,
+              "structure": 0.6976,
+              "press": 0.0895,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3024,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.9105
+      },
+      {
+        "timeMs": 5311500,
+        "teams": {
+          "bastion": {
+            "share": 0.1324,
+            "finalThird": 0,
+            "index": 0.3742,
+            "indexDelta": -0.2415,
+            "components": {
+              "share": 0.1324,
+              "finalThird": 0,
+              "structure": 0.6947,
+              "press": 0.9444,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8676,
+            "finalThird": 0.6478,
+            "index": 0.6157,
+            "indexDelta": 0.2415,
+            "components": {
+              "share": 0.8676,
+              "finalThird": 0.6478,
+              "structure": 0.6947,
+              "press": 0.0556,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3053,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.9444
+      },
+      {
+        "timeMs": 5312000,
+        "teams": {
+          "bastion": {
+            "share": 0.1332,
+            "finalThird": 0,
+            "index": 0.3754,
+            "indexDelta": -0.24,
+            "components": {
+              "share": 0.1332,
+              "finalThird": 0,
+              "structure": 0.6993,
+              "press": 0.9444,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5311500
+          },
+          "vale": {
+            "share": 0.8668,
+            "finalThird": 0.644,
+            "index": 0.6154,
+            "indexDelta": 0.24,
+            "components": {
+              "share": 0.8668,
+              "finalThird": 0.644,
+              "structure": 0.6993,
+              "press": 0.0556,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5311500
+          }
+        },
+        "entropy": 0.3007,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5312500,
+        "teams": {
+          "bastion": {
+            "share": 0.1307,
+            "finalThird": 0,
+            "index": 0.3754,
+            "indexDelta": -0.2427,
+            "components": {
+              "share": 0.1307,
+              "finalThird": 0,
+              "structure": 0.7036,
+              "press": 0.9444,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5311500
+          },
+          "vale": {
+            "share": 0.8693,
+            "finalThird": 0.6477,
+            "index": 0.618,
+            "indexDelta": 0.2427,
+            "components": {
+              "share": 0.8693,
+              "finalThird": 0.6477,
+              "structure": 0.7036,
+              "press": 0.0556,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5311500
+          }
+        },
+        "entropy": 0.2964,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5313000,
+        "teams": {
+          "bastion": {
+            "share": 0.1288,
+            "finalThird": 0,
+            "index": 0.2707,
+            "indexDelta": -0.4542,
+            "components": {
+              "share": 0.1288,
+              "finalThird": 0,
+              "structure": 0.7062,
+              "press": 0.422,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8712,
+            "finalThird": 0.6525,
+            "index": 0.7249,
+            "indexDelta": 0.4542,
+            "components": {
+              "share": 0.8712,
+              "finalThird": 0.6525,
+              "structure": 0.7062,
+              "press": 0.578,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2938,
+        "carrier": {
+          "playerId": "bastion-3",
+          "teamId": "bastion"
+        },
+        "pressing": 0.578
+      },
+      {
+        "timeMs": 5313500,
+        "teams": {
+          "bastion": {
+            "share": 0.125,
+            "finalThird": 0,
+            "index": 0.2391,
+            "indexDelta": -0.5226,
+            "components": {
+              "share": 0.125,
+              "finalThird": 0,
+              "structure": 0.7117,
+              "press": 0.2651,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.875,
+            "finalThird": 0.6646,
+            "index": 0.7617,
+            "indexDelta": 0.5226,
+            "components": {
+              "share": 0.875,
+              "finalThird": 0.6646,
+              "structure": 0.7117,
+              "press": 0.7349,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2883,
+        "carrier": {
+          "playerId": "bastion-3",
+          "teamId": "bastion"
+        },
+        "pressing": 0.7349
+      },
+      {
+        "timeMs": 5314000,
+        "teams": {
+          "bastion": {
+            "share": 0.1299,
+            "finalThird": 0,
+            "index": 0.2409,
+            "indexDelta": -0.5158,
+            "components": {
+              "share": 0.1299,
+              "finalThird": 0,
+              "structure": 0.712,
+              "press": 0.2651,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          },
+          "vale": {
+            "share": 0.8701,
+            "finalThird": 0.6511,
+            "index": 0.7567,
+            "indexDelta": 0.5158,
+            "components": {
+              "share": 0.8701,
+              "finalThird": 0.6511,
+              "structure": 0.712,
+              "press": 0.7349,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          }
+        },
+        "entropy": 0.288,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5314500,
+        "teams": {
+          "bastion": {
+            "share": 0.1355,
+            "finalThird": 0,
+            "index": 0.2427,
+            "indexDelta": -0.5081,
+            "components": {
+              "share": 0.1355,
+              "finalThird": 0,
+              "structure": 0.7114,
+              "press": 0.2651,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          },
+          "vale": {
+            "share": 0.8645,
+            "finalThird": 0.6359,
+            "index": 0.7508,
+            "indexDelta": 0.5081,
+            "components": {
+              "share": 0.8645,
+              "finalThird": 0.6359,
+              "structure": 0.7114,
+              "press": 0.7349,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          }
+        },
+        "entropy": 0.2886,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5315000,
+        "teams": {
+          "bastion": {
+            "share": 0.1381,
+            "finalThird": 0,
+            "index": 0.2446,
+            "indexDelta": -0.5041,
+            "components": {
+              "share": 0.1381,
+              "finalThird": 0,
+              "structure": 0.7163,
+              "press": 0.2651,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          },
+          "vale": {
+            "share": 0.8619,
+            "finalThird": 0.6273,
+            "index": 0.7487,
+            "indexDelta": 0.5041,
+            "components": {
+              "share": 0.8619,
+              "finalThird": 0.6273,
+              "structure": 0.7163,
+              "press": 0.7349,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          }
+        },
+        "entropy": 0.2837,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5315500,
+        "teams": {
+          "bastion": {
+            "share": 0.1357,
+            "finalThird": 0,
+            "index": 0.2432,
+            "indexDelta": -0.5077,
+            "components": {
+              "share": 0.1357,
+              "finalThird": 0,
+              "structure": 0.7134,
+              "press": 0.2651,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          },
+          "vale": {
+            "share": 0.8643,
+            "finalThird": 0.6351,
+            "index": 0.7509,
+            "indexDelta": 0.5077,
+            "components": {
+              "share": 0.8643,
+              "finalThird": 0.6351,
+              "structure": 0.7134,
+              "press": 0.7349,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5313500
+          }
+        },
+        "entropy": 0.2866,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5316000,
+        "teams": {
+          "bastion": {
+            "share": 0.1296,
+            "finalThird": 0,
+            "index": 0.2452,
+            "indexDelta": -0.5056,
+            "components": {
+              "share": 0.1296,
+              "finalThird": 0,
+              "structure": 0.7061,
+              "press": 0.2931,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8704,
+            "finalThird": 0.6543,
+            "index": 0.7508,
+            "indexDelta": 0.5056,
+            "components": {
+              "share": 0.8704,
+              "finalThird": 0.6543,
+              "structure": 0.7061,
+              "press": 0.7069,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2939,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.2931
+      },
+      {
+        "timeMs": 5316500,
+        "teams": {
+          "bastion": {
+            "share": 0.1284,
+            "finalThird": 0,
+            "index": 0.2528,
+            "indexDelta": -0.4908,
+            "components": {
+              "share": 0.1284,
+              "finalThird": 0,
+              "structure": 0.704,
+              "press": 0.3355,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8716,
+            "finalThird": 0.6596,
+            "index": 0.7437,
+            "indexDelta": 0.4908,
+            "components": {
+              "share": 0.8716,
+              "finalThird": 0.6596,
+              "structure": 0.704,
+              "press": 0.6645,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.296,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.3355
+      },
+      {
+        "timeMs": 5317000,
+        "teams": {
+          "bastion": {
+            "share": 0.1273,
+            "finalThird": 0,
+            "index": 0.2668,
+            "indexDelta": -0.4625,
+            "components": {
+              "share": 0.1273,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": 0.411,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8727,
+            "finalThird": 0.6639,
+            "index": 0.7292,
+            "indexDelta": 0.4625,
+            "components": {
+              "share": 0.8727,
+              "finalThird": 0.6639,
+              "structure": 0.7,
+              "press": 0.589,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.411
+      },
+      {
+        "timeMs": 5317500,
+        "teams": {
+          "bastion": {
+            "share": 0.1248,
+            "finalThird": 0,
+            "index": 0.2734,
+            "indexDelta": -0.4496,
+            "components": {
+              "share": 0.1248,
+              "finalThird": 0,
+              "structure": 0.6963,
+              "press": 0.4525,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8752,
+            "finalThird": 0.6718,
+            "index": 0.723,
+            "indexDelta": 0.4496,
+            "components": {
+              "share": 0.8752,
+              "finalThird": 0.6718,
+              "structure": 0.6963,
+              "press": 0.5475,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3037,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.4525
+      },
+      {
+        "timeMs": 5318000,
+        "teams": {
+          "bastion": {
+            "share": 0.1265,
+            "finalThird": 0,
+            "index": 0.274,
+            "indexDelta": -0.4464,
+            "components": {
+              "share": 0.1265,
+              "finalThird": 0,
+              "structure": 0.6928,
+              "press": 0.4558,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8735,
+            "finalThird": 0.6689,
+            "index": 0.7204,
+            "indexDelta": 0.4464,
+            "components": {
+              "share": 0.8735,
+              "finalThird": 0.6689,
+              "structure": 0.6928,
+              "press": 0.5442,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3072,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.4558
+      },
+      {
+        "timeMs": 5318500,
+        "teams": {
+          "bastion": {
+            "share": 0.126,
+            "finalThird": 0,
+            "index": 0.2718,
+            "indexDelta": -0.4529,
+            "components": {
+              "share": 0.126,
+              "finalThird": 0,
+              "structure": 0.698,
+              "press": 0.4403,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.874,
+            "finalThird": 0.6688,
+            "index": 0.7247,
+            "indexDelta": 0.4529,
+            "components": {
+              "share": 0.874,
+              "finalThird": 0.6688,
+              "structure": 0.698,
+              "press": 0.5597,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.302,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.4403
+      },
+      {
+        "timeMs": 5319000,
+        "teams": {
+          "bastion": {
+            "share": 0.1247,
+            "finalThird": 0,
+            "index": 0.2731,
+            "indexDelta": -0.4523,
+            "components": {
+              "share": 0.1247,
+              "finalThird": 0,
+              "structure": 0.702,
+              "press": 0.4452,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8753,
+            "finalThird": 0.6708,
+            "index": 0.7254,
+            "indexDelta": 0.4523,
+            "components": {
+              "share": 0.8753,
+              "finalThird": 0.6708,
+              "structure": 0.702,
+              "press": 0.5548,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.298,
+        "carrier": {
+          "playerId": "vale-9",
+          "teamId": "vale"
+        },
+        "pressing": 0.4452
+      },
+      {
+        "timeMs": 5319500,
+        "teams": {
+          "bastion": {
+            "share": 0.1296,
+            "finalThird": 0,
+            "index": 0.2743,
+            "indexDelta": -0.4456,
+            "components": {
+              "share": 0.1296,
+              "finalThird": 0,
+              "structure": 0.6996,
+              "press": 0.4452,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          },
+          "vale": {
+            "share": 0.8704,
+            "finalThird": 0.6576,
+            "index": 0.7199,
+            "indexDelta": 0.4456,
+            "components": {
+              "share": 0.8704,
+              "finalThird": 0.6576,
+              "structure": 0.6996,
+              "press": 0.5548,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          }
+        },
+        "entropy": 0.3004,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5320000,
+        "teams": {
+          "bastion": {
+            "share": 0.1337,
+            "finalThird": 0,
+            "index": 0.2756,
+            "indexDelta": -0.4394,
+            "components": {
+              "share": 0.1337,
+              "finalThird": 0,
+              "structure": 0.6991,
+              "press": 0.4452,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          },
+          "vale": {
+            "share": 0.8663,
+            "finalThird": 0.6442,
+            "index": 0.715,
+            "indexDelta": 0.4394,
+            "components": {
+              "share": 0.8663,
+              "finalThird": 0.6442,
+              "structure": 0.6991,
+              "press": 0.5548,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          }
+        },
+        "entropy": 0.3009,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5320500,
+        "teams": {
+          "bastion": {
+            "share": 0.1376,
+            "finalThird": 0,
+            "index": 0.2796,
+            "indexDelta": -0.4331,
+            "components": {
+              "share": 0.1376,
+              "finalThird": 0,
+              "structure": 0.7121,
+              "press": 0.4452,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          },
+          "vale": {
+            "share": 0.8624,
+            "finalThird": 0.6298,
+            "index": 0.7127,
+            "indexDelta": 0.4331,
+            "components": {
+              "share": 0.8624,
+              "finalThird": 0.6298,
+              "structure": 0.7121,
+              "press": 0.5548,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5319000
+          }
+        },
+        "entropy": 0.2879,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5321000,
+        "teams": {
+          "bastion": {
+            "share": 0.1398,
+            "finalThird": 0.0001,
+            "index": 0.3886,
+            "indexDelta": -0.2148,
+            "components": {
+              "share": 0.1398,
+              "finalThird": 0.0001,
+              "structure": 0.7151,
+              "press": 0.9829,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8602,
+            "finalThird": 0.6234,
+            "index": 0.6033,
+            "indexDelta": 0.2148,
+            "components": {
+              "share": 0.8602,
+              "finalThird": 0.6234,
+              "structure": 0.7151,
+              "press": 0.0171,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2849,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9829
+      },
+      {
+        "timeMs": 5321500,
+        "teams": {
+          "bastion": {
+            "share": 0.1361,
+            "finalThird": 0.0001,
+            "index": 0.3898,
+            "indexDelta": -0.2163,
+            "components": {
+              "share": 0.1361,
+              "finalThird": 0.0001,
+              "structure": 0.718,
+              "press": 0.9926,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8639,
+            "finalThird": 0.6343,
+            "index": 0.606,
+            "indexDelta": 0.2163,
+            "components": {
+              "share": 0.8639,
+              "finalThird": 0.6343,
+              "structure": 0.718,
+              "press": 0.0074,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.282,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9926
+      },
+      {
+        "timeMs": 5322000,
+        "teams": {
+          "bastion": {
+            "share": 0.1305,
+            "finalThird": 0.0001,
+            "index": 0.3872,
+            "indexDelta": -0.2243,
+            "components": {
+              "share": 0.1305,
+              "finalThird": 0.0001,
+              "structure": 0.715,
+              "press": 0.9926,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5321500
+          },
+          "vale": {
+            "share": 0.8695,
+            "finalThird": 0.6508,
+            "index": 0.6115,
+            "indexDelta": 0.2243,
+            "components": {
+              "share": 0.8695,
+              "finalThird": 0.6508,
+              "structure": 0.715,
+              "press": 0.0074,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5321500
+          }
+        },
+        "entropy": 0.285,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5322500,
+        "teams": {
+          "bastion": {
+            "share": 0.1243,
+            "finalThird": 0,
+            "index": 0.3857,
+            "indexDelta": -0.2301,
+            "components": {
+              "share": 0.1243,
+              "finalThird": 0,
+              "structure": 0.7109,
+              "press": 0.9999,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8757,
+            "finalThird": 0.6686,
+            "index": 0.6158,
+            "indexDelta": 0.2301,
+            "components": {
+              "share": 0.8757,
+              "finalThird": 0.6686,
+              "structure": 0.7109,
+              "press": 0.0001,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2891,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9999
+      },
+      {
+        "timeMs": 5323000,
+        "teams": {
+          "bastion": {
+            "share": 0.1227,
+            "finalThird": 0,
+            "index": 0.3836,
+            "indexDelta": -0.2322,
+            "components": {
+              "share": 0.1227,
+              "finalThird": 0,
+              "structure": 0.703,
+              "press": 1,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8773,
+            "finalThird": 0.6724,
+            "index": 0.6157,
+            "indexDelta": 0.2322,
+            "components": {
+              "share": 0.8773,
+              "finalThird": 0.6724,
+              "structure": 0.703,
+              "press": 0,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.297,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 1
+      },
+      {
+        "timeMs": 5323500,
+        "teams": {
+          "bastion": {
+            "share": 0.1324,
+            "finalThird": 0,
+            "index": 0.3855,
+            "indexDelta": -0.2188,
+            "components": {
+              "share": 0.1324,
+              "finalThird": 0,
+              "structure": 0.6958,
+              "press": 0.9999,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8676,
+            "finalThird": 0.6457,
+            "index": 0.6043,
+            "indexDelta": 0.2188,
+            "components": {
+              "share": 0.8676,
+              "finalThird": 0.6457,
+              "structure": 0.6958,
+              "press": 0.0001,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.3042,
+        "carrier": {
+          "playerId": "vale-10",
+          "teamId": "vale"
+        },
+        "pressing": 0.9999
+      },
+      {
+        "timeMs": 5324000,
+        "teams": {
+          "bastion": {
+            "share": 0.1402,
+            "finalThird": 0.0001,
+            "index": 0.3907,
+            "indexDelta": -0.2069,
+            "components": {
+              "share": 0.1402,
+              "finalThird": 0.0001,
+              "structure": 0.7079,
+              "press": 0.9999,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5323500
+          },
+          "vale": {
+            "share": 0.8598,
+            "finalThird": 0.62,
+            "index": 0.5975,
+            "indexDelta": 0.2069,
+            "components": {
+              "share": 0.8598,
+              "finalThird": 0.62,
+              "structure": 0.7079,
+              "press": 0.0001,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5323500
+          }
+        },
+        "entropy": 0.2921,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5324500,
+        "teams": {
+          "bastion": {
+            "share": 0.1425,
+            "finalThird": 0.0001,
+            "index": 0.3915,
+            "indexDelta": -0.2052,
+            "components": {
+              "share": 0.1425,
+              "finalThird": 0.0001,
+              "structure": 0.7133,
+              "press": 0.9946,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8575,
+            "finalThird": 0.6113,
+            "index": 0.5967,
+            "indexDelta": 0.2052,
+            "components": {
+              "share": 0.8575,
+              "finalThird": 0.6113,
+              "structure": 0.7133,
+              "press": 0.0054,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2867,
+        "carrier": {
+          "playerId": "vale-11",
+          "teamId": "vale"
+        },
+        "pressing": 0.9946
+      },
+      {
+        "timeMs": 5325000,
+        "teams": {
+          "bastion": {
+            "share": 0.1329,
+            "finalThird": 0,
+            "index": 0.389,
+            "indexDelta": -0.2172,
+            "components": {
+              "share": 0.1329,
+              "finalThird": 0,
+              "structure": 0.7151,
+              "press": 0.9972,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          },
+          "vale": {
+            "share": 0.8671,
+            "finalThird": 0.6364,
+            "index": 0.6062,
+            "indexDelta": 0.2172,
+            "components": {
+              "share": 0.8671,
+              "finalThird": 0.6364,
+              "structure": 0.7151,
+              "press": 0.0028,
+              "shotQuality": null
+            },
+            "weightsUsed": 1
+          }
+        },
+        "entropy": 0.2849,
+        "carrier": {
+          "playerId": "vale-11",
+          "teamId": "vale"
+        },
+        "pressing": 0.9972
+      },
+      {
+        "timeMs": 5325500,
+        "teams": {
+          "bastion": {
+            "share": 0.1214,
+            "finalThird": 0,
+            "index": 0.3862,
+            "indexDelta": -0.2329,
+            "components": {
+              "share": 0.1214,
+              "finalThird": 0,
+              "structure": 0.7212,
+              "press": 0.9972,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          },
+          "vale": {
+            "share": 0.8786,
+            "finalThird": 0.667,
+            "index": 0.6191,
+            "indexDelta": 0.2329,
+            "components": {
+              "share": 0.8786,
+              "finalThird": 0.667,
+              "structure": 0.7212,
+              "press": 0.0028,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          }
+        },
+        "entropy": 0.2788,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5326000,
+        "teams": {
+          "bastion": {
+            "share": 0.1107,
+            "finalThird": 0,
+            "index": 0.3835,
+            "indexDelta": -0.2485,
+            "components": {
+              "share": 0.1107,
+              "finalThird": 0,
+              "structure": 0.7267,
+              "press": 0.9972,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          },
+          "vale": {
+            "share": 0.8893,
+            "finalThird": 0.6994,
+            "index": 0.632,
+            "indexDelta": 0.2485,
+            "components": {
+              "share": 0.8893,
+              "finalThird": 0.6994,
+              "structure": 0.7267,
+              "press": 0.0028,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          }
+        },
+        "entropy": 0.2733,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5326500,
+        "teams": {
+          "bastion": {
+            "share": 0.1051,
+            "finalThird": 0,
+            "index": 0.3803,
+            "indexDelta": -0.2578,
+            "components": {
+              "share": 0.1051,
+              "finalThird": 0,
+              "structure": 0.7204,
+              "press": 0.9972,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          },
+          "vale": {
+            "share": 0.8949,
+            "finalThird": 0.7212,
+            "index": 0.6381,
+            "indexDelta": 0.2578,
+            "components": {
+              "share": 0.8949,
+              "finalThird": 0.7212,
+              "structure": 0.7204,
+              "press": 0.0028,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          }
+        },
+        "entropy": 0.2796,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5327000,
+        "teams": {
+          "bastion": {
+            "share": 0.1087,
+            "finalThird": 0,
+            "index": 0.3786,
+            "indexDelta": -0.2545,
+            "components": {
+              "share": 0.1087,
+              "finalThird": 0,
+              "structure": 0.7056,
+              "press": 0.9972,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          },
+          "vale": {
+            "share": 0.8913,
+            "finalThird": 0.718,
+            "index": 0.6331,
+            "indexDelta": 0.2545,
+            "components": {
+              "share": 0.8913,
+              "finalThird": 0.718,
+              "structure": 0.7056,
+              "press": 0.0028,
+              "shotQuality": null
+            },
+            "weightsUsed": 1,
+            "pressHeldFromMs": 5325000
+          }
+        },
+        "entropy": 0.2944,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5327500,
+        "teams": {
+          "bastion": {
+            "share": 0.1135,
+            "finalThird": 0,
+            "index": 0.2245,
+            "indexDelta": -0.5587,
+            "components": {
+              "share": 0.1135,
+              "finalThird": 0,
+              "structure": 0.6992,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8865,
+            "finalThird": 0.7056,
+            "index": 0.7831,
+            "indexDelta": 0.5587,
+            "components": {
+              "share": 0.8865,
+              "finalThird": 0.7056,
+              "structure": 0.6992,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3008,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5328000,
+        "teams": {
+          "bastion": {
+            "share": 0.1196,
+            "finalThird": 0,
+            "index": 0.2243,
+            "indexDelta": -0.5483,
+            "components": {
+              "share": 0.1196,
+              "finalThird": 0,
+              "structure": 0.6878,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8804,
+            "finalThird": 0.6895,
+            "index": 0.7726,
+            "indexDelta": 0.5483,
+            "components": {
+              "share": 0.8804,
+              "finalThird": 0.6895,
+              "structure": 0.6878,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3122,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5328500,
+        "teams": {
+          "bastion": {
+            "share": 0.1217,
+            "finalThird": 0,
+            "index": 0.2238,
+            "indexDelta": -0.5448,
+            "components": {
+              "share": 0.1217,
+              "finalThird": 0,
+              "structure": 0.6823,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8783,
+            "finalThird": 0.6841,
+            "index": 0.7686,
+            "indexDelta": 0.5448,
+            "components": {
+              "share": 0.8783,
+              "finalThird": 0.6841,
+              "structure": 0.6823,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3177,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5329000,
+        "teams": {
+          "bastion": {
+            "share": 0.1191,
+            "finalThird": 0,
+            "index": 0.2248,
+            "indexDelta": -0.5486,
+            "components": {
+              "share": 0.1191,
+              "finalThird": 0,
+              "structure": 0.6908,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8809,
+            "finalThird": 0.6888,
+            "index": 0.7734,
+            "indexDelta": 0.5486,
+            "components": {
+              "share": 0.8809,
+              "finalThird": 0.6888,
+              "structure": 0.6908,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3092,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5329500,
+        "teams": {
+          "bastion": {
+            "share": 0.1158,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5532,
+            "components": {
+              "share": 0.1158,
+              "finalThird": 0,
+              "structure": 0.6994,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8842,
+            "finalThird": 0.6945,
+            "index": 0.7787,
+            "indexDelta": 0.5532,
+            "components": {
+              "share": 0.8842,
+              "finalThird": 0.6945,
+              "structure": 0.6994,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3006,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5330000,
+        "teams": {
+          "bastion": {
+            "share": 0.1153,
+            "finalThird": 0,
+            "index": 0.2254,
+            "indexDelta": -0.5539,
+            "components": {
+              "share": 0.1153,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8847,
+            "finalThird": 0.6955,
+            "index": 0.7794,
+            "indexDelta": 0.5539,
+            "components": {
+              "share": 0.8847,
+              "finalThird": 0.6955,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5330500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2256,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.6948,
+            "index": 0.7791,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.6948,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5331000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.6949,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.6949,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5331500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5332000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5332500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5333000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5333500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5334000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5334500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5335000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5335500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5336000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5336500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5337000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5337500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5338000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5338500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5339000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5339500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5340000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5340500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5341000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5341500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5342000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5342500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5343000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5343500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5344000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5344500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5345000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5345500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.6949,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.6949,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5346000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5346500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5347000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5347500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5348000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5348500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5349000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5349500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5350000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5350500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.6949,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.6949,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5351000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5351500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5352000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5352500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5353000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5353500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5354000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5354500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5355000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5355500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5356000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5356500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5357000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5357500,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5358000,
+        "teams": {
+          "bastion": {
+            "share": 0.1155,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5536,
+            "components": {
+              "share": 0.1155,
+              "finalThird": 0,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8845,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5536,
+            "components": {
+              "share": 0.8845,
+              "finalThird": 0.695,
+              "structure": 0.7,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.3,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5358500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5359000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5359500,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      },
+      {
+        "timeMs": 5360000,
+        "teams": {
+          "bastion": {
+            "share": 0.1154,
+            "finalThird": 0,
+            "index": 0.2255,
+            "indexDelta": -0.5537,
+            "components": {
+              "share": 0.1154,
+              "finalThird": 0,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          },
+          "vale": {
+            "share": 0.8846,
+            "finalThird": 0.695,
+            "index": 0.7792,
+            "indexDelta": 0.5537,
+            "components": {
+              "share": 0.8846,
+              "finalThird": 0.695,
+              "structure": 0.7001,
+              "press": null,
+              "shotQuality": null
+            },
+            "weightsUsed": 0.8
+          }
+        },
+        "entropy": 0.2999,
+        "carrier": null,
+        "pressing": null
+      }
+    ]
+  },
+  "moments": [
+    {
+      "type": "SUSTAINED_PRESSURE",
+      "teamId": "vale",
+      "timeMs": 5291500,
+      "windowStartMs": 5276500,
+      "windowEndMs": 5291500,
+      "evidenceKind": "event",
+      "reasons": [
+        "evt-03",
+        "evt-04",
+        "evt-05"
+      ],
+      "contextEventIds": [],
+      "tickTimesMs": [
+        5289000,
+        5289500,
+        5290000,
+        5290500,
+        5291000,
+        5291500
+      ],
+      "values": {
+        "actions": 3,
+        "finalThird": 0.4728
+      }
+    },
+    {
+      "type": "CONTROL_SWING",
+      "teamId": "bastion",
+      "timeMs": 5302000,
+      "windowStartMs": 5297000,
+      "windowEndMs": 5302000,
+      "evidenceKind": "tick",
+      "reasons": [],
+      "contextEventIds": [
+        "evt-10",
+        "evt-11",
+        "evt-12"
+      ],
+      "tickTimesMs": [
+        5297000,
+        5302000
+      ],
+      "values": {
+        "deltaFrom": -0.5059,
+        "deltaTo": -0.2033,
+        "signal": 0.3026
+      }
+    },
+    {
+      "type": "CONTROL_SWING",
+      "teamId": "vale",
+      "timeMs": 5313500,
+      "windowStartMs": 5308500,
+      "windowEndMs": 5313500,
+      "evidenceKind": "tick",
+      "reasons": [],
+      "contextEventIds": [
+        "evt-18",
+        "evt-19",
+        "evt-20"
+      ],
+      "tickTimesMs": [
+        5308500,
+        5313500
+      ],
+      "values": {
+        "deltaFrom": 0.2078,
+        "deltaTo": 0.5226,
+        "signal": 0.3148
+      }
+    },
+    {
+      "type": "SET_PIECE_SHOT",
+      "teamId": "vale",
+      "timeMs": 5321488,
+      "windowStartMs": 5319185,
+      "windowEndMs": 5321488,
+      "evidenceKind": "event",
+      "reasons": [
+        "evt-22",
+        "evt-23"
+      ],
+      "contextEventIds": [],
+      "tickTimesMs": [],
+      "values": {}
+    }
+  ]
+}

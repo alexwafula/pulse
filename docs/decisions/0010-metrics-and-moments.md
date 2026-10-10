@@ -65,8 +65,9 @@ Agents may only cite facts that Go computed. So every metric must be:
     - The schema requires `eventIds` with `minItems: 1`. Shares, entropy, pressing and the
       index come from ticks, not events.
     - They must not cite unrelated action events just to satisfy the schema.
-    - `CONTROL_SWING.reasons` lists only events inside the swing window, and may be empty.
-      Its evidence is `tickTimesMs`.
+    - `CONTROL_SWING.reasons` is always `[]`. Its evidence is `tickTimesMs` and `values`.
+      Events inside the swing window go to a separate `contextEventIds` field, documented
+      as **not evidence** (PR #16 review). Agents and the Verifier must never cite them.
     - See the FactPack proposal and contract item C1 below.
 11. **Deferred:**
     - pass difficulty rating;
@@ -116,11 +117,13 @@ All tests read `metrics.DefaultParams()`. Toy replays are built in code.
 | T6b | **Ten defenders at 15 m**, standing / closing at 6 m/s | intensity ∈ [0.11, 0.14] / [0.27, 0.32] (0.122 / 0.296). This documents accumulation |
 | T7 | No player within 1.5 m of the ball, or ball z > 1.0 m | `pressing` is `null`; index `press` is held up to 2 s with `pressHeldFromMs`, then `null` |
 | T8 | **Mirror:** late-siege and calm-midfield, roles and `attackingDirection` swapped, x → 105 − x | every per-team value of team X equals the original for team X bit for bit; entropy identical; same moments, reasons and ticks |
+| T8b | **Mirror, off-grid toy** (added in the PR #16 fix pass): velocities with many significant bits, p and 105 − p in different binades | cells, shares, finalThird, entropy and pressing bit-exact. Needed because the fixtures' v·τ is exactly representable, so T8 cannot detect the forbidden `c − (p + v·τ)` order (teeth check, PR #16) |
 | T9a | **Late-siege, within-team contrast** | mean finalThird_vale over the siege window [5290000, 5325000] − mean finalThird_vale over the pre-siege window [5280000, 5289500] **≥ 0.10** |
 | T9b | **Late-siege moments** | `SUSTAINED_PRESSURE` fires for vale with `timeMs` inside [5290000, 5325000], and never for bastion anywhere in the replay |
 | T10 | Unsupported: `corner`, `central`, `exchange` | `trackingMetrics: "unsupported"` with a `reason`; no tracking values; `SET_PIECE_SHOT` returned for `corner` |
 | T11 | Calm-midfield | no `SUSTAINED_PRESSURE` and no `CONTROL_SWING` for either team (and no moment at all, per the expected outcome above) |
 | T12 | Hysteresis: synthetic series crossing the thresholds twice inside the cooldown | exactly one `SUSTAINED_PRESSURE` / one `CONTROL_SWING` |
+| T12c | `SUSTAINED_PRESSURE` conditions (PR #16 fix pass): high share with no completed final-third actions; many actions with share just below `OnShare` | neither fires; control case at share = `OnShare` fires |
 | T13 | Golden: late-siege per-tick output at 4 dp vs `app/testdata/metrics/late-siege.golden.json` | byte-identical; CI fails on drift |
 | T14 | Determinism: compute twice, and once with players shuffled in every frame | identical bytes |
 | T15 | API: `/api/metrics` and `/api/moments` for every scenario including calm-midfield; unknown scenario | `model`, `label` and `trackingMetrics` in every response; routing as in `TestDemoHandler_ScenarioRouting`; unknown gives 404 |
@@ -163,7 +166,7 @@ Rule: **a fact cites only events that are actually its inputs.**
   - The grid (row-major `cols*rows`, team-A control) is included only with `grid=1`.
   - On an unsupported replay, `ticks` is `[]`.
 - `GET /api/moments?scenario=<id>` returns
-  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, reasons, tickTimesMs, values}]}`.
+  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, evidenceKind, reasons, contextEventIds, tickTimesMs, values}]}`.
   - Unsupported replays still return their `SET_PIECE_SHOT` moments.
 - An unknown scenario gives 404 (existing demo router).
 
@@ -180,6 +183,45 @@ Rule: **a fact cites only events that are actually its inputs.**
 - Cross-architecture bit equality of `math.Exp`/`math.Log`/`math.Hypot` is **unverified**.
   The golden file must be checked once on amd64 and once on arm64.
 
+## Stage 1 implementation notes
+
+- **Routing registration deferred to Stage 2.** Stage 1 has no API, so calm-midfield is not
+  yet in the demo router or `TestDemoHandler_ScenarioRouting`. That moves to Stage 2 with T15.
+- **The generator does not build a mid-block.** `sim/formations.go` and
+  `computePlayerTargetPos` use fixed templates: the team attacking RIGHT (vale) keeps its back
+  line at x ≈ 64-66 and forwards at x ≥ 86, and the team attacking LEFT (bastion) holds its
+  defensive line near x ≈ 88.
+  `lineHeightM`/`compactness` in the script are never read. So the spec item "bastion holds a
+  mid-block" is **not met**, and vale's share stays above 0.70 in calm-midfield too. The
+  generator was not changed: that is out of scope and would change the late-siege bytes.
+  Tracked in **issue #17**. Both committed scripts set the fields (late-siege: vale 68.0/0.85,
+  bastion 22.0/0.70), so implementing or rejecting them must keep late-siege byte-identical.
+- **checkdata and calm-midfield (resolved in the PR #16 fix pass).** Scripts may set
+  `expect.minShots` (default 1). Only calm-midfield sets 0, and checkdata prints "shot rule
+  waived by script" when it applies. A script without the field still fails on zero shots
+  (`TestShotRule_ScriptExpectation`). `scripts/check.sh` now runs checkdata over every
+  generated scenario in `data/scenarios`.
+- **checkdata rejects calm-midfield.** `sim/quality.go` requires at least one shot
+  (`insane shot count: 0 (expected at least 1)`). The calm spec forbids shots. The checker
+  was not weakened. With only that rule skipped locally (not committed), every physical check
+  passed: 301 frames at 200 ms, max player speed 6.80 m/s, max ball 15.14 m/s, min player
+  distance 0.61 m. Resolved by `expect.minShots` (bullet above).
+- **T8 passed bit-exact on the first run**; no tolerance was added and no evaluation-order fix
+  was needed.
+- **Golden file** generated on amd64 only; arm64 is unchecked.
+
+### Recorded limitations (PR #16 review)
+
+1. **Swing count is fragile.** The late-siege CONTROL_SWING signals are 0.3026 and 0.3148
+   against `Swing.Delta` = 0.30 (margins 0.0026 / 0.0148). The number of swings on this
+   replay can change with small input changes; it is not asserted by any test.
+2. **Pressing is unverified in the mid-range on real fixtures.** Hand-checked values are
+   toys (T5, T6, T6b). late-siege has 25 of 68 non-null ticks in [0.2, 0.8), none checked
+   independently; calm-midfield peaks at 0.0081.
+3. **Absolute shares reflect formation geometry** because the generator ignores
+   `lineHeightM`/`compactness` (issue #17). **Shares must not be shown as headline
+   numbers**; use them only as within-team change over time, with the uncalibrated label.
+
 ## Parameter change log
 
 Initial values are those in docs/metrics.md as of this ADR. Every later change gets a line.
@@ -189,6 +231,7 @@ Initial values are those in docs/metrics.md as of this ADR. Every later change g
 | 2026-10-10 (pre-run, review) | `Swing` input | index_T | index_T − index_opp | `structure` is shared by both teams (review change 2) | none (no run yet) |
 | 2026-10-10 (pre-run, review) | `Swing.Delta` / re-arm range | 0.15 / ±0.05 | 0.30 / 0.10 | rescaled for the difference signal | none (no run yet) |
 | 2026-10-10 (pre-run, review) | T9 | cross-team finalThird difference ≥ 0.10 | within-team siege vs pre-siege ≥ 0.10, plus T9b | cross-team comparison passes on geometry (review change 1) | none (no run yet) |
+| 2026-10-10 (Stage 1, first run) | none | all ADR values | unchanged | T1-T14 passed on the first run | T9a difference 0.2239; T9b vale SUSTAINED_PRESSURE at 5291500, none for bastion |
 
 ## Decisions resolved
 

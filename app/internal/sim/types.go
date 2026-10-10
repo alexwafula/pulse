@@ -23,6 +23,29 @@ type Script struct {
 	Teams         []TeamConfig   `json:"teams"`
 	Players       []PlayerConfig `json:"players,omitempty"`
 	Beats         []Beat         `json:"beats"`
+	// Expect narrows data-quality rules for this script only. Absent fields
+	// keep the default rule.
+	Expect *Expectations `json:"expect,omitempty"`
+}
+
+// Expectations are per-script data-quality expectations read by checkdata.
+type Expectations struct {
+	// MinShots is the minimum SHOT event count. Default 1. A script that
+	// is meant to contain no shot (calm-midfield) sets 0.
+	MinShots *int `json:"minShots,omitempty"`
+}
+
+// DefaultMinShots is the shot rule applied when a script does not set
+// expect.minShots.
+const DefaultMinShots = 1
+
+// QualityOptions returns the checkdata options implied by the script.
+func (s Script) QualityOptions() QualityOptions {
+	opts := DefaultQualityOptions()
+	if s.Expect != nil && s.Expect.MinShots != nil {
+		opts.MinShots = *s.Expect.MinShots
+	}
+	return opts
 }
 
 // SquadFile defines the shared squad data format stored in data/squads/.
