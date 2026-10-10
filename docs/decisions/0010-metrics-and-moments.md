@@ -1,6 +1,7 @@
 # 0010: Metrics v1 and moment detection
 
-Status: **Proposed (G2 Stage 0)**. Pipeline area only. No contract change.
+Status: **Proposed (G2 Stage 0, revised after first review)**. Pipeline area only. No
+contract change.
 
 ## Context
 
@@ -13,117 +14,186 @@ Agents may only cite facts that Go computed. So every metric must be:
 
 ## Decisions
 
-1. **One model, honestly named.** We use our own time-to-reach control (formula in
-   docs/metrics.md §2), not a published model. We make no accuracy claims.
+1. **One model, honestly named.** We use our own time-to-reach control (docs/metrics.md §2),
+   not a published model. We make no accuracy claims.
 2. **Ticks.**
    - Every 500 ms from `startMs`.
-   - Positions are interpolated linearly to the tick. Because 500 = 2.5 × 200, a tick always
-     lies on a frame or exactly halfway between two, so the weight is 0 or 0.5.
-   - Velocity is a central difference over 400 ms (`p(t±200)`, interpolated the same way),
-     one-sided at the first and last tick.
+   - Positions are interpolated linearly to the tick (weight always 0 or 0.5).
+   - Velocity is a central difference over 400 ms, one-sided at the first and last tick.
    - Quantisation noise from 0.1 m rounding:
      - worst case 0.25 m/s per axis;
      - typical ~0.10 m/s;
-     - worst-case effect on a cell's control ≤ 0.018 (docs/metrics.md §0).
-3. **Integer-decimetre arithmetic.** Positions become `int64` decimetres before any maths.
-   This makes the x-mirror (`1050 − x`) exact, which makes the mirror test bit-exact rather
-   than tolerance-based.
-4. **Unsupported, never invented.**
-   - A replay whose frame gaps are not all 200 ms, or whose player set changes between frames,
-     gets `supported: false` with a reason.
-   - The authored 4v4 fixtures fall in this group.
-   - `SET_PIECE_SHOT` is event-only and still runs on them.
+     - worst-case effect on a cell's control ≤ 0.018.
+3. **Bit-exact mirror by construction.**
+   - Integer-decimetre positions.
+   - Offsets evaluated as `(c − p) − v·τ`, never `c − (p + v·τ)`.
+   - Full-pitch sums in commutative mirror pairs.
+   - Final-third column sums from the goal line outward, for both attack directions.
+   - Exact rules in docs/metrics.md §2, §2.1 and §8.
+4. **Tracking support flag.**
+   - Every metrics and moments response has `trackingMetrics: "supported" | "unsupported"`,
+     plus `reason` when unsupported.
+   - Unsupported replays get HTTP 200, no tracking-derived values, and their event-only
+     moments (`SET_PIECE_SHOT`).
 5. **Carrier from tracking only:**
    - nearest player within 1.5 m of a ball at height ≤ 1.0 m, ties broken by ID;
    - otherwise `null`;
    - event tags are never used, which keeps pressing non-circular (ADR 0009, issue #10).
-6. **Control vs Chaos index.**
-   - Weights: share 0.35, final third 0.25, structure 0.20, press 0.20, shot quality 0.
-   - Weights of null components are renormalised away.
-   - Every component, weight and weight actually used is exposed.
-7. **Moments.**
-   - `SET_PIECE_SHOT`: reuse the `facts.CornerPacks` rule unchanged.
-   - `SUSTAINED_PRESSURE`: final-third share ≥ 0.40 for 6 ticks AND ≥ 3 completed
-     final-third actions in 15 s. Re-arm below 0.30 for 4 ticks, cooldown 30 s.
-   - `CONTROL_SWING`: index rise ≥ 0.15 within 5 s. Re-arm when the index stays within ±0.05
-     for 4 ticks, cooldown 20 s.
-   - All thresholds are initial values in `metrics.Params.Moments`.
-8. **Deferred:**
-   - pass difficulty rating;
-   - `PRESSING_TRAP` and `COUNTER_ATTACK` (v2.1);
-   - shot-quality model.
-9. **Packages.**
-   - `app/internal/metrics` holds pure functions plus the single `Params` struct, including
-     moment thresholds, so there is one config.
-   - `app/internal/moments` holds the detectors.
-   - The existing `app/internal/engine/metrics` (passing, attack routes) stays where it is.
-     The HTTP handler imports the new package under an alias. Merging the two is out of scope.
+6. **Ball in flight: hold `press` for up to 2 s (chosen over a 3-tick median).**
+   - **Why:** a 30 m ground pass at the 15 m/s nominal speed takes 2 s, so the ball is
+     carrier-less for 4 ticks. A 3-tick median only removes isolated 1-tick gaps, so it
+     would not fix the common case (passes and crosses of 2-4 ticks). It would also delay
+     every real swing by one tick.
+   - Holding covers passes up to ~30 m at nominal speed and crosses up to ~40 m at
+     20 m/s. It touches only the index's `press` component.
+   - The raw `pressing` output stays `null`, so nothing is invented.
+   - Every held value is flagged with `pressHeldFromMs`.
+   - After 2 s the weights renormalise and the step is visible as `press: null`. This
+     residual case (long clearances) is a known limitation.
+7. **`CONTROL_SWING` on `Δ_T = index_T − index_opp`.**
+   - The shared `structure` term cancels, and `Δ_opp = −Δ_T` exactly, so detecting rises
+     only fires once per swing.
+   - `Delta` is 0.30 and the re-arm range is 0.10, both double the first proposal, because
+     the difference moves about twice as fast as a single index.
+   - Set before any run.
+8. **Final-third actions** count `COMPLETE` PASS, CARRY, CROSS and CORNER events whose `to`
+   lies in the team's attacking third. Shots are excluded (D5).
+9. **finalThird is never compared across teams.** The two teams' final thirds are
+   different cells, so a cross-team difference could pass on geometry alone. Tests compare a
+   team only with itself over time (T9).
+10. **Evidence for tick-derived values.**
+    - The schema requires `eventIds` with `minItems: 1`. Shares, entropy, pressing and the
+      index come from ticks, not events.
+    - They must not cite unrelated action events just to satisfy the schema.
+    - `CONTROL_SWING.reasons` lists only events inside the swing window, and may be empty.
+      Its evidence is `tickTimesMs`.
+    - See the FactPack proposal and contract item C1 below.
+11. **Deferred:**
+    - pass difficulty rating;
+    - `PRESSING_TRAP` and `COUNTER_ATTACK` (v2.1);
+    - shot-quality model.
+12. **Packages.**
+    - `app/internal/metrics` holds pure functions plus the single `Params` struct, including
+      moment thresholds.
+    - `app/internal/moments` holds the detectors.
+    - The existing `app/internal/engine/metrics` (passing, attack routes) is untouched. The
+      handler imports the new package under an alias.
+
+## Calm-midfield fixture (D2): expected outcome, written before generating
+
+Script `data/scenarios/calm-midfield.script.json`, generated with the PR #8 generator and
+the shared squad:
+- period 1, 60 s, seed 7;
+- vale in possession throughout, circulating with ground passes and carries;
+- every event `from.x` and `to.x` within [35, 65], which is outside both final thirds;
+- no shot, cross, corner, clearance or possession change;
+- bastion holds a mid-block.
+
+**Expected before any metric is computed:**
+- **No moment of any type fires**: no `SET_PIECE_SHOT`, no `SUSTAINED_PRESSURE` for either
+  team, no `CONTROL_SWING` for either team.
+- Mechanism expected for `SUSTAINED_PRESSURE`: zero completed final-third actions, so the K
+  condition (≥ 3) cannot hold, whatever the shares do. If it fires anyway, that is a bug.
+- The script is not changed after the first metric run to make T11 pass. If T11 fails, I
+  report and ask.
+
+The scenario is registered in the demo router and added to `TestDemoHandler_ScenarioRouting`.
+`/api/insights?scenario=calm-midfield` must return its own `matchId` and zero cues, since
+it contains no corner.
 
 ## Tests (written before tuning, Stage 1)
 
-All tests read `metrics.DefaultParams()`. Toy replays are built in code, not in files.
+All tests read `metrics.DefaultParams()`. Toy replays are built in code.
 
 | # | Test | Assertion |
 |---|---|---|
-| T1 | Mirror-symmetric toy: team B's players are team A's mirrored in x, velocities negated, ball on the halfway line | share_A = share_B (bit-exact); share_A ∈ [0.5 − 1e-12, 0.5 + 1e-12] |
-| T2 | Coincident toy: each B player on the same spot with the same velocity as an A player | every cell is exactly 0.5; entropy = 1 within 1e-15; shares 0.5 |
-| T3 | Lone attacker at (80, 34), all 11 defenders beyond 40 m | control_A ≥ 0.9 in every cell within 5 m of the attacker |
-| T4 | Property, all late-siege ticks plus the toys | 0 ≤ entropy ≤ 1; share_A + share_B = 1 within 1e-12; every cell in [0, 1] |
-| T5 | Pressing: one defender 1 m from the carrier, closing at 6 m/s | intensity > 0.9 (expected 0.972) |
-| T6 | Pressing: one defender 15 m away, standing still / closing at 6 m/s | intensity < 0.05 (expected 0.013 / 0.034) |
-| T7 | Pressing: no player within 1.5 m of the ball, or ball z > 1.0 m | intensity is `null` |
-| T8 | **Mirror:** late-siege, with teams' roles and `attackingDirection` swapped and x → 105 − x | every per-team value of team X equals the original for team X, bit for bit; entropy identical; same moments with the same reasons and ticks |
-| T9 | **Late-siege bound** (stated now, see below) | mean finalThird_vale − mean finalThird_bastion ≥ **0.10** over the siege window |
-| T10 | Unsupported: `corner`, `central`, `exchange` | `supported: false`; no metric values; `SET_PIECE_SHOT` still fires on `corner` |
-| T11 | Calm fixture | `SUSTAINED_PRESSURE` does not fire (see decision D2) |
-| T12 | Hysteresis: a synthetic share series that crosses 0.40 twice within 30 s | exactly one `SUSTAINED_PRESSURE` |
+| T1 | Mirror-symmetric toy: B is A mirrored in x, velocities negated, ball on the halfway line | share_A = share_B (bit-exact); \|share_A − 0.5\| ≤ 1e-12 |
+| T2 | Coincident toy: each B player on the same spot with the same velocity as an A player | every cell is exactly 0.5; \|entropy − 1\| ≤ 1e-15; shares 0.5 |
+| T3 | Lone attacker at (80, 34), all defenders beyond 40 m | control_A ≥ 0.9 in every cell within 5 m of the attacker |
+| T4 | Property: all late-siege and calm-midfield ticks plus the toys | 0 ≤ entropy ≤ 1; \|share_A + share_B − 1\| ≤ 1e-12; every cell in [0, 1] |
+| T5 | One defender 1 m from the carrier, closing at 6 m/s | intensity > 0.9 (hand value 0.972) |
+| T6 | One defender 15 m away, standing / closing at 6 m/s | intensity < 0.05 (0.013 / 0.034) |
+| T6b | **Ten defenders at 15 m**, standing / closing at 6 m/s | intensity ∈ [0.11, 0.14] / [0.27, 0.32] (0.122 / 0.296). This documents accumulation |
+| T7 | No player within 1.5 m of the ball, or ball z > 1.0 m | `pressing` is `null`; index `press` is held up to 2 s with `pressHeldFromMs`, then `null` |
+| T8 | **Mirror:** late-siege and calm-midfield, roles and `attackingDirection` swapped, x → 105 − x | every per-team value of team X equals the original for team X bit for bit; entropy identical; same moments, reasons and ticks |
+| T9a | **Late-siege, within-team contrast** | mean finalThird_vale over the siege window [5290000, 5325000] − mean finalThird_vale over the pre-siege window [5280000, 5289500] **≥ 0.10** |
+| T9b | **Late-siege moments** | `SUSTAINED_PRESSURE` fires for vale with `timeMs` inside [5290000, 5325000], and never for bastion anywhere in the replay |
+| T10 | Unsupported: `corner`, `central`, `exchange` | `trackingMetrics: "unsupported"` with a `reason`; no tracking values; `SET_PIECE_SHOT` returned for `corner` |
+| T11 | Calm-midfield | no `SUSTAINED_PRESSURE` and no `CONTROL_SWING` for either team (and no moment at all, per the expected outcome above) |
+| T12 | Hysteresis: synthetic series crossing the thresholds twice inside the cooldown | exactly one `SUSTAINED_PRESSURE` / one `CONTROL_SWING` |
 | T13 | Golden: late-siege per-tick output at 4 dp vs `app/testdata/metrics/late-siege.golden.json` | byte-identical; CI fails on drift |
 | T14 | Determinism: compute twice, and once with players shuffled in every frame | identical bytes |
-| T15 | API: `/api/metrics`, `/api/moments` for each scenario; unknown scenario | `model` and `label` present in every response; scenario routing as in `TestDemoHandler_ScenarioRouting`; unknown gives 404 |
+| T15 | API: `/api/metrics` and `/api/moments` for every scenario including calm-midfield; unknown scenario | `model`, `label` and `trackingMetrics` in every response; routing as in `TestDemoHandler_ScenarioRouting`; unknown gives 404 |
 
-**Siege window (T9).**
-- Defined from events, not from metrics.
-- It starts at the first vale event after which every vale event starts and ends at x ≥ 70.
-  That is `evt-04` (5289695 ms, 73 → 72; `evt-03` starts at 68), so the first tick is 5290000.
-- It ends at the last vale event, `evt-27` (5325317 ms), so the last tick is 5325000.
-- The bound ≥ 0.10 is set from reasoning, before computing anything.
-- If it fails, I will report the measured value and ask. I will not loosen it silently.
+**T9 windows.**
+- Both windows are defined from events, not metrics.
+- The siege window starts at the first vale event after which every vale event starts and
+  ends at x ≥ 70: `evt-04` (5289695 ms), first tick 5290000. It ends at the last vale event,
+  `evt-27` (5325317 ms), last tick 5325000.
+- The pre-siege window is every tick before that: 5280000-5289500, 20 ticks.
+- Both bounds (T9a ≥ 0.10, T9b) are stated before computing anything.
+- If either fails, I report the measured value and ask. Neither the bound nor the windows
+  will be changed silently.
 
 ## Proposal only: metrics into the FactPack (not implemented)
 
-- One `FactPack` per detected moment, using the existing `domain.FactPack` and `domain.Fact`
-  unchanged.
-- Facts: `control_share`, `final_third_control_share`, `tactical_entropy`,
-  `pressing_intensity`, `control_chaos_index` and each index component. Values are rounded to
-  2 dp, with `unit: "ratio"` and `teamId` set.
-- Each fact's `timeStartMs`/`timeEndMs` is the tick span used.
-- Each fact's `eventIds` lists the moment's reason events. Every fact therefore cites at
-  least one source event, as the cue rules require.
-- `attributes` holds `model`, `label`, `tickTimesMs` and the parameter values used. The
-  Verifier can then check the numbers and the Narrator must keep the caveat.
-- This needs agreement from the agents engineer before Stage 2 wires it in.
+Rule: **a fact cites only events that are actually its inputs.**
+
+- **Event-derived facts can go in now, under v2.**
+  - `set_piece_shots` cites `[corner, shot]`.
+  - `final_third_actions` (the K count behind `SUSTAINED_PRESSURE`) cites exactly those K
+    actions.
+- **Tick-derived facts wait for v2.1.**
+  - Covers `control_share`, `final_third_control_share`, `tactical_entropy`,
+    `pressing_intensity`, `control_chaos_index` and the index components.
+  - Under v2 they would need `eventIds` of at least 1 item, and citing nearby passes as
+    evidence for a share value would be false provenance. So they stay out of FactPacks.
+  - Until then the UI may show them as data-only values with the uncalibrated label.
+- **Contract item C1 (for you and the agents engineer; v2.1, not changed here):** a "tick
+  evidence kind" for facts. For example, an evidence entry of kind `TICK` with
+  `tickTimesMs`, `model` and `paramsHash`, accepted instead of `eventIds` for tick-derived
+  metrics. The Verifier then checks values against recomputed ticks. `contracts/` is not
+  touched in G2.
+- `attributes` (already in v2) carries `model` and `label` on every metrics-related fact.
 
 ## API shape (Stage 2)
 
 - `GET /api/metrics?scenario=<id>[&grid=1]` returns
-  `{model, label, scenario, supported, reason?, params, ticks:[{timeMs, teams:{<id>:{share, finalThird, index, components, weightsUsed}}, entropy, carrier:{playerId,teamId}|null, pressing|null, grid?}]}`.
-  The grid is a row-major `cols*rows` array of team-A control, included only with `grid=1`.
-- `GET /api/moments?scenario=<id>` returns `{model, label, scenario, supported, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, reasons, tickTimesMs, values}]}`.
-- An unknown scenario gives 404, which the existing demo router already does.
-- An unsupported replay gives **200 with `supported: false`** (see decision D3).
+  `{model, label, scenario, trackingMetrics, reason?, params, ticks:[{timeMs, teams:{<id>:{share, finalThird, index, components, weightsUsed, pressHeldFromMs?}}, entropy, carrier:{playerId,teamId}|null, pressing|null, grid?}]}`.
+  - The grid (row-major `cols*rows`, team-A control) is included only with `grid=1`.
+  - On an unsupported replay, `ticks` is `[]`.
+- `GET /api/moments?scenario=<id>` returns
+  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, reasons, tickTimesMs, values}]}`.
+  - Unsupported replays still return their `SET_PIECE_SHOT` moments.
+- An unknown scenario gives 404 (existing demo router).
 
-## Decisions needed from you
+## Limitations
 
-- **D1. The entropy expectation was not quite right.** Mirror-symmetric positions give equal
-  shares but **not** maximum entropy. Entropy is 1 only when every cell is exactly 50/50. I
-  split that test into T1 (symmetric gives equal shares) and T2 (coincident players give
-  entropy = 1). Accept?
-- **D2. No calm 5 Hz fixture exists.** The authored fixtures are 4v4 and unsupported, so they
-  can't fire anything; T11 on them would pass trivially. I propose adding
-  `data/scenarios/calm-midfield.script.json` (generated with the PR #8 generator: midfield
-  circulation, no final-third entries) and running T11 on it. Accept, or keep the trivial
-  version?
-- **D3. Unsupported replays:** 200 with `supported: false` (recommended: the UI can show
-  "metrics unavailable"), or 422?
-- **D4. The T9 bound** (≥ 0.10 difference over the siege window, as defined above): accept?
-- **D5. Final-third actions** exclude shots and count only `COMPLETE` outcomes. Accept?
+- **Thresholds are set against two fixtures only** (`late-siege` and `calm-midfield`), both
+  generated by our own generator. Passing on them shows the detectors separate those two
+  scripted stories. It says nothing about general football.
+- **Every post-run change to a parameter, threshold, window or fixture gets a before/after
+  line** in the change log below, with the reason and the measured value that prompted it.
+- Pressing intensity accumulates with defender count (docs/metrics.md §4). Low blocks read as
+  moderate pressure.
+- A ball in flight longer than 2 s still steps the index through renormalisation (flagged).
+- Cross-architecture bit equality of `math.Exp`/`math.Log`/`math.Hypot` is **unverified**.
+  The golden file must be checked once on amd64 and once on arm64.
+
+## Parameter change log
+
+Initial values are those in docs/metrics.md as of this ADR. Every later change gets a line.
+
+| Date | Parameter | Before | After | Reason | Measured value that prompted it |
+|---|---|---|---|---|---|
+| 2026-10-10 (pre-run, review) | `Swing` input | index_T | index_T − index_opp | `structure` is shared by both teams (review change 2) | none (no run yet) |
+| 2026-10-10 (pre-run, review) | `Swing.Delta` / re-arm range | 0.15 / ±0.05 | 0.30 / 0.10 | rescaled for the difference signal | none (no run yet) |
+| 2026-10-10 (pre-run, review) | T9 | cross-team finalThird difference ≥ 0.10 | within-team siege vs pre-siege ≥ 0.10, plus T9b | cross-team comparison passes on geometry (review change 1) | none (no run yet) |
+
+## Decisions resolved
+
+- D1 accepted (T1/T2 split).
+- D2 accepted (calm-midfield, expected outcome above).
+- D3 accepted as 200 with `trackingMetrics` + `reason`.
+- D4 replaced by T9a/T9b.
+- D5 accepted.
