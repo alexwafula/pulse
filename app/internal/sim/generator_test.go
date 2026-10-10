@@ -3,6 +3,7 @@ package sim_test
 import (
 	"bytes"
 	"encoding/json"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -63,6 +64,12 @@ func TestGenerate_QualityValidation(t *testing.T) {
 
 	if metrics.MaxPlayerSpeed > 7.5 {
 		t.Errorf("max player speed %f exceeds 7.5 m/s", metrics.MaxPlayerSpeed)
+	}
+	// Final step clamp is 1.26 m per 200 ms, applied after repulsion. Rounding
+	// both endpoints to 0.1 m adds at most 0.1*sqrt(2) m, so derived speed is
+	// bounded by (1.26+0.1414)/0.2 = 7.01 m/s. The pre-fix output measured 7.50.
+	if bound := (1.26 + 0.1*math.Sqrt2) / 0.2; metrics.MaxPlayerSpeed > bound {
+		t.Errorf("max player speed %.3f exceeds post-clamp bound %.3f m/s", metrics.MaxPlayerSpeed, bound)
 	}
 	if metrics.MinPlayerDist < 0.5 {
 		t.Errorf("min player distance %f < 0.5m", metrics.MinPlayerDist)

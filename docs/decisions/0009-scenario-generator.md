@@ -102,7 +102,8 @@ The script defines the macro narrative and tactical setup, leaving micro-physics
     - Closest defenders close down the ball carrier (pressing radius).
     - Off-ball players maintain tactical spacing relative to their dynamic anchors.
 - **Kinematic limits**:
-  - Maximum sprint speed: capped at $7.5\text{ m/s}$ ($27.0\text{ km/h}$, realistic peak match sprint).
+  - Sprint cap: $7.5\text{ m/s}$ is the data-quality limit checked on output. The generator clamps each player's final 200 ms step to $1.26\text{ m}$ ($6.3\text{ m/s}$) **after** repulsion, receiver anticipation and boundary clamping, so no later force can add displacement. Measured max on `late-siege.json`: $6.73\text{ m/s}$.
+  - Speed derived from 1-dp coordinates can exceed the internal $6.3\text{ m/s}$ clamp by rounding alone, up to $(1.26 + 0.1\sqrt{2}) / 0.2 \approx 7.01\text{ m/s}$, still below the $7.5\text{ m/s}$ cap.
   - Maximum acceleration: $3.5\text{ m/s}^2$.
   - Maximum deceleration: $4.5\text{ m/s}^2$.
   - Spatial collision buffer: minimum $0.5\text{ m}$ separation between players, resolved by a deterministic repulsive potential field.
