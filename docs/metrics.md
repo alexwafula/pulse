@@ -5,11 +5,12 @@ or validated against real football. They describe the synthetic replay that prod
 nothing more. API responses carry `model: "time-to-reach-control-v1"` and
 `label: "model estimate, uncalibrated"`.
 
-Status: **proposal (G2 Stage 0, revised after review)**. No code exists yet. All parameters
-below are initial values, chosen before any metric was computed. Any change made after a
-run is logged with before/after values in
+Status: **implemented in G2 Stage 1** (`app/internal/metrics`, `app/internal/moments`; no API
+or UI yet). All parameters below are the initial values, chosen before any metric was
+computed, and **none changed after the first run**. Any later change is logged with
+before/after values in
 [ADR 0010](decisions/0010-metrics-and-moments.md#parameter-change-log). Measured outputs are
-added in Stage 2.
+in §9.
 
 All parameters live in one Go struct, `metrics.Params` (`app/internal/metrics`), with
 `metrics.DefaultParams()`. Tests read the struct and never repeat literals.
@@ -205,6 +206,9 @@ index_T = Σ_k w_k·x_k / Σ_k w_k        over components k whose value is not n
 **Press hold.**
 - When there is no carrier, `press` keeps the last non-null value for up to
   `Index.PressHoldS` = 2.0 s (4 ticks), and the response sets `pressHeldFromMs`.
+- The bound is **inclusive**: with the last carrier at tick t₀, the ticks t₀+0.5 s … t₀+2.0 s
+  are held (the +2.0 s tick included), and t₀+2.5 s is `null`. Tested in
+  `TestT7_PressHoldInclusive`.
 - After 2 s without a carrier, `press` becomes `null` and the weights are renormalised.
 - The raw `pressing` intensity output is **never** held; it stays `null` while the ball is in
   flight.
@@ -229,6 +233,11 @@ Every moment carries:
 - `reasons`: source event IDs
 - `tickTimesMs`: the ticks used
 - `windowStartMs` and `windowEndMs`
+- `evidenceKind`: `"event"` when the reasons are the events that caused the moment
+  (`SET_PIECE_SHOT`, `SUSTAINED_PRESSURE`), `"tick"` when the moment comes from metric ticks
+  and the reasons are only the events that happened inside its window. `CONTROL_SWING` is
+  always `"tick"`.
+- `values`: the measured numbers behind the decision, rounded to 4 dp
 
 | Type | Fires when | Reasons |
 |---|---|---|
@@ -239,10 +248,23 @@ Every moment carries:
 **Completed final-third action:** an event by T with `outcome = COMPLETE`, type PASS, CARRY,
 CROSS or CORNER, and `to` inside T's attacking final third. Shots are excluded.
 
+The `to` test uses integer decimetres: `round(to.x·10) ≥ 700` for a team attacking RIGHT,
+`≤ 350` for LEFT (the final-third column edges).
+
+**Pressure details:** the action window is `[t − W, t]`, both ends inclusive, and is the
+moment's `windowStartMs`/`windowEndMs`. `tickTimesMs` are the last `N` ticks. `values`:
+`finalThird` at t and `actions` (the count).
+
 **Swing details:**
 - `Δ_opp = −Δ_T` exactly (IEEE subtraction is anti-symmetric), so only **rises** are
   detected. A swing toward T fires once, for T.
 - The shared `structure` term cancels in the difference.
+- The window `[t − W, t]` is inclusive at both ends: 11 tick samples for W = 5 s.
+- `t_min` is the **latest** tick holding the window minimum, so the window is as short as the
+  rise allows. `tickTimesMs = [t_min, t]`, `windowStartMs = t_min`.
+- `values`: `signal`, `deltaFrom` (Δ at t_min) and `deltaTo` (Δ at t).
+- Re-arm: the last `Swing.RearmTicks` = 4 ticks, all after the firing tick, span at most
+  `Swing.RearmRange` = 0.10, and `Swing.CooldownS` has elapsed.
 
 | Parameter (`Moments.*`) | Initial value |
 |---|---|
@@ -252,11 +274,11 @@ CROSS or CORNER, and `to` inside T's attacking final third. Shots are excluded.
 | `Pressure.K` / `Pressure.WindowS` | 3 actions / 15 s |
 | `Pressure.CooldownS` | 30 s |
 | `Swing.Delta` (on Δ_T, range [−1, 1]) | 0.30 |
-| `Swing.WindowS` | 5 s (10 ticks) |
-| `Swing.RearmBand` | max − min of Δ_T over 4 consecutive ticks ≤ 0.10 (it has settled, at any level) |
+| `Swing.WindowS` | 5 s (10 tick intervals, 11 samples) |
+| `Swing.RearmRange` / `Swing.RearmTicks` | max − min of Δ_T over 4 consecutive ticks ≤ 0.10 (it has settled, at any level) |
 | `Swing.CooldownS` | 20 s |
 
-`Swing.Delta` and `RearmBand` are double the earlier 0.15 / ±0.05. The difference moves
+`Swing.Delta` and `RearmRange` are double the earlier 0.15 / ±0.05. The difference moves
 about twice as fast as a single index: for example `share_T − share_opp = 2·share_T − 1`.
 This was set before any run (ADR 0010, decision 7).
 
@@ -303,4 +325,45 @@ This holds because:
 
 ## 9. Measured outputs
 
-To be filled in at Stage 2: per-scenario ranges, moment table, payload sizes, compute time.
+Measured on G2 Stage 1 code, default parameters, amd64 (Intel i7-1185G7), Go test binary.
+Every value is a model estimate, uncalibrated, and describes our synthetic replays only.
+
+**Ranges over all ticks**
+
+| Scenario (ticks) | Team | share | finalThird | index | indexDelta |
+|---|---|---|---|---|---|
+| late-siege (161) | bastion | 0.1051-0.2469 | 0.0000-0.0024 | 0.2112-0.3928 | −0.5587 to −0.1822 |
+| late-siege (161) | vale | 0.7531-0.8949 | 0.3222-0.7212 | 0.5733-0.7831 | 0.1822-0.5587 |
+| calm-midfield (121) | bastion | 0.2244-0.2939 | 0.0003-0.0025 | 0.2184-0.2355 | −0.4813 to −0.4069 |
+| calm-midfield (121) | vale | 0.7061-0.7756 | 0.2532-0.3614 | 0.6394-0.6999 | 0.4069-0.4813 |
+
+| Scenario | entropy | pressing (non-null ticks) | ticks with `press: null` |
+|---|---|---|---|
+| late-siege | 0.2674-0.3267 | 0.0085-1.0000 (68 of 161) | 66 of 161 |
+| calm-midfield | 0.2743-0.3552 | 0.0000-0.0081 (108 of 121) | 0 of 121 |
+
+**Late-siege T9a:** mean finalThird_vale is 0.3811 pre-siege (20 ticks) and 0.6050 in the
+siege (71 ticks); the difference is **0.2239** (bound ≥ 0.10).
+
+**Moments**
+
+| Scenario | Type | Team | timeMs | Window | Evidence | Reasons | Values |
+|---|---|---|---|---|---|---|---|
+| late-siege | SUSTAINED_PRESSURE | vale | 5291500 | 5276500-5291500 | event | evt-03, evt-04, evt-05 | finalThird 0.4728, actions 3 |
+| late-siege | CONTROL_SWING | bastion | 5302000 | 5297000-5302000 | tick | evt-10, evt-11, evt-12 | signal 0.3026 (Δ −0.5059 → −0.2033) |
+| late-siege | CONTROL_SWING | vale | 5313500 | 5308500-5313500 | tick | evt-18, evt-19, evt-20 | signal 0.3148 (Δ 0.2078 → 0.5226) |
+| late-siege | SET_PIECE_SHOT | vale | 5321488 | 5319185-5321488 | event | evt-22, evt-23 | none |
+| calm-midfield | none | none | none | none | none | none | max swing signal: bastion 0.0525, vale 0.0402 |
+| corner / central / exchange | SET_PIECE_SHOT only (1 each) | none | none | none | event | 2 IDs each | trackingMetrics unsupported (8000 ms frame gaps) |
+
+**Cost:** `Compute` takes about 142 ms for late-siege (161 ticks) and about 104 ms for
+calm-midfield (121 ticks); `Detect` takes about 2.6 / 1.5 ms (mean of 20 runs).
+Golden file `app/testdata/metrics/late-siege.golden.json`: 161109 bytes.
+
+**Read with care:**
+- vale's share stays above 0.70 in both scenarios, and bastion's finalThird stays below
+  0.003. The generator places teams by fixed formation templates (ADR 0010, Stage 1 notes),
+  so share mostly reflects that geometry, not play.
+- The SUSTAINED_PRESSURE tick run starts at 5289000, two ticks before the siege window. The
+  firing time (5291500) is inside it.
+- Still unmeasured: arm64 golden equality, API payload sizes (Stage 2), browser rendering.

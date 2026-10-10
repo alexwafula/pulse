@@ -180,6 +180,26 @@ Rule: **a fact cites only events that are actually its inputs.**
 - Cross-architecture bit equality of `math.Exp`/`math.Log`/`math.Hypot` is **unverified**.
   The golden file must be checked once on amd64 and once on arm64.
 
+## Stage 1 implementation notes
+
+- **Routing registration deferred to Stage 2.** Stage 1 has no API, so calm-midfield is not
+  yet in the demo router or `TestDemoHandler_ScenarioRouting`. That moves to Stage 2 with T15.
+- **The generator does not build a mid-block.** `sim/formations.go` and
+  `computePlayerTargetPos` use fixed templates: the team attacking RIGHT (vale) keeps its back
+  line at x ≈ 64-66 and forwards at x ≥ 86, and the team attacking LEFT (bastion) holds its
+  defensive line near x ≈ 88.
+  `lineHeightM`/`compactness` in the script are never read. So the spec item "bastion holds a
+  mid-block" is **not met**, and vale's share stays above 0.70 in calm-midfield too. The
+  generator was not changed: that is out of scope and would change the late-siege bytes.
+- **checkdata rejects calm-midfield.** `sim/quality.go` requires at least one shot
+  (`insane shot count: 0 (expected at least 1)`). The calm spec forbids shots. The checker
+  was not weakened. With only that rule skipped locally (not committed), every physical check
+  passed: 301 frames at 200 ms, max player speed 6.80 m/s, max ball 15.14 m/s, min player
+  distance 0.61 m. This needs a decision (see the PR).
+- **T8 passed bit-exact on the first run**; no tolerance was added and no evaluation-order fix
+  was needed.
+- **Golden file** generated on amd64 only; arm64 is unchecked.
+
 ## Parameter change log
 
 Initial values are those in docs/metrics.md as of this ADR. Every later change gets a line.
@@ -189,6 +209,7 @@ Initial values are those in docs/metrics.md as of this ADR. Every later change g
 | 2026-10-10 (pre-run, review) | `Swing` input | index_T | index_T − index_opp | `structure` is shared by both teams (review change 2) | none (no run yet) |
 | 2026-10-10 (pre-run, review) | `Swing.Delta` / re-arm range | 0.15 / ±0.05 | 0.30 / 0.10 | rescaled for the difference signal | none (no run yet) |
 | 2026-10-10 (pre-run, review) | T9 | cross-team finalThird difference ≥ 0.10 | within-team siege vs pre-siege ≥ 0.10, plus T9b | cross-team comparison passes on geometry (review change 1) | none (no run yet) |
+| 2026-10-10 (Stage 1, first run) | none | all ADR values | unchanged | T1-T14 passed on the first run | T9a difference 0.2239; T9b vale SUSTAINED_PRESSURE at 5291500, none for bastion |
 
 ## Decisions resolved
 
