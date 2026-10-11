@@ -45,8 +45,8 @@ The local renderer comparison has three views: 3D (Three.js, default), 2D
 controls. Drag or pinch the 3D view to adjust the camera; its reset button
 restores the initial view. WebGL initialization failures fall back to SVG.
 Direct comparison URLs are `/?view=three`, `/?view=pixi` and `/?view=svg`.
-Both canvas renderers are currently bundled together for the comparison;
-choosing a primary renderer or splitting the bundle is a later decision.
+Each canvas renderer is a separate lazy-loaded bundle; the SVG replay does
+not load either renderer. Choosing a primary renderer remains a later decision.
 
 To edit the pitch renderer, install Node.js 20 or newer and run:
 
@@ -110,7 +110,9 @@ go run ./app/cmd/server -agents-url http://127.0.0.1:8090
 ```
 
 Open `http://127.0.0.1:8080`. At 27:58 the insight and a shot-outcome banner
-appear. The current final shot is blocked; the scoreboard remains 0:0. Evidence replays
+appear. The current final shot is blocked. Scores are not recorded in the
+replay contract, so the header shows a neutral unavailable-score placeholder.
+Evidence replays
 27:52-27:58 at 1x, highlights the corner and shot, and stops at the clip end.
 Return to match restores your previous clock. Restart clears the insight until
 the moment occurs again. The template supports English CASUAL and ANALYST;
@@ -153,9 +155,10 @@ not model quality. See [decision 0007](docs/decisions/0007-passing-network-and-a
 
 ## Core demo additions
 
-The scenario selector offers Corner chance, Central entry and Passing exchange.
-The latter two are authored variants of the first fixture, not a general seeded
-match generator or evidence of validated football intelligence. Go calculates
+The scenario selector offers Corner chance, Central entry, Passing exchange,
+Late siege and Calm midfield. The first three are authored fixture variants;
+the latter two use the deterministic 11v11 generator. These are synthetic
+stories, not evidence of validated football intelligence. Go calculates
 attacking-relative lane counts for completed passes/carries, penalty-area
 entries and entry-to-shot conversion. Statistics follow rewind and evidence
 playback; conversion is N/A when there are no qualifying entries.
@@ -174,3 +177,38 @@ default mode makes no model calls. See [Foundry/Azure setup](docs/FOUNDRY-AZURE-
 for credentials, direct shadow testing, Docker Compose and deployment steps.
 Dockerfiles and `compose.yaml` are prepared but not yet container-tested here.
 See [project-page copy](docs/PROJECT-PAGE.md) and [uploadable media](docs/media/README.md).
+
+## Replay-backed analytics
+
+Team labels, completed-pass totals, event counts, box entries, shots and
+evidence descriptions now come from the selected replay. These follow the
+same clock as the pitch, including rewind and bounded evidence clips. The
+header pass bar compares completed passes, not possession. No goal is inferred.
+
+The Control tab shows Go-calculated metrics and detected moments. Supported
+5 Hz tracking replays have a clock-synchronised control overlay in SVG,
+Three.js and PixiJS. Legacy fixtures show tracking metrics as unavailable,
+while retaining their event-only set-piece moments.
+
+- `GET /api/metrics?scenario=late-siege&grid=1`: cached metric ticks and a
+  row-major, bottom-left control grid.
+- `GET /api/moments?scenario=late-siege`: moment windows and their evidence.
+- CONTROL_SWING evidence is metric ticks; nearby context events are never
+  presented as its source evidence. Set-piece moments cite actual event IDs.
+
+Tracking-derived values are **model estimates, uncalibrated**. The experimental
+index is not a validated football measure, and the generator's formation
+limitations still apply. These data-only overlays do not publish new AI cues
+or add tick-derived facts to the v2 agent contract.
+
+JSON replay, insight and fact-pack responses support negotiated gzip. Cached
+metrics/moments already support gzip and ETags; they are not compressed twice.
+Streaming transport is still pending. See [decision 0011](docs/decisions/0011-replay-backed-analytics.md)
+for scope and the local compression benchmark.
+
+With the Go server running, check all renderers and mobile layouts:
+
+```powershell
+$env:PULSE_URL = 'http://127.0.0.1:8080'
+node tests/integration/analytics-browser.mjs
+```

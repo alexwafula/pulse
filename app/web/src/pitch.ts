@@ -1,7 +1,8 @@
 export {};
 
-import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download } from "lucide";
+import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } from "lucide";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
+import { createAnalytics, type Moment } from "./analytics";
 
 type ThreeModule = typeof import("./renderers/three");
 type PixiModule = typeof import("./renderers/pixi");
@@ -32,8 +33,8 @@ type Event = {
 };
 type TrackedPlayer = Point & { playerId: string };
 type Frame = { timeMs: number; ball: Ball; players: TrackedPlayer[] };
-type Replay = { schemaVersion: string; match: Match; events: Event[]; tracking: Frame[] };
-type Cue = { id: string; startMs: number; endMs: number; replayStartMs: number; replayEndMs: number; text: string; eventIds: string[]; verification: { status: string } };
+export type Replay = { schemaVersion: string; match: Match; events: Event[]; tracking: Frame[] };
+export type Cue = { id: string; startMs: number; endMs: number; replayStartMs: number; replayEndMs: number; text: string; eventIds: string[]; verification: { status: string } };
 type CueFeed = { schemaVersion: string; cues: Cue[] };
 
 const svgNS = "http://www.w3.org/2000/svg";
@@ -85,6 +86,8 @@ const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
 const runDemoButton = document.querySelector<HTMLButtonElement>("#run-demo-button");
 let cues: Cue[] = [];
 let evidenceCue: Cue | undefined;
+let momentClip: Moment | undefined;
+let analytics: ReturnType<typeof createAnalytics> | undefined;
 let returnClock = 0;
 let displayedCueID: string | undefined;
 let persona = "CASUAL";
@@ -99,6 +102,7 @@ function setDrawerTab(tabId: string, isUser = false): void {
     const active = tab.dataset.tab === tabId;
     tab.classList.toggle("active", active);
     tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
   }
   for (const pane of drawerPanes) {
     pane.classList.toggle("active", pane.dataset.pane === tabId);
@@ -111,6 +115,7 @@ function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenari
 
 function clearEvidence(): void {
   evidenceCue = undefined;
+  momentClip = undefined;
   evidenceReturn.hidden = true;
   for (const button of speedButtons) { button.disabled = false; button.setAttribute("aria-pressed", String(Number(button.dataset.speed) === speed)); }
   for (const button of eventButtons.values()) button.classList.remove("evidence-event");
@@ -368,6 +373,8 @@ function render(): void {
   renderPositions();
   renderEvent();
   renderInsight();
+  const cue = evidenceCue ?? [...cues].reverse().find(item => clock >= item.startMs && clock <= item.endMs);
+  sceneState.control = analytics?.render(clock, cue, momentClip);
   const snapshot = [...passingSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
   if (snapshot !== activePassingSnapshot) {
     if (activePassingSnapshot) activePassingSnapshot.hidden = true;
@@ -383,14 +390,15 @@ function render(): void {
   }
   attackClock.textContent = matchTime(clock);
   recapPanel.hidden = clock < replay.match.endMs;
-  if (clock >= replay.match.endMs) {
+  if (clock >= replay.match.endMs && !userSelectedTab && !momentClip) {
     setDrawerTab("recap");
   } else if (!userSelectedTab && evidenceCue) {
     setDrawerTab("timeline");
   }
   clockDisplay.textContent = matchTime(clock);
   seek.value = String(Math.round(((clock - replay.match.startMs) / (replay.match.endMs - replay.match.startMs)) * 1000));
-  const nextPlayLabel = playing ? "Pause" : evidenceCue && clock >= evidenceCue.replayEndMs ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
+  const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs;
+  const nextPlayLabel = playing ? "Pause" : clipEnd !== undefined && clock >= clipEnd ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
   if (playLabel !== nextPlayLabel) {
     playLabel = nextPlayLabel;
     playButton.replaceChildren(createElement(playing ? Pause : Play));
@@ -404,8 +412,8 @@ function render(): void {
 function animate(time: number): void {
   if (playing) {
     if (previousFrameTime) {
-      const end = evidenceCue?.replayEndMs ?? replay.match.endMs;
-      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue ? 1 : speed));
+      const end = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? replay.match.endMs;
+      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue || momentClip ? 1 : speed));
       if (clock >= end) playing = false;
       render();
     }
@@ -555,13 +563,45 @@ async function start(): Promise<void> {
     }
     createPlayers();
     createTimeline();
+    analytics = createAnalytics(replay, scenarioPicker.value, {
+      repaint: render, matchTime, eventSentence,
+      playMoment: (moment) => {
+        stopDemo();
+        if (!evidenceCue && !momentClip) returnClock = clock;
+        clearEvidence();
+        momentClip = moment;
+        clock = Math.max(replay.match.startMs, moment.windowStartMs);
+        playing = true; previousFrameTime = 0;
+        for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
+        for (const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
+        evidenceReturn.hidden = false;
+        setDrawerTab("evidence", true);
+        render();
+      },
+      inspectTime: (timeMs, eventId) => {
+        stopDemo(); clearEvidence(); playing = false; clock = timeMs;
+        if (eventId) eventButtons.get(eventId)?.classList.add("evidence-event");
+        setDrawerTab(eventId ? "timeline" : "control", true);
+        render();
+      },
+    });
     drawerTabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".drawer-tab"));
     drawerPanes = Array.from(document.querySelectorAll<HTMLElement>(".drawer-pane"));
     for (const tab of drawerTabs) {
       tab.addEventListener("click", () => {
         if (tab.dataset.tab) setDrawerTab(tab.dataset.tab, true);
       });
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const index = drawerTabs.indexOf(tab);
+        const next = event.key === "Home" ? 0 : event.key === "End" ? drawerTabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + drawerTabs.length) % drawerTabs.length;
+        const target = drawerTabs[next];
+        if (target.dataset.tab) setDrawerTab(target.dataset.tab, true);
+        target.focus();
+      });
     }
+    setDrawerTab("timeline");
     scenarioPicker.addEventListener("change", () => {
       stopDemo();
       const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
@@ -581,7 +621,7 @@ async function start(): Promise<void> {
         required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
       });
     }
-    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download } });
+    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } });
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]"))) {
       const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
       if (event) {
@@ -606,7 +646,7 @@ async function start(): Promise<void> {
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) {
       button.addEventListener("click", () => {
         stopDemo();
-        if (evidenceCue) clock = returnClock;
+        if (evidenceCue || momentClip) clock = returnClock;
         clearEvidence(); playing = false;
         persona = button.dataset.persona ?? "CASUAL";
         for (const item of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) item.setAttribute("aria-pressed", String(item === button));
@@ -618,7 +658,7 @@ async function start(): Promise<void> {
       setDrawerTab("timeline");
       const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
       if (!cue) return;
-      if (!evidenceCue) returnClock = clock;
+      if (!evidenceCue && !momentClip) returnClock = clock;
       clearEvidence(); evidenceCue = cue;
       for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
       clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
@@ -632,7 +672,8 @@ async function start(): Promise<void> {
       clock = returnClock;
       playing = false;
       previousFrameTime = 0;
-      if (clock >= replay.match.endMs) setDrawerTab("recap");
+      if (clock >= replay.match.endMs && !userSelectedTab) setDrawerTab("recap");
+      else if (userSelectedTab) setDrawerTab(userSelectedTab);
       render();
     });
     for (const button of viewButtons) button.addEventListener("click", () => { void switchView(button.dataset.view ?? "svg"); });
@@ -648,8 +689,9 @@ async function start(): Promise<void> {
 
     playButton.addEventListener("click", () => {
       stopDemo();
-      if (evidenceCue && clock >= evidenceCue.replayEndMs) clock = evidenceCue.replayStartMs;
-      if (clock >= replay.match.endMs) clock = replay.match.startMs;
+      const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs;
+      if (clipEnd !== undefined && clock >= clipEnd) clock = Math.max(replay.match.startMs, evidenceCue?.replayStartMs ?? momentClip!.windowStartMs);
+      else if (clock >= replay.match.endMs) clock = replay.match.startMs;
       playing = !playing;
       render();
     });
@@ -666,15 +708,6 @@ async function start(): Promise<void> {
       stopDemo();
       clearEvidence();
       clock = replay.match.startMs + (Number(seek.value) / 1000) * (replay.match.endMs - replay.match.startMs);
-      if (!userSelectedTab) {
-        if (seek.value === "450") {
-          setDrawerTab("passing");
-        } else if (seek.value === "1000") {
-          setDrawerTab("recap");
-        } else if (seek.value === "0") {
-          setDrawerTab("timeline");
-        }
-      }
       render();
     });
     for (const button of speedButtons) {
@@ -694,6 +727,7 @@ async function start(): Promise<void> {
     if (pitchLoading) pitchLoading.hidden = true;
     requestAnimationFrame(animate);
     void loadInsights();
+    void analytics.load();
   } catch (error: unknown) {
     if (pitchLoading) pitchLoading.hidden = true;
     if (pitchError) {

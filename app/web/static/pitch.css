@@ -1774,3 +1774,37 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
     display: none;
   }
 }
+
+/* Replay-derived telemetry and model overlays. */
+.score-unavailable { font: 700 18px var(--font-display); color: var(--text-secondary); line-height: 1; }
+.pitch-overlay-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 32px; margin-bottom: 8px; }
+.field-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+.field-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent-lime); }
+.field-toggle svg { width: 15px; height: 15px; }
+.model-label { color: var(--text-muted); font-size: 11px; line-height: 1.5; letter-spacing: 0; overflow-wrap: anywhere; }
+.pitch-overlay-tools .model-label { flex: 1 1 160px; }
+.metric-values { margin: 12px 0 18px; font-size: 12px; }
+.metric-values > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: var(--border-hairline); padding: 7px 0; }
+.metric-values dt { color: var(--text-secondary); min-width: 0; }
+.metric-values dd { margin: 0; color: var(--text-primary); font-variant-numeric: tabular-nums; text-align: right; }
+.moment-list, .evidence-trail-list { padding: 0; list-style: none; }
+.moment-button, .source-event-button { width: 100%; display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 5px 8px; padding: 10px; background: transparent; border: 0; border-bottom: var(--border-hairline); color: var(--text-primary); text-align: left; border-radius: 0; }
+.moment-button svg, .source-event-button svg { grid-row: 1 / 3; }
+.moment-button strong, .source-event-button strong { font-size: 12px; overflow-wrap: anywhere; }
+.moment-button span, .source-event-button span { font-size: 11px; color: var(--text-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.moment-button:hover, .moment-button[aria-pressed="true"], .source-event-button:hover { background: rgba(255,255,255,.06); }
+.moment-banner { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 110px); padding: 8px 10px; background: rgba(9,14,12,.9); border-left: 2px solid var(--accent-lime); border-radius: 3px; pointer-events: none; display: flex; flex-direction: column; gap: 3px; }
+.moment-banner strong { font-size: 13px; }
+.moment-banner span { font-size: 10px; color: var(--text-secondary); overflow-wrap: anywhere; }
+#control-layer[hidden] { display: none; }
+.evidence-range-marker { right: auto; pointer-events: none; }
+.clip-controls { min-height: 0; }
+.clip-controls:has(button:not([hidden])) { min-height: 34px; padding-bottom: 6px; }
+.rail-value { letter-spacing: 0; overflow-wrap: anywhere; }
+.drawer-tab { flex: 0 0 auto; min-height: 30px; }
+@media (max-width: 860px) {
+  .left-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+  .rail-card { min-width: 0; min-height: 86px; }
+  .rail-value { font-size: 16px; }
+  .pitch-column { width: 100%; }
+}

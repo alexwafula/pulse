@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import type { PitchRenderer, RenderPlayer, SceneState } from "./types";
+import type { ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
 
 export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRenderer {
   const scene = new THREE.Scene();
@@ -40,6 +40,10 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
   box(126, .5, 88, 0x1b4735, 0, -.4, 0);
   for (let i = 0; i < 10; i++) box(10.5, .12, 68, i % 2 ? 0x327652 : 0x2b6948, -47.25 + i * 10.5, -.06, 0);
   const markings = new THREE.Group();
+  const control = new THREE.Group();
+  scene.add(control);
+  const controlCells: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>[] = [];
+  let lastControl: ControlField | undefined;
   scene.add(markings);
   const white = new THREE.LineBasicMaterial({ color: 0xe7efe2 });
   function line(points: [number, number][]): void {
@@ -116,6 +120,28 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
   observer.observe(host); reset(); resize();
   return {
     update(state: SceneState) {
+      if (state.control !== lastControl) {
+        control.visible = !!state.control;
+        if (state.control) {
+          const field = state.control;
+          if (controlCells.length !== field.values.length) {
+            for (const cell of controlCells) { cell.geometry.dispose(); cell.material.dispose(); }
+            control.clear(); controlCells.length = 0;
+            for (let row = 0; row < field.rows; row++) for (let col = 0; col < field.cols; col++) {
+              const cell = new THREE.Mesh(new THREE.PlaneGeometry(105 / field.cols, 68 / field.rows), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+              cell.rotation.x = -Math.PI / 2;
+              cell.position.set((col + .5) * 105 / field.cols - 52.5, .025, 34 - (row + .5) * 68 / field.rows);
+              control.add(cell); controlCells.push(cell);
+            }
+          }
+          controlCells.forEach((cell, index) => {
+            const value = field.values[index];
+            cell.material.color.setHex((value >= .5) === field.homeTeamGrid ? 0xf47761 : 0x48bed3);
+            cell.material.opacity = Math.abs(value - .5) * .55;
+          });
+        }
+        lastControl = state.control;
+      }
       for (const [id, point] of state.players) playerObjects.get(id)?.position.set(point.x - 52.5, 0, 34 - point.y);
       ball.position.set(state.ball.x - 52.5, .48 + (state.ball.z ?? 0), 34 - state.ball.y);
       path.visible = !!state.path;

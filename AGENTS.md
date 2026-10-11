@@ -56,10 +56,16 @@ Python template HTTP service and browser Evidence replay now work locally.
 Go-calculated passing snapshots and pass evidence are rendered below the pitch.
 Python has file prompts and a tested async shadow workflow; it does not publish
 model output, and the HTTP endpoint remains template-only.
-Three authored local scenarios, attacking-route metrics, persona controls and
+Three authored local scenarios plus seeded 11v11 late-siege/calm-midfield replays,
+attacking-route metrics, persona controls and
 a deterministic downloadable recap are available. An opt-in Foundry REST
 shadow adapter is mock-tested; no live calls or cloud deployment have been
 verified. Dockerfiles/Compose and setup/project-page docs are prepared.
+Cached metrics/moments APIs and clock-synchronised control overlays now work
+in SVG, Three.js and PixiJS. Replay-backed statistics and event/tick evidence
+clips are available. Tracking values are uncalibrated model estimates, not
+agent facts under v2. CONTROL_SWING context events must never be cited as
+evidence; its evidence is metric ticks. Scores remain unavailable, not 0:0.
 SSE, model-backed runtime agents and Azure remain unimplemented. The Python
 Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
 
@@ -174,6 +180,7 @@ Local checks:
 - Python: `py -m unittest discover -s agents/tests -v` (standard library; pytest is not configured)
 - Offline agent boundary evaluation: `py tests/evaluations/run_agents.py` (fake backend, not model accuracy)
 - Core UI: `node tests/integration/core-browser.mjs` (running local Go server required)
+- Replay analytics: `node tests/integration/analytics-browser.mjs` (running local Go server; set `PULSE_URL` and, if needed, `CHROME_PATH`)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions
