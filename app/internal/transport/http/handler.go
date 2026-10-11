@@ -15,11 +15,16 @@ import (
 )
 
 type pageData struct {
-	Match    domain.Match
-	Graphs   []graphSnapshot
-	Attacks  []metrics.AttackSnapshot
-	Recap    []recapItem
-	Scenario string
+	Match        domain.Match
+	Graphs       []graphSnapshot
+	Attacks      []metrics.AttackSnapshot
+	Recap        []recapItem
+	Scenario     string
+	ScenarioName string
+	TeamInitials []string
+	Summaries    []summarySnapshot
+	TotalEvents  int
+	Window       string
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -60,6 +65,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return nil, err
 		}
 	}
+	view := replayPage(replay, graphs, attacks, scenario)
 
 	mux := http.NewServeMux()
 	tracking := newMetricsAPI(scenario, replay)
@@ -77,7 +83,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_ = designPage.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: "corner"})
+		_ = designPage.Execute(w, view)
 	})
 	mux.HandleFunc("/api/fact-packs", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -176,13 +182,9 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		scenario := r.URL.Query().Get("scenario")
-		if scenario == "" {
-			scenario = "corner"
-		}
-		if err := page.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: scenario}); err != nil {
+		if err := page.Execute(w, view); err != nil {
 			return
 		}
 	})
-	return mux, nil
+	return gzipJSON(mux), nil
 }
