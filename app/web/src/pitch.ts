@@ -687,10 +687,6 @@ async function start(): Promise<void> {
     runDemoButton?.addEventListener("click", () => {
       void (demoRunning ? stopDemo() : startDemo());
     });
-    retryButton?.addEventListener("click", () => {
-      void start();
-    });
-
     playing = true;
     render();
     const preferredView = new URLSearchParams(location.search).get("view") ?? "three";
@@ -714,4 +710,5 @@ async function start(): Promise<void> {
   }
 }
 
+retryButton?.addEventListener("click", () => location.reload());
 void start();

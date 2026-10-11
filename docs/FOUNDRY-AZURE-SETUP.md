@@ -2,8 +2,56 @@
 
 Status: local Go/Python features are tested. The REST adapter is tested with
 mocked HTTP only. No live model calls or Azure deployments have been performed.
-Docker and Azure CLI are not installed on this development machine, so the
-container build and cloud commands below still need an actual smoke test.
+Windows preparation on 2026-10-09: Azure CLI 2.91.0 and the Container Apps
+extension 1.3.0b5 are installed and verified. Azure sign-in, subscription/budget
+confirmation and model quota checks are still required before resource creation.
+The container build and cloud commands below still need an actual smoke test.
+Docker Desktop is optional for deployment: Azure Container Registry can build
+both images in Azure using `az acr build`.
+
+## 0. Prepare this Windows machine
+
+Install the official Azure CLI if `az version` is not available:
+
+```powershell
+winget install --exact --id Microsoft.AzureCLI --source winget
+```
+
+Open a new PowerShell terminal after installation, then sign in and inspect
+the subscriptions you can use:
+
+```powershell
+az version
+az login
+az account list --query "[].{name:name,id:id,state:state,isDefault:isDefault}" --output table
+az account set --subscription 'YOUR-SUBSCRIPTION-ID'
+az account show --query "{name:name,id:id,state:state}" --output table
+```
+
+If the normal browser login fails, use `az login --use-device-code` and follow
+the sign-in instructions in that terminal. Do not share the sign-in code,
+password, API keys or access tokens with collaborators.
+
+Before creating resources, confirm the subscription, available credits or
+spending limit, region and your resource-creation permissions. In Azure Cost
+Management, create a budget for this subscription or the dedicated Pulse
+resource group and configure email alerts. A budget is an alert, not a hard
+spending cap. Free credits do not make every service or model free.
+
+Use this order:
+
+1. Sign in and agree on a budget; reuse an existing Foundry resource if suitable.
+2. Deploy one supported model and test one local shadow workflow (section 1).
+3. Deploy Go and Python in template mode first (section 3).
+4. Enable Foundry shadow mode on the internal Python app and inspect its logs.
+
+The three Pulse roles can initially share one model deployment. This setup
+does not create three hosted Foundry agents or enable model prose in the UI.
+
+Microsoft references:
+[Windows CLI installation](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows),
+[interactive sign-in](https://learn.microsoft.com/en-us/cli/azure/authenticate-azure-cli-interactively),
+[budget alerts](https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets).
 
 ## 1. Connect Foundry later today
 
