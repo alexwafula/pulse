@@ -57,3 +57,8 @@ initialization and duplicate listeners. Browser regressions cover repeated HTTP
 and unsupported-schema failures, restored controls and the automated demo.
 Gallery PNGs are real screenshots
 of the local template-mode application; a final cloud/model demo video remains.
+
+The 2026-10-11 main sync preserves these fixes alongside the seeded simulator
+and metrics additions. `.gitattributes` pins scenario JSON and metric golden
+fixtures to LF so byte-for-byte checks agree on Windows and Linux. Expected
+fixture content is unchanged; Go tests and vet pass in the Windows checkout.
