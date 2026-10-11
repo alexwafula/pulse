@@ -56,23 +56,44 @@ type SquadFile struct {
 
 // SquadTeamData contains team roster and default tactical parameters.
 type SquadTeamData struct {
-	ID                 string         `json:"id"`
-	Name               string         `json:"name"`
-	AttackingDirection string         `json:"attackingDirection"`
-	Formation          string         `json:"formation"`
-	LineHeightM        float64        `json:"lineHeightM"`
-	Compactness        float64        `json:"compactness"`
-	Players            []PlayerConfig `json:"players"`
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
+	AttackingDirection string `json:"attackingDirection"`
+	Formation          string `json:"formation"`
+	// LineHeightM and Compactness are reserved, not implemented (issue #17).
+	// They are parsed but never read by the generator.
+	LineHeightM float64        `json:"lineHeightM"`
+	Compactness float64        `json:"compactness"`
+	Players     []PlayerConfig `json:"players"`
 }
 
 // TeamConfig specifies team parameters, tactics, and formation.
 type TeamConfig struct {
-	ID                 string  `json:"id"`
-	Name               string  `json:"name"`
-	AttackingDirection string  `json:"attackingDirection"`
-	Formation          string  `json:"formation"`
-	LineHeightM        float64 `json:"lineHeightM"`
-	Compactness        float64 `json:"compactness"`
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
+	AttackingDirection string `json:"attackingDirection"`
+	Formation          string `json:"formation"`
+	// LineHeightM and Compactness are reserved, not implemented (issue #17).
+	// They are parsed but never read: team shape comes from the formation
+	// templates. Setting them has no effect and Script.ReservedFieldWarnings
+	// reports them.
+	LineHeightM float64 `json:"lineHeightM"`
+	Compactness float64 `json:"compactness"`
+}
+
+// ReservedFieldWarnings lists every reserved-but-unimplemented setting the
+// script sets (issue #17). The generator CLI prints them; output is unchanged.
+func (s Script) ReservedFieldWarnings() []string {
+	var out []string
+	for _, t := range s.Teams {
+		if t.LineHeightM != 0 {
+			out = append(out, fmt.Sprintf("team %s: lineHeightM=%g is reserved, not implemented (issue #17); ignored", t.ID, t.LineHeightM))
+		}
+		if t.Compactness != 0 {
+			out = append(out, fmt.Sprintf("team %s: compactness=%g is reserved, not implemented (issue #17); ignored", t.ID, t.Compactness))
+		}
+	}
+	return out
 }
 
 // PlayerConfig defines a player's tactical role and formation slot.

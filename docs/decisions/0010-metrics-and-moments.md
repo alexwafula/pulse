@@ -159,16 +159,26 @@ Rule: **a fact cites only events that are actually its inputs.**
   touched in G2.
 - `attributes` (already in v2) carries `model` and `label` on every metrics-related fact.
 
-## API shape (Stage 2)
+## API shape (implemented in Stage 2)
 
 - `GET /api/metrics?scenario=<id>[&grid=1]` returns
-  `{model, label, scenario, trackingMetrics, reason?, params, ticks:[{timeMs, teams:{<id>:{share, finalThird, index, components, weightsUsed, pressHeldFromMs?}}, entropy, carrier:{playerId,teamId}|null, pressing|null, grid?}]}`.
-  - The grid (row-major `cols*rows`, team-A control) is included only with `grid=1`.
-  - On an unsupported replay, `ticks` is `[]`.
+  `{model, label, scenario, matchId, trackingMetrics, reason?, teams, params, gridLayout?, ticks:[{timeMs, teams:{<id>:{share, finalThird, index, indexDelta, components, weightsUsed, pressHeldFromMs?}}, entropy, carrier:{playerId,teamId}|null, pressing|null, grid?}]}`.
+  - The grid (row-major `cols*rows`, team-A control, index `j*cols + i`, row 0 at the bottom
+    touchline, column 0 at the left goal line) is included only with `grid=1`, together with
+    `gridLayout: {order: "row-major", cols, rows, teamId, origin: "bottom-left"}`.
+  - On an unsupported replay, `ticks` is `[]` and `reason` is set.
 - `GET /api/moments?scenario=<id>` returns
-  `{model, label, scenario, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, evidenceKind, reasons, contextEventIds, tickTimesMs, values}]}`.
+  `{model, label, scenario, matchId, trackingMetrics, reason?, moments:[{type, teamId, timeMs, windowStartMs, windowEndMs, evidenceKind, reasons, contextEventIds, tickTimesMs, values}]}`.
   - Unsupported replays still return their `SET_PIECE_SHOT` moments.
-- An unknown scenario gives 404 (existing demo router).
+- Additions to the Stage 0 shape, all additive: `matchId` and `teams` (routing and
+  team order), `indexDelta` (the CONTROL_SWING input), `gridLayout`.
+- Floats are rounded to 4 dp; keys are camelCase; empty lists are `[]`. Only `carrier`,
+  `pressing`, `press` and `shotQuality` may be `null` (enforced by T15).
+- Routing reuses the demo router: an omitted `scenario` is `corner`; an unknown one gives 404
+  `unknown scenario "<id>"; known: ...`.
+- Each scenario is computed once on first request (`sync.Once`) and served from cached raw
+  and gzipped bodies. Responses carry `ETag` (one per encoding), `Cache-Control: public,
+  max-age=300` and `Vary: Accept-Encoding`; `If-None-Match` gives 304.
 
 ## Limitations
 

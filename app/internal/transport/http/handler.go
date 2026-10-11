@@ -27,6 +27,12 @@ func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
 }
 
 func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
+	return newScenarioHandler("", replay, webDir, agentsURL)
+}
+
+// newScenarioHandler serves one replay. scenario is the demo router's ID and
+// is echoed by /api/metrics and /api/moments.
+func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
 	packs, err := facts.CornerPacks(replay)
 	if err != nil {
 		return nil, err
@@ -56,6 +62,9 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 	}
 
 	mux := http.NewServeMux()
+	tracking := newMetricsAPI(scenario, replay)
+	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
+	mux.HandleFunc("/api/moments", tracking.serveMoments)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 	mux.HandleFunc("/design", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
