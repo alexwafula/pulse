@@ -48,6 +48,7 @@ try {
   const expectedY = 20 + (1 - pass.from.y / 68) * 640;
   const renderedY = Number(await desktop.locator("#event-path").getAttribute("y1"));
   assert.ok(Math.abs(renderedY - expectedY) < 0.01, "bottom-left coordinates must be inverted for SVG");
+  await desktop.getByRole("tab", { name: "Passing", exact: true }).click();
   await desktop.locator('.passing-snapshot:not([hidden]) [data-pass-evidence="evt-01"]').click();
   assert.equal(await desktop.locator("#match-clock").textContent(), "27:08");
   assert.equal(await desktop.locator('.event-list .evidence-event').count(), 1);

@@ -15,11 +15,16 @@ import (
 )
 
 type pageData struct {
-	Match    domain.Match
-	Graphs   []graphSnapshot
-	Attacks  []metrics.AttackSnapshot
-	Recap    []recapItem
-	Scenario string
+	Match        domain.Match
+	Graphs       []graphSnapshot
+	Attacks      []metrics.AttackSnapshot
+	Recap        []recapItem
+	Scenario     string
+	ScenarioName string
+	TeamInitials []string
+	Summaries    []summarySnapshot
+	TotalEvents  int
+	Window       string
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -27,6 +32,12 @@ func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
 }
 
 func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
+	return newScenarioHandler("", replay, webDir, agentsURL)
+}
+
+// newScenarioHandler serves one replay. scenario is the demo router's ID and
+// is echoed by /api/metrics and /api/moments.
+func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
 	packs, err := facts.CornerPacks(replay)
 	if err != nil {
 		return nil, err
@@ -54,8 +65,12 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			return nil, err
 		}
 	}
+	view := replayPage(replay, graphs, attacks, scenario)
 
 	mux := http.NewServeMux()
+	tracking := newMetricsAPI(scenario, replay)
+	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
+	mux.HandleFunc("/api/moments", tracking.serveMoments)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 	mux.HandleFunc("/design", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -68,7 +83,7 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_ = designPage.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: "corner"})
+		_ = designPage.Execute(w, view)
 	})
 	mux.HandleFunc("/api/fact-packs", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -167,13 +182,9 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		scenario := r.URL.Query().Get("scenario")
-		if scenario == "" {
-			scenario = "corner"
-		}
-		if err := page.Execute(w, pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: scenario}); err != nil {
+		if err := page.Execute(w, view); err != nil {
 			return
 		}
 	})
-	return mux, nil
+	return gzipJSON(mux), nil
 }

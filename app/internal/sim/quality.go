@@ -12,20 +12,22 @@ var idRegex = regexp.MustCompile(`^[A-Za-z0-9_.:-]{1,64}$`)
 
 // QualityMetrics reports measured physical and statistical bounds of a match.
 type QualityMetrics struct {
-	TotalFrames      int
-	DurationSec      float64
-	MaxPlayerSpeed   float64
-	AvgPlayerSpeed   float64
-	AvgOutfieldSpeed float64
-	MaxBallSpeed     float64
-	MinPlayerDist    float64
-	PassCount        int
-	ShotCount        int
-	CarryCount       int
-	CrossCount       int
-	ClearanceCount   int
-	CornerCount      int
-	BallSpeedPerKind map[string]float64
+	TotalFrames           int
+	DurationSec           float64
+	MaxPlayerSpeed        float64
+	AvgPlayerSpeed        float64
+	AvgOutfieldSpeed      float64
+	MaxBallSpeed          float64
+	MinPlayerDist         float64
+	PassCount             int
+	ShotCount             int
+	CarryCount            int
+	CrossCount            int
+	ClearanceCount        int
+	CornerCount           int
+	EventsOffTrackingGrid int
+	MaxEventFrameOffsetMS int64
+	BallSpeedPerKind      map[string]float64
 	// ShotRuleWaived is true when the script set expect.minShots to 0.
 	ShotRuleWaived bool
 }
@@ -212,6 +214,12 @@ func ValidateQualityWith(replay *domain.Replay, opts QualityOptions) (*QualityMe
 	// - ball speed in realistic physical range per event kind
 	// - receiver within 1.5 m at arrival (for completed passes)
 	for _, event := range replay.Events {
+		if event.TimeMS < replay.Tracking[0].TimeMS || event.TimeMS > replay.Tracking[len(replay.Tracking)-1].TimeMS {
+			return nil, fmt.Errorf("event %s at %d ms is outside the tracking window", event.ID, event.TimeMS)
+		}
+		if (event.TimeMS-replay.Tracking[0].TimeMS)%CadenceMS != 0 {
+			metrics.EventsOffTrackingGrid++
+		}
 		// Find closest tracking frame to event start time
 		var eventFrame *domain.TrackingFrame
 		minDiff := int64(math.MaxInt64)
@@ -228,6 +236,12 @@ func ValidateQualityWith(replay *domain.Replay, opts QualityOptions) (*QualityMe
 
 		if eventFrame == nil {
 			return nil, fmt.Errorf("event %s has no matching tracking frame at %d ms", event.ID, event.TimeMS)
+		}
+		if minDiff > CadenceMS/2 {
+			return nil, fmt.Errorf("event %s is %d ms from the closest frame; expected at most %d ms", event.ID, minDiff, CadenceMS/2)
+		}
+		if minDiff > metrics.MaxEventFrameOffsetMS {
+			metrics.MaxEventFrameOffsetMS = minDiff
 		}
 
 		// Check actor proximity to ball / event from point at start

@@ -162,8 +162,8 @@ func TestNewDemoHandler_LateSiege(t *testing.T) {
 
 // TestDemoHandler_ScenarioRouting proves the scenario query selects the
 // matching replay's fact pack and that unknown scenarios never fall back.
-// /api/metrics and /api/moments do not exist on this branch; G2 must add the
-// same routing assertions when it introduces them.
+// Routing for /api/metrics and /api/moments is covered by T15
+// (metrics_api_test.go).
 func TestDemoHandler_ScenarioRouting(t *testing.T) {
 	base, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "samples", "first-sequence.json"))
 	if err != nil {
