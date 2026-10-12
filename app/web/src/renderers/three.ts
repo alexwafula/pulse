@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { CameraMode, ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
+import { createStadium } from "./stadium";
 
 export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRenderer {
+  if (document.body.classList.contains("experience")) return createStadium(host, players);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x14241f);
   const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });

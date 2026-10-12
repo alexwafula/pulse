@@ -152,7 +152,7 @@ async function loadInsights(): Promise<void> {
   }
 }
 let pitchRenderer: PitchRenderer | undefined;
-let sceneState: SceneState = { players: new Map(), ball: { x: 0, y: 0 } };
+let sceneState: SceneState = { players: new Map(), velocities: new Map(), ball: { x: 0, y: 0 } };
 let switchingView = false;
 let playLabel = "";
 
@@ -317,6 +317,8 @@ function renderPositions(): void {
   const fraction = duration > 0 ? (clock - first.timeMs) / duration : 0;
   const nextPlayers = framePlayers.get(second.timeMs)!;
   sceneState.players.clear();
+  sceneState.velocities?.clear();
+  sceneState.timeMs = clock;
 
   for (const tracked of first.players) {
     const next = nextPlayers.get(tracked.playerId) ?? tracked;
@@ -325,6 +327,7 @@ function renderPositions(): void {
       y: interpolate(tracked.y, next.y, fraction),
     };
     sceneState.players.set(tracked.playerId, position);
+    sceneState.velocities?.set(tracked.playerId, { x: duration > 0 ? (next.x - tracked.x) * 1000 / duration : 0, y: duration > 0 ? (next.y - tracked.y) * 1000 / duration : 0 });
     const point = pitchPoint(position);
     playerElements.get(tracked.playerId)?.setAttribute("transform", `translate(${point.x} ${point.y})`);
   }
@@ -373,6 +376,7 @@ function renderEvent(): void {
   }
   eventPathLayer.style.display = event && clock - event.timeMs < 6500 ? "" : "none";
   sceneState.path = event && clock - event.timeMs < 6500 ? { from: event.from, to: event.to } : undefined;
+  sceneState.selectedPlayer = event && clock - event.timeMs < 6500 ? event.actorId : undefined;
 }
 
 function render(): void {

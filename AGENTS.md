@@ -70,7 +70,11 @@ SSE, model-backed runtime agents and Azure remain unimplemented. The Python
 Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
 The separate `/experience` preview uses locally bundled HTMX for replay-clock
 Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existing
-controller and gated cue feed. Three.js camera presets change presentation only.
+controller and gated cue feed. The preview now ports the supplied stadium and
+articulated character presentation; textured kits/ball and close perspective
+cameras replace the original capsule-and-number view on that route only.
+Gait uses recorded tracking velocity and the replay clock, never a second timer
+or inferred ball flight. The model field is opt-in in the preview.
 Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
 
 ```

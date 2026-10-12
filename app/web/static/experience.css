@@ -66,6 +66,7 @@ html:has(body.experience) { color-scheme: light; background: #f4f6f7; }
 .experience #play-button { color: #fff; background: #08765a; border-color: #08765a; box-shadow: none; }
 .experience #insight-status { color: #08644e; background: #d5eadd; border-color: #b8d6c4; }
 .experience .pitch-shell .icon-button { color: #fff; background: #1d3d30; }
+.stadium-player-tag { position: absolute; transform: translate(-50%,-100%); max-width: 128px; padding: 4px 7px; border-left: 3px solid #ffe9a1; border-radius: 2px; background: #142b22; color: #fff; font-size: 10px; font-weight: 700; line-height: 1.3; pointer-events: none; text-align: center; overflow-wrap: anywhere; }
 .experience .transport { background: transparent; border: 0; padding: 14px 0 4px; flex-wrap: nowrap; }
 .experience .transport .secondary-button { background: #e8eeeb; border: 0; }
 .experience .now-playing { background: #e9eeeb; border: 0; border-left: 3px solid #08765a; border-radius: 0; padding: 10px 12px; margin-top: 12px; min-height: 58px; }

@@ -56,13 +56,34 @@ try {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "page must fit the viewport");
       assert.equal(await page.evaluate(() => innerWidth), mobile ? 390 : 1440);
       if (mode !== "svg") {
+        assert.equal(await page.locator("#canvas-host canvas").getAttribute("data-presentation"), "stadium", "the experience must load the ported on-field presentation");
+        assert.equal(await page.locator("#control-toggle").isChecked(), false, "the natural turf is visible until control is requested");
         await page.locator("#canvas-host canvas").evaluate(canvas => { canvas.dataset.identity = "persistent"; });
         const before = await pixels(page.locator("#canvas-host canvas"), `${mobile}-${mode}`);
         await seek(page, 450);
         await page.waitForTimeout(200);
         const after = await pixels(page.locator("#canvas-host canvas"), `${mobile}-${mode} moved`);
         assert.notDeepEqual(after, before, "replay positions must change canvas pixels");
+        await page.locator("#play-button").click();
+        await page.waitForTimeout(700);
+        await pause(page);
+        assert.notDeepEqual(await pixels(page.locator("#canvas-host canvas"), `${mobile}-${mode} playing`), after, "the on-field presentation must animate during play");
+        await seek(page,450);
+        await page.waitForTimeout(250);
+        const paused = await page.locator("#canvas-host canvas").evaluate(canvas => canvas.toDataURL());
+        await page.waitForTimeout(250);
+        assert.equal(await page.locator("#canvas-host canvas").evaluate(canvas => canvas.toDataURL()),paused,"players and ball must freeze with the replay clock");
+        await seek(page,0); await seek(page,450);
+        await page.waitForTimeout(250);
+        assert.equal(await page.locator("#canvas-host canvas").evaluate(canvas => canvas.toDataURL()),paused,"rewind must reproduce the same poses and ball position");
+        await page.locator("#control-toggle").check();
+        await page.waitForTimeout(150);
+        assert.notEqual(await page.locator("#canvas-host canvas").evaluate(canvas => canvas.toDataURL()),paused,"model overlay must still render over the new pitch");
+        await page.locator("#control-toggle").uncheck();
         if (mode === "three") {
+          assert.ok(await page.locator(".stadium-player-tag").isVisible());
+          const current = replay.events.filter(event => event.timeMs <= replay.match.startMs + .45 * (replay.match.endMs-replay.match.startMs)).at(-1);
+          assert.equal(await page.locator(".stadium-player-tag").getAttribute("data-player-id"),current.actorId,"tag must identify the source event actor, not an invented possessor");
           const captures = [];
           for (const camera of ["broadcast", "tactical", "follow"]) {
             await page.locator("#camera-mode").selectOption(camera);

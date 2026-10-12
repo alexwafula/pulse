@@ -3,6 +3,13 @@
 Branch: `feat/experience-integration`. Preview: `/experience?scenario=late-siege`.
 Existing dashboard: `/?scenario=late-siege`. Both use the same Go engine.
 
+The preview's Three.js scene now uses the supplied HTML's stadium/character
+presentation: stands and crowd, articulated bodies, textured jerseys, patterned
+ball and close perspective cameras. PixiJS uses the brighter striped turf and
+patterned ball in tactical 2D. Original capsule/number visuals remain on `/`.
+Control starts off in the preview so turf and players remain clear; the same
+Go-calculated field can be enabled with the checkbox.
+
 ## Start and contribute
 
 ```powershell
@@ -128,10 +135,17 @@ not a new shared football contract or streaming API.
 | Bounded HTML presentation | `app/internal/transport/http/experience.go` |
 | Shared playback / evidence / overlays | `app/web/src/pitch.ts`, `analytics.ts` |
 | Rendering only | `app/web/src/renderers/three.ts`, `pixi.ts` |
+| Ported stadium / player anatomy | `app/web/src/renderers/stadium.ts`, `characters.ts` |
 
 Never HTMX-swap the canvas, playback controls, analytics inspector or gated cue
 region. Keep the supplied HTML's browser engine and host-specific AI/storage
 calls outside Pulse. Agree shared contract changes with both engine/agent owners.
+
+`SceneState.timeMs` and `velocities` are presentation inputs from adjacent replay
+tracking frames, not shared-contract changes or new statistics. Character roots
+and ball height remain recorded positions; only limbs and ball rotation are
+cosmetic. A name tag identifies the latest source event's actor, not a claimed
+possessor. No synthetic ball arcs, kicks or goals are inferred by the renderer.
 
 ## Meeting walkthrough and checks
 

@@ -4,7 +4,7 @@
     "build:web": "esbuild app/web/src/renderers/three.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/three-renderer.js && esbuild app/web/src/renderers/pixi.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/pixi-renderer.js && esbuild app/web/src/pitch.ts --bundle --minify --format=esm --target=es2020 --external:./*-renderer.js --outfile=app/web/static/pitch.js && esbuild app/web/src/experience.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/experience.js && esbuild node_modules/htmx.org/dist/htmx.js --bundle --minify --outfile=app/web/static/htmx.js",
     "check:web": "tsc --noEmit",
     "test:web": "node tests/integration/pitch-browser.mjs",
-    "test:experience": "node tests/integration/experience-browser.mjs"
+    "test:experience": "node tests/integration/character-poses.mjs && node tests/integration/experience-browser.mjs"
   },
   "devDependencies": {
     "@types/three": "^0.186.0",

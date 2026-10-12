@@ -8,6 +8,8 @@ export type SceneState = {
   path?: { from: Position; to: Position };
   control?: ControlField;
   selectedPlayer?: string;
+  timeMs?: number;
+  velocities?: Map<string, { x: number; y: number }>;
 };
 export interface PitchRenderer {
   update(state: SceneState): void;

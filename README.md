@@ -53,8 +53,11 @@ not load either renderer. Choosing a primary renderer remains a later decision.
 On `feat/experience-integration`, open
 `http://127.0.0.1:8080/experience?scenario=late-siege`. This preview adapts the
 teammate's Live/Story/Insights layout to Go templates and locally bundled HTMX,
-using the existing Three.js, PixiJS and SVG renderers. The original dashboard
-remains at `/`. Broadcast, Tactical and Follow ball cameras use recorded data.
+using Three.js, PixiJS and SVG. The preview ports the supplied stadium's stands,
+articulated players, textured kits and patterned ball; the original renderer
+remains at `/` for comparison. Broadcast, Tactical and Follow ball perspective
+cameras use recorded data. Running poses follow tracking velocity and the match
+clock, so pause and rewind freeze/reproduce them. Control is opt-in on this route.
 Story is a rolling source-event log, not AI prose; the sequence recap unlocks
 at the end. Insights still pass through the existing Go cue gate.
 

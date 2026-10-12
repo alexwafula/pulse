@@ -118,7 +118,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     try {
       metrics = decodeMetrics(await request("/api/metrics"), replay, scenario);
       controlToggle.disabled = !metrics.supported;
-      controlToggle.checked = metrics.supported;
+      controlToggle.checked = metrics.supported && !document.body.classList.contains("experience");
       metricsLabel.textContent = metrics.supported ? metrics.label : "Tracking metrics unavailable";
       metricsState.textContent = metrics.supported ? metrics.label : metrics.reason;
       if (metrics.supported) {
