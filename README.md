@@ -48,6 +48,26 @@ Direct comparison URLs are `/?view=three`, `/?view=pixi` and `/?view=svg`.
 Each canvas renderer is a separate lazy-loaded bundle; the SVG replay does
 not load either renderer. Choosing a primary renderer remains a later decision.
 
+### Experience integration preview
+
+On `feat/experience-integration`, open
+`http://127.0.0.1:8080/experience?scenario=late-siege`. This preview adapts the
+teammate's Live/Story/Insights layout to Go templates and locally bundled HTMX,
+using the existing Three.js, PixiJS and SVG renderers. The original dashboard
+remains at `/`. Broadcast, Tactical and Follow ball cameras use recorded data.
+Story is a rolling source-event log, not AI prose; the sequence recap unlocks
+at the end. Insights still pass through the existing Go cue gate.
+
+Frontend contributors can use the existing JSON APIs and the documented DOM
+events without creating another simulator. See the
+[frontend API handoff](docs/FRONTEND-INTEGRATION.md) for routes, units, ownership,
+examples and meeting walkthrough. With a running server:
+
+```powershell
+$env:PULSE_URL = 'http://127.0.0.1:8080'
+npm run test:experience
+```
+
 To edit the pitch renderer, install Node.js 20 or newer and run:
 
 ```powershell

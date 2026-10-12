@@ -107,6 +107,7 @@ function setDrawerTab(tabId: string, isUser = false): void {
   for (const pane of drawerPanes) {
     pane.classList.toggle("active", pane.dataset.pane === tabId);
   }
+  document.dispatchEvent(new CustomEvent("pulse:pane-selected", { detail: { pane: tabId } }));
 }
 
 const localePicker = required<HTMLSelectElement>("#locale");
@@ -186,6 +187,10 @@ async function switchView(view: string): Promise<void> {
     rendererStatus.hidden = false;
   } finally {
     cameraReset.hidden = view !== "three";
+    const cameraOptions = document.querySelector<HTMLElement>("#camera-options");
+    if (cameraOptions) cameraOptions.hidden = view !== "three";
+    const mode = document.querySelector<HTMLSelectElement>("#camera-mode")?.value;
+    if (mode === "broadcast" || mode === "tactical" || mode === "follow") pitchRenderer?.setCamera?.(mode);
     viewButtons.forEach((button) => {
       button.disabled = false;
       button.setAttribute("aria-pressed", String(button.dataset.view === view));
@@ -212,6 +217,7 @@ const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
+let publishedClock = "";
 
 function pitchPoint(point: Point): Point {
   return {
@@ -407,6 +413,11 @@ function render(): void {
   }
   pitchRenderer?.update(sceneState);
   pitchRenderer?.draw();
+  const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}:${persona}`;
+  if (publication !== publishedClock) {
+    publishedClock = publication;
+    document.dispatchEvent(new CustomEvent("pulse:clock", { detail: { timeMs: Math.floor(clock), playing, scenario: scenarioPicker.value } }));
+  }
 }
 
 function animate(time: number): void {
@@ -563,6 +574,23 @@ async function start(): Promise<void> {
     }
     createPlayers();
     createTimeline();
+    document.addEventListener("pulse:inspect", (event) => {
+      const detail = (event as CustomEvent<{ eventId?: string; timeMs?: number }>).detail;
+      const action = replay.events.find(item => item.id === detail?.eventId);
+      const at = action?.timeMs ?? detail?.timeMs;
+      if (typeof at !== "number" || !Number.isFinite(at) || at < replay.match.startMs || at > replay.match.endMs) return;
+      stopDemo(); clearEvidence(); playing = false; clock = at;
+      if (action) eventButtons.get(action.id)?.classList.add("evidence-event");
+      setDrawerTab("timeline", true); render();
+    });
+    document.addEventListener("pulse:select-pane", (event) => {
+      const pane = (event as CustomEvent<{ pane?: string }>).detail?.pane;
+      if (pane && ["timeline", "passing", "control", "routes", "recap", "evidence"].includes(pane)) setDrawerTab(pane, true);
+    });
+    document.addEventListener("pulse:camera", (event) => {
+      const mode = (event as CustomEvent<{ mode?: string }>).detail?.mode;
+      if (mode === "broadcast" || mode === "tactical" || mode === "follow") { pitchRenderer?.setCamera?.(mode); render(); }
+    });
     analytics = createAnalytics(replay, scenarioPicker.value, {
       repaint: render, matchTime, eventSentence,
       playMoment: (moment) => {

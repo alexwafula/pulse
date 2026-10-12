@@ -68,6 +68,10 @@ agent facts under v2. CONTROL_SWING context events must never be cited as
 evidence; its evidence is metric ticks. Scores remain unavailable, not 0:0.
 SSE, model-backed runtime agents and Azure remain unimplemented. The Python
 Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
+The separate `/experience` preview uses locally bundled HTMX for replay-clock
+Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existing
+controller and gated cue feed. Three.js camera presets change presentation only.
+Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -172,6 +176,8 @@ Known from `package.json`:
 - `npm run build:web` bundles `app/web/src/pitch.ts` with esbuild.
 - `npm run check:web` runs `tsc --noEmit`.
 - `npm run test:web` runs `tests/integration/pitch-browser.mjs`.
+- `npm run test:experience` runs the integration preview browser checks against
+  a running Go server (`PULSE_URL` selects the URL).
 
 Local checks:
 

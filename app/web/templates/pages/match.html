@@ -7,9 +7,27 @@
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
   <link rel="stylesheet" href="/static/tokens.css">
   <link rel="stylesheet" href="/static/pitch.css">
+  {{if .Experience}}
+  <meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"timeout":5000}'>
+  <link rel="stylesheet" href="/static/experience.css">
+  <script src="/static/htmx.js" defer></script>
+  <script type="module" src="/static/experience.js"></script>
+  {{end}}
   <script type="module" src="/static/pitch.js"></script>
 </head>
-<body>
+<body{{if .Experience}} class="experience" data-section="live"{{end}}>
+  {{if .Experience}}
+  <nav class="experience-nav" aria-label="Match workspace">
+    <a class="experience-brand" href="/experience?scenario={{.Scenario}}"><i data-lucide="activity"></i><span>Pulse</span></a>
+    <div class="experience-navigation">
+      <button type="button" data-section="live" aria-label="Live" title="Live" aria-current="page"><i data-lucide="radio"></i><span>Live</span></button>
+      <button type="button" data-section="story" aria-label="Story" title="Story"><i data-lucide="book-open"></i><span>Story</span></button>
+      <button type="button" data-section="insights" aria-label="Insights" title="Insights"><i data-lucide="chart-no-axes-combined"></i><span>Insights</span></button>
+      <button type="button" data-section="recap" aria-label="Recap" title="Recap"><i data-lucide="file-text"></i><span>Recap</span></button>
+    </div>
+    <a class="dashboard-link" href="/?scenario={{.Scenario}}" title="Open the original dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+  </nav>
+  {{end}}
   <!-- PROCEDURAL BACKDROP (No photos, pure dark stadium glow & architectural stands) -->
   <div class="stadium-backdrop" aria-hidden="true">
     <div class="floodlight-beam left"></div>
@@ -24,7 +42,7 @@
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-text">Pulse</span>
       </div>
-      <span class="header-context">Match replay</span>
+      <span class="header-context">{{if .Experience}}Match workspace{{else}}Match replay{{end}}</span>
       
       <label for="scenario" class="sr-only">Scenario</label>
       <select id="scenario" class="scenario-picker" aria-label="Scenario">
@@ -78,7 +96,7 @@
         <span class="score-unavailable" aria-label="Score unavailable" title="Score is not recorded in this replay">&ndash; : &ndash;</span>
         <div class="clock-badge">
           <span class="live-pulse-dot" aria-hidden="true"></span>
-          <time id="match-clock" class="match-clock">27:00</time>
+          <time id="match-clock" class="match-clock">{{.StartClock}}</time>
           <span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span>
         </div>
       </div>
@@ -167,6 +185,7 @@
 
         <div class="pitch-overlay-tools">
           <label class="field-toggle" title="Toggle the model-estimated pitch control field"><input type="checkbox" id="control-toggle" aria-label="Pitch control overlay" disabled><i data-lucide="layers"></i><span>Control</span></label>
+          {{if .Experience}}<label id="camera-options" class="camera-options" hidden><i data-lucide="camera"></i><select id="camera-mode" aria-label="Camera angle"><option value="broadcast">Broadcast</option><option value="tactical">Tactical</option><option value="follow">Follow ball</option></select></label>{{end}}
           <span id="metrics-label" class="model-label" role="status">Loading metrics</span>
         </div>
         <div class="pitch-shell">
@@ -256,8 +275,8 @@
               <div id="evidence-range-marker" class="evidence-range-marker" aria-hidden="true" hidden></div>
             </div>
             <div class="seek-labels">
-              <span id="start-label">27:00</span>
-              <span id="end-label">28:00</span>
+              <span id="start-label">{{.StartClock}}</span>
+              <span id="end-label">{{.EndClock}}</span>
             </div>
           </div>
           
@@ -294,6 +313,13 @@
           </div>
         </section>
 
+        {{if .Experience}}
+        <section id="experience-panel" aria-label="Match story and recap" hidden>
+          <form id="experience-inputs" hidden><input name="scenario" value="{{.Scenario}}"><input name="panel" value="story"><input name="atMs" value="{{.Match.StartMS}}"></form>
+          <div class="panel-status"><span id="panel-status" role="status"></span><button type="button" id="panel-retry" class="icon-button" title="Retry panel" aria-label="Retry panel" hidden><i data-lucide="rotate-ccw"></i></button></div>
+          <div id="experience-content" hx-get="/experience/panel" hx-trigger="pulse:refresh from:body" hx-include="#experience-inputs" hx-swap="innerHTML" hx-sync="this:replace" aria-busy="false">{{template "experience-panel" .Story}}</div>
+        </section>
+        {{end}}
         <div class="drawer-main">
           <!-- Drawer Navigation Tabs -->
           <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">

@@ -1,0 +1,161 @@
+# Frontend integration handoff
+
+Branch: `feat/experience-integration`. Preview: `/experience?scenario=late-siege`.
+Existing dashboard: `/?scenario=late-siege`. Both use the same Go engine.
+
+## Start and contribute
+
+```powershell
+git switch feat/experience-integration
+npm ci
+npm run check:web
+npm run build:web
+go run ./app/cmd/server -addr 127.0.0.1:8080
+```
+
+Open `http://127.0.0.1:8080/experience?scenario=late-siege`. Committed assets also
+allow running Go directly without npm. Optional Python template service:
+
+```powershell
+py agents/run.py --host 127.0.0.1 --port 8090 --mode template
+go run ./app/cmd/server -addr 127.0.0.1:8080 -agents-url http://127.0.0.1:8090
+```
+
+Create a feature branch from this preview for your changes, then open a PR for
+team review. Do not merge it into main before the comparison meeting. If this
+branch has not been published yet, Alex must push it before teammates can fetch.
+
+## API boundary
+
+All Go endpoints are same-origin, read-only GET. Choose one scenario consistently:
+`corner`, `central`, `exchange`, `late-siege`, `calm-midfield`. Unknown scenarios
+return 404. Append `scenario=...` to every request; the default is `corner`.
+
+| Endpoint | Response / use |
+|---|---|
+| `/api/replay?scenario=late-siege` | v2 replay: match metadata, source events, tracking frames |
+| `/api/metrics?scenario=late-siege&grid=1` | Go-calculated ticks and row-major control grid; grid omitted unless requested |
+| `/api/moments?scenario=late-siege` | Detected moments with event or tick evidence and model metadata |
+| `/api/fact-packs?scenario=corner` | Go-built corner-to-shot facts for the agent engineer |
+| `/api/insights?scenario=corner&persona=CASUAL&locale=en-GB` | Go-gated cue feed; `ANALYST` also supported |
+| `/experience/panel?scenario=late-siege&panel=story&atMs=5280000` | HTML fragment: source-event story at elapsed match clock |
+| `/experience/panel?scenario=late-siege&panel=recap&atMs=5360000` | HTML recap, unavailable before the end of that replay |
+
+Example JSON consumer:
+
+```typescript
+const scenario = "late-siege";
+const response = await fetch(`/api/replay?scenario=${scenario}`);
+if (!response.ok) throw new Error(`Replay unavailable: ${response.status}`);
+const replay = await response.json();
+if (replay.schemaVersion !== "2.0.0") throw new Error("Unsupported replay");
+// Interpolate adjacent tracking frames at the single replay clock.
+// Never re-simulate actions or recompute football metrics in the frontend.
+```
+
+An independently hosted development UI should proxy `/api` to the Go server
+through its dev server. CORS is not enabled; do not add wildcard access or put
+Azure/Foundry credentials in browser code. Python's `POST /insights` is a
+server-to-server boundary, not a browser endpoint.
+
+## Units and evidence
+
+- IDs are strings. Events use uppercase enums and `schemaVersion: "2.0.0"`.
+- `timeMs`, match bounds, cue windows and tracking times are elapsed match
+  milliseconds, not wall-clock timestamps or seconds since the clip began.
+- Pitch: 105 x 68 metres, origin bottom-left. SVG/canvas must invert Y; Three.js
+  currently maps metres to `(x - 52.5, height, 34 - y)`.
+- Render only ticks, events and cumulative snapshots at or before the clock.
+  Rewind must remove future numbers, stories, moments and highlights.
+- Score is unavailable. A COMPLETE shot is not proof of a goal.
+- Metrics are **model estimate, uncalibrated**. The index is experimental;
+  formation geometry biases absolute shares (issue #17). Do not make headline
+  probability claims or move tracking estimates into v2 FactPacks.
+- Event moments cite `reasons`. CONTROL_SWING uses `tickTimes` as evidence,
+  with empty `reasons`; `contextEventIds` are context, never evidence.
+- Insight text comes only from `/api/insights` after the Go cue gate. Current
+  `FALLBACK_TEMPLATE` output is deterministic, not real AI verification.
+- English CASUAL/ANALYST work. Kiswahili remains disabled pending review.
+
+Authority: [contracts](../contracts/README.md). Useful fixtures:
+[replay](../data/samples/first-sequence.json),
+[fact pack](../contracts/examples/fact-pack.json),
+[insight request](../contracts/examples/insight-request.json),
+[insight response](../contracts/examples/insight-response.json),
+[overlay cue](../contracts/examples/overlay-cue.json).
+API model details and limitations: [metrics](metrics.md).
+
+## HTMX and pitch ownership
+
+`match.html` serves both routes. Preview-only CSS/JS is loaded on `/experience`.
+HTMX's `hx-get` requests the fragment above, including `scenario`, `panel` and
+`atMs` from `#experience-inputs`. Only `#experience-content` is swapped, with
+replace-on-new-request synchronization. Updates are throttled while playing;
+paused clock changes refresh immediately. Failure retains the dated snapshot
+and offers Retry; playback continues independently. Follow the
+[HTMX docs](https://htmx.org/docs/) when adding another HTML panel.
+
+The existing pitch controller remains the sole clock owner. Contributors can
+use these document events without accessing its private state:
+
+```typescript
+document.addEventListener("pulse:clock", event => {
+  const { timeMs, playing, scenario } = (event as CustomEvent).detail;
+  // Update your panel inputs; never start a second playback timer.
+});
+document.dispatchEvent(new CustomEvent("pulse:inspect", {
+  detail: { eventId: "evt-03" }, // Or { timeMs: <elapsed match ms> }
+}));
+document.dispatchEvent(new CustomEvent("pulse:select-pane", {
+  detail: { pane: "passing" },
+}));
+document.dispatchEvent(new CustomEvent("pulse:camera", {
+  detail: { mode: "tactical" }, // broadcast | tactical | follow (Three.js only)
+}));
+```
+
+`pulse:inspect` pauses at a validated source event/time. `pulse:clock` publishes
+on clock-second/event/play-state changes, with exact paused seek time. Pane
+options: `timeline`, `passing`, `control`, `routes`, `recap`, `evidence`.
+`pulse:pane-selected` reports `{ pane }`. This DOM bridge is presentation-only,
+not a new shared football contract or streaming API.
+
+| Contributor area | Files |
+|---|---|
+| Experience navigation / HTML refresh | `app/web/src/experience.ts` |
+| Layout / mobile polish | `app/web/static/experience.css` |
+| Shared shell / fragment markup | `app/web/templates/pages/match.html`, `partials/experience.html` |
+| Bounded HTML presentation | `app/internal/transport/http/experience.go` |
+| Shared playback / evidence / overlays | `app/web/src/pitch.ts`, `analytics.ts` |
+| Rendering only | `app/web/src/renderers/three.ts`, `pixi.ts` |
+
+Never HTMX-swap the canvas, playback controls, analytics inspector or gated cue
+region. Keep the supplied HTML's browser engine and host-specific AI/storage
+calls outside Pulse. Agree shared contract changes with both engine/agent owners.
+
+## Meeting walkthrough and checks
+
+1. Open late-siege in 3D, pause, select Broadcast/Tactical/Follow ball.
+2. Switch to PixiJS 2D, then return to 3D; all positions use the same clock.
+3. Open Story, seek forward then backward, inspect an event's Evidence.
+4. Open Insights, compare Control/Passing/Routes and inspect moment evidence.
+5. Seek to the end, open Recap and download its source-event summary.
+6. Select Corner chance, advance to the end, compare Casual/Analyst and replay
+   the gated insight's evidence. Return to the original dashboard for comparison.
+
+```powershell
+go test ./...
+go vet ./...
+npm run check:web
+npm run build:web
+$env:PULSE_URL = 'http://127.0.0.1:8080'
+node tests/integration/pitch-browser.mjs
+node tests/integration/core-browser.mjs
+node tests/integration/analytics-browser.mjs
+npm run test:experience
+```
+
+Chrome must be installed; set `CHROME_PATH` if necessary. The preview test uses
+real mobile viewports, checks nonblank/moving canvas pixels and saves screenshots
+to the temporary `pulse-experience-preview` folder (override `PULSE_SCREENSHOTS`).
+No live model calls, paid services or cloud deployment are required for this demo.

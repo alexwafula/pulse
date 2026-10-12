@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import type { ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
+import type { CameraMode, ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
 
 export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRenderer {
   const scene = new THREE.Scene();
@@ -103,9 +103,13 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
   const pathGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
   const path = new THREE.Line(pathGeometry, new THREE.LineDashedMaterial({ color: 0xe3f39a, dashSize: 1.4, gapSize: .75 }));
   scene.add(path);
+  let cameraMode: CameraMode = "broadcast";
   const reset = (): void => {
-    camera.position.set(35, 85, 95); camera.zoom = 1;
+    if (cameraMode === "tactical") camera.position.set(0, 130, 1);
+    else camera.position.set(35, 85, 95);
+    camera.zoom = cameraMode === "follow" ? 1.45 : 1;
     controls.target.set(0,0,0); controls.update();
+    camera.updateProjectionMatrix();
   };
   const resize = (): void => {
     const width = host.clientWidth, height = host.clientHeight;
@@ -144,6 +148,12 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
       }
       for (const [id, point] of state.players) playerObjects.get(id)?.position.set(point.x - 52.5, 0, 34 - point.y);
       ball.position.set(state.ball.x - 52.5, .48 + (state.ball.z ?? 0), 34 - state.ball.y);
+      if (cameraMode === "follow") {
+        // Follow only recorded ball coordinates; camera motion does not change play.
+        const target = new THREE.Vector3(Math.max(-30, Math.min(30, ball.position.x)), 0, Math.max(-15, Math.min(15, ball.position.z)));
+        camera.position.add(target.clone().sub(controls.target));
+        controls.target.copy(target);
+      }
       path.visible = !!state.path;
       if (state.path) {
         const { from, to } = state.path;
@@ -155,6 +165,7 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
     },
     draw() { controls.update(); renderer.render(scene, camera); },
     resetCamera() { reset(); },
+    setCamera(mode) { cameraMode = mode; reset(); },
     destroy() {
       observer.disconnect(); controls.dispose();
       scene.traverse((object) => {

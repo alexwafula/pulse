@@ -1,0 +1,16 @@
+{{define "experience-panel"}}
+<div class="story-content" data-time-ms="{{.TimeMS}}" data-panel="{{.View}}">
+  <div class="section-heading"><h3>{{if eq .View "recap"}}Sequence recap{{else}}Match story{{end}}</h3><time>{{.Clock}}</time></div>
+  {{if eq .View "recap"}}
+    {{if .Complete}}
+      <span class="story-source">Source-event summary</span>
+      <ol class="story-log">{{range .Recap}}<li><p>{{.Text}}</p><div class="story-evidence">{{range .EventIDs}}<button type="button" data-inspect-event="{{.}}" class="evidence-button" title="Inspect {{.}}"><i data-lucide="list-video"></i><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li>No shot attempts recorded in this sequence.</li>{{end}}</ol>
+      <button type="button" class="evidence-button" data-download-recap><i data-lucide="download"></i><span>Download recap</span></button>
+    {{else}}<p class="story-empty">Recap available at the end of the sequence.</p>{{end}}
+  {{else}}
+    <span class="story-source">Source events</span>
+    <dl class="story-summary"><div><dt>Actions</dt><dd>{{.Summary.Actions}}</dd></div><div><dt>Completed passes</dt><dd>{{.Summary.Passes}} / {{.Summary.PassAttempts}}</dd></div><div><dt>Shot attempts</dt><dd>{{.Summary.Shots}}</dd></div></dl>
+    <ol class="story-log">{{range .Actions}}<li data-story-event="{{.ID}}"><div class="story-meta"><time>{{.Clock}}</time><span>{{.Kind}} &middot; {{.Team}}</span></div><p>{{.Text}}</p><div class="story-action"><span>{{.Outcome}}</span><button type="button" data-inspect-event="{{.ID}}" class="evidence-button" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></div></li>{{else}}<li class="story-empty">Waiting for the first action.</li>{{end}}</ol>
+  {{end}}
+</div>
+{{end}}
