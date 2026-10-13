@@ -225,11 +225,13 @@ Readiness update (Oct 13): `feat/meeting-readiness` adds independently checked
 agent publishing for the existing corner fact, canonical demo player identities,
 tap/keyboard map inspection and a native local launcher. Contract v2 is unchanged.
 One separately approved live Foundry CASUAL corner workflow now passes both gates.
-Broader facts/evaluations, Azure app hosting, tracing and clean-clone verification
+Go/Python hosting is now deployed in recorded mode and verified on the public URL.
+Broader facts/evaluations, streaming, tracing and clean-clone verification
 by another teammate remain pending; these changes do not complete the phase exits above.
 
 | Date | Change | By |
 |---|---|---|
+| Oct 13 | Deployed Go/Python on Azure using GitHub-built, container-smoke-tested images. Public desktop/mobile checks pass for replay, all renderers, Story, charts/maps and evidence. Recorded Foundry mode makes no runtime model calls. Python insights require a service token; the reported internal-ingress boundary remains an Azure follow-up. Streaming/soak tests and broader agent evaluations remain pending. | Alex + Codex |
 | Oct 5 | Initial plan for a two-person team | |
 | Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |
 | Oct 6 | Contract v2 aligns field names, enums, locales and coordinates; preserve the corner demo, start with COMMENTARY and direct HTTP; message models/tests ready, runtime agents pending. | Alex + Codex |

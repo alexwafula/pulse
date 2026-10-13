@@ -63,19 +63,22 @@ attacking-route metrics, persona controls and
 a deterministic downloadable recap are available. An opt-in Foundry REST
 adapter is mock-tested; the Foundry resource/project and gpt-4.1-mini deployment
 are provisioned in South Africa North. One bounded live corner workflow passed
-both Python and Go checks; app hosting remains pending. Dockerfiles/Compose and
+both Python and Go checks; Go/Python app hosting now works on Azure. Dockerfiles/Compose and
 setup/project-page docs are prepared.
 An explicit `recorded` mode packages the reviewed live corner output, validates
 it at startup and binds it to the complete request. It makes no model calls and
-is labelled `Verified (recorded)`. Azure image builds are currently blocked by
-`TasksOperationsNotAllowed`; the registry exists, but Go/Python hosting is not
-deployed. See `docs/AZURE-DEPLOYMENT.md` before claiming a public demo is available.
+is labelled `Verified (recorded)`. ACR Tasks are blocked by this subscription;
+GitHub builds and smoke-tests images through registry-scoped federation instead.
+Both apps are deployed and tested on the public Azure URL. Python insights require
+a service token: Azure reported internal ingress, but direct requests still
+reached the endpoint. Health stays public; untrusted insights requests return 401.
+See `docs/AZURE-LIVE-STATUS.md` for verified scope and remaining cloud checks.
 Cached metrics/moments APIs and clock-synchronised control overlays now work
 in SVG, Three.js and PixiJS. Replay-backed statistics and event/tick evidence
 clips are available. Tracking values are uncalibrated model estimates, not
 agent facts under v2. CONTROL_SWING context events must never be cited as
 evidence; its evidence is metric ticks. Scores remain unavailable, not 0:0.
-SSE and Azure app hosting remain unimplemented. Explainer/Narrator/Verifier are wired to the
+SSE remains unimplemented. Explainer/Narrator/Verifier are wired to the
 opt-in Foundry backend; one live CASUAL corner workflow has been verified, not
 broader model quality or latency. The Go gate still
 rejects free prose, unsupported facts and incomplete evidence.
@@ -159,7 +162,8 @@ event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE only:
 
 Current set: **Explainer, Narrator, Verifier**, run by a thin async workflow with
 an opt-in Foundry REST backend. The publishing path is constrained to the recorded
-corner-shot fact and tested with fake backends, not live models. Microsoft Agent
+corner-shot fact, tested with fake backends and one approved live workflow, not
+broad live-model evaluations. Microsoft Agent
 Framework, Recap, and additional personas remain future work.
 
 ### 7.1 Rules for every Pulse agent

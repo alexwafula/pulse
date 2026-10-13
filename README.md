@@ -3,6 +3,17 @@
 An explainable football insights engine built using synthetic match events
 and tracking data.
 
+## Live demo
+
+[Open Pulse on Azure](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three)
+or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=corner&view=three).
+
+Go and Python are deployed in South Africa North. The public demo uses reviewed,
+recorded Foundry output, labelled `Verified (recorded)`, with template fallback.
+It makes no runtime model calls; Azure hosting still consumes credits. Python
+insights require a server-side service token. See the
+[deployment record](docs/AZURE-LIVE-STATUS.md) for checks, source images and limits.
+
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
 - HTMX: server-rendered interface updates
@@ -127,8 +138,8 @@ Go server separately computes the corner fact pack from the replay.
 ## Status
 Shared contracts, local replay, the browser pitch and one computed corner-shot
 insight are working. The browser loads an offline fixture and a gated cue feed
-from Go, sharing one playback clock. SSE/live delivery and cloud deployment
-remain future work; the opt-in model publishing path is mock-tested and one
+from Go, sharing one playback clock. Go/Python cloud hosting now works; SSE/live
+delivery remains future work. The opt-in model publishing path is mock-tested and one
 separately approved live Foundry corner workflow has passed both gates.
 
 Contract v2 follows the Markdown conventions: camelCase, uppercase enums,

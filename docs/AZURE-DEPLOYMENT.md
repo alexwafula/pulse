@@ -2,17 +2,15 @@
 
 This runbook documents the declarative infrastructure-as-code (Bicep) deployment for Pulse on Azure Container Apps.
 
-> **Status (2026-10-13)**: Foundry resource/project, model deployment, budget alerts
-> and ACR Basic `crpulsealexbf7b4530` are provisioned in South Africa North.
-> Go/Python hosting is **not deployed**. Both `az acr build` requests were rejected
-> with `TasksOperationsNotAllowed` by this Students subscription. No image builds
-> ran and no Container Apps were created. The created registry remains billable.
+> **Status (2026-10-13)**: Go and Python are deployed in South Africa North.
+> [Open the public demo](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three).
+> The final image source is `2cd09b9ae0164bfdb4d204e08d3889def92c7a20`; image builds,
+> full CI, authenticated delivery and public desktop/mobile checks passed.
 
-The tested branch `feat/meeting-readiness` is pushed at runtime commit `103b3a4`.
-[GitHub CI passed](https://github.com/alexwafula/pulse/actions/runs/38458056303).
-Local Go/Python, recorded mode, both persona boundaries and desktop/mobile pitch
-and evidence checks passed. Azure What-If succeeded, with no deletions and no
-changes to the Foundry resources. This is not proof of a deployed cloud runtime.
+See [live deployment status](AZURE-LIVE-STATUS.md) for exact resources, image
+digests and remaining checks. ACR Tasks failed with `TasksOperationsNotAllowed`;
+GitHub built the images instead. Azure's first Go create returned an identity
+bootstrap 500; the identical retry succeeded. No Foundry resources were replaced.
 
 The approved replacement is `.github/workflows/build-images.yml`, which uses an
 Azure federated identity restricted to this branch and `AcrPush` on this registry.
@@ -68,7 +66,7 @@ Internet              |   +------------+     internal HTTP    |
 
 ---
 
-## Step-by-Step Deployment Commands (When Access Arrives)
+## Repeat Deployment
 
 These steps create billable Azure resources. Template mode makes no paid model
 calls; it does not make Azure hosting free. ACR, image builds, Log Analytics
