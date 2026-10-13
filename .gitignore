@@ -19,5 +19,9 @@ coverage/
 *.test
 *.out
 
+# Local review and audit output; never part of a release.
+review-artifacts/
+review-screenshots/
+
 .DS_Store
 Thumbs.db
