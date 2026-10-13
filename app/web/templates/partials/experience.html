@@ -1,0 +1,74 @@
+{{define "experience-panel"}}
+<div class="story-content" data-time-ms="{{.TimeMS}}" data-panel="{{.View}}" data-story-mode="{{.Mode}}" data-persona="{{.Persona}}" data-map-mode="{{.MapMode}}">
+  <div class="section-heading"><h3>{{if eq .View "recap"}}Sequence recap{{else if eq .View "analytics"}}Match patterns{{else if eq .Mode "catchup"}}Story so far{{else if eq .Mode "highlights"}}Chances &amp; deliveries{{else if .Focus}}{{.Focus.Name}}{{else}}Match story{{end}}</h3><time>{{.Clock}}</time></div>
+  {{if eq .View "recap"}}
+    {{if .Complete}}
+      <span class="story-source">Source-event summary</span>
+      <ol class="story-log">{{range .Recap}}<li><p>{{.Text}}</p><div class="story-evidence">{{range .EventIDs}}<button type="button" data-inspect-event="{{.}}" class="evidence-button" title="Inspect {{.}}"><i data-lucide="list-video"></i><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li>No shot attempts recorded in this sequence.</li>{{end}}</ol>
+      <button type="button" class="evidence-button" data-download-recap><i data-lucide="download"></i><span>Download recap</span></button>
+    {{else}}<p class="story-empty">Recap available at the end of the sequence.</p>{{end}}
+  {{else if eq .View "analytics"}}
+    {{template "experience-analytics" .}}
+  {{else}}
+    <span class="story-source">Source events</span>
+    {{if .Focus}}
+    <dl class="story-summary player-story-summary"><div><dt>Involvements</dt><dd>{{.PlayerStats.Involvements}}</dd></div><div><dt>Completed passes</dt><dd>{{.PlayerStats.Passes}} / {{.PlayerStats.PassAttempts}}</dd></div><div><dt>Passes received</dt><dd>{{.PlayerStats.Received}}</dd></div><div><dt>Shot attempts</dt><dd>{{.PlayerStats.Shots}}</dd></div></dl>
+    {{else}}
+    <dl class="story-summary"><div><dt>Actions</dt><dd>{{.Summary.Actions}}</dd></div><div><dt>Completed passes</dt><dd>{{.Summary.Passes}} / {{.Summary.PassAttempts}}</dd></div><div><dt>Shot attempts</dt><dd>{{.Summary.Shots}}</dd></div></dl>
+    {{end}}
+    {{$analyst := eq .Persona "ANALYST"}}
+    <ol class="story-log">{{range .Actions}}<li data-story-event="{{.ID}}"><div class="story-meta"><time>{{.Clock}}</time><span>{{.Kind}} &middot; {{.Team}}</span></div><p>{{.Text}}</p>{{if $analyst}}<p class="story-details">{{.ID}} &middot; {{.Phase}}<br>{{.Coordinates}}</p>{{end}}<div class="story-action"><span>{{.Outcome}}</span><button type="button" data-inspect-event="{{.ID}}" class="evidence-button" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></div></li>{{else}}<li class="story-empty">No matching actions at this time.</li>{{end}}</ol>
+  {{end}}
+</div>
+{{end}}
+
+{{define "mini-pitch"}}
+<rect x="0" y="0" width="105" height="68" class="map-turf"></rect>
+<g class="map-lines" fill="none" stroke-width=".35"><rect x="0" y="0" width="105" height="68"></rect><path d="M 52.5 0 V 68 M 0 13.84 H 16.5 V 54.16 H 0 M 105 13.84 H 88.5 V 54.16 H 105 M 0 24.84 H 5.5 V 43.16 H 0 M 105 24.84 H 99.5 V 43.16 H 105"></path><circle cx="52.5" cy="34" r="9.15"></circle></g>
+{{end}}
+
+{{define "experience-analytics"}}
+<span class="story-source">Source events &amp; tracking &middot; replay window</span>
+<div class="chart-legend"><span><b class="team-swatch home"></b>{{.Analytics.HomeName}}</span><span><b class="team-swatch away"></b>{{.Analytics.AwayName}}</span></div>
+<div class="experience-charts">
+{{range .Analytics.Charts}}
+  <figure class="experience-chart" data-chart="{{.Name}}" data-home="{{.Home}}" data-away="{{.Away}}">
+    <figcaption><h4>{{.Name}}</h4><span><b class="home-count">{{.Home}}</b> &middot; <b class="away-count">{{.Away}}</b></span></figcaption>
+    <div class="chart-art" data-end-x="{{.EndX}}" data-home-y="{{.HomeY}}" data-away-y="{{.AwayY}}"><svg viewBox="0 0 280 100" role="img" aria-label="{{.Name}}: {{$.Analytics.HomeName}} {{.Home}}, {{$.Analytics.AwayName}} {{.Away}}, up to {{$.Clock}}">
+      <title>{{.Name}} up to {{$.Clock}}</title><g class="chart-guides"><path d="M 14 16 H 266 M 14 88 H 266"></path></g><text x="0" y="20">{{.Max}}</text><text x="0" y="91">0</text><path class="chart-home-area" d="{{.HomeArea}}"></path><path class="chart-away-area" d="{{.AwayArea}}"></path><path class="chart-home" d="{{.HomePath}}"></path><path class="chart-away" d="{{.AwayPath}}"></path>
+    </svg></div>
+    <div class="chart-clocks"><time>{{$.Analytics.StartClock}}</time><time>{{$.Analytics.EndClock}}</time></div>
+  </figure>
+{{end}}
+</div>
+<section class="experience-map" aria-label="Pitch map">
+  <div class="section-heading"><h4>{{if eq .MapMode "shots"}}Shot locations{{else if eq .MapMode "network"}}Pass network{{else}}Tracking occupancy{{end}}</h4><span class="story-source">{{.Analytics.Team.AttackingDirection}} attack</span></div>
+  <p class="map-team">{{.Analytics.Team.Name}}</p>
+  <div class="map-art" data-map-mode="{{.MapMode}}" data-team-index="{{.Analytics.TeamIndex}}"><svg viewBox="-2 -2 109 72" class="pitch-map" role="img" aria-label="{{.Analytics.Team.Name}} {{if eq .MapMode "shots"}}shot locations{{else if eq .MapMode "network"}}completed passing network{{else}}tracking occupancy heatmap{{end}} up to {{.Clock}}" data-map-team="{{.Analytics.Team.ID}}">
+    {{template "mini-pitch"}}
+    {{if eq .MapMode "occupancy"}}<g class="heat-cells">{{range .Analytics.Cells}}<rect x="{{.X}}" y="{{.Y}}" width="5" height="4" fill-opacity="{{.Opacity}}" data-map-key="cell-{{.X}}-{{.Y}}" data-player-seconds="{{.Seconds}}"><title>{{.Detail}}</title></rect>{{end}}</g>{{else if eq .MapMode "network"}}<g class="network-lines">{{range .Analytics.NetworkEdges}}<path d="{{.Path}}" data-pass-count="{{.Count}}"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}</g><g class="network-nodes">{{range .Analytics.NetworkNodes}}<g class="network-node" data-player-id="{{.ID}}" data-map-key="player-{{.ID}}" data-x="{{.X}}" data-y="{{.Y}}" data-radius="{{.Radius}}" data-number="{{.Number}}" transform="translate({{.X}} {{.Y}})"><title>{{.Name}}: {{.Count}} completed pass involvements</title><circle r="{{.Radius}}"></circle><text>{{.Number}}</text></g>{{end}}</g>{{else}}<g class="shot-points">{{range .Analytics.Shots}}<circle cx="{{.X}}" cy="{{.Y}}" r="1.4" data-map-key="shot-{{.ID}}" data-shot-event="{{.ID}}"><title>{{.Clock}} {{.Player}}: {{.Outcome}}</title></circle>{{end}}</g>{{end}}
+  </svg></div>
+  <div class="map-inspector">
+    <label for="map-selection">{{if eq .MapMode "occupancy"}}Cell{{else if eq .MapMode "network"}}Player{{else}}Shot{{end}}
+      <select id="map-selection" aria-describedby="map-detail"><option value="">None selected</option>
+      {{if eq .MapMode "occupancy"}}{{range .Analytics.Cells}}<option value="cell-{{.X}}-{{.Y}}" data-detail="{{.Detail}}">{{.X}}, {{.SourceY}} m &middot; {{.Seconds}} player-s</option>{{end}}
+      {{else if eq .MapMode "network"}}{{range .Analytics.NetworkNodes}}<option value="player-{{.ID}}" data-detail="{{.Name}}: {{.Count}} completed pass involvements" data-evidence="{{.Evidence}}">{{.Number}} &middot; {{.Name}}</option>{{end}}
+      {{else}}{{range .Analytics.Shots}}<option value="shot-{{.ID}}" data-detail="{{.Clock}} {{.Player}}: {{.Outcome}}" data-evidence="{{.ID}}">{{.Clock}} &middot; {{.Player}}</option>{{end}}{{end}}
+      </select>
+    </label>
+    <output id="map-detail" role="status" aria-live="polite"></output>
+    <div class="story-evidence map-inspector-evidence"></div>
+  </div>
+  {{if eq .MapMode "occupancy"}}
+    <div class="heat-legend"><span>Less time</span><span class="heat-scale" aria-hidden="true"></span><span>More time</span></div>
+    <p class="map-note" data-total-player-seconds="{{.Analytics.PlayerSeconds}}">{{.Analytics.PlayerSeconds}} recorded player-seconds &middot; sample-and-hold<br>Peak 5 &times; 4 m cell: {{.Analytics.MaxSeconds}} player-s<span class="smoothed-note" hidden> &middot; smoothed display</span><br>Longest included sample interval: {{.Analytics.SampleGap}} s</p>
+    {{if .Analytics.TrackingEmpty}}<p class="story-empty">No tracking time accumulated yet.</p>{{end}}
+  {{else if eq .MapMode "network"}}
+    <p class="map-note">Completed-pass involvement positions &middot; directed source links</p><ul class="network-evidence">{{range .Analytics.NetworkEdges}}<li><span>{{.From}} &rarr; {{.To}} &middot; {{.Count}}</span><div class="story-evidence">{{range .EventIDs}}<button type="button" class="evidence-button" data-inspect-event="{{.}}" title="Inspect {{.}}"><i data-lucide="list-video"></i><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li class="story-empty">No completed passes for this team yet.</li>{{end}}</ul>
+  {{else}}
+    <ol class="shot-evidence">{{range .Analytics.Shots}}<li><span><time>{{.Clock}}</time> {{.Player}}<small>{{.Outcome}}</small></span><button type="button" class="evidence-button" data-inspect-event="{{.ID}}" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></li>{{else}}<li class="story-empty">No shot attempts for this team yet.</li>{{end}}</ol>
+  {{end}}
+</section>
+<section class="experience-lanes" aria-label="Attacking lanes"><h4>Attacking lanes</h4><span class="story-source">Completed pass/carry destinations &middot; attack-relative</span><div>{{range .Analytics.Lanes}}<label><span>{{.Name}}</span><progress max="{{$.Analytics.LaneMax}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} completed passes and carries"></progress><b>{{.Count}}</b></label>{{end}}</div></section>
+<div class="analytics-links"><button type="button" class="evidence-button" data-analysis-pane="passing"><i data-lucide="network"></i><span>Passing network</span></button><button type="button" class="evidence-button" data-analysis-pane="control"><i data-lucide="activity"></i><span>Metric evidence</span></button><button type="button" class="evidence-button" data-analysis-pane="routes"><i data-lucide="route"></i><span>Route evidence</span></button></div>
+{{end}}

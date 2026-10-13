@@ -6,7 +6,7 @@ nothing more. API responses carry `model: "time-to-reach-control-v1"` and
 `label: "model estimate, uncalibrated"`.
 
 Status: **implemented** (G2 Stage 1: `app/internal/metrics`, `app/internal/moments`; G2 Stage 2:
-`GET /api/metrics` and `GET /api/moments`; no UI yet). All parameters below are the initial values, chosen before any metric was
+`GET /api/metrics` and `GET /api/moments`, with replay-clock UI overlays and evidence). All parameters below are the initial values, chosen before any metric was
 computed, and **none changed after the first run**. Any later change is logged with
 before/after values in
 [ADR 0010](decisions/0010-metrics-and-moments.md#parameter-change-log). Measured outputs are
@@ -140,6 +140,13 @@ entropy = (pair-ordered sum of H(c), §2.1) / 294, clamped to [0, 1]
 ---
 
 ## 4. Pressing intensity at the ball carrier
+
+This is a continuous **model estimate**, not a discrete pressure-event count.
+It is computed from tracking only; retagging/removing source events cannot change
+its value or carrier. Contract v2 has no `PRESSURE` event. A future provider event
+must retain independent event evidence and must not drive this calculation.
+Null is unavailable carrier evidence, not zero intensity. See
+[readiness decision](decisions/0016-meeting-readiness.md) for the issue #10 boundary.
 
 **Carrier, from tracking only (never from event tags):**
 1. The player nearest the ball, if within `Pressing.CarrierRadiusM` = 1.5 m and with ball

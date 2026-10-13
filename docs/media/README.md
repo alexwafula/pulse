@@ -22,3 +22,19 @@ The final submission also needs a short public demo video. These PNGs are
 registration/gallery assets, not a substitute for that video. See the outline
 in `docs/PROJECT-PAGE.md`; record actual Foundry/Azure behavior only after it
 has been configured and tested.
+
+## Experience preview
+
+Current prototype-style branch screenshots, captured by the real browser tests
+on 2026-10-13. These also use fictional replay data, not live model output.
+
+| File | View |
+| --- | --- |
+| pulse-experience-live.png | Stadium, articulated players, replay toolbar and event timeline. |
+| pulse-experience-graphs.png | Go-backed cumulative completed passes, shot attempts and box entries. |
+| pulse-experience-heatmap.png | Relative soft shading of recorded player-time with source cell totals. |
+| pulse-experience-mobile-network.png | Mobile passing map, recorded pass-involvement positions and source evidence. |
+
+Run `npm run test:experience` with `PULSE_URL` set to a running Go server to
+capture new screenshots in the temporary `pulse-experience-preview` directory.
+Preview setup and contributor APIs: [frontend handoff](../FRONTEND-INTEGRATION.md).

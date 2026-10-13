@@ -221,8 +221,17 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 
 ## Change log
 
+Readiness update (Oct 13): `feat/meeting-readiness` adds independently checked
+agent publishing for the existing corner fact, canonical demo player identities,
+tap/keyboard map inspection and a native local launcher. Contract v2 is unchanged.
+One separately approved live Foundry CASUAL corner workflow now passes both gates.
+Go/Python hosting is now deployed in recorded mode and verified on the public URL.
+Broader facts/evaluations, streaming, tracing and clean-clone verification
+by another teammate remain pending; these changes do not complete the phase exits above.
+
 | Date | Change | By |
 |---|---|---|
+| Oct 13 | Deployed Go/Python on Azure using GitHub-built, container-smoke-tested images. Public desktop/mobile checks pass for replay, all renderers, Story, charts/maps and evidence. Recorded Foundry mode makes no runtime model calls. Python insights require a service token; the reported internal-ingress boundary remains an Azure follow-up. Streaming/soak tests and broader agent evaluations remain pending. | Alex + Codex |
 | Oct 5 | Initial plan for a two-person team | |
 | Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |
 | Oct 6 | Contract v2 aligns field names, enums, locales and coordinates; preserve the corner demo, start with COMMENTARY and direct HTTP; message models/tests ready, runtime agents pending. | Alex + Codex |
@@ -230,3 +239,5 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 | Oct 8 | Local corner fact builder, Python template HTTP pipeline, conservative Go gate and browser evidence replay connected. SSE, Azure and real model calls remain pending. | Alex + Codex |
 | Oct 8 | Added three authored local scenario variants, attacking-route metrics, Casual/Analyst control, deterministic recap, opt-in mock-tested Foundry shadow adapter, container definitions, setup instructions and registration media. Goals need contract approval; Kiswahili needs review; live models, streaming and deployment remain pending. | Alex + Codex |
 | Oct 11 | Integrated cached metrics/moments APIs with replay-backed team labels/statistics and control overlays in all three pitch renderers. Added event/tick evidence clips, neutral score state, gzip and millisecond timing checks (#9, #11, #13). Model values remain uncalibrated; tick evidence is not added to v2 FactPacks. Live agents, streaming and deployment remain pending. | Alex + Codex |
+| Oct 12 | Added prototype-inspired Story filters, Go-backed pass/shot/entry charts, tracking-occupancy heatmaps and shot evidence on the separate experience branch. Shared v2 contracts and the gate are unchanged; these are source-data views, not live AI agents. Competition fit and reuse checks are recorded in ADR 0014. | Alex + Codex |
+| Oct 13 | Ported the prototype visual system across working preview screens, with local fonts, dedicated Story/Insights/Recap, source-backed canvas charts/maps and a persistent optional watch dock. Source statistics and cue contracts remain Go-owned; unsupported prototype agent/social/game features remain deferred. | Alex + Codex |

@@ -2,7 +2,21 @@
 
 This runbook documents the declarative infrastructure-as-code (Bicep) deployment for Pulse on Azure Container Apps.
 
-> **Status**: Bicep templates validated with `az bicep build`. No resources provisioned yet (pending cloud credentials).
+> **Status (2026-10-13)**: Go and Python are deployed in South Africa North.
+> [Open the public demo](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three).
+> The final image source is `2cd09b9ae0164bfdb4d204e08d3889def92c7a20`; image builds,
+> full CI, authenticated delivery and public desktop/mobile checks passed.
+
+See [live deployment status](AZURE-LIVE-STATUS.md) for exact resources, image
+digests and remaining checks. ACR Tasks failed with `TasksOperationsNotAllowed`;
+GitHub built the images instead. Azure's first Go create returned an identity
+bootstrap 500; the identical retry succeeded. No Foundry resources were replaced.
+
+The approved replacement is `.github/workflows/build-images.yml`, which uses an
+Azure federated identity restricted to this branch and `AcrPush` on this registry.
+It builds on GitHub, tests both containers and uploads commit-SHA tags. It cannot
+deploy hosting resources or access Foundry. Do not enable registry admin passwords
+or upload an Azure model key to GitHub. See [decision 0018](decisions/0018-passwordless-image-builds.md).
 
 ---
 
@@ -52,12 +66,21 @@ Internet              |   +------------+     internal HTTP    |
 
 ---
 
-## Step-by-Step Deployment Commands (When Access Arrives)
+## Repeat Deployment
 
 These steps create billable Azure resources. Template mode makes no paid model
 calls; it does not make Azure hosting free. ACR, image builds, Log Analytics
-and running Container Apps replicas can incur charges. The template keeps at
-least one replica of each app running by default.
+and running Container Apps replicas can incur charges. The parameter file uses
+recorded mode, zero minimum and one maximum replica per app, 0.25 vCPU/0.5 GiB.
+No Foundry key is needed or deployed in this mode. The saved CASUAL/en-GB corner
+response is checked by Python and Go and labelled `Verified (recorded)` in the UI.
+Other requests receive templates. See [decision 0017](decisions/0017-recorded-cloud-demo.md).
+
+Hosted Python also requires a generated `agentAuthToken` secure parameter. The
+same token is injected into Go/Python app secrets, never the browser or GitHub.
+Health checks remain public; `/insights` rejects requests without the service
+credential. Do not infer network privacy from `external: false` alone: direct
+requests reached Python in this deployment. See [decision 0019](decisions/0019-agent-service-authentication.md).
 
 Confirm the subscription, region, permissions and budget before proceeding.
 Configure Azure Cost Management budget alerts; alerts do not automatically
@@ -80,12 +103,13 @@ az account set --subscription "<YOUR-SUBSCRIPTION-ID>"
 az provider register --namespace Microsoft.App
 az provider register --namespace Microsoft.OperationalInsights
 az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.ManagedIdentity
 ```
 
 ### 3. Set Environment Variables
 ```bash
 RESOURCE_GROUP="pulse-hackathon"
-LOCATION="eastus2"          # Choose a region with available quota
+LOCATION="southafricanorth" # Allowed by the current Students region policy
 ACR_NAME="crpulse$(openssl rand -hex 4)" # 5-50 lowercase alphanumeric characters
 ENVIRONMENT_NAME="pulse-demo"
 ```
@@ -102,6 +126,25 @@ az acr create \
 ```
 
 ### 5. Build and Push Container Images to ACR
+
+For this Students subscription use the GitHub build workflow, not ACR Tasks:
+
+```powershell
+az deployment group create --resource-group pulse-hackathon --template-file infra/azure/github-build.bicep --parameters acrName=crpulsealexbf7b4530
+```
+
+Set GitHub secrets `PULSE_AZURE_CLIENT_ID`, `PULSE_AZURE_TENANT_ID` and
+`PULSE_AZURE_SUBSCRIPTION_ID` from its outputs, and repository variable
+`PULSE_ACR_NAME=crpulsealexbf7b4530`. These are identifiers, not passwords.
+Only the trusted branch can exchange an OIDC token for registry-push access.
+
+Runtime/container changes on `feat/meeting-readiness` trigger the build.
+Docs-only pushes do not. Manual dispatch requires the workflow to be reviewed
+into the default branch first; main is not merged as part of this deployment.
+Wait for **Build Azure Images** and **CI** to pass. Use that build's full source
+SHA for **both** `webImageTag` and `agentsImageTag` in steps 6 and 7.
+
+For other subscriptions with ACR Tasks enabled, the alternative is:
 ```bash
 az acr build --registry "$ACR_NAME" --image pulse-web:demo --file Dockerfile .
 az acr build --registry "$ACR_NAME" --image pulse-agents:demo --file agents/Dockerfile .
@@ -118,7 +161,17 @@ az deployment group what-if \
 
 ### 7. Provision Infrastructure via Bicep
 
-#### Option A: Deterministic Template Mode (No Model Charges)
+#### Option A: Reviewed Recorded Mode (No Runtime Model Charges)
+
+On Windows use the tested image SHA with the deployment helper. It verifies both
+GitHub workflows and uploaded tags before generating a token in memory:
+
+```powershell
+.\scripts\deploy-azure.ps1 -ImageTag '<FULL-SOURCE-COMMIT-SHA>'
+```
+
+The generic CLI equivalent below requires `AGENT_AUTH_TOKEN` to be generated
+securely in the shell first. Never paste its value into a file or GitHub:
 ```bash
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
@@ -128,7 +181,9 @@ az deployment group create \
     acrName="$ACR_NAME" \
     location="$LOCATION" \
     environmentName="$ENVIRONMENT_NAME" \
-    agentMode="template"
+    agentMode="recorded" \
+    modelRequestCap=0 \
+    agentAuthToken="$AGENT_AUTH_TOKEN"
 ```
 
 #### Option B: Foundry Shadow Mode with Model Key
@@ -145,6 +200,7 @@ az deployment group create \
     location="$LOCATION" \
     environmentName="$ENVIRONMENT_NAME" \
     agentMode="foundry-shadow" \
+    agentAuthToken="$AGENT_AUTH_TOKEN" \
     foundryEndpoint="https://<YOUR-RESOURCE>.openai.azure.com" \
     foundryDeployment="<YOUR-DEPLOYMENT-NAME>" \
     foundryApiKey="$FOUNDRY_KEY" \
@@ -152,6 +208,13 @@ az deployment group create \
 ```
 
 ### 8. Verify Deployment and Retrieve Public URL
+
+After validating shadow mode, `agentMode="foundry"` is an explicit opt-in to
+independently checked corner-shot publishing. It is billable and still requires
+complete evidence; it does not enable free prose or broader tactical facts.
+Start with a small `modelRequestCap`, check both Verified and Template behaviour,
+and follow [Foundry setup](FOUNDRY-AZURE-SETUP.md). These cloud steps have not been
+executed as part of local readiness testing.
 ```bash
 # Retrieve deployment outputs
 az deployment group show \

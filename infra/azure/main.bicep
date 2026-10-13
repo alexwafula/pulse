@@ -18,7 +18,9 @@ param agentsImageTag string = 'demo'
 @description('Agent operating mode. Template mode has no model charges; Azure hosting remains billable.')
 @allowed([
   'template'
+  'recorded'
   'foundry-shadow'
+  'foundry'
 ])
 param agentMode string = 'template'
 
@@ -32,26 +34,30 @@ param foundryDeployment string = ''
 @secure()
 param foundryApiKey string = ''
 
-@description('Maximum paid shadow workflows allowed per service process.')
-param modelRequestCap int = 10
+@description('Generated Go-to-Python service token (64 lowercase hex characters). Required for a healthy protected deployment; never a Foundry key.')
+@secure()
+param agentAuthToken string = ''
+
+@description('Maximum paid model workflows allowed per service process; resets on restart.')
+param modelRequestCap int = 0
 
 @description('Minimum replicas for the web container app (0 enables scale-to-zero).')
-param minReplicasWeb int = 1
+param minReplicasWeb int = 0
 
 @description('Maximum replicas for the web container app.')
-param maxReplicasWeb int = 5
+param maxReplicasWeb int = 1
 
 @description('Minimum replicas for the agents container app (0 enables scale-to-zero).')
-param minReplicasAgents int = 1
+param minReplicasAgents int = 0
 
 @description('Maximum replicas for the agents container app.')
-param maxReplicasAgents int = 3
+param maxReplicasAgents int = 1
 
 @description('CPU allocated to each container.')
-param cpuCore string = '0.5'
+param cpuCore string = '0.25'
 
 @description('Memory allocated to each container.')
-param memorySize string = '1.0Gi'
+param memorySize string = '0.5Gi'
 
 // 1. Log Analytics Workspace for Container Apps Environment
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -117,14 +123,32 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
 
 var hasFoundryKey = !empty(foundryApiKey)
 
-var agentSecrets = hasFoundryKey ? [
+var serviceSecrets = !empty(agentAuthToken) ? [
+  {
+    name: 'agent-auth'
+    value: agentAuthToken
+  }
+] : []
+
+var serviceAuthEnv = !empty(agentAuthToken) ? [
+  {
+    name: 'PULSE_AGENT_AUTH_TOKEN'
+    secretRef: 'agent-auth'
+  }
+] : []
+
+var agentSecrets = concat(serviceSecrets, hasFoundryKey ? [
   {
     name: 'foundry-key'
     value: foundryApiKey
   }
-] : []
+] : [])
 
 var agentBaseEnv = [
+  {
+    name: 'PULSE_REQUIRE_AUTH'
+    value: '1'
+  }
   {
     name: 'PULSE_AGENT_MODE'
     value: agentMode
@@ -159,7 +183,7 @@ var agentFoundryEnv = hasFoundryKey ? [
   }
 ] : [])
 
-var agentEnv = concat(agentBaseEnv, agentFoundryEnv)
+var agentEnv = concat(agentBaseEnv, agentFoundryEnv, serviceAuthEnv)
 
 // 5. Container App: pulse-agents (Internal HTTP Ingress on port 8090)
 resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -251,6 +275,7 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
+      secrets: serviceSecrets
       activeRevisionsMode: 'Single'
       ingress: {
         external: true
@@ -273,12 +298,12 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json(cpuCore)
             memory: memorySize
           }
-          env: [
+          env: concat([
             {
               name: 'PULSE_AGENTS_URL'
               value: 'https://${agentsApp.properties.configuration.ingress.fqdn}'
             }
-          ]
+          ], serviceAuthEnv)
           probes: [
             {
               type: 'Liveness'

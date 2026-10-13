@@ -3,6 +3,17 @@
 An explainable football insights engine built using synthetic match events
 and tracking data.
 
+## Live demo
+
+[Open Pulse on Azure](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three)
+or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=corner&view=three).
+
+Go and Python are deployed in South Africa North. The public demo uses reviewed,
+recorded Foundry output, labelled `Verified (recorded)`, with template fallback.
+It makes no runtime model calls; Azure hosting still consumes credits. Python
+insights require a server-side service token. See the
+[deployment record](docs/AZURE-LIVE-STATUS.md) for checks, source images and limits.
+
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
 - HTMX: server-rendered interface updates
@@ -29,6 +40,20 @@ are recorded in [docs/decisions](docs/decisions).
 
 ## Run the browser pitch
 
+Windows two-service startup (Go + Python, free template mode, automatic free ports):
+
+```powershell
+.\scripts\start-local.ps1
+```
+
+The printed Preview/Stadium URLs and process IDs are authoritative. Use
+`-SkipWebBuild` for committed assets. See [collaborator meeting](docs/COLLABORATOR-MEETING.md)
+for prerequisites, checks, owners and the demo walkthrough.
+
+Use `-AgentMode recorded` to replay the reviewed Foundry corner response without
+a key or paid model calls. The cue is labelled `Verified (recorded)`; unmatched
+requests use templates. Live mode is separate, opt-in and narrowly constrained.
+
 Go 1.23 or newer is required. From the repository root:
 
 ```powershell
@@ -47,6 +72,40 @@ restores the initial view. WebGL initialization failures fall back to SVG.
 Direct comparison URLs are `/?view=three`, `/?view=pixi` and `/?view=svg`.
 Each canvas renderer is a separate lazy-loaded bundle; the SVG replay does
 not load either renderer. Choosing a primary renderer remains a later decision.
+
+### Experience integration preview
+
+On `feat/meeting-readiness` (based on `feat/experience-integration`), open
+`http://127.0.0.1:8080/experience?scenario=late-siege`. This preview adapts the
+teammate's Live/Story/Insights layout to Go templates and locally bundled HTMX,
+using Three.js, PixiJS and SVG. The preview ports the supplied stadium's stands,
+articulated players, textured kits and patterned ball; the original renderer
+remains at `/` for comparison. Broadcast, Tactical and Follow ball perspective
+cameras use recorded data. Running poses follow tracking velocity and the match
+clock, so pause and rewind freeze/reproduce them. Control is opt-in on this route.
+Story offers Live story, Catch up, recorded Highlights and Player focus, with
+Casual/Analyst detail. These are source-event views, not model-generated prose.
+Insights adds cumulative pass/shot/entry charts, attack-relative lanes, team
+tracking heatmaps and shot locations with evidence. Heatmaps measure player-time,
+not touches or pressure. The sequence recap unlocks at the end, and narrative
+insights still pass through the existing Go cue gate.
+The prototype's visual system now covers every working preview screen: neutral
+canvas, blue navigation, local Outfit/Jakarta typography, red/blue teams and
+canvas charts/maps. Story/Insights/Recap are dedicated pages with a shared replay
+toolbar and optional mini-player. Navigation preserves the renderer. Passing
+maps use Go-calculated pass-involvement positions; soft heat shading keeps the
+underlying cell durations. SVG fallback remains available. Host-only prototype
+AI/social/game features are not implemented by this visual port.
+
+Frontend contributors can use the existing JSON APIs and the documented DOM
+events without creating another simulator. See the
+[frontend API handoff](docs/FRONTEND-INTEGRATION.md) for routes, units, ownership,
+examples and meeting walkthrough. With a running server:
+
+```powershell
+$env:PULSE_URL = 'http://127.0.0.1:8080'
+npm run test:experience
+```
 
 To edit the pitch renderer, install Node.js 20 or newer and run:
 
@@ -79,15 +138,18 @@ Go server separately computes the corner fact pack from the replay.
 ## Status
 Shared contracts, local replay, the browser pitch and one computed corner-shot
 insight are working. The browser loads an offline fixture and a gated cue feed
-from Go, sharing one playback clock. SSE/live delivery and model-backed agents
-remain future work.
+from Go, sharing one playback clock. Go/Python cloud hosting now works; SSE/live
+delivery remains future work. The opt-in model publishing path is mock-tested and one
+separately approved live Foundry corner workflow has passed both gates.
 
 Contract v2 follows the Markdown conventions: camelCase, uppercase enums,
 regional locales and bottom-left pitch coordinates. Go and Python now share
 FactPack, NarrationDraft and VerificationResult models plus valid/invalid
 message examples. The Python HTTP endpoint now has separate deterministic
-Explainer/Narrator/Verifier-shaped stages. They are template stubs, not LLM
-agents; no model calls are made.
+Explainer/Narrator/Verifier stages. Template mode makes no model calls. An explicit
+Foundry mode wires all three roles and may publish independently checked wording
+for the corner fact. One live CASUAL corner workflow was verified on 2026-10-13;
+this is not a broad model-quality evaluation.
 
 Check the dependency-free Python contract foundation with:
 
@@ -126,13 +188,14 @@ moment detector, not a full set-piece attribution model.
 - `GET /api/fact-packs`: computed corner fact packs.
 - `POST /insights` on Python: `contracts/examples/insight-request.json` to `insight-response.json`.
 - `GET /api/insights?persona=CASUAL` on Go: gated cue feed (`ANALYST` is also supported).
-- `X-Pulse-Insight-Source`: `python-template` or `go-template` for the current one-moment fixture.
+- `X-Pulse-Insight-Source`: `python-verified`, `python-template` or `go-template` for the current one-moment fixture.
 
 If Python is unavailable or returns unsafe content, Go uses its own canonical
 template through the same gate. `FALLBACK_TEMPLATE` means deterministic output,
-not completed LLM verification. The gate currently rejects all noncanonical
-prose, including model output labelled VERIFIED. Expand it only alongside the
-real agent verification work and adversarial evaluations.
+not completed LLM verification. `VERIFIED` output must match one of the approved
+corner-shot strings for the requested persona with the exact claim and full
+evidence. Python and Go check independently; Go recalculates the pack. A model
+approval alone cannot publish arbitrary prose. No shared v2 schema changed.
 
 ## Passing network and agent preparation
 
@@ -141,17 +204,21 @@ passes, directed links and sent/received totals. They follow the match clock;
 rewinding removes future links. Click a pass timestamp to inspect its action.
 The two-pass sample is intentionally small: no influence or centrality claims.
 
-The Python agent backend interface, three prompt files and async shadow
-workflow are ready for an approved Foundry adapter. Shadow runs retry the
-Narrator once and fall back on rejection or timeout. The HTTP service and
-browser still publish templates only; no live AI calls are configured.
+The three prompt files and bounded async workflow use the existing Foundry
+backend in opt-in `foundry` mode. Narrator retries once, then falls back on
+unsupported content or timeout. `foundry-shadow` remains template-only. Successful
+verified cues show Verified in the browser; deterministic fallbacks show Template.
+The first publishing policy permits wording selection, not open-ended tactical
+analysis. Broader factual coverage needs a separately reviewed change.
 
 ```powershell
 py tests/evaluations/run_agents.py
+py tests/integration/agents-flow.py
 ```
 
-These recorded, fake-backend checks exercise the canonical safety boundary,
-not model quality. See [decision 0007](docs/decisions/0007-passing-network-and-agent-shadow.md).
+These recorded, fake-backend checks exercise both publishing and fallback,
+not model quality. The HTTP smoke test starts actual Python and Go servers without
+paid calls. See [readiness decision](docs/decisions/0016-meeting-readiness.md).
 
 ## Core demo additions
 
@@ -172,9 +239,9 @@ Additional browser check: `node tests/integration/core-browser.mjs` with
 `PULSE_URL` pointing to the running server. The offline agent evaluation now
 has 30 recorded cases, not a live model accuracy measurement.
 
-Foundry is opt-in, shadow-only and bounded by a per-process request cap. The
+Foundry is opt-in and bounded by a per-process request cap. The
 default mode makes no model calls. See [Foundry/Azure setup](docs/FOUNDRY-AZURE-SETUP.md)
-for credentials, direct shadow testing, Docker Compose and deployment steps.
+for credentials, shadow/publishing modes, Docker Compose and deployment steps.
 Dockerfiles and `compose.yaml` are prepared but not yet container-tested here.
 See [project-page copy](docs/PROJECT-PAGE.md) and [uploadable media](docs/media/README.md).
 

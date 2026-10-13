@@ -1,0 +1,88 @@
+name: Build Azure Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['feat/meeting-readiness']
+    paths:
+      - '.github/workflows/build-images.yml'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'go.mod'
+      - 'app/**'
+      - 'agents/**'
+      - 'data/**'
+      - 'tests/integration/container-smoke.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-images-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'alexwafula/pulse' && github.ref == 'refs/heads/feat/meeting-readiness'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ACR_NAME: ${{ vars.PULSE_ACR_NAME }}
+    steps:
+      - name: Checkout exact source revision
+        uses: actions/checkout@v4
+
+      - name: Validate registry configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$ACR_NAME" =~ ^[a-z0-9]{5,50}$ ]]
+          echo "REGISTRY=$ACR_NAME.azurecr.io" >> "$GITHUB_ENV"
+
+      - name: Build Go and Python images
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
+          docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-agents:$GITHUB_SHA" -f agents/Dockerfile .
+
+      - name: Test both containers without model calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          service_token=$(openssl rand -hex 32)
+          echo "::add-mask::$service_token"
+          docker network create pulse-smoke
+          docker run -d --name pulse-agents --network pulse-smoke -p 8090:8090 -e PULSE_REQUIRE_AUTH=1 -e PULSE_AGENT_AUTH_TOKEN="$service_token" -e PULSE_AGENT_MODE=recorded -e PULSE_MODEL_REQUEST_CAP=0 "$REGISTRY/pulse-agents:$GITHUB_SHA"
+          docker run -d --name pulse-web --network pulse-smoke -p 8080:8080 -e PULSE_AGENT_AUTH_TOKEN="$service_token" -e PULSE_AGENTS_URL=http://pulse-agents:8090 "$REGISTRY/pulse-web:$GITHUB_SHA"
+          for attempt in {1..30}; do curl --fail --silent http://127.0.0.1:8090/healthz && break; sleep 1; done
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8090/insights)" = 401
+          PULSE_URL=http://127.0.0.1:8080 node tests/integration/container-smoke.mjs
+
+      - name: Azure login with federated identity
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.PULSE_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.PULSE_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PULSE_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Push tested images to Azure
+        shell: bash
+        run: |
+          set -euo pipefail
+          az acr login --name "$ACR_NAME"
+          docker push "$REGISTRY/pulse-web:$GITHUB_SHA"
+          docker push "$REGISTRY/pulse-agents:$GITHUB_SHA"
+          printf 'Built and smoke-tested source `%s`.\n\nImages:\n- `%s/pulse-web:%s`\n- `%s/pulse-agents:%s`\n' "$GITHUB_SHA" "$REGISTRY" "$GITHUB_SHA" "$REGISTRY" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Container diagnostics and cleanup
+        if: always()
+        shell: bash
+        run: |
+          docker logs pulse-web 2>&1 || true
+          docker logs pulse-agents 2>&1 || true
+          docker rm -f pulse-web pulse-agents || true
+          docker network rm pulse-smoke || true

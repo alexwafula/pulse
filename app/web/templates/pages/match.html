@@ -7,9 +7,27 @@
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
   <link rel="stylesheet" href="/static/tokens.css">
   <link rel="stylesheet" href="/static/pitch.css">
+  {{if .Experience}}
+  <meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"timeout":5000}'>
+  <link rel="stylesheet" href="/static/experience.css">
+  <script src="/static/htmx.js" defer></script>
+  <script type="module" src="/static/experience.js"></script>
+  {{end}}
   <script type="module" src="/static/pitch.js"></script>
 </head>
-<body>
+<body{{if .Experience}} class="experience" data-section="live"{{end}}>
+  {{if .Experience}}
+  <nav class="experience-nav" aria-label="Match workspace">
+    <a class="experience-brand" href="/experience?scenario={{.Scenario}}"><i data-lucide="activity"></i><span>Pulse</span></a>
+    <div class="experience-navigation">
+      <button type="button" data-section="live" aria-label="Live" title="Live" aria-current="page"><i data-lucide="radio"></i><span>Live</span></button>
+      <button type="button" data-section="story" aria-label="Story" title="Story"><i data-lucide="book-open"></i><span>Story</span></button>
+      <button type="button" data-section="insights" aria-label="Insights" title="Insights"><i data-lucide="chart-no-axes-combined"></i><span>Insights</span></button>
+      <button type="button" data-section="recap" aria-label="Recap" title="Recap"><i data-lucide="file-text"></i><span>Recap</span></button>
+    </div>
+    <a class="dashboard-link" href="/?scenario={{.Scenario}}" title="Open the original dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+  </nav>
+  {{end}}
   <!-- PROCEDURAL BACKDROP (No photos, pure dark stadium glow & architectural stands) -->
   <div class="stadium-backdrop" aria-hidden="true">
     <div class="floodlight-beam left"></div>
@@ -24,7 +42,7 @@
         <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-text">Pulse</span>
       </div>
-      <span class="header-context">Match replay</span>
+      <span class="header-context">{{if .Experience}}Match workspace{{else}}Match replay{{end}}</span>
       
       <label for="scenario" class="sr-only">Scenario</label>
       <select id="scenario" class="scenario-picker" aria-label="Scenario">
@@ -50,10 +68,16 @@
       </div>
       
       <span class="header-badge">Synthetic fixture</span>
+      {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-label="Score not recorded">&ndash; : &ndash;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
     </div>
   </header>
 
   <main class="app-main">
+    {{if .Experience}}
+    <header class="experience-screen-heading"><h1 id="workspace-title">Live</h1><div class="experience-screen-actions"><span class="fixture-label">{{.ScenarioName}}</span><button id="watch-toggle" type="button" class="icon-button" aria-label="Show match player" title="Show match player" aria-pressed="false" hidden><i data-lucide="picture-in-picture-2"></i></button></div></header>
+    <div id="experience-transport" hidden></div>
+    <div id="experience-watch-dock" hidden><div class="watch-dock-tools"><button type="button" id="watch-expand" class="icon-button" title="Return to Live" aria-label="Return to Live"><i data-lucide="maximize-2"></i></button><button type="button" id="watch-close" class="icon-button" title="Hide match player" aria-label="Hide match player"><i data-lucide="x"></i></button></div></div>
+    {{end}}
     <!-- MATCH STRIP / SCOREBOARD & COMPUTED SHARE BAR -->
     <section class="match-strip" aria-label="Match scoreboard and pass share">
       <!-- First replay team: coral -->
@@ -78,7 +102,7 @@
         <span class="score-unavailable" aria-label="Score unavailable" title="Score is not recorded in this replay">&ndash; : &ndash;</span>
         <div class="clock-badge">
           <span class="live-pulse-dot" aria-hidden="true"></span>
-          <time id="match-clock" class="match-clock">27:00</time>
+          <time id="match-clock" class="match-clock">{{.StartClock}}</time>
           <span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span>
         </div>
       </div>
@@ -167,6 +191,7 @@
 
         <div class="pitch-overlay-tools">
           <label class="field-toggle" title="Toggle the model-estimated pitch control field"><input type="checkbox" id="control-toggle" aria-label="Pitch control overlay" disabled><i data-lucide="layers"></i><span>Control</span></label>
+          {{if .Experience}}<label id="camera-options" class="camera-options" hidden><i data-lucide="camera"></i><select id="camera-mode" aria-label="Camera angle"><option value="broadcast">Broadcast</option><option value="tactical">Tactical</option><option value="follow">Follow ball</option></select></label>{{end}}
           <span id="metrics-label" class="model-label" role="status">Loading metrics</span>
         </div>
         <div class="pitch-shell">
@@ -256,8 +281,8 @@
               <div id="evidence-range-marker" class="evidence-range-marker" aria-hidden="true" hidden></div>
             </div>
             <div class="seek-labels">
-              <span id="start-label">27:00</span>
-              <span id="end-label">28:00</span>
+              <span id="start-label">{{.StartClock}}</span>
+              <span id="end-label">{{.EndClock}}</span>
             </div>
           </div>
           
@@ -294,7 +319,38 @@
           </div>
         </section>
 
+        {{if .Experience}}
+        <section id="experience-panel" aria-label="Story, charts and maps" hidden>
+          <form id="experience-inputs">
+            <input type="hidden" name="scenario" value="{{.Scenario}}"><input type="hidden" name="panel" value="story"><input type="hidden" name="atMs" value="{{.Match.StartMS}}"><input type="hidden" name="persona" value="CASUAL">
+            <div id="story-controls" class="experience-controls">
+              <div class="story-modes" role="group" aria-label="Story view">
+                <button type="button" data-story-mode="live" aria-pressed="true">Live story</button>
+                <button type="button" data-story-mode="catchup" aria-pressed="false">Catch up</button>
+                <button type="button" data-story-mode="highlights" aria-pressed="false">Highlights</button>
+                <button type="button" data-story-mode="player" aria-pressed="false">Player focus</button>
+                <button type="button" data-open-recap>Recap</button>
+              </div>
+              <input type="hidden" name="mode" value="live">
+              <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}">#{{.Number}} {{.Name}}</option>{{end}}</select></label>
+            </div>
+            <div id="map-controls" class="experience-controls" hidden>
+              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
+              <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></label>
+              <div class="story-modes" role="group" aria-label="Pitch map">
+                <button type="button" data-map-mode="network" aria-pressed="false"><i data-lucide="network"></i><span>Pass network</span></button>
+                <button type="button" data-map-mode="occupancy" aria-pressed="true"><i data-lucide="map"></i><span>Heatmap</span></button>
+                <button type="button" data-map-mode="shots" aria-pressed="false"><i data-lucide="crosshair"></i><span>Shots</span></button>
+              </div>
+              <input type="hidden" name="map" value="occupancy">
+            </div>
+          </form>
+          <div class="panel-status"><span id="panel-status" role="status"></span><button type="button" id="panel-retry" class="icon-button" title="Retry panel" aria-label="Retry panel" hidden><i data-lucide="rotate-ccw"></i></button></div>
+          <div id="experience-content" hx-get="/experience/panel" hx-trigger="pulse:refresh from:body" hx-include="#experience-inputs" hx-swap="innerHTML" hx-sync="this:replace" aria-busy="false">{{template "experience-panel" .Story}}</div>
+        </section>
+        {{end}}
         <div class="drawer-main">
+          {{if .Experience}}<button type="button" class="evidence-button analytics-return" data-open-charts><i data-lucide="chart-no-axes-combined"></i><span>Charts &amp; maps</span></button>{{end}}
           <!-- Drawer Navigation Tabs -->
           <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">
           <button type="button" role="tab" id="tab-timeline" class="drawer-tab active" data-tab="timeline" aria-selected="true" aria-controls="pane-timeline">Timeline</button>
@@ -312,7 +368,7 @@
             <p id="metrics-state" class="model-label">Loading metrics</p>
             <dl class="metric-values">
               <div><dt>Entropy</dt><dd id="metric-entropy">N/A</dd></div>
-              <div><dt>Pressing</dt><dd id="metric-pressing">N/A</dd></div>
+              <div><dt title="Tracking-derived reach estimate, not a count of pressure events">Pressing estimate</dt><dd id="metric-pressing">N/A</dd></div>
               <div><dt>Ball carrier</dt><dd id="metric-carrier">N/A</dd></div>
               <div><dt><span class="team-swatch home"></span> {{(index .Match.Teams 0).Name}} final third</dt><dd id="metric-home-third">N/A</dd></div>
               <div><dt><span class="team-swatch away"></span> {{(index .Match.Teams 1).Name}} final third</dt><dd id="metric-away-third">N/A</dd></div>

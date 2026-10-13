@@ -25,6 +25,10 @@ type pageData struct {
 	Summaries    []summarySnapshot
 	TotalEvents  int
 	Window       string
+	StartClock   string
+	EndClock     string
+	Experience   bool
+	Story        experiencePanel
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -50,7 +54,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 	if err != nil {
 		return nil, err
 	}
-	page, err := template.ParseFiles(filepath.Join(webDir, "templates", "pages", "match.html"))
+	page, err := template.ParseFiles(filepath.Join(webDir, "templates", "pages", "match.html"), filepath.Join(webDir, "templates", "partials", "experience.html"))
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +70,13 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 	}
 	view := replayPage(replay, graphs, attacks, scenario)
+	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()
 	tracking := newMetricsAPI(scenario, replay)
 	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
 	mux.HandleFunc("/api/moments", tracking.serveMoments)
+	mux.HandleFunc("/experience/panel", experiencePanelHandler(page, replay, view))
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 	mux.HandleFunc("/design", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -126,12 +132,18 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 				return
 			}
 			if agentsURL != "" {
-				remote, remoteErr := ai.Request(r.Context(), agentsURL, pack, locale, persona)
+				remote, mode, remoteErr := ai.RequestWithMode(r.Context(), agentsURL, pack, locale, persona)
 				if remoteErr == nil {
 					_, remoteErr = ai.Cue(replay, pack, remote, locale, persona)
 					if remoteErr == nil {
 						response = remote
 						source = "python-template"
+						if remote.Verification.Status == "VERIFIED" {
+							source = "python-verified"
+							if mode == "recorded" {
+								source = "python-recorded"
+							}
+						}
 					}
 				}
 				if remoteErr != nil {
@@ -172,7 +184,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		w.Write([]byte("ok"))
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
+		if r.URL.Path != "/" && r.URL.Path != "/experience" {
 			http.NotFound(w, r)
 			return
 		}
@@ -182,7 +194,9 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if err := page.Execute(w, view); err != nil {
+		data := view
+		data.Experience = r.URL.Path == "/experience"
+		if err := page.Execute(w, data); err != nil {
 			return
 		}
 	})

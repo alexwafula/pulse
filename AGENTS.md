@@ -51,23 +51,57 @@ This is the target architecture, not the current implementation. Current: Go
 replay and HTTP fixture API, Go templates, TypeScript pitch, contract v2,
 Go/Python agent-message models and dependency-free contract tests. A local
 Three.js/PixiJS comparison now sits beside the SVG view, using the same replay.
-The corner-to-first-shot builder, conservative canonical-template Go cue gate,
+The corner-to-first-shot builder, conservative independently checking Go cue gate,
 Python template HTTP service and browser Evidence replay now work locally.
 Go-calculated passing snapshots and pass evidence are rendered below the pitch.
-Python has file prompts and a tested async shadow workflow; it does not publish
-model output, and the HTTP endpoint remains template-only.
+Python has file prompts and a tested bounded three-role workflow. Default HTTP
+mode is template-only; opt-in `foundry` can publish only approved corner-shot
+wording after independent Python/Go checks. `foundry-shadow` still publishes
+templates. Recorded publishing tests are not evidence of live model quality.
 Three authored local scenarios plus seeded 11v11 late-siege/calm-midfield replays,
 attacking-route metrics, persona controls and
 a deterministic downloadable recap are available. An opt-in Foundry REST
-shadow adapter is mock-tested; no live calls or cloud deployment have been
-verified. Dockerfiles/Compose and setup/project-page docs are prepared.
+adapter is mock-tested; the Foundry resource/project and gpt-4.1-mini deployment
+are provisioned in South Africa North. One bounded live corner workflow passed
+both Python and Go checks; Go/Python app hosting now works on Azure. Dockerfiles/Compose and
+setup/project-page docs are prepared.
+An explicit `recorded` mode packages the reviewed live corner output, validates
+it at startup and binds it to the complete request. It makes no model calls and
+is labelled `Verified (recorded)`. ACR Tasks are blocked by this subscription;
+GitHub builds and smoke-tests images through registry-scoped federation instead.
+Both apps are deployed and tested on the public Azure URL. Python insights require
+a service token: Azure reported internal ingress, but direct requests still
+reached the endpoint. Health stays public; untrusted insights requests return 401.
+See `docs/AZURE-LIVE-STATUS.md` for verified scope and remaining cloud checks.
 Cached metrics/moments APIs and clock-synchronised control overlays now work
 in SVG, Three.js and PixiJS. Replay-backed statistics and event/tick evidence
 clips are available. Tracking values are uncalibrated model estimates, not
 agent facts under v2. CONTROL_SWING context events must never be cited as
 evidence; its evidence is metric ticks. Scores remain unavailable, not 0:0.
-SSE, model-backed runtime agents and Azure remain unimplemented. The Python
-Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
+SSE remains unimplemented. Explainer/Narrator/Verifier are wired to the
+opt-in Foundry backend; one live CASUAL corner workflow has been verified, not
+broader model quality or latency. The Go gate still
+rejects free prose, unsupported facts and incomplete evidence.
+The separate `/experience` preview uses locally bundled HTMX for replay-clock
+Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existing
+controller and gated cue feed. The preview now ports the supplied stadium and
+articulated character presentation; textured kits/ball and close perspective
+cameras replace the original capsule-and-number view on that route only.
+Gait uses recorded tracking velocity and the replay clock, never a second timer
+or inferred ball flight. The model field is opt-in in the preview.
+Story now includes clock-bounded Catch up, source-event Highlights and Player
+focus with Casual/Analyst detail; Player focus is a presentation filter, not a
+new agent persona. Insights shows Go-backed cumulative pass/shot/entry charts,
+attack-relative lane counts, team tracking-occupancy heatmaps and evidenced shot
+locations. Occupancy is sample-and-hold player-time, not touches or pressure.
+The preview now uses the prototype's neutral/blue visual system and locally
+served Outfit/Jakarta fonts across Live, Story, Insights, Recap and evidence.
+Dedicated screens move the existing pitch into an optional watch dock; transport
+and renderer nodes are reused, never recreated by navigation. Chart/map canvases
+paint Go paths/cells with SVG fallback. Passing-map positions average elapsed
+completed-pass involvement locations. Soft heat shading is presentation only;
+source cell time, sample intervals and evidence remain available.
+Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -126,7 +160,11 @@ event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE only:
 
 ## 7. Pulse runtime agents
 
-Planned set: **Explainer, Narrator, Verifier**, run by a thin orchestrator workflow on Microsoft Agent Framework with Foundry models. The runtime agents are not implemented yet. Candidates after the golden path works: Recap agent, and splitting Persona/Locale out of the Narrator.
+Current set: **Explainer, Narrator, Verifier**, run by a thin async workflow with
+an opt-in Foundry REST backend. The publishing path is constrained to the recorded
+corner-shot fact, tested with fake backends and one approved live workflow, not
+broad live-model evaluations. Microsoft Agent
+Framework, Recap, and additional personas remain future work.
 
 ### 7.1 Rules for every Pulse agent
 
@@ -172,6 +210,8 @@ Known from `package.json`:
 - `npm run build:web` bundles `app/web/src/pitch.ts` with esbuild.
 - `npm run check:web` runs `tsc --noEmit`.
 - `npm run test:web` runs `tests/integration/pitch-browser.mjs`.
+- `npm run test:experience` runs the integration preview browser checks against
+  a running Go server (`PULSE_URL` selects the URL).
 
 Local checks:
 

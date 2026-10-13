@@ -1,13 +1,69 @@
 # Foundry and Azure setup
 
-Status: local Go/Python features are tested. The REST adapter is tested with
-mocked HTTP only. No live model calls or Azure deployments have been performed.
+Status: local Go/Python features and one live Foundry workflow are tested.
+Foundry resource, project and model deployment were created on 2026-10-13.
+Go/Python app hosting is not deployed.
 Windows preparation on 2026-10-09: Azure CLI 2.91.0 and the Container Apps
-extension 1.3.0b5 are installed and verified. Azure sign-in, subscription/budget
-confirmation and model quota checks are still required before resource creation.
-The container build and cloud commands below still need an actual smoke test.
+extension 1.3.0b5 are installed and verified. Student sign-in, provider registration,
+allowed-region policy, model quota and budget alerts are now checked.
+The container build and app-hosting commands below still need an actual smoke test.
 Docker Desktop is optional for deployment: Azure Container Registry can build
 both images in Azure using `az acr build`.
+
+## Alex's student setup (2026-10-13)
+
+- Resource group: `pulse-hackathon`.
+- Foundry resource: `pulse-foundry-alex-bf7b4530`, kind AIServices, S0.
+- Project: `pulse-hackathon` (display name Pulse).
+- Resource location: `southafricanorth`.
+- Deployment: `pulse-insights`, `gpt-4.1-mini`, version `2025-04-14`, Global Standard.
+- Model endpoint: `https://pulse-foundry-alex-bf7b4530.openai.azure.com`.
+- Allocated rate: 50,000 TPM / 50 RPM, not prepaid tokens or a spending cap.
+- Provider registration and resource/project/deployment status: verified Succeeded.
+- One live CASUAL corner workflow: accepted on first narration attempt, complete
+  `evt-06`/`evt-07` evidence, Go source `python-verified`, status `VERIFIED`.
+- Observed Python workflow latency: 7,813 ms; Go HTTP request: 7,875 ms.
+  One run is not a model-quality or production-latency measurement.
+
+The student subscription's policy permits Spain Central, Poland Central,
+Austria East, Germany West Central and South Africa North. East US is blocked
+for resource creation even though quota can be queried there. We checked live
+model capacity in the permitted regions before creating the resource. Global
+Standard inference can be processed outside the resource's home region.
+No API key, contact email or full subscription ID is stored in these instructions.
+
+Use the model endpoint above for Pulse, not the project endpoint ending in
+`/api/projects/pulse-hackathon` or the generic `.cognitiveservices.azure.com` endpoint.
+All three Python roles share this one deployment. This does not create three
+hosted Foundry agents or deploy Go/Python Container Apps.
+
+`infra/azure/budget.bicep` prepares resource-group alerts at 25/50/100 percent
+of a default 20-unit monthly budget in the subscription's billing currency.
+Notifications are not a hard cap; availability can lag on a new subscription.
+The contact address is supplied as a secure deployment parameter, never committed.
+Budget `pulse-credit-alerts` was deployed successfully with amount 20, Monthly,
+enabled actual-spend thresholds 25/50/100 percent and expiry 2026-12-01. The initial
+budget response did not report a currency unit; confirm it in the portal. Cost
+data is delayed, so its initial zero is not proof that inference incurred no cost.
+
+The local Foundry demo is capped at one distinct model workflow per service process.
+Repeated CASUAL requests for the same corner pack use its cache; other audiences
+or scenarios return templates once the cap is reached. Restarting resets the cap.
+Keep the original template instance for freely testing all personas/scenarios.
+Desktop/mobile browser checks passed against the warmed service, including Verified
+status, evidence replay and a nonblank Three.js pitch. The workflow log count stayed
+at one after these requests. Screenshots are in the temporary `pulse-foundry-preview`
+folder. To repeat this browser check against an already-capped/warmed instance:
+
+```powershell
+$env:PULSE_URL = 'http://127.0.0.1:8089'
+$env:PULSE_CACHED_FOUNDRY = '1'
+node tests/integration/foundry-browser.mjs
+```
+
+This is a manual check, never an offline CI model test. Supply the actual printed
+port and ensure the cap/cache are set; pointing it at a different uncapped service
+can make paid requests. No other persona or scenario was tested live in this run.
 
 ## 0. Prepare this Windows machine
 
@@ -44,9 +100,12 @@ Use this order:
 2. Deploy one supported model and test one local shadow workflow (section 1).
 3. Deploy Go and Python in template mode first (section 3).
 4. Enable Foundry shadow mode on the internal Python app and inspect its logs.
+5. After one successful shadow check, explicitly opt into constrained `foundry`
+   publishing and verify its fallback and complete evidence in the browser.
 
 The three Pulse roles can initially share one model deployment. This setup
-does not create three hosted Foundry agents or enable model prose in the UI.
+does not create three hosted Foundry agents. `foundry` enables only the approved
+corner-shot wording, not arbitrary prose or broader tactical analysis.
 
 Microsoft references:
 [Windows CLI installation](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows),
@@ -94,20 +153,38 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/insights `
   -ContentType application/json -Body $body -TimeoutSec 30
 ```
 
-Read the Python terminal's `pulse_agent_shadow` log for accepted/rejected,
+Read the Python terminal's `pulse_agent_workflow` log for accepted/rejected,
 attempt count and measured latency. A successful shadow run still returns
-`FALLBACK_TEMPLATE`. This is intentional: models cannot publish free prose
-through the current canonical Go gate. Activating broader model-backed viewer
-output requires the agreed contract/gate changes and adversarial tests, not
-just supplying a key. Logs are local diagnostics, not Foundry distributed
+`FALLBACK_TEMPLATE`. Shadow mode deliberately does not publish. The separately
+tested `foundry` mode accepts only approved corner-shot wording with complete
+evidence and independent checks in Python and Go. Logs are local diagnostics, not Foundry distributed
 tracing. Keep the default `template` mode when recording credential-free demos.
 
-Each shadow workflow makes up to five role calls (Explainer, Narrator/Verifier
+Each model workflow makes up to five role calls (Explainer, Narrator/Verifier
 with one retry), with bounded timeouts. The cap is per service process, not an
 Azure-wide spending limit, and resets on restart. Cache hits do not call the
-model again. The browser's Go timeout is shorter than a full shadow workflow;
-use the direct Python request above to test model stages, then refresh the
-browser to consume the cached template. No API key belongs in browser code.
+model again. The workflow has a 12-second deadline plus bounded transport shutdown;
+Go allows 20 seconds. No API key belongs in browser code.
+
+To publish after validating shadow mode, restart the Python service with:
+
+```powershell
+$env:PULSE_AGENT_MODE = 'foundry'
+$env:PULSE_MODEL_REQUEST_CAP = '2'
+py agents/run.py --port 8090
+```
+
+Start Go with `-agents-url http://127.0.0.1:8090`, select Corner chance and inspect
+`/api/insights?scenario=corner&persona=CASUAL`. A supported model response returns
+`X-Pulse-Insight-Source: python-verified` and a `VERIFIED` cue. Errors, unsupported
+words, missing evidence, timeout or an exhausted cap return a checked template.
+The browser displays Verified or Template accordingly. Publishing supports only
+English CASUAL/ANALYST and the existing corner fact. The six permitted strings
+are tested in both languages using `tests/evaluations/publication-cases.json`.
+Offline tests do not verify live Foundry. One separately approved CASUAL smoke
+test succeeded on 2026-10-13; additional calls need an explicit testing budget.
+The native launcher also accepts `-AgentMode foundry`, but
+loading a browser cue then consumes a workflow if it is not cached.
 
 Microsoft references:
 [v1 endpoint/authentication](https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle),

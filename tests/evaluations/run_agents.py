@@ -9,7 +9,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "agents/src"))
 from pulse_agents.pipeline import explain, insights
-from pulse_agents.workflow import run_shadow
+from pulse_agents.workflow import run_agents, run_shadow
 
 
 class RecordedBackend:
@@ -62,11 +62,14 @@ async def main() -> int:
         request["persona"] = case.get("persona", "CASUAL")
         result = await run_shadow(request, RecordedBackend(request, case))
         ok = result.accepted == case["expectedAccepted"] and result.response == insights(request)
+        publication = await run_agents(request, RecordedBackend(request, case))
+        status = "VERIFIED" if case["expectedAccepted"] else "FALLBACK_TEMPLATE"
+        ok = ok and publication.accepted == case["expectedAccepted"] and publication.response["verification"]["status"] == status
         passed += int(ok)
-        false_accepts += int(result.accepted and not case["expectedAccepted"])
+        false_accepts += int((result.accepted or publication.accepted) and not case["expectedAccepted"])
         print(f"{'PASS' if ok else 'FAIL'} {case['name']}")
     print(f"Offline fake-backend checks: {passed}/{len(cases)}; false accepts: {false_accepts}")
-    print("This measures the current canonical guard, not LLM verification quality.")
+    print("Both shadow and publishing boundaries checked; this is not LLM verification quality.")
     return int(passed != len(cases))
 
 

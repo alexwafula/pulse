@@ -1,0 +1,297 @@
+/* Prototype presentation, scoped to the comparison route. */
+@font-face { font-family: Outfit; src: url('/static/fonts/Outfit-Variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Plus Jakarta Sans'; src: url('/static/fonts/PlusJakartaSans-Variable.ttf') format('truetype'); font-weight: 200 800; font-display: swap; }
+html:has(body.experience) { color-scheme: light; background: #ecedef; }
+.experience {
+  --bg-canvas: #ecedef; --bg-surface-raised: #fff; --bg-surface-base: #f4f5f6;
+  --text-primary: #1c2838; --text-secondary: #596b83; --text-muted: #66748a;
+  --text-inverse: #fff; --accent-lime: #2c5e77; --accent-lime-bg: #e4eef3;
+  --team-aurora: #d9485f; --team-bastion: #3a7fd5;
+  --border-hairline: 1px solid #dce0e5; --border-subtle: 1px solid #d6dde3;
+  --glass-panel: #fff; --glass-header: transparent; --glass-surface: #f4f5f6;
+  --font-display: Outfit, sans-serif; --font-ui: 'Plus Jakarta Sans', sans-serif;
+  --glass-blur: none; --glow-lime-sm: none; --shadow-card: none;
+  --radius-md: 8px; --radius-lg: 8px;
+  margin: 0; padding: 0 0 0 236px; font-family: var(--font-ui); background: #ecedef;
+}
+.experience *, .experience *::before, .experience *::after { letter-spacing: 0; }
+.experience button, .experience select, .experience input { font-family: inherit; }
+.experience button:focus-visible, .experience a:focus-visible, .experience select:focus-visible { outline: 2px solid #2c5e77; outline-offset: 3px; }
+.experience .map-inspector { display: grid; gap: 10px; padding: 14px 0; border-bottom: var(--border-hairline); min-width: 0; }
+.experience .map-inspector label { display: grid; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.experience .map-inspector select { width: 100%; min-width: 0; max-width: 100%; min-height: 44px; background: #fff; border: var(--border-subtle); border-radius: 6px; padding: 8px; color: var(--text-primary); }
+.experience .map-inspector output { min-height: 36px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.experience .map-inspector-evidence { flex-wrap: wrap; }
+.experience h1, .experience h2, .experience h3, .experience h4 { font-family: var(--font-display); }
+.experience .stadium-backdrop { display: none; }
+.experience-nav { position: fixed; z-index: 30; inset: 0 auto 0 0; width: 236px; display: flex; flex-direction: column; padding: 22px 14px; gap: 38px; background: #ecedef; border-right: var(--border-hairline); }
+.experience-nav a { color: inherit; text-decoration: none; }
+.experience-brand { display: flex; align-items: center; gap: 10px; font: 800 25px var(--font-display); padding: 0 14px; height: 32px; }
+.experience-brand > svg { color: #fff; background: #2c5e77; border-radius: 50%; padding: 6px; width: 31px; height: 31px; flex: 0 0 31px; }
+.experience-navigation { display: flex; flex-direction: column; gap: 6px; }
+.experience-navigation button, .dashboard-link { display: flex; align-items: center; gap: 16px; min-height: 45px; padding: 12px 16px; background: transparent; color: #66748a; border: 0; border-radius: 8px; text-align: left; font-size: 14px; font-weight: 600; }
+.experience-navigation button[aria-current] { color: #fff; background: #2c5e77; box-shadow: 0 6px 14px #2c5e7730; }
+.experience-navigation button:hover:not([aria-current]), .dashboard-link:hover { background: #e2e6ea; }
+.experience-nav svg { width: 21px; height: 21px; flex-shrink: 0; }
+.experience-nav .experience-brand svg { width: 31px; height: 31px; flex: 0 0 31px; }
+.experience .dashboard-link { margin-top: auto; font-size: 12px; }
+.experience .app-header { position: relative; background: transparent; border: 0; }
+.experience .header-inner { min-height: 76px; height: auto; padding: 16px 32px; gap: 12px; flex-wrap: wrap; max-width: none; }
+.experience .header-inner .brand, .experience .header-context { display: none; }
+.experience .scenario-picker { background: #fff; color: #1c2838; border: 0; border-radius: 6px; width: 174px; max-width: 100%; font-size: 12px; }
+.experience .audience-controls { margin-left: auto; background: #fff; border: 0; border-radius: 24px; padding: 4px; }
+.experience .audience-controls button { border-radius: 20px; }
+.experience .audience-controls button[aria-pressed=true] { background: #2c5e77; color: #fff; }
+.experience .header-badge { color: #66748a; background: #fff; border: 0; }
+.experience .demo-button { border-radius: 20px; border: 0; background: #dceef8; color: #2c5e77; box-shadow: none; }
+.experience-mini-score { display: flex; align-items: center; gap: 9px; padding: 7px 12px; border-radius: 20px; background: #fff; font: 700 13px var(--font-display); font-variant-numeric: tabular-nums; }
+.experience-mini-score time { color: #66748a; min-width: 42px; text-align: right; }
+.experience .app-main { padding: 0 32px 36px; max-width: 1540px; }
+.experience-screen-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0 22px; }
+.experience-screen-heading h1 { font: 800 34px/1.1 var(--font-display); margin: 0; }
+.experience-screen-actions { display: flex; align-items: center; gap: 12px; }
+.fixture-label { font-size: 12px; color: #66748a; }
+.experience-screen-actions .icon-button { background: #fff; color: #2c5e77; border: 0; border-radius: 50%; }
+.experience .match-strip { margin: 0 0 18px; padding: 18px 0; background: transparent; border: 0; box-shadow: none; gap: 14px; }
+.experience .team-name-text { font: 700 22px/1.2 var(--font-display); white-space: normal; overflow: visible; }
+.experience .team-sub { font-size: 10px; color: #66748a; }
+.experience .crest-svg { width: 46px; flex-basis: 46px; filter: none; }
+.experience .clock-badge { background: #fff; border: 0; border-radius: 20px; }
+.experience .live-pulse-dot { background: #16855a; animation: none; box-shadow: none; }
+.experience .score-unavailable { color: #1c2838; font: 700 28px var(--font-display); }
+.experience .share-title { text-transform: none; color: #66748a; }
+.experience .share-track { background: #e0e4e8; }
+.experience .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 20px; padding: 0; align-items: start; }
+.experience .left-rail { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.experience .rail-card { min-width: 0; padding: 16px; border: 0; background: #fff; border-radius: 8px; box-shadow: none; }
+.experience .rail-card:hover { transform: none; box-shadow: none; border: 0; }
+.experience .rail-label { text-transform: none; color: #66748a; font-size: 11px; }
+.experience .rail-value { font: 700 23px/1.3 var(--font-display); overflow-wrap: anywhere; }
+.experience .rail-sub { font-size: 10px; color: #66748a; }
+.experience .pitch-column { min-width: 0; grid-column: 1; grid-row: 1; }
+.experience .pitch-column > .section-heading h1 { font-size: 16px; }
+.experience .pitch-shell { height: auto; aspect-ratio: 1.65; min-height: 0; border-radius: 8px; border: 0; box-shadow: none; }
+.experience .pitch-overlay-tools { margin-bottom: 12px; gap: 12px; }
+.experience .pitch-overlay-tools .model-label { margin-left: auto; text-align: right; }
+.experience .camera-options { display: inline-flex; align-items: center; gap: 6px; }
+.experience .camera-options svg { width: 16px; height: 16px; }
+.experience .camera-options select { background: transparent; border: 0; font-size: 11px; color: #66748a; max-width: 122px; }
+.experience .view-controls, .experience .speed-control { background: #fff; border: 0; border-radius: 24px; padding: 3px; }
+.experience .view-controls button, .experience .speed-control button { border: 0; border-radius: 20px; }
+.experience .view-controls button[aria-pressed=true], .experience .speed-control button[aria-pressed=true] { color: #fff; background: #2c5e77; box-shadow: none; }
+.experience .pitch-stamp { color: #e9f4ed; font-size: 9px; max-width: calc(100% - 28px); left: 12px; bottom: 12px; }
+.experience .pitch-shell .icon-button { color: #fff; background: #163427; border: 0; }
+.stadium-player-tag { position: absolute; transform: translate(-50%,-100%); max-width: 128px; padding: 4px 7px; border-left: 3px solid #ffe9a1; border-radius: 2px; background: #142b22; color: #fff; font-size: 10px; font-weight: 700; line-height: 1.3; pointer-events: none; text-align: center; overflow-wrap: anywhere; }
+.experience .moment-banner strong { color: #fff; }
+.experience .moment-banner span, .experience .action-result span { color: #c4d5cc; }
+.experience .transport { padding: 14px 0 4px; background: transparent; border: 0; flex-wrap: nowrap; }
+.experience #play-button { color: #fff; background: #2c5e77; border: 0; box-shadow: none; }
+.experience #restart-button { color: #2c5e77; background: #fff; border: 0; }
+.experience .now-playing { padding: 12px 14px; margin-top: 10px; background: #dceef8; border: 0; border-radius: 6px; min-height: 56px; }
+.experience .now-label { color: #2c5e77; }
+.experience .right-drawer { grid-column: 2; grid-row: 1; height: auto; max-height: none; min-width: 0; border: 0; background: transparent; border-radius: 0; box-shadow: none; padding: 0; }
+.experience .insight-panel { padding: 16px 0; background: transparent; border: 0; border-radius: 0; margin-bottom: 18px; box-shadow: none; }
+.experience .insight-panel p { font-size: 14px; line-height: 1.7; }
+.experience #insight-status { color: #2c5e77; background: #dceef8; border: 0; }
+.experience .drawer-main { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+.experience .drawer-tabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 4px; background: #fff; border-radius: 24px; margin-bottom: 14px; }
+.experience .drawer-tab { padding: 7px 10px; font-size: 11px; border-radius: 20px; color: #66748a; }
+.experience .drawer-tab.active { color: #fff; background: #2c5e77; box-shadow: none; }
+.experience .drawer-panes { padding: 0; }
+.experience .event-list, .experience .moment-list { max-height: 430px; }
+.experience .event-button { border: 0; background: #fff; border-radius: 8px; box-shadow: none; margin-bottom: 6px; }
+.experience .event-button[aria-current=true] { background: #dceef8; box-shadow: inset 3px 0 #2c5e77; }
+.experience .event-detail, .experience .passing-panel, .experience .attack-panel, .experience .recap-panel { border: 0; background: transparent; border-radius: 0; box-shadow: none; padding: 0; }
+.experience .event-detail { border-top: var(--border-hairline); margin-top: 14px; padding-top: 14px; }
+.experience .evidence-button { display: inline-flex; align-items: center; gap: 6px; background: #e3edf3; color: #2c5e77; border: 0; border-radius: 20px; padding: 7px 11px; font-size: 11px; font-weight: 600; }
+.experience .evidence-button svg { width: 15px; height: 15px; flex: 0 0 15px; }
+.experience .passing-team { padding: 16px 0; border: 0; border-bottom: var(--border-hairline); border-radius: 0; background: transparent; }
+.experience .passing-node circle { fill: #2c5e77; }
+.experience .passing-node .node-number { fill: #fff; }
+.experience .panel-status { min-height: 24px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: #66748a; }
+.experience #panel-retry { background: #fff; color: #2c5e77; border: 0; width: 28px; height: 28px; }
+.experience .experience-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-bottom: 18px; }
+.experience .story-modes, .experience .insight-views { display: inline-flex; flex-wrap: wrap; gap: 3px; background: #fff; padding: 4px; border-radius: 24px; max-width: 100%; }
+.experience .story-modes button, .experience .insight-views button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: transparent; color: #66748a; border-radius: 20px; padding: 8px 13px; min-height: 34px; font-size: 12px; font-weight: 600; }
+.experience .story-modes button[aria-pressed=true], .experience .insight-views button[aria-pressed=true] { background: #2c5e77; color: #fff; }
+.experience .story-modes svg { width: 15px; height: 15px; }
+.experience .experience-select { display: flex; align-items: center; gap: 10px; min-width: 0; max-width: 430px; flex: 1 1 260px; font-size: 11px; color: #66748a; }
+.experience .experience-select select { min-width: 0; width: 100%; border: 0; border-radius: 6px; padding: 10px 12px; background: #f4f5f6; color: #1c2838; font-size: 13px; }
+.experience .story-content > .section-heading h3 { font-size: 20px; }
+.experience .story-source { display: block; color: #66748a; font-size: 11px; }
+.experience .story-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 18px 0; }
+.experience .story-summary > div { background: #fff; padding: 14px; border-radius: 8px; min-width: 0; }
+.experience .story-summary dt { color: #66748a; font-size: 10px; }
+.experience .story-summary dd { font: 700 28px/1.2 var(--font-display); margin: 6px 0 0; }
+.experience .player-story-summary { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.experience .story-log { list-style: none; padding: 0; margin: 18px 0 0; max-height: 580px; overflow-y: auto; scrollbar-gutter: stable; }
+.experience .story-log li { padding: 16px 0; border-bottom: var(--border-hairline); }
+.experience[data-section=story] .story-log li { background: #fff; border: 0; border-radius: 8px; padding: 16px; margin-bottom: 10px; }
+.experience .story-log p { margin: 6px 0; font-size: 14px; line-height: 1.6; }
+.experience .story-meta { display: flex; flex-wrap: wrap; gap: 10px; color: #66748a; font-size: 11px; }
+.experience .story-meta time { color: #2c5e77; font-weight: 700; font-variant-numeric: tabular-nums; }
+.experience .story-action { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: #66748a; font-size: 11px; }
+.experience .story-details { color: #66748a; font-size: 11px !important; }
+.experience .story-evidence, .experience .analytics-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.experience .story-empty { color: #66748a; padding: 24px 0; font-size: 13px; }
+.experience .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0; font-size: 11px; }
+.experience .chart-legend span { display: inline-flex; gap: 6px; align-items: center; }
+.experience .experience-charts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.experience .experience-chart { margin: 0; padding: 16px; border-radius: 8px; background: #fff; min-width: 0; }
+.experience .experience-chart figcaption { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; }
+.experience .experience-chart h4 { margin: 0; font-size: 15px; }
+.experience .experience-chart svg { display: block; width: 100%; aspect-ratio: 2.8; }
+.experience .experience-chart svg text { font: 9px sans-serif; fill: #66748a; }
+.experience .chart-guides path { stroke: #dce0e5; fill: none; }
+.experience .chart-home, .experience .chart-away { stroke-width: 2; fill: none; }
+.experience .chart-home { stroke: #d9485f; }
+.experience .chart-away { stroke: #3a7fd5; }
+.experience .chart-home-area { fill: #d9485f; opacity: .12; }
+.experience .chart-away-area { fill: #3a7fd5; opacity: .12; }
+.experience .home-count { color: #d9485f; }
+.experience .away-count { color: #3a7fd5; }
+.experience .chart-clocks { display: flex; justify-content: space-between; font-size: 10px; color: #66748a; padding: 0 5%; }
+.experience .experience-map { padding: 18px 0; min-width: 0; }
+.experience .map-team { margin: 6px 0 12px; color: #66748a; font-size: 12px; }
+.experience .map-art, .experience .chart-art { position: relative; }
+.experience .pitch-map { display: block; width: 100%; aspect-ratio: 109 / 72; border-radius: 8px; background: #2e7a53; }
+.experience .map-turf { fill: #2e7a53; }
+.experience .map-lines { stroke: #e4f0e9; }
+.experience .heat-cells { fill: #ffd60a; }
+.experience .shot-points { fill: #ffd60a; stroke: #fff; stroke-width: .4; }
+.experience .network-lines { stroke: #fff; stroke-width: .6; opacity: .65; }
+.experience .network-node circle { fill: #d9485f; stroke: #fff; stroke-width: .35; }
+.experience .network-node text { fill: #fff; font: 700 2px Outfit, sans-serif; text-anchor: middle; dominant-baseline: central; }
+.experience .map-art[data-team-index="1"] .network-node circle { fill: #3a7fd5; }
+.experience .experience-graphic { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 8px; }
+.experience .graphic-tooltip { position: absolute; z-index: 2; top: 8px; left: 8px; max-width: calc(100% - 16px); padding: 6px 9px; font-size: 11px; color: #fff; background: #142d24; border-radius: 4px; pointer-events: none; }
+.experience .heat-legend { display: flex; gap: 10px; align-items: center; font-size: 10px; margin-top: 10px; color: #66748a; }
+.experience .heat-scale { height: 7px; flex: 1; background: linear-gradient(90deg,#2e7a53,#ffd60a); }
+.experience .map-note { color: #66748a; font-size: 11px; line-height: 1.7; margin: 10px 0 0; }
+.experience .shot-evidence, .experience .network-evidence { list-style: none; margin: 12px 0 0; padding: 0; max-height: 260px; overflow: auto; }
+.experience .shot-evidence li, .experience .network-evidence li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 0; border-bottom: var(--border-hairline); font-size: 12px; }
+.experience .shot-evidence small { display: block; margin-top: 4px; color: #66748a; }
+.experience .experience-lanes { padding: 18px 0; }
+.experience .experience-lanes h4 { margin: 0 0 8px; font-size: 16px; }
+.experience .experience-lanes label { display: grid; grid-template-columns: 50px minmax(0,1fr) 30px; gap: 10px; align-items: center; margin: 12px 0; font-size: 12px; }
+.experience .experience-lanes progress { width: 100%; height: 8px; accent-color: #3a7fd5; }
+.experience .experience-lanes b { text-align: right; }
+.experience .analytics-links { padding: 18px 0; }
+.experience .analytics-return { margin-bottom: 14px; }
+.experience .metric-values { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.experience .metric-values > div { display: block; border: 0; border-radius: 8px; padding: 16px; background: #fff; }
+.experience .metric-values dt { font-size: 11px; }
+.experience .metric-values dd { font: 700 25px/1.3 var(--font-display); text-align: left; margin-top: 8px; overflow-wrap: anywhere; }
+.experience .model-label { font-size: 10px; color: #66748a; line-height: 1.6; }
+.experience:not([data-section=live]) .match-strip, .experience:not([data-section=live]) .left-rail { display: none; }
+.experience:not([data-section=live]) .workspace { grid-template-columns: minmax(0,1fr) 320px; }
+.experience:not([data-section=live]) .right-drawer { display: contents; }
+.experience:not([data-section=live]) #experience-panel { grid-column: 1; grid-row: 1; min-width: 0; }
+.experience:not([data-section=live]) .insight-panel { grid-column: 2; grid-row: 1; }
+.experience:not([data-section=live]) .drawer-main { grid-column: 1 / -1; grid-row: 2; }
+.experience[data-section=insights] #experience-panel { grid-column: 1 / -1; }
+.experience[data-section=insights] .insight-panel { grid-column: 1 / -1; grid-row: 3; border-top: var(--border-hairline); }
+.experience[data-section=insights] .experience-select, .experience[data-section=insights] #map-controls > .story-modes { display: none; }
+.experience[data-insight-view=maps] .experience-select { display: flex; }
+.experience[data-insight-view=maps] #map-controls > .story-modes { display: inline-flex; }
+.experience[data-insight-view=charts] .experience-map, .experience[data-insight-view=charts] .experience-lanes { display: none; }
+.experience[data-insight-view=maps] .experience-charts, .experience[data-insight-view=maps] .chart-legend { display: none; }
+.experience[data-insight-view=maps] .story-content { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(240px,.8fr); gap: 0 26px; }
+.experience[data-insight-view=maps] .story-content > .section-heading, .experience[data-insight-view=maps] .story-content > .story-source, .experience[data-insight-view=maps] .analytics-links { grid-column: 1 / -1; }
+.experience[data-insight-view=maps] .experience-map { grid-column: 1; }
+.experience[data-insight-view=maps] .experience-lanes { grid-column: 2; }
+.experience .crest-svg.home path { stroke: #d9485f; }
+.experience .crest-svg.away path { stroke: #3a7fd5; }
+.experience .crest-svg.home text { fill: #d9485f; }
+.experience .crest-svg.away text { fill: #3a7fd5; }
+/* The same renderer moves between the live stage and the optional watch dock. */
+#experience-transport { margin: 0 0 22px; border-bottom: var(--border-hairline); padding-bottom: 10px; }
+#experience-transport .transport { padding-top: 0; max-width: 900px; }
+#experience-watch-dock { position: fixed; z-index: 24; right: 24px; bottom: 24px; width: 300px; box-shadow: 0 10px 28px #17201c30; background: #ecedef; border-radius: 8px; }
+#experience-watch-dock .pitch-column { padding: 0; }
+#experience-watch-dock .pitch-column > .section-heading, #experience-watch-dock .pitch-overlay-tools, #experience-watch-dock .now-playing, #experience-watch-dock .scene-tools { display: none; }
+#experience-watch-dock .pitch-shell { aspect-ratio: 1.65; }
+#experience-watch-dock .pitch-stamp, #experience-watch-dock .moment-banner, #experience-watch-dock .action-result, #experience-watch-dock .stadium-player-tag { display: none; }
+.watch-dock-tools { position: absolute; z-index: 3; top: 8px; right: 8px; display: flex; gap: 4px; }
+.watch-dock-tools .icon-button { width: 27px; height: 27px; background: #142d24; color: #fff; border: 0; }
+@media (max-width: 1160px) {
+  .experience { padding-left: 190px; }
+  .experience-nav { width: 190px; }
+  .experience .app-main { padding-inline: 24px; }
+  .experience .header-inner { padding-inline: 24px; }
+  .experience .workspace { grid-template-columns: minmax(0,1fr) 290px; }
+  .experience .header-badge { display: none; }
+  .experience .rail-value { font-size: 20px; }
+  .experience .experience-charts { grid-template-columns: minmax(0,1fr); }
+  .experience .experience-chart { display: grid; grid-template-columns: 170px minmax(0,1fr); gap: 12px; align-items: center; }
+  .experience .chart-clocks { grid-column: 2; }
+}
+@media (max-width: 900px) {
+  .experience { padding-left: 76px; }
+  .experience-nav { width: 76px; padding-inline: 8px; }
+  .experience-nav span { display: none; }
+  .experience-brand, .experience-navigation button, .experience .dashboard-link { justify-content: center; padding-inline: 8px; }
+  .experience .workspace, .experience:not([data-section=live]) .workspace { grid-template-columns: minmax(0,1fr); }
+  .experience .pitch-column, .experience .right-drawer, .experience .left-rail, .experience:not([data-section=live]) #experience-panel, .experience:not([data-section=live]) .insight-panel, .experience:not([data-section=live]) .drawer-main { grid-column: 1; grid-row: auto; }
+  .experience .pitch-column { order: 0; }
+  .experience .left-rail { order: 1; }
+  .experience .right-drawer { display: block; order: 2; }
+  .experience:not([data-section=live]) #experience-panel { order: 0; }
+  .experience:not([data-section=live]) .drawer-main { order: 1; }
+  .experience:not([data-section=live]) .insight-panel { order: 2; }
+  .experience .player-story-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .experience .team-sub { display: none; }
+  .experience .team-name-text { font-size: 18px; }
+  .experience .left-rail { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .experience .header-inner { gap: 8px; }
+}
+@media (max-width: 600px) {
+  .experience { padding: 0 0 74px; }
+  .experience-nav { inset: auto 0 0; height: 64px; width: 100%; padding: 4px 10px; border-right: 0; border-top: var(--border-hairline); background: #fff; }
+  .experience-nav .experience-brand, .experience-nav .dashboard-link { display: none; }
+  .experience-navigation { flex-direction: row; justify-content: space-around; gap: 0; }
+  .experience-navigation button { flex-direction: column; gap: 2px; font-size: 10px; padding: 4px 16px; min-height: 52px; }
+  .experience-navigation span { display: inline; }
+  .experience-navigation button[aria-current] { background: #e3edf3; color: #2c5e77; box-shadow: none; }
+  .experience .header-inner { padding: 14px; }
+  .experience .header-inner { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
+  .experience .header-inner .brand { display: flex; grid-column: 1; grid-row: 1; }
+  .experience .header-inner .brand-mark { display: none; }
+  .experience .header-inner .brand-text { font: 800 23px var(--font-display); color: #1c2838; }
+  .experience .scenario-picker { grid-column: 1 / -1; grid-row: 2; width: 100%; max-width: none; }
+  .experience-mini-score { grid-column: 2; grid-row: 1; margin: 0; }
+  .experience .audience-controls { grid-column: 1; grid-row: 3; margin: 0; width: max-content; }
+  .experience .demo-button { grid-column: 2; grid-row: 3; margin: 0; justify-self: end; }
+  .experience .app-main { padding: 0 14px 26px; }
+  .experience-screen-heading { padding: 10px 0 18px; }
+  .experience-screen-heading h1 { font-size: 28px; }
+  .fixture-label { display: none; }
+  .experience .match-strip { grid-template-columns: minmax(0,1fr) 90px minmax(0,1fr); gap: 8px; padding-top: 0; }
+  .experience .team-name-text { font-size: 14px; overflow-wrap: anywhere; }
+  .experience .crest-svg, .experience .clock-period, .experience .half-label, .experience .share-title { display: none; }
+  .experience .scoreboard { min-width: 0; }
+  .experience .score-unavailable { font-size: 22px; }
+  .experience .clock-badge { padding: 4px 6px; }
+  .experience .pitch-column > .section-heading h1 { font-size: 15px; }
+  .experience .pitch-shell { aspect-ratio: 1.45; }
+  .experience .pitch-overlay-tools { flex-wrap: wrap; gap: 10px; }
+  .experience .pitch-overlay-tools .model-label { flex-basis: 100%; text-align: left; margin: 0; }
+  .experience .transport { gap: 8px; }
+  .experience .transport-actions { gap: 4px; }
+  .experience .speed-control button { padding: 0 5px; min-width: 29px; }
+  .experience .rail-card { padding: 14px; }
+  .experience .rail-value { font-size: 19px; }
+  .experience .story-summary { gap: 8px; }
+  .experience .story-summary > div { padding: 12px; }
+  .experience .story-summary dd { font-size: 22px; }
+  .experience .story-modes button, .experience .insight-views button { padding: 8px 10px; font-size: 11px; }
+  .experience .story-modes, .experience .insight-views { flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; }
+  .experience .story-modes button, .experience .insight-views button { flex-shrink: 0; }
+  .experience .experience-chart { display: block; }
+  .experience .chart-clocks { font-size: 9px; }
+  .experience .metric-values { gap: 8px; }
+  .experience .metric-values > div { padding: 12px; }
+  .experience .metric-values dd { font-size: 21px; }
+  .experience[data-insight-view=maps] .story-content { display: block; }
+  #experience-watch-dock { position: relative; right: auto; bottom: auto; width: 100%; margin-bottom: 18px; box-shadow: none; }
+}

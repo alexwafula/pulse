@@ -85,6 +85,7 @@ const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
 const runDemoButton = document.querySelector<HTMLButtonElement>("#run-demo-button");
 let cues: Cue[] = [];
+let insightSource = "";
 let evidenceCue: Cue | undefined;
 let momentClip: Moment | undefined;
 let analytics: ReturnType<typeof createAnalytics> | undefined;
@@ -107,6 +108,7 @@ function setDrawerTab(tabId: string, isUser = false): void {
   for (const pane of drawerPanes) {
     pane.classList.toggle("active", pane.dataset.pane === tabId);
   }
+  document.dispatchEvent(new CustomEvent("pulse:pane-selected", { detail: { pane: tabId } }));
 }
 
 const localePicker = required<HTMLSelectElement>("#locale");
@@ -127,7 +129,7 @@ function renderInsight(): void {
   if (displayedCueID === id) return;
   displayedCueID = id;
   insightText.textContent = cue?.text ?? "Awaiting next moment";
-  insightStatus.textContent = cue ? "Template" : "Waiting";
+  insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
   insightEvidence.hidden = !cue;
   if (cue) insightWindow.textContent = `${matchTime(cue.replayStartMs)}–${matchTime(cue.replayEndMs)} · ${cue.eventIds.length} events`;
 }
@@ -141,6 +143,7 @@ async function loadInsights(): Promise<void> {
     if (request !== insightRequest) return;
     if (feed.schemaVersion !== "2.0.0" || !Array.isArray(feed.cues)) throw new Error("Unsupported cue feed");
     cues = feed.cues;
+    insightSource = response.headers.get("X-Pulse-Insight-Source") ?? "";
     if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; insightStatus.textContent = "No moment"; }
     else { displayedCueID = undefined; renderInsight(); }
   } catch (error: unknown) {
@@ -151,7 +154,7 @@ async function loadInsights(): Promise<void> {
   }
 }
 let pitchRenderer: PitchRenderer | undefined;
-let sceneState: SceneState = { players: new Map(), ball: { x: 0, y: 0 } };
+let sceneState: SceneState = { players: new Map(), velocities: new Map(), ball: { x: 0, y: 0 } };
 let switchingView = false;
 let playLabel = "";
 
@@ -186,6 +189,10 @@ async function switchView(view: string): Promise<void> {
     rendererStatus.hidden = false;
   } finally {
     cameraReset.hidden = view !== "three";
+    const cameraOptions = document.querySelector<HTMLElement>("#camera-options");
+    if (cameraOptions) cameraOptions.hidden = view !== "three";
+    const mode = document.querySelector<HTMLSelectElement>("#camera-mode")?.value;
+    if (mode === "broadcast" || mode === "tactical" || mode === "follow") pitchRenderer?.setCamera?.(mode);
     viewButtons.forEach((button) => {
       button.disabled = false;
       button.setAttribute("aria-pressed", String(button.dataset.view === view));
@@ -212,6 +219,7 @@ const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
+let publishedClock = "";
 
 function pitchPoint(point: Point): Point {
   return {
@@ -311,6 +319,8 @@ function renderPositions(): void {
   const fraction = duration > 0 ? (clock - first.timeMs) / duration : 0;
   const nextPlayers = framePlayers.get(second.timeMs)!;
   sceneState.players.clear();
+  sceneState.velocities?.clear();
+  sceneState.timeMs = clock;
 
   for (const tracked of first.players) {
     const next = nextPlayers.get(tracked.playerId) ?? tracked;
@@ -319,6 +329,7 @@ function renderPositions(): void {
       y: interpolate(tracked.y, next.y, fraction),
     };
     sceneState.players.set(tracked.playerId, position);
+    sceneState.velocities?.set(tracked.playerId, { x: duration > 0 ? (next.x - tracked.x) * 1000 / duration : 0, y: duration > 0 ? (next.y - tracked.y) * 1000 / duration : 0 });
     const point = pitchPoint(position);
     playerElements.get(tracked.playerId)?.setAttribute("transform", `translate(${point.x} ${point.y})`);
   }
@@ -367,6 +378,7 @@ function renderEvent(): void {
   }
   eventPathLayer.style.display = event && clock - event.timeMs < 6500 ? "" : "none";
   sceneState.path = event && clock - event.timeMs < 6500 ? { from: event.from, to: event.to } : undefined;
+  sceneState.selectedPlayer = event && clock - event.timeMs < 6500 ? event.actorId : undefined;
 }
 
 function render(): void {
@@ -407,6 +419,11 @@ function render(): void {
   }
   pitchRenderer?.update(sceneState);
   pitchRenderer?.draw();
+  const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}:${persona}`;
+  if (publication !== publishedClock) {
+    publishedClock = publication;
+    document.dispatchEvent(new CustomEvent("pulse:clock", { detail: { timeMs: Math.floor(clock), playing, scenario: scenarioPicker.value } }));
+  }
 }
 
 function animate(time: number): void {
@@ -563,6 +580,23 @@ async function start(): Promise<void> {
     }
     createPlayers();
     createTimeline();
+    document.addEventListener("pulse:inspect", (event) => {
+      const detail = (event as CustomEvent<{ eventId?: string; timeMs?: number }>).detail;
+      const action = replay.events.find(item => item.id === detail?.eventId);
+      const at = action?.timeMs ?? detail?.timeMs;
+      if (typeof at !== "number" || !Number.isFinite(at) || at < replay.match.startMs || at > replay.match.endMs) return;
+      stopDemo(); clearEvidence(); playing = false; clock = at;
+      if (action) eventButtons.get(action.id)?.classList.add("evidence-event");
+      setDrawerTab("timeline", true); render();
+    });
+    document.addEventListener("pulse:select-pane", (event) => {
+      const pane = (event as CustomEvent<{ pane?: string }>).detail?.pane;
+      if (pane && ["timeline", "passing", "control", "routes", "recap", "evidence"].includes(pane)) setDrawerTab(pane, true);
+    });
+    document.addEventListener("pulse:camera", (event) => {
+      const mode = (event as CustomEvent<{ mode?: string }>).detail?.mode;
+      if (mode === "broadcast" || mode === "tactical" || mode === "follow") { pitchRenderer?.setCamera?.(mode); render(); }
+    });
     analytics = createAnalytics(replay, scenarioPicker.value, {
       repaint: render, matchTime, eventSentence,
       playMoment: (moment) => {

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/alexwafula/pulse/app/internal/domain"
@@ -53,6 +54,7 @@ func TestTemplateCueGate(t *testing.T) {
 }
 
 func TestPythonHTTPBoundary(t *testing.T) {
+	t.Setenv("PULSE_AGENT_AUTH_TOKEN", strings.Repeat("0", 64))
 	data, err := os.ReadFile("../../../contracts/examples/insight-request.json")
 	if err != nil {
 		t.Fatal(err)
@@ -62,6 +64,9 @@ func TestPythonHTTPBoundary(t *testing.T) {
 		t.Fatal(err)
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer "+strings.Repeat("0", 64) {
+			t.Error("service token not delivered")
+		}
 		if r.Method != "POST" || r.URL.Path != "/insights" {
 			t.Error("wrong boundary")
 		}

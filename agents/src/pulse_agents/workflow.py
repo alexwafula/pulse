@@ -1,4 +1,4 @@
-"""Offline/shadow agent orchestration. No model output is published to viewers."""
+"""Bounded three-agent orchestration with independent publishing checks."""
 
 import asyncio
 from copy import deepcopy
@@ -7,8 +7,10 @@ from pathlib import Path
 from typing import Protocol, cast
 
 from .contracts import (Claim, InsightRequest, InsightResponse, NarrationDraft,
-                        VerificationResult, validate_draft, validate_verification)
+                        VerificationResult, validate_draft)
 from .pipeline import insights
+from .publication import (PUBLICATION_REASON, approved_wordings, validate_publishable_draft,
+                          validate_publishable_verification)
 
 PROMPTS = Path(__file__).parent / "prompts"
 
@@ -29,14 +31,9 @@ class ShadowRun:
     reasons: tuple[str, ...]
 
 
-async def run_shadow(request: InsightRequest, backend: AgentBackend,
-                     timeout_seconds: float = 2.0) -> ShadowRun:
-    """Exercise three replaceable agents, retry narration once, always ship template.
-
-    Until broader deterministic language checks and the Go gate are agreed,
-    only canonical wording qualifies even for shadow acceptance. A model's
-    VERIFIED label alone never establishes correctness.
-    """
+async def run_agents(request: InsightRequest, backend: AgentBackend,
+                     timeout_seconds: float = 2.0, *, publish: bool = True) -> ShadowRun:
+    """Publish only approved language with a complete independently checked claim."""
     if not 0 < timeout_seconds <= 10:
         raise ValueError("Agent timeout must be between zero and ten seconds")
     template = insights(request)
@@ -65,34 +62,31 @@ async def run_shadow(request: InsightRequest, backend: AgentBackend,
                 candidate = cast(NarrationDraft, await call("narrator", {
                     "request": request, "explanation": explanation,
                     "rejectionReasons": list(reasons),
+                    "approvedWordings": list(approved_wordings(request["persona"])) if publish else [template["draft"]["text"]],
                 }))
                 validate_draft(candidate, request["factPack"])
-                if candidate != template["draft"]:
+                validate_publishable_draft(request, candidate)
+                if not publish and candidate != template["draft"]:
                     raise ValueError("Narration differs from the deterministically supported template")
                 verification = cast(VerificationResult, await call("verifier", {
                     "draft": candidate, "factPack": request["factPack"],
                 }))
-                if set(verification) != {"schemaVersion", "draftId", "status", "claimsChecked", "claimsPassed", "claims"}:
-                    raise ValueError("Invalid verifier fields")
-                if not isinstance(verification["claims"], list) or any(
-                    not isinstance(item, dict)
-                    or set(item) != {"claimId", "supported", "eventIds", "reason"}
-                    or not isinstance(item["reason"], str)
-                    or not isinstance(item["eventIds"], list)
-                    for item in verification["claims"]
-                ):
-                    raise ValueError("Invalid verifier claim fields")
-                validate_verification(verification, candidate)
-                if verification["status"] != "VERIFIED":
-                    raise ValueError("Verifier rejected the candidate")
-                # Require the full evidence set, not merely a subset of IDs.
-                claims = {claim["id"]: claim for claim in candidate["claims"]}
+                validate_publishable_verification(candidate, verification)
+                # Verifier prose is diagnostic, not an additional publishable claim.
+                verification = deepcopy(verification)
                 for item in verification["claims"]:
-                    if set(item["eventIds"]) != set(claims[item["claimId"]]["eventIds"]):
-                        raise ValueError("Verifier omitted supporting evidence")
-                return ShadowRun(template, candidate, True, attempts, tuple(reasons))
+                    item["reason"] = PUBLICATION_REASON
+                response: InsightResponse = {"schemaVersion": template["schemaVersion"],
+                                             "draft": candidate, "verification": verification}
+                return ShadowRun(response if publish else template, candidate, True, attempts, tuple(reasons))
             except (ValueError, KeyError, TypeError, AttributeError) as error:
                 reasons.append(f"Narrator attempt {attempts}: {error}")
     except (TimeoutError, OSError, ValueError, KeyError, TypeError, AttributeError, RuntimeError) as error:
         reasons.append(f"Agent workflow failed: {error}")
     return ShadowRun(template, candidate, False, attempts, tuple(reasons))
+
+
+async def run_shadow(request: InsightRequest, backend: AgentBackend,
+                     timeout_seconds: float = 2.0) -> ShadowRun:
+    """Retain the original template-only diagnostic mode."""
+    return await run_agents(request, backend, timeout_seconds, publish=False)
