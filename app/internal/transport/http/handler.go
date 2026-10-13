@@ -132,12 +132,18 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 				return
 			}
 			if agentsURL != "" {
-				remote, remoteErr := ai.Request(r.Context(), agentsURL, pack, locale, persona)
+				remote, mode, remoteErr := ai.RequestWithMode(r.Context(), agentsURL, pack, locale, persona)
 				if remoteErr == nil {
 					_, remoteErr = ai.Cue(replay, pack, remote, locale, persona)
 					if remoteErr == nil {
 						response = remote
 						source = "python-template"
+						if remote.Verification.Status == "VERIFIED" {
+							source = "python-verified"
+							if mode == "recorded" {
+								source = "python-recorded"
+							}
+						}
 					}
 				}
 				if remoteErr != nil {

@@ -9,7 +9,7 @@ WORKDIR /pulse-app
 COPY --from=build /pulse /pulse
 COPY app/web/templates ./app/web/templates
 COPY app/web/static ./app/web/static
-COPY data/samples ./data/samples
+COPY data ./data
 EXPOSE 8080
 ENTRYPOINT ["/pulse"]
 CMD ["-addr", "0.0.0.0:8080"]

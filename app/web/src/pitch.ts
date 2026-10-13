@@ -85,6 +85,7 @@ const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
 const runDemoButton = document.querySelector<HTMLButtonElement>("#run-demo-button");
 let cues: Cue[] = [];
+let insightSource = "";
 let evidenceCue: Cue | undefined;
 let momentClip: Moment | undefined;
 let analytics: ReturnType<typeof createAnalytics> | undefined;
@@ -128,7 +129,7 @@ function renderInsight(): void {
   if (displayedCueID === id) return;
   displayedCueID = id;
   insightText.textContent = cue?.text ?? "Awaiting next moment";
-  insightStatus.textContent = cue ? "Template" : "Waiting";
+  insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
   insightEvidence.hidden = !cue;
   if (cue) insightWindow.textContent = `${matchTime(cue.replayStartMs)}–${matchTime(cue.replayEndMs)} · ${cue.eventIds.length} events`;
 }
@@ -142,6 +143,7 @@ async function loadInsights(): Promise<void> {
     if (request !== insightRequest) return;
     if (feed.schemaVersion !== "2.0.0" || !Array.isArray(feed.cues)) throw new Error("Unsupported cue feed");
     cues = feed.cues;
+    insightSource = response.headers.get("X-Pulse-Insight-Source") ?? "";
     if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; insightStatus.textContent = "No moment"; }
     else { displayedCueID = undefined; renderInsight(); }
   } catch (error: unknown) {

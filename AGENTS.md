@@ -51,23 +51,29 @@ This is the target architecture, not the current implementation. Current: Go
 replay and HTTP fixture API, Go templates, TypeScript pitch, contract v2,
 Go/Python agent-message models and dependency-free contract tests. A local
 Three.js/PixiJS comparison now sits beside the SVG view, using the same replay.
-The corner-to-first-shot builder, conservative canonical-template Go cue gate,
+The corner-to-first-shot builder, conservative independently checking Go cue gate,
 Python template HTTP service and browser Evidence replay now work locally.
 Go-calculated passing snapshots and pass evidence are rendered below the pitch.
-Python has file prompts and a tested async shadow workflow; it does not publish
-model output, and the HTTP endpoint remains template-only.
+Python has file prompts and a tested bounded three-role workflow. Default HTTP
+mode is template-only; opt-in `foundry` can publish only approved corner-shot
+wording after independent Python/Go checks. `foundry-shadow` still publishes
+templates. Recorded publishing tests are not evidence of live model quality.
 Three authored local scenarios plus seeded 11v11 late-siege/calm-midfield replays,
 attacking-route metrics, persona controls and
 a deterministic downloadable recap are available. An opt-in Foundry REST
-shadow adapter is mock-tested; no live calls or cloud deployment have been
-verified. Dockerfiles/Compose and setup/project-page docs are prepared.
+adapter is mock-tested; the Foundry resource/project and gpt-4.1-mini deployment
+are provisioned in South Africa North. One bounded live corner workflow passed
+both Python and Go checks; app hosting remains pending. Dockerfiles/Compose and
+setup/project-page docs are prepared.
 Cached metrics/moments APIs and clock-synchronised control overlays now work
 in SVG, Three.js and PixiJS. Replay-backed statistics and event/tick evidence
 clips are available. Tracking values are uncalibrated model estimates, not
 agent facts under v2. CONTROL_SWING context events must never be cited as
 evidence; its evidence is metric ticks. Scores remain unavailable, not 0:0.
-SSE, model-backed runtime agents and Azure remain unimplemented. The Python
-Explainer/Narrator/Verifier-shaped stages are deterministic replacement points.
+SSE and Azure app hosting remain unimplemented. Explainer/Narrator/Verifier are wired to the
+opt-in Foundry backend; one live CASUAL corner workflow has been verified, not
+broader model quality or latency. The Go gate still
+rejects free prose, unsupported facts and incomplete evidence.
 The separate `/experience` preview uses locally bundled HTMX for replay-clock
 Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existing
 controller and gated cue feed. The preview now ports the supplied stadium and
@@ -146,7 +152,10 @@ event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE only:
 
 ## 7. Pulse runtime agents
 
-Planned set: **Explainer, Narrator, Verifier**, run by a thin orchestrator workflow on Microsoft Agent Framework with Foundry models. The runtime agents are not implemented yet. Candidates after the golden path works: Recap agent, and splitting Persona/Locale out of the Narrator.
+Current set: **Explainer, Narrator, Verifier**, run by a thin async workflow with
+an opt-in Foundry REST backend. The publishing path is constrained to the recorded
+corner-shot fact and tested with fake backends, not live models. Microsoft Agent
+Framework, Recap, and additional personas remain future work.
 
 ### 7.1 Rules for every Pulse agent
 

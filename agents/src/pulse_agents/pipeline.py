@@ -48,6 +48,8 @@ def validate_request(request: InsightRequest) -> None:
 
 
 def explain(pack: FactPack) -> Claim:
+    if len(pack["facts"]) != 1:
+        raise ValueError("Publishing currently supports one computed corner fact only")
     facts = [fact for fact in pack["facts"] if fact["metric"] == "set_piece_shots"]
     if len(facts) != 1:
         raise ValueError("Exactly one corner-shot fact is required")

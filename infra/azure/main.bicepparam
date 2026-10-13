@@ -3,9 +3,9 @@ using 'main.bicep'
 param environmentName = 'pulse-demo'
 param webImageTag = 'demo'
 param agentsImageTag = 'demo'
-param agentMode = 'template'
-param modelRequestCap = 10
-param minReplicasWeb = 1
-param maxReplicasWeb = 5
-param minReplicasAgents = 1
-param maxReplicasAgents = 3
+param agentMode = 'recorded'
+param modelRequestCap = 0
+param minReplicasWeb = 0
+param maxReplicasWeb = 1
+param minReplicasAgents = 0
+param maxReplicasAgents = 1

@@ -18,7 +18,9 @@ param agentsImageTag string = 'demo'
 @description('Agent operating mode. Template mode has no model charges; Azure hosting remains billable.')
 @allowed([
   'template'
+  'recorded'
   'foundry-shadow'
+  'foundry'
 ])
 param agentMode string = 'template'
 
@@ -32,26 +34,26 @@ param foundryDeployment string = ''
 @secure()
 param foundryApiKey string = ''
 
-@description('Maximum paid shadow workflows allowed per service process.')
-param modelRequestCap int = 10
+@description('Maximum paid model workflows allowed per service process; resets on restart.')
+param modelRequestCap int = 0
 
 @description('Minimum replicas for the web container app (0 enables scale-to-zero).')
-param minReplicasWeb int = 1
+param minReplicasWeb int = 0
 
 @description('Maximum replicas for the web container app.')
-param maxReplicasWeb int = 5
+param maxReplicasWeb int = 1
 
 @description('Minimum replicas for the agents container app (0 enables scale-to-zero).')
-param minReplicasAgents int = 1
+param minReplicasAgents int = 0
 
 @description('Maximum replicas for the agents container app.')
-param maxReplicasAgents int = 3
+param maxReplicasAgents int = 1
 
 @description('CPU allocated to each container.')
-param cpuCore string = '0.5'
+param cpuCore string = '0.25'
 
 @description('Memory allocated to each container.')
-param memorySize string = '1.0Gi'
+param memorySize string = '0.5Gi'
 
 // 1. Log Analytics Workspace for Container Apps Environment
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {

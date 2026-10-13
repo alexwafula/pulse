@@ -29,6 +29,20 @@ are recorded in [docs/decisions](docs/decisions).
 
 ## Run the browser pitch
 
+Windows two-service startup (Go + Python, free template mode, automatic free ports):
+
+```powershell
+.\scripts\start-local.ps1
+```
+
+The printed Preview/Stadium URLs and process IDs are authoritative. Use
+`-SkipWebBuild` for committed assets. See [collaborator meeting](docs/COLLABORATOR-MEETING.md)
+for prerequisites, checks, owners and the demo walkthrough.
+
+Use `-AgentMode recorded` to replay the reviewed Foundry corner response without
+a key or paid model calls. The cue is labelled `Verified (recorded)`; unmatched
+requests use templates. Live mode is separate, opt-in and narrowly constrained.
+
 Go 1.23 or newer is required. From the repository root:
 
 ```powershell
@@ -50,7 +64,7 @@ not load either renderer. Choosing a primary renderer remains a later decision.
 
 ### Experience integration preview
 
-On `feat/experience-integration`, open
+On `feat/meeting-readiness` (based on `feat/experience-integration`), open
 `http://127.0.0.1:8080/experience?scenario=late-siege`. This preview adapts the
 teammate's Live/Story/Insights layout to Go templates and locally bundled HTMX,
 using Three.js, PixiJS and SVG. The preview ports the supplied stadium's stands,
@@ -113,15 +127,18 @@ Go server separately computes the corner fact pack from the replay.
 ## Status
 Shared contracts, local replay, the browser pitch and one computed corner-shot
 insight are working. The browser loads an offline fixture and a gated cue feed
-from Go, sharing one playback clock. SSE/live delivery and model-backed agents
-remain future work.
+from Go, sharing one playback clock. SSE/live delivery and cloud deployment
+remain future work; the opt-in model publishing path is mock-tested and one
+separately approved live Foundry corner workflow has passed both gates.
 
 Contract v2 follows the Markdown conventions: camelCase, uppercase enums,
 regional locales and bottom-left pitch coordinates. Go and Python now share
 FactPack, NarrationDraft and VerificationResult models plus valid/invalid
 message examples. The Python HTTP endpoint now has separate deterministic
-Explainer/Narrator/Verifier-shaped stages. They are template stubs, not LLM
-agents; no model calls are made.
+Explainer/Narrator/Verifier stages. Template mode makes no model calls. An explicit
+Foundry mode wires all three roles and may publish independently checked wording
+for the corner fact. One live CASUAL corner workflow was verified on 2026-10-13;
+this is not a broad model-quality evaluation.
 
 Check the dependency-free Python contract foundation with:
 
@@ -160,13 +177,14 @@ moment detector, not a full set-piece attribution model.
 - `GET /api/fact-packs`: computed corner fact packs.
 - `POST /insights` on Python: `contracts/examples/insight-request.json` to `insight-response.json`.
 - `GET /api/insights?persona=CASUAL` on Go: gated cue feed (`ANALYST` is also supported).
-- `X-Pulse-Insight-Source`: `python-template` or `go-template` for the current one-moment fixture.
+- `X-Pulse-Insight-Source`: `python-verified`, `python-template` or `go-template` for the current one-moment fixture.
 
 If Python is unavailable or returns unsafe content, Go uses its own canonical
 template through the same gate. `FALLBACK_TEMPLATE` means deterministic output,
-not completed LLM verification. The gate currently rejects all noncanonical
-prose, including model output labelled VERIFIED. Expand it only alongside the
-real agent verification work and adversarial evaluations.
+not completed LLM verification. `VERIFIED` output must match one of the approved
+corner-shot strings for the requested persona with the exact claim and full
+evidence. Python and Go check independently; Go recalculates the pack. A model
+approval alone cannot publish arbitrary prose. No shared v2 schema changed.
 
 ## Passing network and agent preparation
 
@@ -175,17 +193,21 @@ passes, directed links and sent/received totals. They follow the match clock;
 rewinding removes future links. Click a pass timestamp to inspect its action.
 The two-pass sample is intentionally small: no influence or centrality claims.
 
-The Python agent backend interface, three prompt files and async shadow
-workflow are ready for an approved Foundry adapter. Shadow runs retry the
-Narrator once and fall back on rejection or timeout. The HTTP service and
-browser still publish templates only; no live AI calls are configured.
+The three prompt files and bounded async workflow use the existing Foundry
+backend in opt-in `foundry` mode. Narrator retries once, then falls back on
+unsupported content or timeout. `foundry-shadow` remains template-only. Successful
+verified cues show Verified in the browser; deterministic fallbacks show Template.
+The first publishing policy permits wording selection, not open-ended tactical
+analysis. Broader factual coverage needs a separately reviewed change.
 
 ```powershell
 py tests/evaluations/run_agents.py
+py tests/integration/agents-flow.py
 ```
 
-These recorded, fake-backend checks exercise the canonical safety boundary,
-not model quality. See [decision 0007](docs/decisions/0007-passing-network-and-agent-shadow.md).
+These recorded, fake-backend checks exercise both publishing and fallback,
+not model quality. The HTTP smoke test starts actual Python and Go servers without
+paid calls. See [readiness decision](docs/decisions/0016-meeting-readiness.md).
 
 ## Core demo additions
 
@@ -206,9 +228,9 @@ Additional browser check: `node tests/integration/core-browser.mjs` with
 `PULSE_URL` pointing to the running server. The offline agent evaluation now
 has 30 recorded cases, not a live model accuracy measurement.
 
-Foundry is opt-in, shadow-only and bounded by a per-process request cap. The
+Foundry is opt-in and bounded by a per-process request cap. The
 default mode makes no model calls. See [Foundry/Azure setup](docs/FOUNDRY-AZURE-SETUP.md)
-for credentials, direct shadow testing, Docker Compose and deployment steps.
+for credentials, shadow/publishing modes, Docker Compose and deployment steps.
 Dockerfiles and `compose.yaml` are prepared but not yet container-tested here.
 See [project-page copy](docs/PROJECT-PAGE.md) and [uploadable media](docs/media/README.md).
 

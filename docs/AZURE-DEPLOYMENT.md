@@ -2,7 +2,9 @@
 
 This runbook documents the declarative infrastructure-as-code (Bicep) deployment for Pulse on Azure Container Apps.
 
-> **Status**: Bicep templates validated with `az bicep build`. No resources provisioned yet (pending cloud credentials).
+> **Status**: Foundry resource/project, model deployment and resource-group budget
+> alerts are provisioned in South Africa North. Container Apps deployment is in
+> progress; a successful deployment and public URL must be verified separately.
 
 ---
 
@@ -56,8 +58,11 @@ Internet              |   +------------+     internal HTTP    |
 
 These steps create billable Azure resources. Template mode makes no paid model
 calls; it does not make Azure hosting free. ACR, image builds, Log Analytics
-and running Container Apps replicas can incur charges. The template keeps at
-least one replica of each app running by default.
+and running Container Apps replicas can incur charges. The parameter file uses
+recorded mode, zero minimum and one maximum replica per app, 0.25 vCPU/0.5 GiB.
+No Foundry key is needed or deployed in this mode. The saved CASUAL/en-GB corner
+response is checked by Python and Go and labelled `Verified (recorded)` in the UI.
+Other requests receive templates. See [decision 0017](decisions/0017-recorded-cloud-demo.md).
 
 Confirm the subscription, region, permissions and budget before proceeding.
 Configure Azure Cost Management budget alerts; alerts do not automatically
@@ -80,12 +85,13 @@ az account set --subscription "<YOUR-SUBSCRIPTION-ID>"
 az provider register --namespace Microsoft.App
 az provider register --namespace Microsoft.OperationalInsights
 az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.ManagedIdentity
 ```
 
 ### 3. Set Environment Variables
 ```bash
 RESOURCE_GROUP="pulse-hackathon"
-LOCATION="eastus2"          # Choose a region with available quota
+LOCATION="southafricanorth" # Allowed by the current Students region policy
 ACR_NAME="crpulse$(openssl rand -hex 4)" # 5-50 lowercase alphanumeric characters
 ENVIRONMENT_NAME="pulse-demo"
 ```
@@ -118,7 +124,7 @@ az deployment group what-if \
 
 ### 7. Provision Infrastructure via Bicep
 
-#### Option A: Deterministic Template Mode (No Model Charges)
+#### Option A: Reviewed Recorded Mode (No Runtime Model Charges)
 ```bash
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
@@ -128,7 +134,8 @@ az deployment group create \
     acrName="$ACR_NAME" \
     location="$LOCATION" \
     environmentName="$ENVIRONMENT_NAME" \
-    agentMode="template"
+    agentMode="recorded" \
+    modelRequestCap=0
 ```
 
 #### Option B: Foundry Shadow Mode with Model Key
@@ -152,6 +159,13 @@ az deployment group create \
 ```
 
 ### 8. Verify Deployment and Retrieve Public URL
+
+After validating shadow mode, `agentMode="foundry"` is an explicit opt-in to
+independently checked corner-shot publishing. It is billable and still requires
+complete evidence; it does not enable free prose or broader tactical facts.
+Start with a small `modelRequestCap`, check both Verified and Template behaviour,
+and follow [Foundry setup](FOUNDRY-AZURE-SETUP.md). These cloud steps have not been
+executed as part of local readiness testing.
 ```bash
 # Retrieve deployment outputs
 az deployment group show \

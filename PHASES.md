@@ -221,6 +221,13 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 
 ## Change log
 
+Readiness update (Oct 13): `feat/meeting-readiness` adds independently checked
+agent publishing for the existing corner fact, canonical demo player identities,
+tap/keyboard map inspection and a native local launcher. Contract v2 is unchanged.
+One separately approved live Foundry CASUAL corner workflow now passes both gates.
+Broader facts/evaluations, Azure app hosting, tracing and clean-clone verification
+by another teammate remain pending; these changes do not complete the phase exits above.
+
 | Date | Change | By |
 |---|---|---|
 | Oct 5 | Initial plan for a two-person team | |

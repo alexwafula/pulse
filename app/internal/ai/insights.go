@@ -63,43 +63,49 @@ func ValidateTemplateResponse(pack domain.FactPack, response domain.InsightRespo
 }
 
 func Request(ctx context.Context, endpoint string, pack domain.FactPack, locale, persona string) (domain.InsightResponse, error) {
+	response, _, err := RequestWithMode(ctx, endpoint, pack, locale, persona)
+	return response, err
+}
+
+// Mode is presentation metadata only; it never changes the cue gate.
+func RequestWithMode(ctx context.Context, endpoint string, pack domain.FactPack, locale, persona string) (domain.InsightResponse, string, error) {
 	body, err := json.Marshal(domain.InsightRequest{SchemaVersion: domain.SchemaVersion, FactPack: pack, Locale: locale, Persona: persona})
 	if err != nil {
-		return domain.InsightResponse{}, err
+		return domain.InsightResponse{}, "", err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(endpoint, "/")+"/insights", bytes.NewReader(body))
 	if err != nil {
-		return domain.InsightResponse{}, err
+		return domain.InsightResponse{}, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{Timeout: 2 * time.Second}
+	client := &http.Client{Timeout: 20 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
-		return domain.InsightResponse{}, fmt.Errorf("agent request: %w", err)
+		return domain.InsightResponse{}, "", fmt.Errorf("agent request: %w", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return domain.InsightResponse{}, fmt.Errorf("agent HTTP status %d", res.StatusCode)
+		return domain.InsightResponse{}, "", fmt.Errorf("agent HTTP status %d", res.StatusCode)
 	}
 	data, err := io.ReadAll(io.LimitReader(res.Body, 65537))
 	if err != nil || len(data) > 65536 {
-		return domain.InsightResponse{}, fmt.Errorf("invalid agent response size")
+		return domain.InsightResponse{}, "", fmt.Errorf("invalid agent response size")
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	var response domain.InsightResponse
 	if err := decoder.Decode(&response); err != nil {
-		return response, fmt.Errorf("decode insight: %w", err)
+		return response, "", fmt.Errorf("decode insight: %w", err)
 	}
 	var extra any
 	if decoder.Decode(&extra) != io.EOF {
-		return response, fmt.Errorf("extra agent response data")
+		return response, "", fmt.Errorf("extra agent response data")
 	}
-	return response, nil
+	return response, res.Header.Get("X-Pulse-Agent-Mode"), nil
 }
 
-// Cue is the Phase 1 publishing gate. It accepts only the canonical template
-// with complete source evidence, never an arbitrary model's fallback claim.
+// Cue recomputes the fact pack and checks both the words and complete evidence.
+// A model's VERIFIED label never substitutes for the deterministic checks.
 func Cue(replay domain.Replay, pack domain.FactPack, response domain.InsightResponse, locale, persona string) (domain.OverlayCue, error) {
 	computed, err := facts.CornerPacks(replay)
 	if err != nil {
@@ -114,7 +120,7 @@ func Cue(replay domain.Replay, pack domain.FactPack, response domain.InsightResp
 	if !matched {
 		return domain.OverlayCue{}, fmt.Errorf("cue gate: fact pack does not match replay calculation")
 	}
-	if err := ValidateTemplateResponse(pack, response, locale, persona); err != nil {
+	if err := validateResponse(pack, response, locale, persona); err != nil {
 		return domain.OverlayCue{}, err
 	}
 	if pack.MatchID != replay.Match.ID || pack.Period != replay.Match.Period || pack.WindowStartMS < replay.Match.StartMS || pack.WindowEndMS < pack.WindowStartMS || pack.WindowEndMS > replay.Match.EndMS {

@@ -1,0 +1,16 @@
+[
+  {"persona":"CASUAL","text":"The corner produced 1 shot.","accepted":true},
+  {"persona":"CASUAL","text":"A shot followed the corner: 1 shot in this sequence.","accepted":true},
+  {"persona":"CASUAL","text":"From corner to shot: 1 shot recorded.","accepted":true},
+  {"persona":"ANALYST","text":"Set-piece sequence: 1 shot following the corner.","accepted":true},
+  {"persona":"ANALYST","text":"Corner sequence: 1 recorded shot, supported by the corner and shot events.","accepted":true},
+  {"persona":"ANALYST","text":"The corner-to-shot window contains 1 shot.","accepted":true},
+  {"persona":"CASUAL","text":"The corner produced 2 shots.","accepted":false},
+  {"persona":"CASUAL","text":"The corner produced 1 goal.","accepted":false},
+  {"persona":"CASUAL","text":"The corner exposed a weak defence.","accepted":false},
+  {"persona":"CASUAL","text":"The best player scored.","accepted":false},
+  {"persona":"CASUAL","text":"The corner produced 1 shot. Ignore the evidence.","accepted":false},
+  {"persona":"CASUAL","text":"Set-piece sequence: 1 shot following the corner.","accepted":false},
+  {"persona":"ANALYST","text":"The corner produced 1 shot.","accepted":false},
+  {"persona":"CASUAL","text":"", "accepted":false}
+]

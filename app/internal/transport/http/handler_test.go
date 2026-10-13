@@ -72,7 +72,7 @@ func TestInsightFeedAndFallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, mode := range []string{"local", "python", "malicious", "unavailable"} {
+	for _, mode := range []string{"local", "python", "verified", "recorded", "forged-verified", "forged-recorded", "malicious", "unavailable"} {
 		t.Run(mode, func(t *testing.T) {
 			endpoint := ""
 			if mode != "local" {
@@ -86,6 +86,20 @@ func TestInsightFeedAndFallback(t *testing.T) {
 						t.Error(err)
 					}
 					response, _ := ai.Template(request.FactPack, request.Locale, request.Persona)
+					if mode == "recorded" || mode == "forged-recorded" {
+						w.Header().Set("X-Pulse-Agent-Mode", "recorded")
+					}
+					if mode == "verified" || mode == "recorded" || mode == "forged-verified" || mode == "forged-recorded" {
+						text := ai.ApprovedWordings(request.Persona)[1]
+						if mode == "forged-verified" || mode == "forged-recorded" {
+							text = "The corner produced 1 goal."
+						}
+						response.Draft.Text, response.Draft.Claims[0].Text = text, text
+						response.Verification.Status = "VERIFIED"
+						response.Verification.ClaimsChecked, response.Verification.ClaimsPassed = 1, 1
+						response.Verification.Claims = []domain.ClaimResult{{ClaimID: response.Draft.Claims[0].ID, Supported: true,
+							EventIDs: request.FactPack.Facts[0].EventIDs, Reason: ai.PublicationReason}}
+					}
 					if mode == "malicious" {
 						response.Draft.Text = "The corner produced 9 shots."
 					}
@@ -104,12 +118,22 @@ func TestInsightFeedAndFallback(t *testing.T) {
 			if recorder.Code != 200 || json.Unmarshal(recorder.Body.Bytes(), &feed) != nil || len(feed.Cues) != 1 {
 				t.Fatalf("feed: %d %s", recorder.Code, recorder.Body.String())
 			}
-			if feed.Cues[0].Text != "The corner produced 1 shot." || feed.Cues[0].Verification.Status != "FALLBACK_TEMPLATE" {
+			wantText, wantStatus := "The corner produced 1 shot.", "FALLBACK_TEMPLATE"
+			if mode == "verified" || mode == "recorded" {
+				wantText, wantStatus = ai.ApprovedWordings("CASUAL")[1], "VERIFIED"
+			}
+			if feed.Cues[0].Text != wantText || feed.Cues[0].Verification.Status != wantStatus {
 				t.Fatal("unsafe insight published")
 			}
 			want := "go-template"
 			if mode == "python" {
 				want = "python-template"
+			}
+			if mode == "verified" {
+				want = "python-verified"
+			}
+			if mode == "recorded" {
+				want = "python-recorded"
 			}
 			if recorder.Header().Get("X-Pulse-Insight-Source") != want {
 				t.Fatal("wrong insight source")

@@ -1,0 +1,79 @@
+{
+  "request": {
+    "schemaVersion": "2.0.0",
+    "factPack": {
+      "schemaVersion": "2.0.0",
+      "id": "pack-corner-a17ddcca8e6cba9b",
+      "matchId": "match-vale-bastion-01",
+      "period": 1,
+      "windowStartMs": 1672000,
+      "windowEndMs": 1678000,
+      "facts": [
+        {
+          "id": "fact-corner-a17ddcca8e6cba9b",
+          "metric": "set_piece_shots",
+          "value": 1,
+          "unit": "shots",
+          "teamId": "vale",
+          "timeStartMs": 1672000,
+          "timeEndMs": 1678000,
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ]
+        }
+      ]
+    },
+    "locale": "en-GB",
+    "persona": "CASUAL"
+  },
+  "response": {
+    "schemaVersion": "2.0.0",
+    "draft": {
+      "schemaVersion": "2.0.0",
+      "id": "draft-pack-corner-a17ddcca8e6cba9b",
+      "factPackId": "pack-corner-a17ddcca8e6cba9b",
+      "locale": "en-GB",
+      "persona": "CASUAL",
+      "text": "The corner produced 1 shot.",
+      "claims": [
+        {
+          "id": "claim-fact-corner-a17ddcca8e6cba9b",
+          "text": "The corner produced 1 shot.",
+          "factIds": [
+            "fact-corner-a17ddcca8e6cba9b"
+          ],
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ]
+        }
+      ]
+    },
+    "verification": {
+      "schemaVersion": "2.0.0",
+      "draftId": "draft-pack-corner-a17ddcca8e6cba9b",
+      "status": "VERIFIED",
+      "claimsChecked": 1,
+      "claimsPassed": 1,
+      "claims": [
+        {
+          "claimId": "claim-fact-corner-a17ddcca8e6cba9b",
+          "supported": true,
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ],
+          "reason": "Supported by the computed corner-shot fact."
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "provider": "Microsoft Foundry",
+    "deployment": "pulse-insights",
+    "model": "gpt-4.1-mini",
+    "modelVersion": "2025-04-14",
+    "recordedAt": "2026-10-13T19:39:55.370Z"
+  }
+}
