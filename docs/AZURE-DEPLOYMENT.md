@@ -78,6 +78,12 @@ No Foundry key is needed or deployed in this mode. The saved CASUAL/en-GB corner
 response is checked by Python and Go and labelled `Verified (recorded)` in the UI.
 Other requests receive templates. See [decision 0017](decisions/0017-recorded-cloud-demo.md).
 
+Hosted Python also requires a generated `agentAuthToken` secure parameter. The
+same token is injected into Go/Python app secrets, never the browser or GitHub.
+Health checks remain public; `/insights` rejects requests without the service
+credential. Do not infer network privacy from `external: false` alone: direct
+requests reached Python in this deployment. See [decision 0019](decisions/0019-agent-service-authentication.md).
+
 Confirm the subscription, region, permissions and budget before proceeding.
 Configure Azure Cost Management budget alerts; alerts do not automatically
 stop spending. Setting minimum replicas to zero can reduce idle compute costs,
@@ -158,6 +164,16 @@ az deployment group what-if \
 ### 7. Provision Infrastructure via Bicep
 
 #### Option A: Reviewed Recorded Mode (No Runtime Model Charges)
+
+On Windows use the tested image SHA with the deployment helper. It verifies both
+GitHub workflows and uploaded tags before generating a token in memory:
+
+```powershell
+.\scripts\deploy-azure.ps1 -ImageTag '<FULL-SOURCE-COMMIT-SHA>'
+```
+
+The generic CLI equivalent below requires `AGENT_AUTH_TOKEN` to be generated
+securely in the shell first. Never paste its value into a file or GitHub:
 ```bash
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \
@@ -168,7 +184,8 @@ az deployment group create \
     location="$LOCATION" \
     environmentName="$ENVIRONMENT_NAME" \
     agentMode="recorded" \
-    modelRequestCap=0
+    modelRequestCap=0 \
+    agentAuthToken="$AGENT_AUTH_TOKEN"
 ```
 
 #### Option B: Foundry Shadow Mode with Model Key
@@ -185,6 +202,7 @@ az deployment group create \
     location="$LOCATION" \
     environmentName="$ENVIRONMENT_NAME" \
     agentMode="foundry-shadow" \
+    agentAuthToken="$AGENT_AUTH_TOKEN" \
     foundryEndpoint="https://<YOUR-RESOURCE>.openai.azure.com" \
     foundryDeployment="<YOUR-DEPLOYMENT-NAME>" \
     foundryApiKey="$FOUNDRY_KEY" \
