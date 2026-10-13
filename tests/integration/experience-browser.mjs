@@ -19,6 +19,87 @@ const section = async (page, name) => page.locator(`.experience-navigation [data
 const panelAt = async (page, at) => page.waitForFunction(at => document.querySelector(".story-content")?.getAttribute("data-time-ms") === String(at) && document.querySelector(".story-content")?.getAttribute("data-panel") === document.querySelector('#experience-inputs [name="panel"]')?.value, at);
 const clock = ms => `${String(Math.floor(ms / 60000)).padStart(2, "0")}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
 
+async function storyAndMaps(page, replay, mobile) {
+  await section(page, "story");
+  await seek(page, 450);
+  const at = Math.floor(replay.match.startMs + .45 * (replay.match.endMs - replay.match.startMs));
+  await panelAt(page, at);
+  const elapsed = replay.events.filter(event => event.timeMs <= at);
+  const ids = () => page.locator("[data-story-event]").evaluateAll(items => items.map(item => item.dataset.storyEvent));
+  await page.getByRole("button", { name: "Catch up", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.storyMode === "catchup");
+  assert.deepEqual(await ids(), elapsed.map(event => event.id));
+  await page.getByRole("button", { name: "Highlights", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.storyMode === "highlights");
+  assert.deepEqual(await ids(), elapsed.filter(event => ["SHOT", "CORNER", "CROSS"].includes(event.type)).map(event => event.id));
+  await page.getByRole("button", { name: "Player focus", exact: true }).click();
+  const player = replay.match.players.find(player => player.id === elapsed.at(-1).actorId);
+  await page.getByLabel("Story player", { exact: true }).selectOption(player.id);
+  await page.waitForFunction(name => document.querySelector(".story-content h3")?.textContent === name, player.name);
+  const involved = elapsed.filter(event => event.actorId === player.id || event.recipientId === player.id);
+  assert.deepEqual(await ids(), involved.map(event => event.id));
+  assert.equal(await page.locator(".player-story-summary dd").first().textContent(), String(involved.length));
+  await page.getByRole("button", { name: "Analyst", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.persona === "ANALYST");
+  assert.equal(await page.locator(".story-details").count(), involved.length);
+  await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-player-story.png`), fullPage: true });
+  await page.getByRole("button", { name: "Casual", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.persona === "CASUAL");
+  assert.equal(await page.locator(".story-details").count(), 0);
+  await page.getByRole("button", { name: "Live story", exact: true }).click();
+  await section(page, "insights");
+  await panelAt(page, at);
+  assert.ok(await page.locator(".pitch-map").isVisible());
+  for (const [name, predicate] of [["Completed passes", event => event.type === "PASS" && event.outcome === "COMPLETE"], ["Shot attempts", event => event.type === "SHOT"]]) {
+    const figure = page.locator(`[data-chart="${name}"]`);
+    for (const [index, team] of replay.match.teams.entries()) assert.equal(Number(await figure.getAttribute(index === 0 ? "data-home" : "data-away")), elapsed.filter(event => event.teamId === team.id && predicate(event)).length);
+  }
+  for (const team of replay.match.teams) {
+    await page.getByLabel("Map team", { exact: true }).selectOption(team.id);
+    await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
+    const count = replay.match.players.filter(player => player.teamId === team.id).length;
+    assert.equal(Number(await page.locator("[data-total-player-seconds]").getAttribute("data-total-player-seconds")), Number((count * (at - replay.match.startMs) / 1000).toFixed(1)));
+    assert.ok(await page.locator(".heat-cells rect").count() > 0);
+  }
+  const mapPixels = PNG.sync.read(await page.locator(".pitch-map").screenshot());
+  let warmCells = 0;
+  for (let index = 0; index < mapPixels.data.length; index += 16) {
+    const [r, g, b] = mapPixels.data.subarray(index, index + 3);
+    if (r > 150 && g > 130 && b < g * .8) warmCells++;
+  }
+  assert.ok(warmCells > 30, "heatmap cells must visibly render over the pitch");
+  await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-charts-heatmap.png`), fullPage: true });
+  await seek(page, 0); await panelAt(page, replay.match.startMs);
+  assert.equal(await page.locator(".heat-cells rect").count(), 0);
+  assert.equal(await page.locator("[data-total-player-seconds]").getAttribute("data-total-player-seconds"), "0.0");
+  await seek(page, 1000); await panelAt(page, replay.match.endMs);
+  await page.getByRole("button", { name: "Shots", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "shots");
+  const team = replay.match.teams.find(team => replay.events.some(event => event.type === "SHOT" && event.teamId === team.id));
+  await page.getByLabel("Map team", { exact: true }).selectOption(team.id);
+  await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
+  const shots = replay.events.filter(event => event.type === "SHOT" && event.teamId === team.id);
+  assert.deepEqual(await page.locator("[data-shot-event]").evaluateAll(items => items.map(item => item.dataset.shotEvent)), shots.map(event => event.id));
+  for (const event of shots) {
+    const point = page.locator(`[data-shot-event="${event.id}"]`);
+    assert.equal(Number(await point.getAttribute("cx")), event.from.x);
+    assert.equal(Number(await point.getAttribute("cy")), 68-event.from.y);
+  }
+  await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-shot-map.png`), fullPage: true });
+  await page.locator(".shot-evidence [data-inspect-event]").first().click();
+  assert.equal(await page.locator("#match-clock").textContent(), clock(shots[0].timeMs));
+  assert.equal(await page.locator("#play-button").getAttribute("aria-label"), "Play");
+  await section(page, "insights");
+  await page.getByRole("button", { name: "Passing network", exact: true }).click();
+  assert.ok(await page.locator("#pane-passing").isVisible());
+  await page.getByRole("button", { name: "Charts & maps", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector("#experience-panel")?.hidden === false);
+  await page.getByRole("button", { name: "Heatmap", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "occupancy");
+  assert.equal(await page.locator("#canvas-host canvas").getAttribute("data-identity"), "persistent", "Story modes, charts and maps must preserve the pitch");
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "charts and maps must fit mobile and desktop");
+}
+
 async function pixels(canvas, label) {
   const buffer = await canvas.screenshot();
   const decoded = PNG.sync.read(buffer);
@@ -114,6 +195,7 @@ try {
       assert.equal(await page.locator("#match-clock").textContent(), clock(replay.events.find(event => event.id === id).timeMs));
       assert.equal(await page.locator("#play-button").getAttribute("aria-label"), "Play");
       await section(page, "insights");
+      await page.getByRole("button", { name: "Model & moments", exact: true }).click();
       assert.ok(await page.locator("#pane-control").isVisible());
       await page.getByRole("tab", { name: "Passing", exact: true }).click();
       assert.ok(await page.locator("#pane-passing").isVisible());
@@ -128,6 +210,7 @@ try {
       await page.locator("[data-download-recap]").click();
       assert.equal((await downloading).suggestedFilename(), "pulse-sequence-recap.txt");
       await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-${mode}-recap.png`), fullPage: true });
+      if (mode === "three") await storyAndMaps(page, replay, mobile);
     }
     // HTMX failures retain the last HTML, offer retry and leave playback working.
     await section(page, "story");
@@ -158,5 +241,5 @@ try {
   await cuePage.getByRole("button", { name: "Analyst", exact: true }).click();
   await cuePage.waitForFunction(text => document.querySelector("#insight-text")?.textContent === text, analyst.cues[0].text);
   assert.deepEqual(errors, []);
-  console.log(`Experience browser checks passed: desktop/mobile, all renderers, cameras, HTMX, evidence, replay-clock panels and failure recovery. Screenshots: ${output}`);
+  console.log(`Experience browser checks passed: desktop/mobile, all renderers, cameras, Story views, charts/heatmaps, HTMX, evidence, replay-clock panels and failure recovery. Screenshots: ${output}`);
 } finally { await browser.close(); }

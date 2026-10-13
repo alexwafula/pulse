@@ -58,8 +58,12 @@ articulated players, textured kits and patterned ball; the original renderer
 remains at `/` for comparison. Broadcast, Tactical and Follow ball perspective
 cameras use recorded data. Running poses follow tracking velocity and the match
 clock, so pause and rewind freeze/reproduce them. Control is opt-in on this route.
-Story is a rolling source-event log, not AI prose; the sequence recap unlocks
-at the end. Insights still pass through the existing Go cue gate.
+Story offers Live story, Catch up, recorded Highlights and Player focus, with
+Casual/Analyst detail. These are source-event views, not model-generated prose.
+Insights adds cumulative pass/shot/entry charts, attack-relative lanes, team
+tracking heatmaps and shot locations with evidence. Heatmaps measure player-time,
+not touches or pressure. The sequence recap unlocks at the end, and narrative
+insights still pass through the existing Go cue gate.
 
 Frontend contributors can use the existing JSON APIs and the documented DOM
 events without creating another simulator. See the

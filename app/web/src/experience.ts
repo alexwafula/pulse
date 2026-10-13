@@ -1,4 +1,4 @@
-import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw } from "lucide";
+import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route } from "lucide";
 
 type Section = "live" | "story" | "insights" | "recap";
 type ClockEvent = { timeMs: number; playing: boolean; scenario: string };
@@ -8,32 +8,38 @@ const content = document.querySelector<HTMLElement>("#experience-content")!;
 const form = document.querySelector<HTMLFormElement>("#experience-inputs")!;
 const atInput = form.elements.namedItem("atMs") as HTMLInputElement;
 const panelInput = form.elements.namedItem("panel") as HTMLInputElement;
+const modeInput = form.elements.namedItem("mode") as HTMLInputElement;
+const mapInput = form.elements.namedItem("map") as HTMLInputElement;
+const personaInput = form.elements.namedItem("persona") as HTMLInputElement;
 const status = document.querySelector<HTMLElement>("#panel-status")!;
 const retry = document.querySelector<HTMLButtonElement>("#panel-retry")!;
 let pendingRefresh: ReturnType<typeof setTimeout> | undefined;
 let lastRefresh = 0;
 
-const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw } });
+const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route } });
 icons();
 
 function refresh(): void {
   clearTimeout(pendingRefresh);
   pendingRefresh = undefined;
   if (panel.hidden) return;
+  personaInput.value = document.querySelector<HTMLButtonElement>('[data-persona][aria-pressed="true"]')?.dataset.persona ?? "CASUAL";
   lastRefresh = performance.now();
   document.body.dispatchEvent(new CustomEvent("pulse:refresh"));
 }
 
 function selectSection(next: Section, changePane = true): void {
   document.body.dataset.section = next;
-  panel.hidden = next !== "story" && next !== "recap";
+  panel.hidden = next === "live" || (next === "insights" && !changePane);
   document.querySelector<HTMLElement>(".drawer-main")!.hidden = !panel.hidden;
+  document.querySelector<HTMLElement>("#story-controls")!.hidden = next !== "story";
+  document.querySelector<HTMLElement>("#map-controls")!.hidden = next !== "insights";
   for (const button of navigation) {
     if (button.dataset.section === next) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   }
   if (!panel.hidden) {
-    panelInput.value = next;
+    panelInput.value = next === "insights" ? "analytics" : next;
     refresh();
   } else if (changePane) {
     document.dispatchEvent(new CustomEvent("pulse:select-pane", { detail: { pane: next === "insights" ? "control" : "timeline" } }));
@@ -41,6 +47,19 @@ function selectSection(next: Section, changePane = true): void {
 }
 
 for (const button of navigation) button.addEventListener("click", () => selectSection(button.dataset.section as Section));
+for (const button of document.querySelectorAll<HTMLButtonElement>(".story-modes [data-story-mode]")) button.addEventListener("click", () => {
+  modeInput.value = button.dataset.storyMode!;
+  for (const item of document.querySelectorAll<HTMLButtonElement>(".story-modes [data-story-mode]")) item.setAttribute("aria-pressed", String(item === button));
+  document.querySelector<HTMLElement>("#story-player-label")!.hidden = modeInput.value !== "player";
+  refresh();
+});
+for (const button of document.querySelectorAll<HTMLButtonElement>(".story-modes [data-map-mode]")) button.addEventListener("click", () => {
+  mapInput.value = button.dataset.mapMode!;
+  for (const item of document.querySelectorAll<HTMLButtonElement>(".story-modes [data-map-mode]")) item.setAttribute("aria-pressed", String(item === button));
+  refresh();
+});
+form.addEventListener("change", refresh);
+document.querySelector<HTMLButtonElement>("[data-open-charts]")!.addEventListener("click", () => selectSection("insights"));
 document.addEventListener("pulse:clock", (event) => {
   const clock = (event as CustomEvent<ClockEvent>).detail;
   atInput.value = String(clock.timeMs);
@@ -64,6 +83,9 @@ content.addEventListener("click", (event) => {
     document.dispatchEvent(new CustomEvent("pulse:inspect", { detail: { eventId: button.dataset.inspectEvent } }));
   } else if (button?.hasAttribute("data-download-recap")) {
     document.querySelector<HTMLButtonElement>("#download-recap")!.click();
+  } else if (button?.dataset.analysisPane) {
+    selectSection("insights", false);
+    document.dispatchEvent(new CustomEvent("pulse:select-pane", { detail: { pane: button.dataset.analysisPane } }));
   }
 });
 retry.addEventListener("click", refresh);

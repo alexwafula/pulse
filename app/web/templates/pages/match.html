@@ -314,13 +314,34 @@
         </section>
 
         {{if .Experience}}
-        <section id="experience-panel" aria-label="Match story and recap" hidden>
-          <form id="experience-inputs" hidden><input name="scenario" value="{{.Scenario}}"><input name="panel" value="story"><input name="atMs" value="{{.Match.StartMS}}"></form>
+        <section id="experience-panel" aria-label="Story, charts and maps" hidden>
+          <form id="experience-inputs">
+            <input type="hidden" name="scenario" value="{{.Scenario}}"><input type="hidden" name="panel" value="story"><input type="hidden" name="atMs" value="{{.Match.StartMS}}"><input type="hidden" name="persona" value="CASUAL">
+            <div id="story-controls" class="experience-controls">
+              <div class="story-modes" role="group" aria-label="Story view">
+                <button type="button" data-story-mode="live" aria-pressed="true">Live story</button>
+                <button type="button" data-story-mode="catchup" aria-pressed="false">Catch up</button>
+                <button type="button" data-story-mode="highlights" aria-pressed="false">Highlights</button>
+                <button type="button" data-story-mode="player" aria-pressed="false">Player focus</button>
+              </div>
+              <input type="hidden" name="mode" value="live">
+              <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}">#{{.Number}} {{.Name}}</option>{{end}}</select></label>
+            </div>
+            <div id="map-controls" class="experience-controls" hidden>
+              <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></label>
+              <div class="story-modes" role="group" aria-label="Pitch map">
+                <button type="button" data-map-mode="occupancy" aria-pressed="true"><i data-lucide="map"></i><span>Heatmap</span></button>
+                <button type="button" data-map-mode="shots" aria-pressed="false"><i data-lucide="crosshair"></i><span>Shots</span></button>
+              </div>
+              <input type="hidden" name="map" value="occupancy">
+            </div>
+          </form>
           <div class="panel-status"><span id="panel-status" role="status"></span><button type="button" id="panel-retry" class="icon-button" title="Retry panel" aria-label="Retry panel" hidden><i data-lucide="rotate-ccw"></i></button></div>
           <div id="experience-content" hx-get="/experience/panel" hx-trigger="pulse:refresh from:body" hx-include="#experience-inputs" hx-swap="innerHTML" hx-sync="this:replace" aria-busy="false">{{template "experience-panel" .Story}}</div>
         </section>
         {{end}}
         <div class="drawer-main">
+          {{if .Experience}}<button type="button" class="evidence-button analytics-return" data-open-charts><i data-lucide="chart-no-axes-combined"></i><span>Charts &amp; maps</span></button>{{end}}
           <!-- Drawer Navigation Tabs -->
           <div class="drawer-tabs" role="tablist" aria-label="Analysis tabs">
           <button type="button" role="tab" id="tab-timeline" class="drawer-tab active" data-tab="timeline" aria-selected="true" aria-controls="pane-timeline">Timeline</button>

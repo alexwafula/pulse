@@ -47,6 +47,25 @@ return 404. Append `scenario=...` to every request; the default is `corner`.
 | `/api/insights?scenario=corner&persona=CASUAL&locale=en-GB` | Go-gated cue feed; `ANALYST` also supported |
 | `/experience/panel?scenario=late-siege&panel=story&atMs=5280000` | HTML fragment: source-event story at elapsed match clock |
 | `/experience/panel?scenario=late-siege&panel=recap&atMs=5360000` | HTML recap, unavailable before the end of that replay |
+| `/experience/panel?scenario=late-siege&panel=analytics&atMs=5316000&map=occupancy` | HTML cumulative charts, tracking occupancy and attacking lanes |
+
+HTML panel selectors (not new shared v2 contracts):
+
+- `panel`: `story`, `recap`, `analytics`.
+- `mode`: `live` (last five events), `catchup` (all elapsed events), `highlights`
+  (elapsed SHOT/CORNER/CROSS), `player` (actor or named recipient involvement).
+- `persona`: `CASUAL` or `ANALYST`; analyst source logs add IDs, phase and coordinates.
+- `playerId`: a match player; defaults to the first metadata player. Only the
+  Player focus view filters by it. This is not the unimplemented SPOTLIGHT persona.
+- `teamId`: a match team; defaults to the first metadata team. Selects maps/lanes,
+  while the cumulative charts always compare both teams.
+- `map`: `occupancy` or `shots`. Shot dots use the event's `from` coordinates;
+  each has a source-event evidence button. No xG, on-target or goal classification.
+
+Every fragment uses `Cache-Control: no-store`. Missing/out-of-window/non-integer
+`atMs` and unknown selectors return 400; non-GET methods return 405. Recap still
+unlocks only at the end. The existing JSON routes supply the underlying data
+for contributors using a separate development UI.
 
 Example JSON consumer:
 
@@ -83,6 +102,16 @@ server-to-server boundary, not a browser endpoint.
 - Insight text comes only from `/api/insights` after the Go cue gate. Current
   `FALLBACK_TEMPLATE` output is deterministic, not real AI verification.
 - English CASUAL/ANALYST work. Kiswahili remains disabled pending review.
+- Occupancy sums recorded player milliseconds in 21 x 17 cells (5 x 4 metres),
+  holding each position until the next frame or the cutoff. No future positions
+  are used. Team totals sum all selected players' time, so they can exceed elapsed
+  match time. It is not a touch, possession, pressure or threat heatmap.
+- Heat intensity is relative to the map's current maximum; use the legend when
+  comparing teams/times. Longest included sampling interval is displayed because
+  sparse fixtures provide a much coarser approximation than the seeded 5 Hz clips.
+- Chart paths use existing Go passing/attacking snapshots. Their match-clock axis
+  is fixed to the replay window, with the future part blank and no interpolated
+  action counts. Box entries are not goals; lane counts are attack-relative.
 
 Authority: [contracts](../contracts/README.md). Useful fixtures:
 [replay](../data/samples/first-sequence.json),
@@ -95,7 +124,7 @@ API model details and limitations: [metrics](metrics.md).
 ## HTMX and pitch ownership
 
 `match.html` serves both routes. Preview-only CSS/JS is loaded on `/experience`.
-HTMX's `hx-get` requests the fragment above, including `scenario`, `panel` and
+HTMX's `hx-get` requests the fragment above, including all selectors and
 `atMs` from `#experience-inputs`. Only `#experience-content` is swapped, with
 replace-on-new-request synchronization. Updates are throttled while playing;
 paused clock changes refresh immediately. Failure retains the dated snapshot
@@ -133,6 +162,8 @@ not a new shared football contract or streaming API.
 | Layout / mobile polish | `app/web/static/experience.css` |
 | Shared shell / fragment markup | `app/web/templates/pages/match.html`, `partials/experience.html` |
 | Bounded HTML presentation | `app/internal/transport/http/experience.go` |
+| Go chart/map presentation | `app/internal/transport/http/experience_analytics.go` |
+| Tracking occupancy aggregation | `app/internal/engine/metrics/occupancy.go` |
 | Shared playback / evidence / overlays | `app/web/src/pitch.ts`, `analytics.ts` |
 | Rendering only | `app/web/src/renderers/three.ts`, `pixi.ts` |
 | Ported stadium / player anatomy | `app/web/src/renderers/stadium.ts`, `characters.ts` |
@@ -151,8 +182,11 @@ possessor. No synthetic ball arcs, kicks or goals are inferred by the renderer.
 
 1. Open late-siege in 3D, pause, select Broadcast/Tactical/Follow ball.
 2. Switch to PixiJS 2D, then return to 3D; all positions use the same clock.
-3. Open Story, seek forward then backward, inspect an event's Evidence.
-4. Open Insights, compare Control/Passing/Routes and inspect moment evidence.
+3. Open Story, compare Live/Catch up/Highlights/Player focus, switch Casual/Analyst,
+   seek forward then backward and inspect an event's Evidence.
+4. Open Insights, compare charts, team heatmaps and shot locations. Use Passing
+   network, Model & moments or Route evidence for detailed existing analytics;
+   Charts & maps returns to the overview. Inspect a shot's source evidence.
 5. Seek to the end, open Recap and download its source-event summary.
 6. Select Corner chance, advance to the end, compare Casual/Analyst and replay
    the gated insight's evidence. Return to the original dashboard for comparison.
@@ -173,3 +207,5 @@ Chrome must be installed; set `CHROME_PATH` if necessary. The preview test uses
 real mobile viewports, checks nonblank/moving canvas pixels and saves screenshots
 to the temporary `pulse-experience-preview` folder (override `PULSE_SCREENSHOTS`).
 No live model calls, paid services or cloud deployment are required for this demo.
+Competition fit and unimplemented prototype features:
+[Story and maps decision](decisions/0014-story-views-and-replay-maps.md).

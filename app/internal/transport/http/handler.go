@@ -70,7 +70,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 	}
 	view := replayPage(replay, graphs, attacks, scenario)
-	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS)
+	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()
 	tracking := newMetricsAPI(scenario, replay)

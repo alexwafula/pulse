@@ -75,6 +75,11 @@ articulated character presentation; textured kits/ball and close perspective
 cameras replace the original capsule-and-number view on that route only.
 Gait uses recorded tracking velocity and the replay clock, never a second timer
 or inferred ball flight. The model field is opt-in in the preview.
+Story now includes clock-bounded Catch up, source-event Highlights and Player
+focus with Casual/Analyst detail; Player focus is a presentation filter, not a
+new agent persona. Insights shows Go-backed cumulative pass/shot/entry charts,
+attack-relative lane counts, team tracking-occupancy heatmaps and evidenced shot
+locations. Occupancy is sample-and-hold player-time, not touches or pressure.
 Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
 
 ```
