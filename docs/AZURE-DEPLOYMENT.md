@@ -2,9 +2,24 @@
 
 This runbook documents the declarative infrastructure-as-code (Bicep) deployment for Pulse on Azure Container Apps.
 
-> **Status**: Foundry resource/project, model deployment and resource-group budget
-> alerts are provisioned in South Africa North. Container Apps deployment is in
-> progress; a successful deployment and public URL must be verified separately.
+> **Status (2026-10-13)**: Foundry resource/project, model deployment, budget alerts
+> and ACR Basic `crpulsealexbf7b4530` are provisioned in South Africa North.
+> Go/Python hosting is **not deployed**. Both `az acr build` requests were rejected
+> with `TasksOperationsNotAllowed` by this Students subscription. No image builds
+> ran and no Container Apps were created. The created registry remains billable.
+
+The tested branch `feat/meeting-readiness` is pushed at runtime commit `103b3a4`.
+[GitHub CI passed](https://github.com/alexwafula/pulse/actions/runs/38458056303).
+Local Go/Python, recorded mode, both persona boundaries and desktop/mobile pitch
+and evidence checks passed. Azure What-If succeeded, with no deletions and no
+changes to the Foundry resources. This is not proof of a deployed cloud runtime.
+
+Next build route, pending team approval: a manual GitHub Actions workflow using
+an Azure federated identity restricted to this branch and `AcrPush` on this
+registry. Do not enable registry admin passwords or upload an Azure model key to
+GitHub. See [Microsoft's OIDC setup](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect).
+Only deploy after both image tags exist; then check public Go health, Go-to-Python
+recorded insight delivery and desktop/mobile browser playback on the public URL.
 
 ---
 

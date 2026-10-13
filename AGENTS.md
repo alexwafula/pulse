@@ -65,6 +65,11 @@ adapter is mock-tested; the Foundry resource/project and gpt-4.1-mini deployment
 are provisioned in South Africa North. One bounded live corner workflow passed
 both Python and Go checks; app hosting remains pending. Dockerfiles/Compose and
 setup/project-page docs are prepared.
+An explicit `recorded` mode packages the reviewed live corner output, validates
+it at startup and binds it to the complete request. It makes no model calls and
+is labelled `Verified (recorded)`. Azure image builds are currently blocked by
+`TasksOperationsNotAllowed`; the registry exists, but Go/Python hosting is not
+deployed. See `docs/AZURE-DEPLOYMENT.md` before claiming a public demo is available.
 Cached metrics/moments APIs and clock-synchronised control overlays now work
 in SVG, Three.js and PixiJS. Replay-backed statistics and event/tick evidence
 clips are available. Tracking values are uncalibrated model estimates, not
