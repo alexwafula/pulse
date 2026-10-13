@@ -12,6 +12,12 @@ only `alexwafula/pulse` and `refs/heads/feat/meeting-readiness`; forks and other
 branches do not match. This identity cannot deploy Container Apps or access
 Foundry. Runtime apps use a separate `AcrPull` identity.
 
+Pulse uses GitHub's ID-bearing subject format. The exact approved subject is
+`repo:alexwafula@91899603/pulse@1404538837:ref:refs/heads/feat/meeting-readiness`.
+These IDs were checked against the repository API and the first job's token
+metadata. Do not substitute the legacy name-only subject or add a wildcard.
+See [GitHub's immutable subject reference](https://docs.github.com/en/actions/reference/security/oidc).
+
 GitHub secrets contain only client/tenant/subscription identifiers, not passwords
 or model keys. Login exchanges the job's short-lived OIDC token for an Azure token.
 Keep registry admin authentication disabled.

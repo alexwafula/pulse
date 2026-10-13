@@ -9,10 +9,23 @@ param identityName string = 'id-pulse-github-build'
 ])
 param repository string = 'alexwafula/pulse'
 
+@description('Immutable IDs verified from GitHub and the actual OIDC token subject.')
+@allowed([
+  91899603
+])
+param ownerId int = 91899603
+
+@allowed([
+  1404538837
+])
+param repositoryId int = 1404538837
+
 @allowed([
   'feat/meeting-readiness'
 ])
 param branch string = 'feat/meeting-readiness'
+
+var repositoryParts = split(repository, '/')
 
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: acrName
@@ -28,7 +41,7 @@ resource federation 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedI
   name: 'github-meeting-readiness'
   properties: {
     issuer: 'https://token.actions.githubusercontent.com'
-    subject: 'repo:${repository}:ref:refs/heads/${branch}'
+    subject: 'repo:${repositoryParts[0]}@${ownerId}/${repositoryParts[1]}@${repositoryId}:ref:refs/heads/${branch}'
     audiences: [
       'api://AzureADTokenExchange'
     ]
