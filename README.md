@@ -64,6 +64,13 @@ Insights adds cumulative pass/shot/entry charts, attack-relative lanes, team
 tracking heatmaps and shot locations with evidence. Heatmaps measure player-time,
 not touches or pressure. The sequence recap unlocks at the end, and narrative
 insights still pass through the existing Go cue gate.
+The prototype's visual system now covers every working preview screen: neutral
+canvas, blue navigation, local Outfit/Jakarta typography, red/blue teams and
+canvas charts/maps. Story/Insights/Recap are dedicated pages with a shared replay
+toolbar and optional mini-player. Navigation preserves the renderer. Passing
+maps use Go-calculated pass-involvement positions; soft heat shading keeps the
+underlying cell durations. SVG fallback remains available. Host-only prototype
+AI/social/game features are not implemented by this visual port.
 
 Frontend contributors can use the existing JSON APIs and the documented DOM
 events without creating another simulator. See the

@@ -9,6 +9,11 @@ ball and close perspective cameras. PixiJS uses the brighter striped turf and
 patterned ball in tactical 2D. Original capsule/number visuals remain on `/`.
 Control starts off in the preview so turf and players remain clear; the same
 Go-calculated field can be enabled with the checkbox.
+The current preview matches the supplied prototype's neutral/blue shell, sidebar,
+segmented views and typography across all working screens. Fonts are local.
+Dedicated Story/Insights/Recap screens reuse the pitch in an optional watch dock
+and keep the original playback controls in a shared toolbar. No second renderer
+or clock is created. `section=story|insights|recap` opens a screen directly.
 
 ## Start and contribute
 
@@ -59,8 +64,12 @@ HTML panel selectors (not new shared v2 contracts):
   Player focus view filters by it. This is not the unimplemented SPOTLIGHT persona.
 - `teamId`: a match team; defaults to the first metadata team. Selects maps/lanes,
   while the cumulative charts always compare both teams.
-- `map`: `occupancy` or `shots`. Shot dots use the event's `from` coordinates;
+- `map`: `occupancy`, `shots` or `network`. Shot dots use the event's `from` coordinates;
   each has a source-event evidence button. No xG, on-target or goal classification.
+- Passing-map nodes average each player's completed-pass origins/received
+  destinations up to the clock, computed in Go. These are pass-involvement
+  locations, not general touches or average tracking positions. Directed edges
+  preserve their source event IDs; incomplete passes, crosses and corners are out.
 
 Every fragment uses `Cache-Control: no-store`. Missing/out-of-window/non-integer
 `atMs` and unknown selectors return 400; non-GET methods return 405. Recap still
@@ -109,6 +118,11 @@ server-to-server boundary, not a browser endpoint.
 - Heat intensity is relative to the map's current maximum; use the legend when
   comparing teams/times. Longest included sampling interval is displayed because
   sparse fixtures provide a much coarser approximation than the seeded 5 Hz clips.
+- The preview's canvas uses radial shading of those source cells for the supplied
+  prototype's softer look. Colour is relative display density, not a calibrated
+  probability or literal cell duration. Hover reads the underlying cell's exact
+  displayed player-seconds; peak cell and total time remain numeric. Canvas failure
+  leaves the unsmoothed Go SVG visible and removes the smoothing label.
 - Chart paths use existing Go passing/attacking snapshots. Their match-clock axis
   is fixed to the replay window, with the future part blank and no interpolated
   action counts. Box entries are not goals; lane counts are attack-relative.
@@ -159,6 +173,7 @@ not a new shared football contract or streaming API.
 | Contributor area | Files |
 |---|---|
 | Experience navigation / HTML refresh | `app/web/src/experience.ts` |
+| Prototype canvas charts / maps | `app/web/src/experience-graphics.ts` |
 | Layout / mobile polish | `app/web/static/experience.css` |
 | Shared shell / fragment markup | `app/web/templates/pages/match.html`, `partials/experience.html` |
 | Bounded HTML presentation | `app/internal/transport/http/experience.go` |
@@ -171,6 +186,11 @@ not a new shared football contract or streaming API.
 Never HTMX-swap the canvas, playback controls, analytics inspector or gated cue
 region. Keep the supplied HTML's browser engine and host-specific AI/storage
 calls outside Pulse. Agree shared contract changes with both engine/agent owners.
+`experience.ts` moves the existing pitch/transport DOM nodes when navigating and
+restores them on Live. Avoid cached parent assumptions. Map canvases dispatch
+`pulse:map-inspect` with `{ eventId }`, which navigation turns into the existing
+`pulse:inspect` command. Canvas observers are disposed on each HTMX swap; SVG and
+source evidence buttons remain the fallback. Do not calculate football in canvas.
 
 `SceneState.timeMs` and `velocities` are presentation inputs from adjacent replay
 tracking frames, not shared-contract changes or new statistics. Character roots
@@ -184,11 +204,14 @@ possessor. No synthetic ball arcs, kicks or goals are inferred by the renderer.
 2. Switch to PixiJS 2D, then return to 3D; all positions use the same clock.
 3. Open Story, compare Live/Catch up/Highlights/Player focus, switch Casual/Analyst,
    seek forward then backward and inspect an event's Evidence.
-4. Open Insights, compare charts, team heatmaps and shot locations. Use Passing
-   network, Model & moments or Route evidence for detailed existing analytics;
+4. Open Insights, compare Match graphs and Pitch maps (pass network, team heatmaps,
+   shot locations). Use Passing detail, Model & moments or Routes for the existing
+   inspectors; source evidence buttons remain available.
    Charts & maps returns to the overview. Inspect a shot's source evidence.
 5. Seek to the end, open Recap and download its source-event summary.
-6. Select Corner chance, advance to the end, compare Casual/Analyst and replay
+6. On any non-Live screen, show/hide the watch dock and return to Live; the
+   original renderer and playback state must survive.
+7. Select Corner chance, advance to the end, compare Casual/Analyst and replay
    the gated insight's evidence. Return to the original dashboard for comparison.
 
 ```powershell
@@ -209,3 +232,4 @@ to the temporary `pulse-experience-preview` folder (override `PULSE_SCREENSHOTS`
 No live model calls, paid services or cloud deployment are required for this demo.
 Competition fit and unimplemented prototype features:
 [Story and maps decision](decisions/0014-story-views-and-replay-maps.md).
+Full visual port: [prototype presentation decision](decisions/0015-prototype-visual-system.md).

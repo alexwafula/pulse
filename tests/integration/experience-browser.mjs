@@ -49,11 +49,23 @@ async function storyAndMaps(page, replay, mobile) {
   await page.getByRole("button", { name: "Live story", exact: true }).click();
   await section(page, "insights");
   await panelAt(page, at);
-  assert.ok(await page.locator(".pitch-map").isVisible());
+  assert.equal(await page.locator("#workspace-title").textContent(), "Insights");
+  assert.ok(await page.locator('[data-graphic="chart"]').first().isVisible());
+  const chartPixels = PNG.sync.read(await page.locator('[data-graphic="chart"]').first().screenshot());
+  let chartColor = 0;
+  for (let index = 0; index < chartPixels.data.length; index += 16) {
+    const [r,g,b] = chartPixels.data.subarray(index,index+3);
+    if ((r > 150 && g < 130 && b < 160) || (b > 140 && b > r*1.2 && b > g*1.1)) chartColor++;
+  }
+  assert.ok(chartColor > 30, "chart canvas must visibly render source-backed team paths");
+  await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-prototype-graphs.png`), fullPage: true });
   for (const [name, predicate] of [["Completed passes", event => event.type === "PASS" && event.outcome === "COMPLETE"], ["Shot attempts", event => event.type === "SHOT"]]) {
     const figure = page.locator(`[data-chart="${name}"]`);
     for (const [index, team] of replay.match.teams.entries()) assert.equal(Number(await figure.getAttribute(index === 0 ? "data-home" : "data-away")), elapsed.filter(event => event.teamId === team.id && predicate(event)).length);
   }
+  await page.getByRole("button", { name: "Pitch maps", exact: true }).click();
+  await page.waitForFunction(() => document.body.dataset.insightView === "maps");
+  assert.ok(await page.locator('[data-graphic="map"]').isVisible());
   for (const team of replay.match.teams) {
     await page.getByLabel("Map team", { exact: true }).selectOption(team.id);
     await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
@@ -61,7 +73,7 @@ async function storyAndMaps(page, replay, mobile) {
     assert.equal(Number(await page.locator("[data-total-player-seconds]").getAttribute("data-total-player-seconds")), Number((count * (at - replay.match.startMs) / 1000).toFixed(1)));
     assert.ok(await page.locator(".heat-cells rect").count() > 0);
   }
-  const mapPixels = PNG.sync.read(await page.locator(".pitch-map").screenshot());
+  const mapPixels = PNG.sync.read(await page.locator('[data-graphic="map"]').screenshot());
   let warmCells = 0;
   for (let index = 0; index < mapPixels.data.length; index += 16) {
     const [r, g, b] = mapPixels.data.subarray(index, index + 3);
@@ -69,6 +81,13 @@ async function storyAndMaps(page, replay, mobile) {
   }
   assert.ok(warmCells > 30, "heatmap cells must visibly render over the pitch");
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-charts-heatmap.png`), fullPage: true });
+  await page.getByRole("button", { name: "Pass network", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "network");
+  assert.ok(await page.locator(".network-node").count() > 0);
+  assert.ok(await page.locator(".network-evidence [data-inspect-event]").count() > 0);
+  await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-pitch-network.png`), fullPage: true });
+  await page.getByRole("button", { name: "Heatmap", exact: true }).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "occupancy");
   await seek(page, 0); await panelAt(page, replay.match.startMs);
   assert.equal(await page.locator(".heat-cells rect").count(), 0);
   assert.equal(await page.locator("[data-total-player-seconds]").getAttribute("data-total-player-seconds"), "0.0");
@@ -86,6 +105,16 @@ async function storyAndMaps(page, replay, mobile) {
     assert.equal(Number(await point.getAttribute("cy")), 68-event.from.y);
   }
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-shot-map.png`), fullPage: true });
+  const map = page.locator('[data-graphic="map"]');
+  await map.scrollIntoViewIfNeeded();
+  const size = await map.boundingBox();
+  const position = {x:(shots[0].from.x+2)/109*size.width, y:(68-shots[0].from.y+2)/72*size.height};
+  if (mobile) await map.tap({position});
+  else await map.click({position});
+  assert.equal(await page.locator("#match-clock").textContent(),clock(shots[0].timeMs),"click or tap on a source shot must open its evidence");
+  await section(page,"insights");
+  await page.getByRole("button",{name:"Pitch maps",exact:true}).click();
+  await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "shots");
   await page.locator(".shot-evidence [data-inspect-event]").first().click();
   assert.equal(await page.locator("#match-clock").textContent(), clock(shots[0].timeMs));
   assert.equal(await page.locator("#play-button").getAttribute("aria-label"), "Play");
@@ -94,9 +123,15 @@ async function storyAndMaps(page, replay, mobile) {
   assert.ok(await page.locator("#pane-passing").isVisible());
   await page.getByRole("button", { name: "Charts & maps", exact: true }).click();
   await page.waitForFunction(() => document.querySelector("#experience-panel")?.hidden === false);
+  await page.getByRole("button", { name: "Pitch maps", exact: true }).click();
   await page.getByRole("button", { name: "Heatmap", exact: true }).click();
   await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "occupancy");
   assert.equal(await page.locator("#canvas-host canvas").getAttribute("data-identity"), "persistent", "Story modes, charts and maps must preserve the pitch");
+  await page.locator("#watch-toggle").click();
+  await pixels(page.locator("#canvas-host canvas"), `${mobile}-mini-player`);
+  await page.locator("#watch-expand").click();
+  assert.equal(await page.locator("#canvas-host canvas").getAttribute("data-identity"), "persistent", "mini-player must reuse the original renderer");
+  await pixels(page.locator("#canvas-host canvas"), `${mobile}-returned-live`);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "charts and maps must fit mobile and desktop");
 }
 
@@ -136,6 +171,10 @@ try {
       assert.ok(await page.getByLabel("Score unavailable", { exact: true }).isVisible());
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "page must fit the viewport");
       assert.equal(await page.evaluate(() => innerWidth), mobile ? 390 : 1440);
+      if (mobile) {
+        assert.ok(await page.locator(".header-inner .brand-text").isVisible());
+        assert.equal(await page.locator(".header-inner .brand-text").evaluate(element => getComputedStyle(element).color), "rgb(28, 40, 56)", "mobile brand must contrast with the light canvas");
+      }
       if (mode !== "svg") {
         assert.equal(await page.locator("#canvas-host canvas").getAttribute("data-presentation"), "stadium", "the experience must load the ported on-field presentation");
         assert.equal(await page.locator("#control-toggle").isChecked(), false, "the natural turf is visible until control is requested");
@@ -241,5 +280,24 @@ try {
   await cuePage.getByRole("button", { name: "Analyst", exact: true }).click();
   await cuePage.waitForFunction(text => document.querySelector("#insight-text")?.textContent === text, analyst.cues[0].text);
   assert.deepEqual(errors, []);
+  const fallback = await browser.newPage({ viewport: {width: 390, height: 844} });
+  fallback.on("pageerror",error => errors.push(error.message));
+  await fallback.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function(type,...args) { return type === "2d" ? null : getContext.call(this,type,...args); };
+  });
+  await fallback.goto(`${base}/experience?scenario=late-siege&view=svg&section=insights`, {waitUntil: "networkidle"});
+  await pause(fallback); await seek(fallback,1000);
+  const recorded = await (await fallback.request.get(`${base}/api/replay?scenario=late-siege`)).json();
+  await panelAt(fallback,recorded.match.endMs);
+  assert.equal(await fallback.locator("#workspace-title").textContent(),"Insights","section links must work on a fresh load");
+  assert.equal(await fallback.locator(".experience-graphic").count(),0);
+  assert.ok(await fallback.locator(".experience-chart svg").first().isVisible(),"failed canvas must retain the Go-rendered chart");
+  await fallback.getByRole("button",{name:"Pitch maps",exact:true}).click();
+  assert.ok(await fallback.locator(".pitch-map").isVisible(),"failed canvas must retain the Go-rendered map");
+  assert.ok(await fallback.locator(".smoothed-note").isHidden(),"fallback grid must not claim smoothing");
+  await fallback.screenshot({path:path.join(output,"mobile-prototype-svg-fallback.png"),fullPage:true});
+  await fallback.close();
+  assert.deepEqual(errors,[]);
   console.log(`Experience browser checks passed: desktop/mobile, all renderers, cameras, Story views, charts/heatmaps, HTMX, evidence, replay-clock panels and failure recovery. Screenshots: ${output}`);
 } finally { await browser.close(); }

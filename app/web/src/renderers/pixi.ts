@@ -34,7 +34,7 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   const tokens = new Map<string, Container>();
   for (const player of players) {
     const token = new Container();
-    const color = stadium ? (player.home ? 0xe9614f : 0x269ab7) : (player.home ? 0xf47761 : 0x48bed3);
+    const color = stadium ? (player.home ? 0xd9485f : 0x3a7fd5) : (player.home ? 0xf47761 : 0x48bed3);
     token.addChild(new Graphics().circle(.22, .35, 1.8).fill({ color: 0x071b13, alpha: .35 }));
     token.addChild(new Graphics().circle(0, 0, 1.65).fill(color).stroke({ color: 0xffffff, width: .24 }));
     const label = new Text({ text: String(player.number), style: { fontFamily: "Arial", fontSize: 32, fontWeight: "bold", fill: stadium ? 0xffffff : 0x10231c }, resolution: 2 });

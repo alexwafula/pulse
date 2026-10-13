@@ -68,10 +68,16 @@
       </div>
       
       <span class="header-badge">Synthetic fixture</span>
+      {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-label="Score not recorded">&ndash; : &ndash;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
     </div>
   </header>
 
   <main class="app-main">
+    {{if .Experience}}
+    <header class="experience-screen-heading"><h1 id="workspace-title">Live</h1><div class="experience-screen-actions"><span class="fixture-label">{{.ScenarioName}}</span><button id="watch-toggle" type="button" class="icon-button" aria-label="Show match player" title="Show match player" aria-pressed="false" hidden><i data-lucide="picture-in-picture-2"></i></button></div></header>
+    <div id="experience-transport" hidden></div>
+    <div id="experience-watch-dock" hidden><div class="watch-dock-tools"><button type="button" id="watch-expand" class="icon-button" title="Return to Live" aria-label="Return to Live"><i data-lucide="maximize-2"></i></button><button type="button" id="watch-close" class="icon-button" title="Hide match player" aria-label="Hide match player"><i data-lucide="x"></i></button></div></div>
+    {{end}}
     <!-- MATCH STRIP / SCOREBOARD & COMPUTED SHARE BAR -->
     <section class="match-strip" aria-label="Match scoreboard and pass share">
       <!-- First replay team: coral -->
@@ -323,13 +329,16 @@
                 <button type="button" data-story-mode="catchup" aria-pressed="false">Catch up</button>
                 <button type="button" data-story-mode="highlights" aria-pressed="false">Highlights</button>
                 <button type="button" data-story-mode="player" aria-pressed="false">Player focus</button>
+                <button type="button" data-open-recap>Recap</button>
               </div>
               <input type="hidden" name="mode" value="live">
               <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}">#{{.Number}} {{.Name}}</option>{{end}}</select></label>
             </div>
             <div id="map-controls" class="experience-controls" hidden>
+              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
               <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></label>
               <div class="story-modes" role="group" aria-label="Pitch map">
+                <button type="button" data-map-mode="network" aria-pressed="false"><i data-lucide="network"></i><span>Pass network</span></button>
                 <button type="button" data-map-mode="occupancy" aria-pressed="true"><i data-lucide="map"></i><span>Heatmap</span></button>
                 <button type="button" data-map-mode="shots" aria-pressed="false"><i data-lucide="crosshair"></i><span>Shots</span></button>
               </div>

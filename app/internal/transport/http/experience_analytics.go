@@ -2,6 +2,7 @@ package transporthttp
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/alexwafula/pulse/app/internal/domain"
@@ -10,6 +11,8 @@ import (
 
 type experienceChart struct {
 	Name, HomePath, AwayPath string
+	HomeArea, AwayArea       string
+	EndX, HomeY, AwayY       float64
 	Max, Home, Away          int
 }
 
@@ -28,6 +31,18 @@ type shotPoint struct {
 	X, Y                       float64
 }
 
+type mapNetworkNode struct {
+	ID, Name      string
+	Number, Count int
+	X, Y, Radius  float64
+}
+
+type mapNetworkEdge struct {
+	From, To, Path string
+	Count          int
+	EventIDs       []string
+}
+
 type experienceAnalytics struct {
 	Team                      domain.Team
 	HomeName, AwayName        string
@@ -40,6 +55,9 @@ type experienceAnalytics struct {
 	PlayerSeconds, MaxSeconds string
 	SampleGap                 string
 	TrackingEmpty             bool
+	TeamIndex                 int
+	NetworkNodes              []mapNetworkNode
+	NetworkEdges              []mapNetworkEdge
 }
 
 func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string) experienceAnalytics {
@@ -51,6 +69,7 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 			view.Team, teamIndex = team, i
 		}
 	}
+	view.TeamIndex = teamIndex
 	var passes, shots, entries []chartCount
 	for _, snapshot := range page.Graphs {
 		if snapshot.TimeMS > at {
@@ -101,7 +120,64 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 				Outcome: shotOutcome(event.Outcome), X: event.From.X, Y: replay.Match.Pitch.WidthM - event.From.Y})
 		}
 	}
+	view.NetworkNodes, view.NetworkEdges = pitchNetwork(replay, at, teamID)
 	return view
+}
+
+// Positions average only completed-pass involvement locations, not inferred touches.
+func pitchNetwork(replay domain.Replay, at int64, teamID string) ([]mapNetworkNode, []mapNetworkEdge) {
+	positions := make(map[string]domain.Point)
+	counts := make(map[string]int)
+	type pair struct{ from, to string }
+	links := make(map[pair][]string)
+	order := []pair{}
+	for _, event := range replay.Events {
+		if event.TimeMS > at {
+			break
+		}
+		if event.TeamID != teamID || event.Type != "PASS" || event.Outcome != "COMPLETE" {
+			continue
+		}
+		for _, involvement := range []struct {
+			id    string
+			point domain.Point
+		}{{event.ActorID, event.From}, {event.RecipientID, event.To}} {
+			position := positions[involvement.id]
+			position.X += involvement.point.X
+			position.Y += involvement.point.Y
+			positions[involvement.id] = position
+			counts[involvement.id]++
+		}
+		key := pair{event.ActorID, event.RecipientID}
+		if len(links[key]) == 0 {
+			order = append(order, key)
+		}
+		links[key] = append(links[key], event.ID)
+	}
+	maximum := 1
+	for _, count := range counts {
+		maximum = max(maximum, count)
+	}
+	var nodes []mapNetworkNode
+	lookup := make(map[string]mapNetworkNode)
+	for _, player := range replay.Match.Players {
+		count := counts[player.ID]
+		if count == 0 {
+			continue
+		}
+		position := positions[player.ID]
+		node := mapNetworkNode{ID: player.ID, Name: player.Name, Number: player.Number, Count: count,
+			X: position.X / float64(count), Y: 68 - position.Y/float64(count), Radius: 1.6 + 1.6*math.Sqrt(float64(count)/float64(maximum))}
+		nodes = append(nodes, node)
+		lookup[player.ID] = node
+	}
+	var edges []mapNetworkEdge
+	for _, key := range order {
+		from, to := lookup[key.from], lookup[key.to]
+		edges = append(edges, mapNetworkEdge{From: from.Name, To: to.Name, Count: len(links[key]), EventIDs: links[key],
+			Path: fmt.Sprintf("M %.3f %.3f L %.3f %.3f", from.X, from.Y, to.X, to.Y)})
+	}
+	return nodes, edges
 }
 
 func countChart(name string, match domain.Match, at int64, counts []chartCount) experienceChart {
@@ -126,6 +202,9 @@ func countChart(name string, match domain.Match, at int64, counts []chartCount) 
 		fmt.Fprintf(&b, " H %.2f", x(at))
 		*path = b.String()
 	}
+	view.EndX, view.HomeY, view.AwayY = x(at), y(view.Home), y(view.Away)
+	view.HomeArea = fmt.Sprintf("%s L %.2f 88 H 14 Z", view.HomePath, view.EndX)
+	view.AwayArea = fmt.Sprintf("%s L %.2f 88 H 14 Z", view.AwayPath, view.EndX)
 	return view
 }
 

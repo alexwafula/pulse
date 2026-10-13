@@ -169,7 +169,7 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 		if !validPlayer || !validTeam ||
 			(options.persona != "CASUAL" && options.persona != "ANALYST") ||
 			(options.mode != "live" && options.mode != "catchup" && options.mode != "highlights" && options.mode != "player") ||
-			(options.mapMode != "occupancy" && options.mapMode != "shots") {
+			(options.mapMode != "occupancy" && options.mapMode != "shots" && options.mapMode != "network") {
 			http.Error(w, "unsupported story or map selection", http.StatusBadRequest)
 			return
 		}

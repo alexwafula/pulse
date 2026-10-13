@@ -2,6 +2,7 @@ package transporthttp
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -211,7 +212,7 @@ func TestAnalyticsHTMLIsClockBounded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, mode := range []string{"occupancy", "shots"} {
+	for _, mode := range []string{"occupancy", "shots", "network"} {
 		for _, at := range []int64{replay.Match.StartMS, replay.Match.EndMS} {
 			response := httptest.NewRecorder()
 			handler.ServeHTTP(response, httptest.NewRequest("GET", fmt.Sprintf("/experience/panel?panel=analytics&atMs=%d&map=%s", at, mode), nil))
@@ -220,6 +221,69 @@ func TestAnalyticsHTMLIsClockBounded(t *testing.T) {
 			}
 			if at == replay.Match.StartMS && strings.Contains(response.Body.String(), "data-shot-event=") {
 				t.Fatal("future shot exposed in HTML")
+			}
+		}
+	}
+}
+
+func TestPitchNetworkUsesCompletedPassSourcePositions(t *testing.T) {
+	replay, err := simulator.Load("../../../../data/samples/first-sequence.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, at := range []int64{replay.Match.StartMS, replay.Match.StartMS + 35000, replay.Match.EndMS, replay.Match.StartMS} {
+		for _, team := range replay.Match.Teams {
+			nodes, edges := pitchNetwork(replay, at, team.ID)
+			counts := make(map[string]int)
+			xs, ys := make(map[string]float64), make(map[string]float64)
+			var expectedIDs []string
+			for _, event := range replay.Events {
+				if event.TimeMS > at {
+					break
+				}
+				if event.TeamID != team.ID || event.Type != "PASS" || event.Outcome != "COMPLETE" {
+					continue
+				}
+				expectedIDs = append(expectedIDs, event.ID)
+				counts[event.ActorID]++
+				counts[event.RecipientID]++
+				xs[event.ActorID] += event.From.X
+				ys[event.ActorID] += event.From.Y
+				xs[event.RecipientID] += event.To.X
+				ys[event.RecipientID] += event.To.Y
+			}
+			if len(nodes) != len(counts) {
+				t.Fatal("network includes players without elapsed completed passes")
+			}
+			for _, node := range nodes {
+				count := counts[node.ID]
+				if node.Count != count || math.Abs(node.X-xs[node.ID]/float64(count)) > 1e-9 || math.Abs(node.Y-(68-ys[node.ID]/float64(count))) > 1e-9 {
+					t.Fatalf("incorrect source average: %+v", node)
+				}
+			}
+			seen := make(map[string]bool)
+			for _, edge := range edges {
+				if edge.Count != len(edge.EventIDs) {
+					t.Fatal("edge count disagrees with evidence")
+				}
+				for _, id := range edge.EventIDs {
+					if seen[id] {
+						t.Fatal("pass attributed twice")
+					}
+					seen[id] = true
+				}
+			}
+			if len(seen) != len(expectedIDs) {
+				t.Fatal("network lost source evidence")
+			}
+			for _, id := range expectedIDs {
+				if !seen[id] {
+					t.Fatal("network contains unsupported evidence")
+				}
+			}
+			againNodes, againEdges := pitchNetwork(replay, at, team.ID)
+			if !reflect.DeepEqual(nodes, againNodes) || !reflect.DeepEqual(edges, againEdges) {
+				t.Fatal("network presentation is nondeterministic")
 			}
 		}
 	}

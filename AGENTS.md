@@ -80,6 +80,13 @@ focus with Casual/Analyst detail; Player focus is a presentation filter, not a
 new agent persona. Insights shows Go-backed cumulative pass/shot/entry charts,
 attack-relative lane counts, team tracking-occupancy heatmaps and evidenced shot
 locations. Occupancy is sample-and-hold player-time, not touches or pressure.
+The preview now uses the prototype's neutral/blue visual system and locally
+served Outfit/Jakarta fonts across Live, Story, Insights, Recap and evidence.
+Dedicated screens move the existing pitch into an optional watch dock; transport
+and renderer nodes are reused, never recreated by navigation. Chart/map canvases
+paint Go paths/cells with SVG fallback. Passing-map positions average elapsed
+completed-pass involvement locations. Soft heat shading is presentation only;
+source cell time, sample intervals and evidence remain available.
 Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
 
 ```
