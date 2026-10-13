@@ -14,12 +14,11 @@ Local Go/Python, recorded mode, both persona boundaries and desktop/mobile pitch
 and evidence checks passed. Azure What-If succeeded, with no deletions and no
 changes to the Foundry resources. This is not proof of a deployed cloud runtime.
 
-Next build route, pending team approval: a manual GitHub Actions workflow using
-an Azure federated identity restricted to this branch and `AcrPush` on this
-registry. Do not enable registry admin passwords or upload an Azure model key to
-GitHub. See [Microsoft's OIDC setup](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure-openid-connect).
-Only deploy after both image tags exist; then check public Go health, Go-to-Python
-recorded insight delivery and desktop/mobile browser playback on the public URL.
+The approved replacement is `.github/workflows/build-images.yml`, which uses an
+Azure federated identity restricted to this branch and `AcrPush` on this registry.
+It builds on GitHub, tests both containers and uploads commit-SHA tags. It cannot
+deploy hosting resources or access Foundry. Do not enable registry admin passwords
+or upload an Azure model key to GitHub. See [decision 0018](decisions/0018-passwordless-image-builds.md).
 
 ---
 
@@ -123,6 +122,25 @@ az acr create \
 ```
 
 ### 5. Build and Push Container Images to ACR
+
+For this Students subscription use the GitHub build workflow, not ACR Tasks:
+
+```powershell
+az deployment group create --resource-group pulse-hackathon --template-file infra/azure/github-build.bicep --parameters acrName=crpulsealexbf7b4530
+```
+
+Set GitHub secrets `PULSE_AZURE_CLIENT_ID`, `PULSE_AZURE_TENANT_ID` and
+`PULSE_AZURE_SUBSCRIPTION_ID` from its outputs, and repository variable
+`PULSE_ACR_NAME=crpulsealexbf7b4530`. These are identifiers, not passwords.
+Only the trusted branch can exchange an OIDC token for registry-push access.
+
+Runtime/container changes on `feat/meeting-readiness` trigger the build.
+Docs-only pushes do not. Manual dispatch requires the workflow to be reviewed
+into the default branch first; main is not merged as part of this deployment.
+Wait for **Build Azure Images** and **CI** to pass. Use that build's full source
+SHA for **both** `webImageTag` and `agentsImageTag` in steps 6 and 7.
+
+For other subscriptions with ACR Tasks enabled, the alternative is:
 ```bash
 az acr build --registry "$ACR_NAME" --image pulse-web:demo --file Dockerfile .
 az acr build --registry "$ACR_NAME" --image pulse-agents:demo --file agents/Dockerfile .
