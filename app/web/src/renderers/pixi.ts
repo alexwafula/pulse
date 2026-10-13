@@ -1,5 +1,5 @@
 import { Application, Container, Graphics, Text } from "pixi.js";
-import type { PitchRenderer, RenderPlayer, SceneState } from "./types";
+import type { ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
 
 export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Promise<PitchRenderer> {
   const app = new Application();
@@ -15,6 +15,9 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   const turf = new Graphics().rect(-4, -4, 113, 76).fill(0x174934);
   for (let i = 0; i < 10; i++) turf.rect(i * 10.5, 0, 10.5, 68).fill(i % 2 ? 0x286a49 : 0x246244);
   world.addChild(turf);
+  const control = new Graphics();
+  world.addChild(control);
+  let lastControl: ControlField | undefined;
   const lines = new Graphics();
   lines.rect(0, 0, 105, 68).moveTo(52.5, 0).lineTo(52.5, 68).circle(52.5, 34, 9.15);
   lines.rect(0, 13.84, 16.5, 40.32).rect(88.5, 13.84, 16.5, 40.32);
@@ -52,6 +55,19 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   resize();
   return {
     update(state) {
+      if (state.control !== lastControl) {
+        control.clear();
+        if (state.control) {
+          const field = state.control;
+          for (let row = 0; row < field.rows; row++) for (let col = 0; col < field.cols; col++) {
+            const value = field.values[row * field.cols + col];
+            const color = (value >= .5) === field.homeTeamGrid ? 0xf47761 : 0x48bed3;
+            control.rect(col * 105 / field.cols, 68 - (row + 1) * 68 / field.rows, 105 / field.cols, 68 / field.rows)
+              .fill({ color, alpha: Math.abs(value - .5) * .55 });
+          }
+        }
+        lastControl = state.control;
+      }
       for (const [id, point] of state.players) tokens.get(id)?.position.set(point.x, 68 - point.y);
       ball.position.set(state.ball.x, 68 - state.ball.y);
       path.clear();

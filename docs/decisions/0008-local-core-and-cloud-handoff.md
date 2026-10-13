@@ -39,9 +39,11 @@ cannot establish model compatibility, latency or verifier quality.
 
 Container Apps is the intended cloud handoff: Go external ingress, Python
 internal ingress in the same environment, managed-identity registry pulls and
-secret references. Container definitions are not runtime-tested because Docker
-and Azure CLI are absent. The Python HTTP server remains a demo adapter, not
-production-grade ASGI hosting.
+secret references. Azure CLI and Bicep are now installed, and the infrastructure
+template compiles locally. Docker container builds and live Azure deployment
+remain unverified. The Python HTTP server remains a demo adapter, not
+production-grade ASGI hosting. Template mode avoids model charges, not Azure
+hosting costs; minimum replicas, registry and logging need a budget.
 
 ## Checks and media
 
@@ -49,5 +51,14 @@ Go unit tests cover counts, cutoffs, attribution and deterministic variants.
 Python tests cover endpoint safety, mocked REST, cache/cap, rejection and retry.
 Thirty recorded agent cases exercise the canonical guard, not model accuracy.
 Chrome tests cover scenarios, metric rewind, audience switching, recap download,
-evidence navigation and desktop/mobile layout. Gallery PNGs are real screenshots
+evidence navigation and desktop/mobile layout. Replay recovery reloads the page
+from a Retry handler registered before the initial request, avoiding partial
+initialization and duplicate listeners. Browser regressions cover repeated HTTP
+and unsupported-schema failures, restored controls and the automated demo.
+Gallery PNGs are real screenshots
 of the local template-mode application; a final cloud/model demo video remains.
+
+The 2026-10-11 main sync preserves these fixes alongside the seeded simulator
+and metrics additions. `.gitattributes` pins scenario JSON and metric golden
+fixtures to LF so byte-for-byte checks agree on Windows and Linux. Expected
+fixture content is unchanged; Go tests and vet pass in the Windows checkout.

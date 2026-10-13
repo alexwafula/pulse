@@ -6,6 +6,51 @@ const defaultChrome = process.platform === "linux" ? "/usr/bin/chromium-browser"
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? defaultChrome, headless: true });
 try {
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    for (const failure of ["http", "schema"]) {
+      const recovery = await browser.newPage({ viewport });
+      const errors = [];
+      recovery.on("pageerror", error => errors.push(error.message));
+      let attempts = 0;
+      await recovery.route("**/api/replay?*", async route => {
+        attempts++;
+        if (attempts > 2) return route.continue();
+        await route.fulfill({
+          status: failure === "http" ? 503 : 200,
+          contentType: "application/json",
+          body: JSON.stringify({ schemaVersion: "unsupported", tracking: [] }),
+        });
+      });
+      await recovery.goto(`${url}/?view=svg`, { waitUntil: "networkidle" });
+      for (const expectedAttempts of [1, 2]) {
+        await recovery.locator("#pitch-error").waitFor({ state: "visible" });
+        assert.equal(attempts, expectedAttempts);
+        assert.equal(await recovery.locator("#play-button").isDisabled(), true);
+        assert.equal(await recovery.locator("#restart-button").isDisabled(), true);
+        assert.equal(await recovery.locator("#seek").isDisabled(), true);
+        const reloaded = recovery.waitForEvent("load");
+        await recovery.locator("#pitch-retry").click();
+        await reloaded;
+        await recovery.waitForFunction(() => document.querySelector("#pitch-error")?.hidden === false
+          || document.querySelector("#play-button")?.title === "Pause");
+      }
+      await recovery.waitForFunction(() => document.querySelector("#play-button")?.title === "Pause");
+      assert.equal(attempts, 3);
+      assert.equal(await recovery.locator("#pitch-error").isVisible(), false);
+      assert.equal(await recovery.locator("#pitch-loading").isVisible(), false);
+      assert.equal(await recovery.locator("#play-button").isDisabled(), false);
+      assert.equal(await recovery.locator("#restart-button").isDisabled(), false);
+      assert.equal(await recovery.locator("#seek").isDisabled(), false);
+      assert.equal(await recovery.locator("#event-list button").count(), 7);
+      assert.equal(await recovery.locator("#player-layer g").count(), 8);
+      await recovery.getByRole("button", { name: "Pause", exact: true }).click();
+      const paused = await recovery.locator("#match-clock").textContent();
+      await recovery.waitForTimeout(200);
+      assert.equal(await recovery.locator("#match-clock").textContent(), paused);
+      await recovery.getByRole("button", { name: "Play", exact: true }).click();
+      await recovery.waitForFunction(previous => document.querySelector("#match-clock")?.textContent !== previous, paused);
+      assert.deepEqual(errors, []);
+      await recovery.close();
+    }
     const page = await browser.newPage({ viewport, acceptDownloads: true });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
@@ -41,8 +86,12 @@ try {
     await page.getByRole("button", { name: "Pause", exact: true }).click();
     await seek("1000");
     assert.equal(await page.locator('.passing-snapshot:not([hidden]) .passing-links button').count(), 3);
+    await page.locator("#run-demo-button").click();
+    await page.waitForFunction(() => document.querySelector("#run-demo-button")?.getAttribute("aria-pressed") === "false", null, { timeout: 45000 });
+    assert.equal(await page.locator("#match-clock").textContent(), "28:00");
+    assert.equal(await page.locator("#recap-panel").isVisible(), true);
     assert.deepEqual(errors, []);
     await page.close();
   }
-  console.log("Scenarios, attack metrics/cutoff, persona switch, recap/evidence/download and responsive layout checked.");
+  console.log("Repeated HTTP/schema failures and retry recovery, scenarios, attack metrics/cutoff, persona switch, recap/evidence/download, automated demo and responsive layout checked.");
 } finally { await browser.close(); }

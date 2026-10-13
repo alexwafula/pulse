@@ -54,6 +54,21 @@ Internet              |   +------------+     internal HTTP    |
 
 ## Step-by-Step Deployment Commands (When Access Arrives)
 
+These steps create billable Azure resources. Template mode makes no paid model
+calls; it does not make Azure hosting free. ACR, image builds, Log Analytics
+and running Container Apps replicas can incur charges. The template keeps at
+least one replica of each app running by default.
+
+Confirm the subscription, region, permissions and budget before proceeding.
+Configure Azure Cost Management budget alerts; alerts do not automatically
+stop spending. Setting minimum replicas to zero can reduce idle compute costs,
+but adds cold starts and does not remove registry or logging costs.
+
+Microsoft references:
+[Container Apps billing](https://learn.microsoft.com/en-us/azure/container-apps/billing),
+[Container Registry pricing](https://azure.microsoft.com/en-us/pricing/details/container-registry/),
+[budget alerts](https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/tutorial-acm-create-budgets).
+
 ### 1. Authenticate and Configure Subscription
 ```bash
 az login
@@ -103,7 +118,7 @@ az deployment group what-if \
 
 ### 7. Provision Infrastructure via Bicep
 
-#### Option A: Zero-cost Deterministic Template Mode (Default)
+#### Option A: Deterministic Template Mode (No Model Charges)
 ```bash
 az deployment group create \
   --resource-group "$RESOURCE_GROUP" \

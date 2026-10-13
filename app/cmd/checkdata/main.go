@@ -53,6 +53,8 @@ func main() {
 	}
 	fmt.Printf("Total Tracking Frames: %d (spacing: 200 ms)\n", metrics.TotalFrames)
 	fmt.Printf("Duration:             %.1f s\n", metrics.DurationSec)
+	fmt.Printf("Events off 200ms grid: %d\n", metrics.EventsOffTrackingGrid)
+	fmt.Printf("Max event/frame gap:  %d ms\n", metrics.MaxEventFrameOffsetMS)
 	fmt.Printf("Max Player Speed:     %.2f m/s (cap: 7.5 m/s)\n", metrics.MaxPlayerSpeed)
 	fmt.Printf("Avg Player Speed:     %.2f m/s\n", metrics.AvgPlayerSpeed)
 	fmt.Printf("Max Ball Speed:       %.2f m/s (cap: 30.0 m/s)\n", metrics.MaxBallSpeed)

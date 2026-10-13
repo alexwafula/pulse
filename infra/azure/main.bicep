@@ -15,7 +15,7 @@ param webImageTag string = 'demo'
 @description('Tag of the pulse-agents image in ACR.')
 param agentsImageTag string = 'demo'
 
-@description('Agent operating mode. Default is zero-cost deterministic template.')
+@description('Agent operating mode. Template mode has no model charges; Azure hosting remains billable.')
 @allowed([
   'template'
   'foundry-shadow'
