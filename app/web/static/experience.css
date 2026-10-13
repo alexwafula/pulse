@@ -17,6 +17,11 @@ html:has(body.experience) { color-scheme: light; background: #ecedef; }
 .experience *, .experience *::before, .experience *::after { letter-spacing: 0; }
 .experience button, .experience select, .experience input { font-family: inherit; }
 .experience button:focus-visible, .experience a:focus-visible, .experience select:focus-visible { outline: 2px solid #2c5e77; outline-offset: 3px; }
+.experience .map-inspector { display: grid; gap: 10px; padding: 14px 0; border-bottom: var(--border-hairline); min-width: 0; }
+.experience .map-inspector label { display: grid; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.experience .map-inspector select { width: 100%; min-width: 0; max-width: 100%; min-height: 44px; background: #fff; border: var(--border-subtle); border-radius: 6px; padding: 8px; color: var(--text-primary); }
+.experience .map-inspector output { min-height: 36px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.experience .map-inspector-evidence { flex-wrap: wrap; }
 .experience h1, .experience h2, .experience h3, .experience h4 { font-family: var(--font-display); }
 .experience .stadium-backdrop { display: none; }
 .experience-nav { position: fixed; z-index: 30; inset: 0 auto 0 0; width: 236px; display: flex; flex-direction: column; padding: 22px 14px; gap: 38px; background: #ecedef; border-right: var(--border-hairline); }

@@ -1,5 +1,8 @@
+import { createElement, ListVideo } from "lucide";
+
 type Graphic = { canvas: HTMLCanvasElement; context: CanvasRenderingContext2D; svg: SVGSVGElement; host: HTMLElement };
 const number = (element: Element, attribute: string): number => Number(element.getAttribute(attribute));
+const mapSelections = new Map<string, string>();
 
 function field(ctx: CanvasRenderingContext2D): void {
   ctx.fillStyle = "#2e7a53"; ctx.fillRect(-2, -2, 109, 72);
@@ -75,38 +78,64 @@ function drawChart({context: ctx, svg, host}: Graphic): void {
   }
 }
 
-function mapInteraction(graphic: Graphic): void {
-  const {canvas, svg, host} = graphic;
+function mapInteraction(host: HTMLElement, svg: SVGSVGElement, canvas?: HTMLCanvasElement): () => void {
+  const inspector = host.closest(".experience-map")!.querySelector<HTMLElement>(".map-inspector")!;
+  const selection = inspector.querySelector<HTMLSelectElement>("select")!;
+  const detail = inspector.querySelector<HTMLOutputElement>("output")!;
+  const evidence = inspector.querySelector<HTMLElement>(".map-inspector-evidence")!;
+  const memoryKey = `${new URL(location.href).searchParams.get("scenario") ?? "corner"}/${svg.dataset.mapTeam}/${host.dataset.mapMode}`;
+  selection.value = mapSelections.get(memoryKey) ?? "";
+  function inspect(): void {
+    mapSelections.set(memoryKey, selection.value);
+    const option = selection.selectedOptions[0];
+    detail.textContent = option?.dataset.detail ?? "";
+    evidence.replaceChildren();
+    for (const eventId of (option?.dataset.evidence ?? "").split(" ").filter(Boolean)) {
+      const button = document.createElement("button"); button.type = "button";
+      button.className = "evidence-button"; button.dataset.inspectEvent = eventId;
+      button.title = `Inspect ${eventId}`;
+      const label = document.createElement("span"); label.textContent = eventId;
+      button.append(createElement(ListVideo), label); evidence.append(button);
+    }
+  }
+  inspect();
+  selection.addEventListener("change", inspect);
+  if (!canvas) return () => selection.removeEventListener("change", inspect);
+  const surface = canvas;
   const tooltip = document.createElement("span"); tooltip.className = "graphic-tooltip"; tooltip.hidden = true;
   tooltip.setAttribute("role","tooltip"); host.append(tooltip);
-  let selectedEvent: string | undefined;
-  canvas.addEventListener("pointermove", event => {
-    const bounds = canvas.getBoundingClientRect();
+  function hit(event: MouseEvent): SVGElement | undefined {
+    const bounds = surface.getBoundingClientRect();
     const x = (event.clientX-bounds.left)/bounds.width*109-2;
     const y = (event.clientY-bounds.top)/bounds.height*72-2;
-    let text: string | undefined; selectedEvent = undefined;
     if (host.dataset.mapMode === "occupancy") {
-      const cell = Array.from(svg.querySelectorAll<SVGRectElement>(".heat-cells rect")).find(cell => x >= number(cell,"x") && x < number(cell,"x")+5 && y >= number(cell,"y") && y < number(cell,"y")+4);
-      text = cell?.querySelector("title")?.textContent ?? undefined;
+      return Array.from(svg.querySelectorAll<SVGRectElement>(".heat-cells rect")).find(cell => x >= number(cell,"x") && x < number(cell,"x")+5 && y >= number(cell,"y") && y < number(cell,"y")+4);
     } else if (host.dataset.mapMode === "network") {
-      const node = Array.from(svg.querySelectorAll<SVGGElement>(".network-node")).find(node => Math.hypot(x-number(node,"data-x"),y-number(node,"data-y")) <= number(node,"data-radius"));
-      text = node?.querySelector("title")?.textContent ?? undefined;
+      return Array.from(svg.querySelectorAll<SVGGElement>(".network-node")).find(node => Math.hypot(x-number(node,"data-x"),y-number(node,"data-y")) <= Math.max(3,number(node,"data-radius")));
     } else {
-      const point = Array.from(svg.querySelectorAll<SVGCircleElement>(".shot-points circle")).find(point => Math.hypot(x-number(point,"cx"),y-number(point,"cy")) <= 3);
-      text = point?.querySelector("title")?.textContent ?? undefined;
-      selectedEvent = point?.dataset.shotEvent;
+      return Array.from(svg.querySelectorAll<SVGCircleElement>(".shot-points circle")).find(point => Math.hypot(x-number(point,"cx"),y-number(point,"cy")) <= 3);
     }
+  }
+  const move = (event: PointerEvent): void => {
+    const element = hit(event), text = element?.querySelector("title")?.textContent;
     tooltip.hidden = !text; tooltip.textContent = text ?? "";
-    canvas.style.cursor = selectedEvent ? "pointer" : "default";
-  });
-  canvas.addEventListener("pointerleave", () => { tooltip.hidden = true; selectedEvent = undefined; });
-  canvas.addEventListener("click", event => {
-    if (host.dataset.mapMode !== "shots") return;
-    const bounds = canvas.getBoundingClientRect();
-    const x = (event.clientX-bounds.left)/bounds.width*109-2, y = (event.clientY-bounds.top)/bounds.height*72-2;
-    const point = Array.from(svg.querySelectorAll<SVGCircleElement>(".shot-points circle")).find(point => Math.hypot(x-number(point,"cx"),y-number(point,"cy")) <= 3);
-    if (point?.dataset.shotEvent) document.dispatchEvent(new CustomEvent("pulse:map-inspect", {detail: {eventId: point.dataset.shotEvent}}));
-  });
+    canvas.style.cursor = element ? "pointer" : "default";
+  };
+  const leave = (): void => { tooltip.hidden = true; };
+  const click = (event: MouseEvent): void => {
+    const element = hit(event);
+    if (!element) return;
+    selection.value = element.dataset.mapKey!;
+    inspect();
+    if (element.dataset.shotEvent) document.dispatchEvent(new CustomEvent("pulse:map-inspect", {detail: {eventId: element.dataset.shotEvent}}));
+  };
+  canvas.addEventListener("pointermove", move);
+  canvas.addEventListener("pointerleave", leave);
+  canvas.addEventListener("click", click);
+  return () => {
+    selection.removeEventListener("change", inspect); tooltip.remove();
+    canvas.removeEventListener("pointermove", move); canvas.removeEventListener("pointerleave", leave); canvas.removeEventListener("click", click);
+  };
 }
 
 // Repaint only presentation paths/cells supplied by Go. No football calculations.
@@ -115,7 +144,10 @@ export function paintExperienceGraphics(root: HTMLElement): () => void {
   for (const host of root.querySelectorAll<HTMLElement>(".chart-art, .map-art")) {
     const svg = host.querySelector<SVGSVGElement>("svg")!;
     const canvas = document.createElement("canvas"), context = canvas.getContext("2d");
-    if (!context || typeof Path2D === "undefined") continue;
+    if (!context || typeof Path2D === "undefined") {
+      if (host.classList.contains("map-art")) cleanups.push(mapInteraction(host, svg));
+      continue;
+    }
     canvas.className = "experience-graphic";
     canvas.setAttribute("role","img"); canvas.setAttribute("aria-label",svg.getAttribute("aria-label")!);
     canvas.dataset.graphic = host.classList.contains("map-art") ? "map" : "chart";
@@ -135,7 +167,7 @@ export function paintExperienceGraphics(root: HTMLElement): () => void {
     host.append(canvas); svg.style.visibility = "hidden";
     const smoothingNote = host.closest(".experience-map")?.querySelector<HTMLElement>(".smoothed-note");
     if (smoothingNote) smoothingNote.hidden = false;
-    if (canvas.dataset.graphic === "map") mapInteraction(graphic);
+    if (canvas.dataset.graphic === "map") cleanups.push(mapInteraction(host, svg, canvas));
     const observer = new ResizeObserver(draw); observer.observe(host); draw();
     void document.fonts.ready.then(draw);
     cleanups.push(() => { observer.disconnect(); canvas.remove(); host.querySelector(".graphic-tooltip")?.remove(); svg.style.visibility = ""; if (smoothingNote) smoothingNote.hidden = true; });

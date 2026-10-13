@@ -257,6 +257,15 @@ func TestPitchNetworkUsesCompletedPassSourcePositions(t *testing.T) {
 			}
 			for _, node := range nodes {
 				count := counts[node.ID]
+				var involved []string
+				for _, event := range replay.Events {
+					if event.TimeMS <= at && event.TeamID == team.ID && event.Type == "PASS" && event.Outcome == "COMPLETE" && (event.ActorID == node.ID || event.RecipientID == node.ID) {
+						involved = append(involved, event.ID)
+					}
+				}
+				if node.Evidence != strings.Join(involved, " ") {
+					t.Fatal("player inspection cites unrelated or future evidence")
+				}
 				if node.Count != count || math.Abs(node.X-xs[node.ID]/float64(count)) > 1e-9 || math.Abs(node.Y-(68-ys[node.ID]/float64(count))) > 1e-9 {
 					t.Fatalf("incorrect source average: %+v", node)
 				}

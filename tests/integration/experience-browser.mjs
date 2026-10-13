@@ -80,11 +80,41 @@ async function storyAndMaps(page, replay, mobile) {
     if (r > 150 && g > 130 && b < g * .8) warmCells++;
   }
   assert.ok(warmCells > 30, "heatmap cells must visibly render over the pitch");
+  const heatTarget = await page.locator(".heat-cells rect").first().evaluate(cell => ({
+    x: Number(cell.getAttribute("x")) + 2.5, y: Number(cell.getAttribute("y")) + 2,
+    key: cell.dataset.mapKey, text: cell.querySelector("title").textContent
+  }));
+  const tapMap = async target => {
+    await page.locator('[data-graphic="map"]').evaluate(canvas => canvas.scrollIntoView({block:"center"}));
+    const bounds = await page.locator('[data-graphic="map"]').boundingBox();
+    const x = bounds.x + (target.x + 2) / 109 * bounds.width, y = bounds.y + (target.y + 2) / 72 * bounds.height;
+    if (mobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
+  };
+  await tapMap(heatTarget);
+  assert.equal(await page.locator("#map-selection").inputValue(), heatTarget.key);
+  assert.equal(await page.locator("#map-detail").textContent(), heatTarget.text);
+  assert.equal(await page.locator(".map-inspector-evidence button").count(), 0, "occupancy must not invent event evidence");
+  await page.locator("#map-selection").focus();
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowDown");
+  assert.notEqual(await page.locator("#map-selection").inputValue(), "", "heat cells must be keyboard selectable");
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-charts-heatmap.png`), fullPage: true });
   await page.getByRole("button", { name: "Pass network", exact: true }).click();
   await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "network");
   assert.ok(await page.locator(".network-node").count() > 0);
   assert.ok(await page.locator(".network-evidence [data-inspect-event]").count() > 0);
+  const nodeTarget = await page.locator(".network-node").first().evaluate(node => ({
+    x: Number(node.dataset.x), y: Number(node.dataset.y), key: node.dataset.mapKey,
+    id: node.dataset.playerId, text: node.querySelector("title").textContent
+  }));
+  await tapMap(nodeTarget);
+  assert.equal(await page.locator("#map-selection").inputValue(), nodeTarget.key);
+  assert.equal(await page.locator("#map-detail").textContent(), nodeTarget.text);
+  const playerEvidence = elapsed.filter(event => event.teamId === replay.match.teams[1].id && event.type === "PASS" && event.outcome === "COMPLETE" && (event.actorId === nodeTarget.id || event.recipientId === nodeTarget.id));
+  assert.deepEqual(await page.locator(".map-inspector-evidence [data-inspect-event]").evaluateAll(items => items.map(item => item.dataset.inspectEvent)), playerEvidence.map(event => event.id));
+  await page.locator("#map-selection").focus();
+  await page.keyboard.press("End");
+  assert.notEqual(await page.locator("#map-detail").textContent(), "", "network inspection must be keyboard accessible");
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-pitch-network.png`), fullPage: true });
   await page.getByRole("button", { name: "Heatmap", exact: true }).click();
   await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "occupancy");
@@ -279,6 +309,14 @@ try {
   const analyst = await (await cuePage.request.get(`${base}/api/insights?scenario=corner&persona=ANALYST`)).json();
   await cuePage.getByRole("button", { name: "Analyst", exact: true }).click();
   await cuePage.waitForFunction(text => document.querySelector("#insight-text")?.textContent === text, analyst.cues[0].text);
+  const verifiedFeed = structuredClone(analyst);
+  verifiedFeed.cues[0].text = "The corner-to-shot window contains 1 shot.";
+  verifiedFeed.cues[0].verification.status = "VERIFIED";
+  await cuePage.route("**/api/insights?**", route => route.fulfill({ contentType: "application/json", body: JSON.stringify(verifiedFeed) }));
+  await cuePage.reload({waitUntil:"networkidle"});
+  await pause(cuePage); await seek(cuePage,1000);
+  await cuePage.waitForFunction(() => document.querySelector("#insight-status")?.textContent === "Verified");
+  assert.equal(await cuePage.locator("#insight-text").textContent(), verifiedFeed.cues[0].text, "browser must label verified cues from the supplied status, not as templates");
   assert.deepEqual(errors, []);
   const fallback = await browser.newPage({ viewport: {width: 390, height: 844} });
   fallback.on("pageerror",error => errors.push(error.message));
@@ -296,6 +334,8 @@ try {
   await fallback.getByRole("button",{name:"Pitch maps",exact:true}).click();
   assert.ok(await fallback.locator(".pitch-map").isVisible(),"failed canvas must retain the Go-rendered map");
   assert.ok(await fallback.locator(".smoothed-note").isHidden(),"fallback grid must not claim smoothing");
+  await fallback.locator("#map-selection").selectOption({index:1});
+  assert.notEqual(await fallback.locator("#map-detail").textContent(), "", "inspection must work without Canvas 2D");
   await fallback.screenshot({path:path.join(output,"mobile-prototype-svg-fallback.png"),fullPage:true});
   await fallback.close();
   assert.deepEqual(errors,[]);

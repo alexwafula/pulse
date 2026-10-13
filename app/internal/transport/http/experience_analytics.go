@@ -24,6 +24,8 @@ type chartCount struct {
 type heatCell struct {
 	X, Y, Opacity float64
 	Seconds       string
+	SourceY       float64
+	Detail        string
 }
 
 type shotPoint struct {
@@ -33,6 +35,7 @@ type shotPoint struct {
 
 type mapNetworkNode struct {
 	ID, Name      string
+	Evidence      string
 	Number, Count int
 	X, Y, Radius  float64
 }
@@ -103,8 +106,11 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 			if value == 0 {
 				continue
 			}
-			view.Cells = append(view.Cells, heatCell{X: float64(i%grid.Cols) * 5, Y: 68 - float64(i/grid.Cols+1)*4,
-				Opacity: 0.15 + 0.8*float64(value)/float64(grid.MaxPlayerMS), Seconds: fmt.Sprintf("%.1f", float64(value)/1000)})
+			x, y := float64(i%grid.Cols)*5, float64(i/grid.Cols)*4
+			seconds := fmt.Sprintf("%.1f", float64(value)/1000)
+			view.Cells = append(view.Cells, heatCell{X: x, Y: 68 - y - 4, SourceY: y,
+				Opacity: 0.15 + 0.8*float64(value)/float64(grid.MaxPlayerMS), Seconds: seconds,
+				Detail: fmt.Sprintf("x %.0f-%.0f m, y %.0f-%.0f m: %s player-seconds", x, x+5, y, y+4, seconds)})
 		}
 	}
 	players := make(map[string]string)
@@ -128,6 +134,7 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 func pitchNetwork(replay domain.Replay, at int64, teamID string) ([]mapNetworkNode, []mapNetworkEdge) {
 	positions := make(map[string]domain.Point)
 	counts := make(map[string]int)
+	evidence := make(map[string][]string)
 	type pair struct{ from, to string }
 	links := make(map[pair][]string)
 	order := []pair{}
@@ -147,6 +154,7 @@ func pitchNetwork(replay domain.Replay, at int64, teamID string) ([]mapNetworkNo
 			position.Y += involvement.point.Y
 			positions[involvement.id] = position
 			counts[involvement.id]++
+			evidence[involvement.id] = append(evidence[involvement.id], event.ID)
 		}
 		key := pair{event.ActorID, event.RecipientID}
 		if len(links[key]) == 0 {
@@ -167,7 +175,8 @@ func pitchNetwork(replay domain.Replay, at int64, teamID string) ([]mapNetworkNo
 		}
 		position := positions[player.ID]
 		node := mapNetworkNode{ID: player.ID, Name: player.Name, Number: player.Number, Count: count,
-			X: position.X / float64(count), Y: 68 - position.Y/float64(count), Radius: 1.6 + 1.6*math.Sqrt(float64(count)/float64(maximum))}
+			Evidence: strings.Join(evidence[player.ID], " "),
+			X:        position.X / float64(count), Y: 68 - position.Y/float64(count), Radius: 1.6 + 1.6*math.Sqrt(float64(count)/float64(maximum))}
 		nodes = append(nodes, node)
 		lookup[player.ID] = node
 	}

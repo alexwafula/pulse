@@ -38,7 +38,10 @@ func TestCornerPacks(t *testing.T) {
 		{"no shot", func(r *domain.Replay) { r.Events[6].Type = "CARRY" }},
 		{"late shot", func(r *domain.Replay) { r.Events[5].TimeMS = 1663000 }},
 		{"phase changed", func(r *domain.Replay) { r.Events[6].PhaseID = "other-phase" }},
-		{"opponent shot", func(r *domain.Replay) { r.Events[6].TeamID = "bastion"; r.Events[6].ActorID = "bastion-2" }},
+		{"opponent shot", func(r *domain.Replay) {
+			r.Events[6].TeamID = r.Events[4].TeamID
+			r.Events[6].ActorID = r.Events[4].ActorID
+		}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := load()
@@ -55,7 +58,7 @@ func TestCornerPacks(t *testing.T) {
 	opponent.ID = "evt-opponent-touch"
 	opponent.Type = "CARRY"
 	opponent.TeamID = "bastion"
-	opponent.ActorID = "bastion-2"
+	opponent.ActorID = r.Events[4].ActorID
 	opponent.TimeMS = 1674000
 	r.Events = append(r.Events[:6], opponent, r.Events[6])
 	broken, err := CornerPacks(r)

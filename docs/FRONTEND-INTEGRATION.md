@@ -17,6 +17,11 @@ or clock is created. `section=story|insights|recap` opens a screen directly.
 
 ## Start and contribute
 
+Windows: `.\scripts\start-local.ps1` starts both services in template mode,
+selects unused ports and prints their URLs/PIDs/logs. Committed browser assets
+can be used with `-SkipWebBuild`. Full meeting checklist:
+[collaborator meeting](COLLABORATOR-MEETING.md).
+
 ```powershell
 git switch feat/experience-integration
 npm ci
@@ -191,6 +196,17 @@ restores them on Live. Avoid cached parent assumptions. Map canvases dispatch
 `pulse:map-inspect` with `{ eventId }`, which navigation turns into the existing
 `pulse:inspect` command. Canvas observers are disposed on each HTMX swap; SVG and
 source evidence buttons remain the fallback. Do not calculate football in canvas.
+
+Map cells and passing players now support touch/click selection plus the native
+`#map-selection` selector. `#map-detail` announces the selected source detail;
+passing-player evidence comes from elapsed completed-pass involvements in Go.
+Heatmap cells carry player-time only and must never fabricate event evidence.
+Selection is scoped by scenario/team/map and cleared when rewinding removes it.
+These selectors and evidence controls remain usable with the SVG fallback.
+
+Cue status is sourced from `verification.status`: VERIFIED is shown as Verified,
+FALLBACK_TEMPLATE as Template. The opt-in agent publishing policy remains narrow;
+do not relabel deterministic source summaries as AI output.
 
 `SceneState.timeMs` and `velocities` are presentation inputs from adjacent replay
 tracking frames, not shared-contract changes or new statistics. Character roots
