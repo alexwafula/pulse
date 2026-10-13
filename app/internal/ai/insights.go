@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -78,6 +79,9 @@ func RequestWithMode(ctx context.Context, endpoint string, pack domain.FactPack,
 		return domain.InsightResponse{}, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if token := os.Getenv("PULSE_AGENT_AUTH_TOKEN"); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
 	client := &http.Client{Timeout: 20 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {

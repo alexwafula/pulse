@@ -2,6 +2,7 @@
 
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import hmac
 import json
 import logging
 import os
@@ -40,6 +41,17 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != "/insights":
             self.send_json(404, {"error": "Not found"})
             return
+        token = getattr(self.server, "auth_token", "")
+        if token and not hmac.compare_digest(self.headers.get("Authorization", "").encode(), f"Bearer {token}".encode()):
+            # Drain bounded bytes, without decoding, to avoid an HTTP/TCP reset.
+            try:
+                length = min(max(int(self.headers.get("Content-Length", "0")), 0), 65536)
+                self.rfile.read(length)
+            except (ValueError, OSError):
+                pass
+            self.send_json(401, {"error": "Unauthorized"})
+            self.close_connection = True
+            return
         if self.headers.get_content_type() != "application/json":
             self.send_json(415, {"error": "Expected application/json"})
             return
@@ -69,7 +81,13 @@ def main() -> None:
     parser.add_argument("--mode", choices=("template", "recorded", "foundry-shadow", "foundry"), default=os.getenv("PULSE_AGENT_MODE", "template"))
     parser.add_argument("--recordings", default=os.getenv("PULSE_RECORDINGS_DIR", "agents/recordings"))
     args = parser.parse_args()
+    token = os.getenv("PULSE_AGENT_AUTH_TOKEN", "")
+    if os.getenv("PULSE_REQUIRE_AUTH") == "1" and not token:
+        raise ValueError("PULSE_AGENT_AUTH_TOKEN is required for protected hosting")
+    if token and (len(token) != 64 or any(char not in "0123456789abcdef" for char in token)):
+        raise ValueError("Service auth token must contain 64 lowercase hex characters")
     with ThreadingHTTPServer((args.host, args.port), Handler) as server:
+        server.auth_token = token
         logging.basicConfig(level=logging.INFO, format="%(message)s")
         backend = None
         recordings = None

@@ -8,6 +8,9 @@ import { chromium } from "playwright-core";
 const require = createRequire(import.meta.url);
 const { PNG } = require(path.join(path.dirname(require.resolve("playwright-core/package.json")), "lib/utilsBundle.js"));
 const base = process.env.PULSE_URL ?? "http://127.0.0.1:8080";
+const source = process.env.PULSE_INSIGHT_SOURCE ?? "python-template";
+assert.ok(["python-template", "python-recorded"].includes(source), "Use a template or recorded service; this suite must not generate paid workflows.");
+const cornerStatus = source === "python-recorded" ? "Verified (recorded)" : "Template";
 const executablePath = process.env.CHROME_PATH ?? (process.platform === "linux" ? "/usr/bin/chromium-browser" : "C:/Program Files/Google/Chrome/Application/chrome.exe");
 const output = process.env.PULSE_SCREENSHOTS ?? path.join(os.tmpdir(), "pulse-experience-preview");
 fs.mkdirSync(output, { recursive: true });
@@ -302,7 +305,7 @@ try {
   cuePage.on("pageerror", error => errors.push(error.message));
   await cuePage.goto(`${base}/experience?scenario=corner&view=svg`, { waitUntil: "networkidle" });
   await pause(cuePage); await seek(cuePage, 1000);
-  await cuePage.waitForFunction(() => document.querySelector("#insight-status")?.textContent === "Template");
+  await cuePage.waitForFunction(expected => document.querySelector("#insight-status")?.textContent === expected, cornerStatus);
   await cuePage.locator("#evidence-button").click();
   assert.ok(await cuePage.locator("#evidence-return").isVisible());
   await cuePage.locator("#evidence-return").click();

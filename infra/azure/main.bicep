@@ -34,6 +34,10 @@ param foundryDeployment string = ''
 @secure()
 param foundryApiKey string = ''
 
+@description('Generated Go-to-Python service token (64 lowercase hex characters). Required for a healthy protected deployment; never a Foundry key.')
+@secure()
+param agentAuthToken string = ''
+
 @description('Maximum paid model workflows allowed per service process; resets on restart.')
 param modelRequestCap int = 0
 
@@ -119,14 +123,32 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
 
 var hasFoundryKey = !empty(foundryApiKey)
 
-var agentSecrets = hasFoundryKey ? [
+var serviceSecrets = !empty(agentAuthToken) ? [
+  {
+    name: 'agent-auth'
+    value: agentAuthToken
+  }
+] : []
+
+var serviceAuthEnv = !empty(agentAuthToken) ? [
+  {
+    name: 'PULSE_AGENT_AUTH_TOKEN'
+    secretRef: 'agent-auth'
+  }
+] : []
+
+var agentSecrets = concat(serviceSecrets, hasFoundryKey ? [
   {
     name: 'foundry-key'
     value: foundryApiKey
   }
-] : []
+] : [])
 
 var agentBaseEnv = [
+  {
+    name: 'PULSE_REQUIRE_AUTH'
+    value: '1'
+  }
   {
     name: 'PULSE_AGENT_MODE'
     value: agentMode
@@ -161,7 +183,7 @@ var agentFoundryEnv = hasFoundryKey ? [
   }
 ] : [])
 
-var agentEnv = concat(agentBaseEnv, agentFoundryEnv)
+var agentEnv = concat(agentBaseEnv, agentFoundryEnv, serviceAuthEnv)
 
 // 5. Container App: pulse-agents (Internal HTTP Ingress on port 8090)
 resource agentsApp 'Microsoft.App/containerApps@2024-03-01' = {
@@ -253,6 +275,7 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: containerAppEnv.id
     configuration: {
+      secrets: serviceSecrets
       activeRevisionsMode: 'Single'
       ingress: {
         external: true
@@ -275,12 +298,12 @@ resource webApp 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json(cpuCore)
             memory: memorySize
           }
-          env: [
+          env: concat([
             {
               name: 'PULSE_AGENTS_URL'
               value: 'https://${agentsApp.properties.configuration.ingress.fqdn}'
             }
-          ]
+          ], serviceAuthEnv)
           probes: [
             {
               type: 'Liveness'
