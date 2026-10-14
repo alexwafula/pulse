@@ -36,11 +36,13 @@ async function uniqueControls(page) {
     widgets:[...select.parentElement.children].filter(element=>element.matches(".select2-container")).length,
     siblings:[...select.parentElement.children].filter(element=>element.matches("select:not([hidden])")).length,
     enhanced:select.nextElementSibling?.matches(".select2-container"),
+    label:select.nextElementSibling?.querySelector('[role="combobox"]')?.getAttribute("aria-label"),
   })));
   for (const control of controls) {
     assert.equal(control.display,"none",`Native ${control.id} must not be visible alongside Select2`);
     assert.equal(control.hidden,"true");
     assert.equal(control.enhanced,true);
+    assert.ok(control.label?.length>0&&control.label.length<80,`Concise field label for ${control.id}, not the option list`);
     assert.equal(control.widgets,control.siblings,`Exactly one widget per select in ${control.id}`);
   }
 }

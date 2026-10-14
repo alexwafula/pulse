@@ -34,7 +34,9 @@ export function enhanceSelects(root: ParentNode = document): void {
     };
     $(select).select2(options);
     const selection = select.nextElementSibling?.querySelector<HTMLElement>("[role=combobox]");
-    selection?.setAttribute("aria-label", select.getAttribute("aria-label") ?? select.closest("label")?.textContent?.trim() ?? select.id);
+    const label = select.labels?.[0]?.cloneNode(true) as HTMLElement | undefined;
+    label?.querySelectorAll("select,.select2-container").forEach(element => element.remove());
+    selection?.setAttribute("aria-label", select.getAttribute("aria-label") ?? label?.textContent?.trim() ?? select.id);
     if (select.hasAttribute("aria-describedby")) selection?.setAttribute("aria-describedby", select.getAttribute("aria-describedby")!);
     $(select).on("select2:opening", () => {
       if (opened && opened !== select) $(opened).select2("close");
