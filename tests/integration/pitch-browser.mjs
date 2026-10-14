@@ -12,7 +12,7 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   const pageErrors = [];
   desktop.on("pageerror", (error) => pageErrors.push(error.message));
-  await desktop.goto(url, { waitUntil: "networkidle" });
+  await desktop.goto(`${url}/legacy`, { waitUntil: "networkidle" });
   const replay = await (await desktop.request.get(`${url}/api/replay`)).json();
   assert.equal(replay.schemaVersion, "2.0.0");
   assert.equal(replay.events[0].type, "PASS");
@@ -87,7 +87,7 @@ try {
   assert.equal(await desktop.locator("#action-result").isVisible(), false);
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
-  await mobile.goto(url, { waitUntil: "networkidle" });
+  await mobile.goto(`${url}/legacy`, { waitUntil: "networkidle" });
   await mobile.getByRole("button", { name: "Pause" }).click();
   await mobile.locator("#seek").evaluate((input) => {
     input.value = "450";
@@ -106,7 +106,7 @@ try {
       const page = await browser.newPage({ viewport });
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
-      await page.goto(`${url}/?view=${mode}`, { waitUntil: "networkidle" });
+      await page.goto(`${url}/legacy?view=${mode}`, { waitUntil: "networkidle" });
       await page.waitForFunction((view) => document.querySelector(".pitch-shell")?.getAttribute("data-renderer") === view, mode);
       const canvas = page.locator("#canvas-host canvas");
       assert.equal(await canvas.count(), 1);
@@ -163,7 +163,7 @@ try {
       return original.call(this, kind, ...args);
     };
   });
-  await fallback.goto(`${url}/?view=three`, { waitUntil: "networkidle" });
+  await fallback.goto(`${url}/legacy?view=three`, { waitUntil: "networkidle" });
   await fallback.waitForFunction(() => document.querySelector(".pitch-shell")?.getAttribute("data-renderer") === "svg");
   assert.equal(await fallback.locator("#pitch").isVisible(), true);
   assert.match(await fallback.locator("#renderer-status").textContent(), /SVG view is active/);

@@ -18,14 +18,14 @@
 <body{{if .Experience}} class="experience" data-section="live"{{end}}>
   {{if .Experience}}
   <nav class="experience-nav" aria-label="Match workspace">
-    <a class="experience-brand" href="/experience?scenario={{.Scenario}}"><i data-lucide="activity"></i><span>Pulse</span></a>
+    <a class="experience-brand" href="/?scenario={{.Scenario}}"><i data-lucide="activity"></i><span>Pulse</span></a>
     <div class="experience-navigation">
       <button type="button" data-section="live" aria-label="Live" title="Live" aria-current="page"><i data-lucide="radio"></i><span>Live</span></button>
       <button type="button" data-section="story" aria-label="Story" title="Story"><i data-lucide="book-open"></i><span>Story</span></button>
       <button type="button" data-section="insights" aria-label="Insights" title="Insights"><i data-lucide="chart-no-axes-combined"></i><span>Insights</span></button>
       <button type="button" data-section="recap" aria-label="Recap" title="Recap"><i data-lucide="file-text"></i><span>Recap</span></button>
     </div>
-    <a class="dashboard-link" href="/?scenario={{.Scenario}}" title="Open the original dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+    <a class="dashboard-link" href="/legacy?scenario={{.Scenario}}" title="Open the legacy dashboard"><i data-lucide="layout-dashboard"></i><span>Legacy</span></a>
   </nav>
   {{end}}
   <!-- PROCEDURAL BACKDROP (No photos, pure dark stadium glow & architectural stands) -->

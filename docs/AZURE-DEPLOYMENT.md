@@ -2,10 +2,10 @@
 
 This runbook documents the declarative infrastructure-as-code (Bicep) deployment for Pulse on Azure Container Apps.
 
-> **Status (2026-10-13)**: Go and Python are deployed in South Africa North.
-> [Open the public demo](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three).
-> The final image source is `2cd09b9ae0164bfdb4d204e08d3889def92c7a20`; image builds,
-> full CI, authenticated delivery and public desktop/mobile checks passed.
+> Go and Python are deployed in South Africa North.
+> [Open the public demo](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/).
+> Main releases automatically run CI, container smoke checks, image publication
+> and image-only updates of the two existing apps.
 
 See [live deployment status](AZURE-LIVE-STATUS.md) for exact resources, image
 digests and remaining checks. ACR Tasks failed with `TasksOperationsNotAllowed`;
@@ -13,10 +13,11 @@ GitHub built the images instead. Azure's first Go create returned an identity
 bootstrap 500; the identical retry succeeded. No Foundry resources were replaced.
 
 The approved replacement is `.github/workflows/build-images.yml`, which uses an
-Azure federated identity restricted to this branch and `AcrPush` on this registry.
-It builds on GitHub, tests both containers and uploads commit-SHA tags. It cannot
-deploy hosting resources or access Foundry. Do not enable registry admin passwords
-or upload an Azure model key to GitHub. See [decision 0018](decisions/0018-passwordless-image-builds.md).
+Azure federated publisher identity restricted to main and `AcrPush` on this registry.
+It builds on GitHub, tests both containers and uploads commit-SHA tags. A separate
+main-only identity can update the two existing apps; neither identity accesses
+Foundry. Do not enable registry admin passwords or upload an Azure model key to
+GitHub. See [decision 0020](decisions/0020-main-release-and-default-experience.md).
 
 ---
 
@@ -54,7 +55,7 @@ Internet              |   +------------+     internal HTTP    |
 
 1. **Networking**:
    - `pulse-web`: External HTTP ingress on port 8080 (publicly routable).
-   - `pulse-agents`: Internal HTTP ingress on port 8090 (only reachable within the ACA environment).
+   - `pulse-agents`: Configured internal HTTP ingress on port 8090; direct reachability was observed, so service authentication is mandatory. Network isolation remains unverified.
    - `PULSE_AGENTS_URL` dynamically configured via Bicep referencing the agents app FQDN.
 2. **Security**:
    - Zero-credential container pulls via User-Assigned Managed Identity assigned the `AcrPull` RBAC role.
@@ -131,18 +132,28 @@ For this Students subscription use the GitHub build workflow, not ACR Tasks:
 
 ```powershell
 az deployment group create --resource-group pulse-hackathon --template-file infra/azure/github-build.bicep --parameters acrName=crpulsealexbf7b4530
+az deployment group create --resource-group pulse-hackathon --template-file infra/azure/github-deploy.bicep
 ```
 
 Set GitHub secrets `PULSE_AZURE_CLIENT_ID`, `PULSE_AZURE_TENANT_ID` and
 `PULSE_AZURE_SUBSCRIPTION_ID` from its outputs, and repository variable
 `PULSE_ACR_NAME=crpulsealexbf7b4530`. These are identifiers, not passwords.
-Only the trusted branch can exchange an OIDC token for registry-push access.
+Set `PULSE_AZURE_DEPLOY_CLIENT_ID` from the deployment identity's `clientId` output.
+Only exact main-branch OIDC subjects can exchange tokens. The publisher has
+registry-scoped `AcrPush`; the deployer has Container Apps Contributor on the two
+apps and Reader on their environment. Remove obsolete feature-branch federation
+after confirming main trust. No client password or model key is used.
 
-Runtime/container changes on `feat/meeting-readiness` trigger the build.
-Docs-only pushes do not. Manual dispatch requires the workflow to be reviewed
-into the default branch first; main is not merged as part of this deployment.
-Wait for **Build Azure Images** and **CI** to pass. Use that build's full source
-SHA for **both** `webImageTag` and `agentsImageTag` in steps 6 and 7.
+Pushes to `main` trigger **Build Azure Images**. It calls the full reusable CI
+gate, builds both images, checks authenticated Go/Python delivery and the
+desktop/mobile homepage, then pushes commit-SHA tags. A non-superseded release
+updates Python and Go to those tags and checks the public APIs. Image-only updates
+preserve service secrets, recorded mode, model cap and replica limits. Manual
+dispatch is supported on main. Feature branches and PRs never deploy.
+
+For existing hosting this workflow replaces manual steps 6 and 7. Those steps
+remain for initial infrastructure provisioning or an explicitly reviewed
+configuration change; use the tested build's full SHA for both image tags.
 
 For other subscriptions with ACR Tasks enabled, the alternative is:
 ```bash

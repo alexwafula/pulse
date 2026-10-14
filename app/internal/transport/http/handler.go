@@ -184,7 +184,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		w.Write([]byte("ok"))
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" && r.URL.Path != "/experience" {
+		if r.URL.Path != "/" && r.URL.Path != "/experience" && r.URL.Path != "/legacy" {
 			http.NotFound(w, r)
 			return
 		}
@@ -195,7 +195,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		data := view
-		data.Experience = r.URL.Path == "/experience"
+		data.Experience = r.URL.Path != "/legacy"
 		if err := page.Execute(w, data); err != nil {
 			return
 		}

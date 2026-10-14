@@ -29,7 +29,7 @@ function summaryAt(replay, clock) {
 try {
   for (const scenario of ["corner", "central", "exchange", "late-siege", "calm-midfield"]) {
     const page = await newPage({ width: 1440, height: 900 });
-    await page.goto(`${url}/?scenario=${scenario}&view=svg`, { waitUntil: "networkidle" });
+    await page.goto(`${url}/legacy?scenario=${scenario}&view=svg`, { waitUntil: "networkidle" });
     await pause(page);
     const replay = await data(page, "/api/replay", scenario);
     assert.deepEqual(await page.locator(".team-name-text").allTextContents(), replay.match.teams.map(team => team.name));
@@ -63,7 +63,7 @@ try {
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     for (const mode of ["svg", "three", "pixi"]) {
       const page = await newPage(viewport);
-      await page.goto(`${url}/?scenario=late-siege&view=${mode}`, { waitUntil: "networkidle" });
+      await page.goto(`${url}/legacy?scenario=late-siege&view=${mode}`, { waitUntil: "networkidle" });
       await page.waitForFunction(view => document.querySelector(".pitch-shell")?.getAttribute("data-renderer") === view, mode);
       await pause(page);
       const replay = await data(page, "/api/replay", "late-siege");
@@ -140,7 +140,7 @@ try {
       else body.matchId = "another-match";
       await route.fulfill({ response, json: body });
     });
-    await page.goto(`${url}/?scenario=late-siege&view=svg`, { waitUntil: "networkidle" });
+    await page.goto(`${url}/legacy?scenario=late-siege&view=svg`, { waitUntil: "networkidle" });
     assert.equal(await page.locator("#metrics-label").textContent(), "Metrics unavailable");
     assert.ok(await page.locator("#control-toggle").isDisabled());
     await pause(page); await seek(page, 1000);

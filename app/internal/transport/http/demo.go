@@ -41,6 +41,9 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 		id := r.URL.Query().Get("scenario")
 		if id == "" {
 			id = "corner"
+			if (r.URL.Path == "/" || r.URL.Path == "/experience") && handlers["late-siege"] != nil {
+				id = "late-siege"
+			}
 		}
 		handler := handlers[id]
 		if handler == nil {

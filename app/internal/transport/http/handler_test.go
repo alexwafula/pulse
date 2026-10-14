@@ -28,7 +28,7 @@ func TestMatchPageAndReplayAPI(t *testing.T) {
 	}
 
 	page := httptest.NewRecorder()
-	handler.ServeHTTP(page, httptest.NewRequest(http.MethodGet, "/", nil))
+	handler.ServeHTTP(page, httptest.NewRequest(http.MethodGet, "/legacy", nil))
 	if page.Code != http.StatusOK || !strings.Contains(page.Body.String(), "Aurora Vale") {
 		t.Fatalf("match page: status %d", page.Code)
 	}
