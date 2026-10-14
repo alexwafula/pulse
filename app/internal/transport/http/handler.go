@@ -29,6 +29,7 @@ type pageData struct {
 	EndClock     string
 	Experience   bool
 	Story        experiencePanel
+	catalog      uiCatalog
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -70,6 +71,10 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 	}
 	view := replayPage(replay, graphs, attacks, scenario)
+	view.catalog, err = loadUICatalog(filepath.Join(staticDir, "locales.json"))
+	if err != nil {
+		return nil, err
+	}
 	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()
@@ -119,8 +124,8 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		if locale == "" {
 			locale = "en-GB"
 		}
-		if locale != "en-GB" {
-			http.Error(w, "locale awaiting review", 400)
+		if !domain.SupportedLocale(locale) {
+			http.Error(w, "unsupported locale", 400)
 			return
 		}
 		feed := domain.CueFeed{SchemaVersion: domain.SchemaVersion, Cues: []domain.OverlayCue{}}

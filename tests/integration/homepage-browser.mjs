@@ -33,7 +33,8 @@ try {
     }
     assert.ok(turf>100,"Homepage stadium must render");
     await page.screenshot({path:path.join(output,`${mobile?"mobile":"desktop"}.png`),fullPage:true});
-    await page.locator("#scenario").selectOption("corner");
+    await page.locator("#scenario-library-open").click();
+    await page.locator('[data-scenario-id="corner"] a:not([data-guided-demo])').click();
     await page.waitForURL(url => url.pathname === "/" && url.searchParams.get("scenario") === "corner");
     assert.equal(await page.locator("body").getAttribute("class"),"experience");
     for (const section of ["story","insights","recap","live"]) {

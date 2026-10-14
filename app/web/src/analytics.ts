@@ -1,4 +1,5 @@
 import { createElement, ListVideo } from "lucide";
+import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
 
@@ -165,19 +166,20 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
 
   function renderSummary(clock: number): void {
     const summary = [...summaries].reverse().find(item => Number(item.dataset.cutoff) <= clock);
-    if (!summary || summary === lastSummary) return;
+    if (!summary || (summary === lastSummary && summary.dataset.renderedLocale === locale())) return;
     lastSummary = summary;
+    summary.dataset.renderedLocale = locale();
     const values = summary.dataset;
     const passes = Number(values.passes), attempts = Number(values.attempts);
-    write("#summary-actions", `${values.actions} of ${replay.events.length}`);
-    write("#summary-passes", `${passes} of ${attempts}`);
+    write("#summary-actions", t("stats.of", {count:values.actions ?? 0, total:replay.events.length}));
+    write("#summary-passes", t("stats.of", {count:passes, total:attempts}));
     element<HTMLElement>("#summary-pass-fill").style.width = `${attempts ? 100 * passes / attempts : 0}%`;
-    write("#summary-attacks", `${values.entries} ${values.entries === "1" ? "entry" : "entries"} / ${values.shots} ${values.shots === "1" ? "shot" : "shots"}`);
-    write("#summary-conversion", Number(values.entries) ? `${values.converted} of ${values.entries} converted` : "N/A");
+    write("#summary-attacks", t("stats.attacks", {entries:values.entries ?? 0, entry:t(values.entries === "1" ? "entry" : "entries"), shots:values.shots ?? 0, shot:t(values.shots === "1" ? "shot" : "shots")}));
+    write("#summary-conversion", Number(values.entries) ? t("stats.converted", {count:values.converted ?? 0, total:values.entries ?? 0}) : "N/A");
     for (const side of ["home", "away"] as const) {
       const count = Number(values[side]);
-      write(`#${side}-pass-share`, `${count} completed ${count === 1 ? "pass" : "passes"}`);
-      write(`#${side}-pass-share-mobile`, `${count} ${count === 1 ? "pass" : "passes"}`);
+      write(`#${side}-pass-share`, t("stats.passes", {count, pass:t(count === 1 ? "pass" : "passes")}));
+      write(`#${side}-pass-share-mobile`, `${count} ${t(count === 1 ? "pass" : "passes")}`);
       element<HTMLElement>(`#${side}-pass-fill`).style.width = `${passes ? count / passes * 100 : 0}%`;
     }
   }
@@ -215,7 +217,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   }
 
   function renderEvidence(cue: Cue | undefined, selected: Moment | undefined): void {
-    const key = selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none";
+    const key = `${locale()}:${selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none"}`;
     if (key === evidenceKey) return;
     evidenceKey = key;
     evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected;

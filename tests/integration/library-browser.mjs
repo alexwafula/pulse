@@ -1,0 +1,80 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { chromium } from "playwright-core";
+
+const base=process.env.PULSE_URL ?? "http://127.0.0.1:8080";
+const executablePath=process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
+const output=path.join(os.tmpdir(),"pulse-library-review");fs.mkdirSync(output,{recursive:true});
+const browser=await chromium.launch({executablePath,headless:true});
+const errors=[];
+const seek=async (page,value)=>page.locator("#seek").evaluate((input,value)=>{input.value=String(value);input.dispatchEvent(new Event("input",{bubbles:true}));},value);
+try {
+ for(const width of [1440,768,390,320]) {
+  const page=await browser.newPage({viewport:{width,height:900},isMobile:width<600,hasTouch:width<600});
+  page.on("pageerror",error=>errors.push(error.message));
+  await page.goto(`${base}/?scenario=corner&view=svg`,{waitUntil:"networkidle"});
+  await page.locator("#scenario-library-open").click();
+  await page.waitForSelector(".scenario-tile");
+  assert.equal(await page.locator(".scenario-tile").count(),5);
+  assert.equal(await page.locator("#play-button").getAttribute("aria-label"),"Play","Opening library pauses replay");
+  assert.equal(await page.locator('.scenario-tile[aria-current="true"]').getAttribute("data-scenario-id"),"corner");
+  for(const id of ["corner","central","exchange","late-siege","calm-midfield"]) {
+   const replay=await (await page.request.get(`${base}/api/replay?scenario=${id}`)).json();
+   const tile=page.locator(`[data-scenario-id="${id}"]`);
+   assert.equal(Number(await tile.getAttribute("data-player-count")),replay.match.players.length);
+   assert.equal(Number(await tile.getAttribute("data-event-count")),replay.events.length);
+   assert.equal(await tile.locator("circle").count(),replay.tracking[0].players.length+2,"Recorded players, ball and centre circle");
+  }
+  await page.locator('[data-scenario-filter="full"]').click();
+  assert.equal(await page.locator(".scenario-tile:visible").count(),2);
+  await page.locator('[data-scenario-filter="short"]').click();
+  assert.equal(await page.locator(".scenario-tile:visible").count(),3);
+  await page.locator("#scenario-search").fill("nonsense");
+  assert.equal(await page.locator("#scenario-library-empty").isVisible(),true);
+  await page.locator("#scenario-search").fill("");
+  await page.locator('[data-scenario-filter="all"]').click();
+  const r=await page.locator("#scenario-dialog").boundingBox();assert.ok(r.x>=0&&r.x+r.width<=width+1);
+  await page.screenshot({path:path.join(output,`library-${width}.png`),fullPage:true});
+  await page.keyboard.press("Escape");
+  assert.equal(await page.locator("#scenario-dialog").isVisible(),false);
+  assert.equal(await page.locator("#scenario-library-open").evaluate(element=>element===document.activeElement),true,"Focus returns to launcher");
+  await seek(page,1000);
+  await page.waitForSelector("#fact-check");
+  const feed=await (await page.request.get(`${base}/api/insights?scenario=corner`)).json();
+  const cue=feed.cues[0];
+  await page.locator("#fact-check summary").click();
+  assert.equal(await page.locator("#fact-check-facts").textContent(),cue.factIds.join(", "));
+  if(cue.verification.status==="VERIFIED") assert.equal(await page.locator("#fact-check-counts").textContent(),`${cue.verification.claimsPassed} / ${cue.verification.claimsChecked}`);
+  else assert.equal(await page.locator("#fact-check-counts").textContent(),"Not model-verified");
+  assert.deepEqual(await page.locator("[data-fact-source]").evaluateAll(items=>items.map(item=>item.dataset.factSource)),cue.eventIds);
+  await page.screenshot({path:path.join(output,`fact-check-${width}.png`),fullPage:true});
+  await page.locator("[data-fact-source]").first().click();
+  const replay=await (await page.request.get(`${base}/api/replay?scenario=corner`)).json();
+  const event=replay.events.find(event=>event.id===cue.eventIds[0]);
+  const eventClock=`${String(Math.floor(event.timeMs/60000)).padStart(2,"0")}:${String(Math.floor(event.timeMs/1000)%60).padStart(2,"0")}`;
+  assert.equal(await page.locator('#event-list [aria-current="true"] .event-time').textContent(),eventClock);
+  await page.close();
+ }
+ const page=await browser.newPage();page.on("pageerror",e=>errors.push(e.message));
+ let fail=true;
+ await page.route("**/scenarios",route=>fail?route.fulfill({status:503,body:"Replay library unavailable"}):route.continue());
+ await page.goto(`${base}/?view=svg`,{waitUntil:"networkidle"});
+ await page.locator("#scenario-library-open").click();await page.waitForSelector("#scenario-library-retry");
+ fail=false;await page.locator("#scenario-library-retry").click();await page.waitForSelector(".scenario-tile");
+ await page.locator('[data-scenario-id="corner"] [data-guided-demo]').click();
+ await page.waitForFunction(()=>document.querySelector("#run-demo-button")?.getAttribute("aria-pressed")==="true");
+ await page.waitForFunction(()=>document.body.dataset.section==="recap",null,{timeout:45000});
+ await page.waitForSelector('.story-content[data-panel="recap"] [data-inspect-event]');
+ assert.equal(await page.locator("#run-demo-button").isVisible(),false);
+ await page.goto(`${base}/?scenario=corner&view=svg&locale=hi-IN&persona=ANALYST`,{waitUntil:"networkidle"});
+ await page.locator("#scenario-library-open").click();
+ await page.locator('[data-scenario-id="exchange"] a:not([data-guided-demo])').click();
+ await page.waitForURL(url=>url.searchParams.get("scenario")==="exchange");
+ assert.equal(new URL(page.url()).searchParams.get("locale"),"hi-IN");
+ assert.equal(new URL(page.url()).searchParams.get("persona"),"ANALYST");
+ assert.equal(new URL(page.url()).searchParams.get("view"),"svg");
+ await page.close();assert.deepEqual(errors,[]);
+ console.log(`PASS replay-backed gallery, search/filters, native dialog focus, retry, guided demo/recap, honest fact checks and evidence links at 320/390/768/1440px. Screenshots: ${output}`);
+}finally{await browser.close();}

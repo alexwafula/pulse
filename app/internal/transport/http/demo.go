@@ -37,7 +37,15 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 		known = append(known, id)
 	}
 	sort.Strings(known)
+	library, err := scenarioLibrary(catalog, webDir)
+	if err != nil {
+		return nil, err
+	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/scenarios" {
+			library.ServeHTTP(w, r)
+			return
+		}
 		id := r.URL.Query().Get("scenario")
 		if id == "" {
 			id = "corner"

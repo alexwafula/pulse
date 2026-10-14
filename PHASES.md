@@ -221,6 +221,14 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 
 ## Change log
 
+Local UI update (Oct 14): Alex approved interface and deterministic-template
+translation in English, Kiswahili and Hindi. Opt-in `hi-IN` is mirrored across
+Go/Python and v2 locale enums with shared positive/negative cases. Select2,
+responsive control spacing and persisted Casual/Analyst preferences are available
+locally. Translations remain drafts for native-speaker review; non-English model
+publishing is blocked and translated requests consume no model calls. No new
+deployment or phase exit is claimed by this local iteration.
+
 Main-release update (Oct 14): prototype experience promoted to `/`, with the
 original dashboard preserved at `/legacy`. Reusable CI, container/browser gates
 and separate main-only Azure identities support automatic image-only releases.
@@ -237,6 +245,7 @@ by another teammate remain pending; these changes do not complete the phase exit
 
 | Date | Change | By |
 |---|---|---|
+| Oct 15 | Reviewed the supplied local prototype, fixed Select2/HTMX settle duplication and added replay browsing plus explicit fact-check provenance. Localisation drafts and UI tests do not complete native review, streaming, cloud reliability or broader agent evaluation. Feature review branch only until merged. | Alex + Codex |
 | Oct 13 | Deployed Go/Python on Azure using GitHub-built, container-smoke-tested images. Public desktop/mobile checks pass for replay, all renderers, Story, charts/maps and evidence. Recorded Foundry mode makes no runtime model calls. Python insights require a service token; the reported internal-ingress boundary remains an Azure follow-up. Streaming/soak tests and broader agent evaluations remain pending. | Alex + Codex |
 | Oct 5 | Initial plan for a two-person team | |
 | Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |

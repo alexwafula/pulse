@@ -1,5 +1,7 @@
-import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X } from "lucide";
+import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play } from "lucide";
 import { paintExperienceGraphics } from "./experience-graphics";
+import { t } from "./i18n";
+const dropdownOpen = (): boolean => document.querySelector(".select2-container--open .select2-dropdown") !== null;
 
 type Section = "live" | "story" | "insights" | "recap";
 type ClockEvent = { timeMs: number; playing: boolean; scenario: string };
@@ -12,10 +14,12 @@ const panelInput = form.elements.namedItem("panel") as HTMLInputElement;
 const modeInput = form.elements.namedItem("mode") as HTMLInputElement;
 const mapInput = form.elements.namedItem("map") as HTMLInputElement;
 const personaInput = form.elements.namedItem("persona") as HTMLInputElement;
+const localeInput = form.elements.namedItem("locale") as HTMLInputElement;
 const status = document.querySelector<HTMLElement>("#panel-status")!;
 const retry = document.querySelector<HTMLButtonElement>("#panel-retry")!;
 let pendingRefresh: ReturnType<typeof setTimeout> | undefined;
 let lastRefresh = 0;
+let refreshQueued = false;
 let insightView = "charts";
 let watchVisible = false;
 const pitch = document.querySelector<HTMLElement>(".pitch-column")!;
@@ -29,8 +33,53 @@ const watchDock = document.querySelector<HTMLElement>("#experience-watch-dock")!
 const watchButton = document.querySelector<HTMLButtonElement>("#watch-toggle")!;
 let disposeGraphics: (() => void) | undefined;
 
-const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X } });
+const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play } });
 icons();
+
+const library = document.querySelector<HTMLElement>("#scenario-library")!;
+const libraryDialog = document.querySelector<HTMLDialogElement>("#scenario-dialog")!;
+const librarySearch = document.querySelector<HTMLInputElement>("#scenario-search")!;
+const libraryRetry = document.querySelector<HTMLButtonElement>("#scenario-library-retry")!;
+let scenarioFilter = "all";
+function filterScenarios(): void {
+  let count = 0;
+  const term = librarySearch.value.trim().toLocaleLowerCase();
+  for (const tile of library.querySelectorAll<HTMLElement>("[data-scenario-id]")) {
+    tile.hidden = (scenarioFilter !== "all" && tile.dataset.scenarioKind !== scenarioFilter) || !tile.textContent?.toLocaleLowerCase().includes(term);
+    tile.setAttribute("aria-current", String(tile.dataset.scenarioId === document.querySelector<HTMLSelectElement>("#scenario")!.value));
+    if (!tile.hidden) count++;
+  }
+  document.querySelector<HTMLElement>("#scenario-library-empty")!.hidden = count > 0 || !library.querySelector(".scenario-tile");
+}
+document.querySelector("#scenario-library-open")!.addEventListener("click", () => {
+  document.dispatchEvent(new CustomEvent("pulse:library-open"));
+  libraryDialog.showModal(); librarySearch.focus();
+  if (!library.querySelector(".scenario-tile")) library.dispatchEvent(new CustomEvent("pulse:library"));
+  else filterScenarios();
+});
+document.querySelector("#scenario-library-close")!.addEventListener("click", () => libraryDialog.close());
+libraryDialog.addEventListener("click", event => { if (event.target === libraryDialog) {
+  const r=libraryDialog.getBoundingClientRect();
+  if (event.clientX<r.left || event.clientX>r.right || event.clientY<r.top || event.clientY>r.bottom) libraryDialog.close();
+}});
+librarySearch.addEventListener("input", filterScenarios);
+for (const button of document.querySelectorAll<HTMLButtonElement>("[data-scenario-filter]")) button.addEventListener("click", () => {
+  scenarioFilter = button.dataset.scenarioFilter!;
+  for (const item of document.querySelectorAll("[data-scenario-filter]")) item.setAttribute("aria-pressed", String(item === button));
+  filterScenarios();
+});
+libraryRetry.addEventListener("click", () => library.dispatchEvent(new CustomEvent("pulse:library")));
+library.addEventListener("click", event => {
+  const link = (event.target as Element).closest<HTMLAnchorElement>("[data-scenario-link]");
+  if (!link) return;
+  const url = new URL(link.href);
+  for (const key of ["locale", "persona", "view"]) {
+    const value = new URL(location.href).searchParams.get(key);
+    if (value) url.searchParams.set(key, value);
+  }
+  link.href = url.href;
+});
+document.addEventListener("pulse:demo-complete", () => selectSection("recap"));
 
 function graphics(): void {
   disposeGraphics?.();
@@ -65,16 +114,22 @@ function layout(next: Section): void {
   transportBar.hidden = live;
   watchButton.hidden = live;
   watchDock.hidden = live || !watchVisible;
-  document.querySelector<HTMLElement>("#workspace-title")!.textContent = ({ live: "Live", story: "Story", insights: "Insights", recap: "Recap" })[next];
+  document.querySelector<HTMLElement>("#workspace-title")!.textContent = t(({ live: "Live", story: "Story", insights: "Insights", recap: "Recap" })[next]);
 }
 
 function refresh(): void {
   clearTimeout(pendingRefresh);
   pendingRefresh = undefined;
-  if (panel.hidden || content.hidden) return;
-  personaInput.value = document.querySelector<HTMLButtonElement>('[data-persona][aria-pressed="true"]')?.dataset.persona ?? "CASUAL";
-  lastRefresh = performance.now();
-  document.body.dispatchEvent(new CustomEvent("pulse:refresh"));
+  if (panel.hidden || content.hidden || dropdownOpen() || refreshQueued) return;
+  refreshQueued = true;
+  queueMicrotask(() => {
+    refreshQueued = false;
+    if (panel.hidden || content.hidden || dropdownOpen()) return;
+    personaInput.value = document.body.dataset.persona ?? "CASUAL";
+    localeInput.value = document.body.dataset.locale ?? "en-GB";
+    lastRefresh = performance.now();
+    document.body.dispatchEvent(new CustomEvent("pulse:refresh"));
+  });
 }
 
 function selectSection(next: Section, changePane = true): void {
@@ -143,6 +198,17 @@ document.addEventListener("pulse:clock", (event) => {
   if (!clock.playing) refresh();
   else if (pendingRefresh === undefined) pendingRefresh = setTimeout(() => { pendingRefresh = undefined; refresh(); }, Math.max(0, 1000 - (performance.now() - lastRefresh)));
 });
+document.addEventListener("pulse:audience", () => {
+  layout(document.body.dataset.section as Section);
+  refresh();
+});
+document.addEventListener("pulse:dropdown", (event) => {
+  if (!(event as CustomEvent<{open:boolean}>).detail.open) refresh();
+});
+document.addEventListener("htmx:beforeSwap", event => {
+  const detail = (event as CustomEvent<{target:HTMLElement; shouldSwap:boolean}>).detail;
+  if (detail.target === content && dropdownOpen()) detail.shouldSwap = false;
+});
 document.addEventListener("pulse:pane-selected", (event) => {
   const pane = (event as CustomEvent<{ pane: string }>).detail.pane;
   if (pane === "evidence") openAnalysis(pane, false);
@@ -174,6 +240,14 @@ document.addEventListener("htmx:beforeRequest", (event) => {
 });
 document.addEventListener("htmx:afterRequest", (event) => {
   const detail = (event as CustomEvent<{ elt: HTMLElement; successful: boolean }>).detail;
+  if (detail.elt === library) {
+    libraryRetry.hidden = detail.successful;
+    if (!detail.successful) {
+      const message = library.querySelector(".library-message");
+      if (message) message.textContent = t("Replays unavailable");
+    }
+    return;
+  }
   if (detail.elt !== content) return;
   content.setAttribute("aria-busy", "false");
   status.textContent = detail.successful ? "" : "Update unavailable. Last loaded view retained.";
@@ -181,6 +255,7 @@ document.addEventListener("htmx:afterRequest", (event) => {
 });
 document.addEventListener("htmx:afterSwap", (event) => {
   if ((event.target as Element).id === content.id) { icons(); graphics(); }
+  if ((event.target as Element).id === library.id) { icons(); filterScenarios(); }
 });
 document.addEventListener("pulse:map-inspect", (event) => {
   selectSection("live");
