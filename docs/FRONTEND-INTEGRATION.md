@@ -1,12 +1,13 @@
 # Frontend integration handoff
 
-Branch: `feat/experience-integration`. Preview: `/experience?scenario=late-siege`.
-Existing dashboard: `/?scenario=late-siege`. Both use the same Go engine.
+Base branch: `main`. Homepage: `/` (defaults to late-siege).
+`/experience?scenario=late-siege` remains an alias. Existing dashboard:
+`/legacy?scenario=late-siege`. All use the same Go engine.
 
 The preview's Three.js scene now uses the supplied HTML's stadium/character
 presentation: stands and crowd, articulated bodies, textured jerseys, patterned
 ball and close perspective cameras. PixiJS uses the brighter striped turf and
-patterned ball in tactical 2D. Original capsule/number visuals remain on `/`.
+patterned ball in tactical 2D. Original capsule/number visuals remain on `/legacy`.
 Control starts off in the preview so turf and players remain clear; the same
 Go-calculated field can be enabled with the checkbox.
 The current preview matches the supplied prototype's neutral/blue shell, sidebar,
@@ -23,14 +24,15 @@ can be used with `-SkipWebBuild`. Full meeting checklist:
 [collaborator meeting](COLLABORATOR-MEETING.md).
 
 ```powershell
-git switch feat/experience-integration
+git switch main
+git switch -c feature/frontend-change
 npm ci
 npm run check:web
 npm run build:web
 go run ./app/cmd/server -addr 127.0.0.1:8080
 ```
 
-Open `http://127.0.0.1:8080/experience?scenario=late-siege`. Committed assets also
+Open `http://127.0.0.1:8080/`. Committed assets also
 allow running Go directly without npm. Optional Python template service:
 
 ```powershell
@@ -38,9 +40,9 @@ py agents/run.py --host 127.0.0.1 --port 8090 --mode template
 go run ./app/cmd/server -addr 127.0.0.1:8080 -agents-url http://127.0.0.1:8090
 ```
 
-Create a feature branch from this preview for your changes, then open a PR for
-team review. Do not merge it into main before the comparison meeting. If this
-branch has not been published yet, Alex must push it before teammates can fetch.
+Create a feature branch from current main for your changes, then open a PR for
+team review. Main runtime changes automatically build and deploy after the CI
+and container smoke gates pass.
 
 ## API boundary
 

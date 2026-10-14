@@ -5,14 +5,17 @@ and tracking data.
 
 ## Live demo
 
-[Open Pulse on Azure](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=late-siege&view=three)
-or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/experience?scenario=corner&view=three).
+[Open Pulse on Azure](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/)
+or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three).
 
 Go and Python are deployed in South Africa North. The public demo uses reviewed,
 recorded Foundry output, labelled `Verified (recorded)`, with template fallback.
 It makes no runtime model calls; Azure hosting still consumes credits. Python
 insights require a server-side service token. See the
 [deployment record](docs/AZURE-LIVE-STATUS.md) for checks, source images and limits.
+Runtime changes on `main` are checked, container-tested and automatically deployed
+by **Build Azure Images**. The homepage is the prototype-inspired experience;
+`/experience` remains an alias and `/legacy` preserves the original dashboard.
 
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
@@ -60,8 +63,9 @@ Go 1.23 or newer is required. From the repository root:
 go run ./app/cmd/server
 ```
 
-Open `http://127.0.0.1:8080`. The browser replays the fictional 27:00-28:00
-sequence with animated players and ball, a match clock, event timeline, play
+Open `http://127.0.0.1:8080`. The homepage defaults to the fictional 11v11 Late
+siege replay. Use `/?scenario=corner` for the short 27:00-28:00 sequence.
+Both have animated players and ball, a match clock, event timeline, play
 and pause, seeking and speed controls. The page is served by Go; its pitch
 renderer is TypeScript compiled to `app/web/static/pitch.js`.
 
@@ -73,14 +77,13 @@ Direct comparison URLs are `/?view=three`, `/?view=pixi` and `/?view=svg`.
 Each canvas renderer is a separate lazy-loaded bundle; the SVG replay does
 not load either renderer. Choosing a primary renderer remains a later decision.
 
-### Experience integration preview
+### Match experience
 
-On `feat/meeting-readiness` (based on `feat/experience-integration`), open
-`http://127.0.0.1:8080/experience?scenario=late-siege`. This preview adapts the
+On `main`, open `http://127.0.0.1:8080/`. The match experience adapts the
 teammate's Live/Story/Insights layout to Go templates and locally bundled HTMX,
 using Three.js, PixiJS and SVG. The preview ports the supplied stadium's stands,
 articulated players, textured kits and patterned ball; the original renderer
-remains at `/` for comparison. Broadcast, Tactical and Follow ball perspective
+remains at `/legacy` for comparison. Broadcast, Tactical and Follow ball perspective
 cameras use recorded data. Running poses follow tracking velocity and the match
 clock, so pause and rewind freeze/reproduce them. Control is opt-in on this route.
 Story offers Live story, Catch up, recorded Highlights and Player focus, with
@@ -171,7 +174,7 @@ In a second terminal:
 go run ./app/cmd/server -agents-url http://127.0.0.1:8090
 ```
 
-Open `http://127.0.0.1:8080`. At 27:58 the insight and a shot-outcome banner
+Open `http://127.0.0.1:8080/?scenario=corner`. At 27:58 the insight and a shot-outcome banner
 appear. The current final shot is blocked. Scores are not recorded in the
 replay contract, so the header shows a neutral unavailable-score placeholder.
 Evidence replays

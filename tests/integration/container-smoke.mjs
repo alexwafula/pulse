@@ -23,6 +23,10 @@ for (let attempt = 0; attempt < 30; attempt++) {
   }
 }
 assert.ok(healthy);
+const home = await (await get("/")).text();
+assert.ok(home.includes('class="experience"') && home.includes('value="late-siege" selected'), "Homepage must open the full prototype-style replay");
+const legacy = await (await get("/legacy?scenario=corner")).text();
+assert.ok(!legacy.includes('class="experience"'), "Legacy renderer must remain separately addressable");
 await get("/experience?scenario=corner&view=three");
 await get("/static/three-renderer.js");
 await get("/static/pixi-renderer.js");

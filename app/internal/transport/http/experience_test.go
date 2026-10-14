@@ -61,6 +61,47 @@ func TestExperiencePanelsFollowReplayClock(t *testing.T) {
 	}
 }
 
+func TestHomepageAndLegacyRouting(t *testing.T) {
+	replay, err := simulator.Load("../../../../data/samples/first-sequence.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler, err := NewDemoHandler(replay, "../../../web", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		path, scenario string
+		experience     bool
+	}{
+		{"/", "late-siege", true},
+		{"/experience", "late-siege", true},
+		{"/?scenario=corner&view=pixi", "corner", true},
+		{"/experience?scenario=central", "central", true},
+		{"/legacy", "corner", false},
+		{"/legacy?scenario=late-siege", "late-siege", false},
+	} {
+		t.Run(test.path, func(t *testing.T) {
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, httptest.NewRequest("GET", test.path, nil))
+			body := response.Body.String()
+			if response.Code != 200 || strings.Contains(body, `class="experience"`) != test.experience || !strings.Contains(body, `value="`+test.scenario+`" selected`) {
+				t.Fatalf("wrong route/scenario: %s status %d", test.path, response.Code)
+			}
+			if test.experience && !strings.Contains(body, `href="/legacy?scenario=`+test.scenario+`"`) {
+				t.Fatal("legacy link must name and target the legacy route")
+			}
+		})
+	}
+	for _, path := range []string{"/", "/experience", "/legacy"} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest("POST", path, nil))
+		if response.Code != 405 {
+			t.Fatalf("POST %s accepted", path)
+		}
+	}
+}
+
 func TestExperiencePanelValidationAndEscaping(t *testing.T) {
 	replay, err := simulator.Load("../../../../data/samples/first-sequence.json")
 	if err != nil {

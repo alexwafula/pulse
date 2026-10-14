@@ -20,7 +20,7 @@ try {
           body: JSON.stringify({ schemaVersion: "unsupported", tracking: [] }),
         });
       });
-      await recovery.goto(`${url}/?view=svg`, { waitUntil: "networkidle" });
+      await recovery.goto(`${url}/legacy?view=svg`, { waitUntil: "networkidle" });
       for (const expectedAttempts of [1, 2]) {
         await recovery.locator("#pitch-error").waitFor({ state: "visible" });
         assert.equal(attempts, expectedAttempts);
@@ -54,7 +54,7 @@ try {
     const page = await browser.newPage({ viewport, acceptDownloads: true });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
-    await page.goto(`${url}/?scenario=central`, { waitUntil: "networkidle" });
+    await page.goto(`${url}/legacy?scenario=central`, { waitUntil: "networkidle" });
     await page.getByRole("button", { name: "Pause", exact: true }).click();
     const seek = async value => page.locator("#seek").evaluate((input, value) => { input.value = value; input.dispatchEvent(new Event("input", { bubbles: true })); }, value);
     await seek("667");

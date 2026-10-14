@@ -83,7 +83,8 @@ function mapInteraction(host: HTMLElement, svg: SVGSVGElement, canvas?: HTMLCanv
   const selection = inspector.querySelector<HTMLSelectElement>("select")!;
   const detail = inspector.querySelector<HTMLOutputElement>("output")!;
   const evidence = inspector.querySelector<HTMLElement>(".map-inspector-evidence")!;
-  const memoryKey = `${new URL(location.href).searchParams.get("scenario") ?? "corner"}/${svg.dataset.mapTeam}/${host.dataset.mapMode}`;
+  const scenario = document.querySelector<HTMLSelectElement>("#scenario")!.value;
+  const memoryKey = `${scenario}/${svg.dataset.mapTeam}/${host.dataset.mapMode}`;
   selection.value = mapSelections.get(memoryKey) ?? "";
   function inspect(): void {
     mapSelections.set(memoryKey, selection.value);
@@ -106,6 +107,7 @@ function mapInteraction(host: HTMLElement, svg: SVGSVGElement, canvas?: HTMLCanv
   tooltip.setAttribute("role","tooltip"); host.append(tooltip);
   function hit(event: MouseEvent): SVGElement | undefined {
     const bounds = surface.getBoundingClientRect();
+    if (!surface.isConnected || bounds.width <= 0 || bounds.height <= 0) return;
     const x = (event.clientX-bounds.left)/bounds.width*109-2;
     const y = (event.clientY-bounds.top)/bounds.height*72-2;
     if (host.dataset.mapMode === "occupancy") {
@@ -113,7 +115,14 @@ function mapInteraction(host: HTMLElement, svg: SVGSVGElement, canvas?: HTMLCanv
     } else if (host.dataset.mapMode === "network") {
       return Array.from(svg.querySelectorAll<SVGGElement>(".network-node")).find(node => Math.hypot(x-number(node,"data-x"),y-number(node,"data-y")) <= Math.max(3,number(node,"data-radius")));
     } else {
-      return Array.from(svg.querySelectorAll<SVGCircleElement>(".shot-points circle")).find(point => Math.hypot(x-number(point,"cx"),y-number(point,"cy")) <= 3);
+      const tolerance = event instanceof PointerEvent && event.pointerType === "touch" ? 22 : 10;
+      let nearest: SVGCircleElement | undefined;
+      let distance = Math.max(tolerance, 3 * bounds.width / 109);
+      for (const point of svg.querySelectorAll<SVGCircleElement>(".shot-points circle")) {
+        const pixels = Math.hypot((x-number(point,"cx"))*bounds.width/109, (y-number(point,"cy"))*bounds.height/72);
+        if (pixels < distance) { nearest = point; distance = pixels; }
+      }
+      return nearest;
     }
   }
   const move = (event: PointerEvent): void => {
