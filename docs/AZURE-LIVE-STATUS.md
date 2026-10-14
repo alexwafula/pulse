@@ -15,6 +15,11 @@ The Oct 13 record below is historical; it does not identify later main images.
 
 ## October 15 recheck
 
+Current console ingestion and the Express-environment investigation are recorded
+in [cloud readiness](CLOUD-READINESS-2026-10-15.md). The fresh marker confirms
+Log Analytics works despite the CLI stream error. Network isolation and new
+Foundry traces are not claimed complete. Native review is tracked separately.
+
 Main CI and image release succeeded for `88a5b7de04c7f690b5951d140f8b59e329449890`.
 Both Container Apps use that tag and report Running/Succeeded. Both health
 endpoints respond; Python reports recorded mode, requires authentication and
