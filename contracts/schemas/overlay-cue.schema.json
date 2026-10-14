@@ -14,7 +14,7 @@
     "endMs": { "type": "integer", "minimum": 0 },
     "replayStartMs": { "type": "integer", "minimum": 0 },
     "replayEndMs": { "type": "integer", "minimum": 0 },
-    "locale": { "enum": ["en-GB", "sw-KE"] },
+    "locale": { "enum": ["en-GB", "sw-KE", "hi-IN"] },
     "persona": { "enum": ["CASUAL", "ANALYST"] },
     "kind": { "const": "COMMENTARY" },
     "verification": { "allOf": [{ "$ref": "verification-result.schema.json" }, { "properties": { "status": { "enum": ["VERIFIED", "FALLBACK_TEMPLATE"] } } }] },

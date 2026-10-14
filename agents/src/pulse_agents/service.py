@@ -44,6 +44,8 @@ class AgentService:
 
     def respond(self, request: InsightRequest) -> InsightResponse:
         fallback = insights(request)
+        if request["locale"] != "en-GB":
+            return fallback
         key = self.request_key(request)
         if key in self.recorded:
             return deepcopy(self.recorded[key])

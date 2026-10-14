@@ -1,6 +1,7 @@
 """Three replaceable stages for the template-only golden path, not LLM agents."""
 
 import math
+from .locales.templates import TEMPLATE_TEXTS
 
 from .contracts import (Claim, FactPack, InsightRequest, InsightResponse,
                         NarrationDraft, VerificationResult, SCHEMA_VERSION,
@@ -10,9 +11,9 @@ from .contracts import (Claim, FactPack, InsightRequest, InsightResponse,
 def validate_request(request: InsightRequest) -> None:
     if set(request) != {"schemaVersion", "factPack", "locale", "persona"}:
         raise ValueError("Invalid request fields")
-    if (request["schemaVersion"] != SCHEMA_VERSION or request["locale"] != "en-GB"
+    if (request["schemaVersion"] != SCHEMA_VERSION or request["locale"] not in TEMPLATE_TEXTS
             or request["persona"] not in ("CASUAL", "ANALYST")):
-        raise ValueError("Only English CASUAL/ANALYST templates are available")
+        raise ValueError("Unsupported template locale or persona")
     pack = request["factPack"]
     required = {"schemaVersion", "id", "matchId", "period", "windowStartMs", "windowEndMs", "facts"}
     if not isinstance(pack, dict) or set(pack) != required:
@@ -61,7 +62,7 @@ def explain(pack: FactPack) -> Claim:
 
 
 def narrate(request: InsightRequest, claim: Claim) -> NarrationDraft:
-    text = claim["text"] if request["persona"] == "CASUAL" else "Set-piece sequence: 1 shot following the corner."
+    text = TEMPLATE_TEXTS[request["locale"]][request["persona"]]
     return {"schemaVersion": SCHEMA_VERSION, "id": "draft-" + request["factPack"]["id"],
             "factPackId": request["factPack"]["id"], "locale": request["locale"],
             "persona": request["persona"], "text": text,

@@ -1,0 +1,13 @@
+{
+  "baseRequest": "insight-request.json",
+  "cases": [
+    {"locale":"en-GB","persona":"CASUAL","text":"The corner produced 1 shot."},
+    {"locale":"en-GB","persona":"ANALYST","text":"Set-piece sequence: 1 shot following the corner."},
+    {"locale":"sw-KE","persona":"CASUAL","text":"Kona ilizalisha shuti 1."},
+    {"locale":"sw-KE","persona":"ANALYST","text":"Mpira wa kona: shuti 1 baada ya kona."},
+    {"locale":"hi-IN","persona":"CASUAL","text":"कॉर्नर से 1 शॉट आया।"},
+    {"locale":"hi-IN","persona":"ANALYST","text":"सेट-पीस क्रम: कॉर्नर के बाद 1 शॉट।"}
+  ],
+  "invalidLocales": ["fr-FR", "hi", "HI-IN", "", "<script>"],
+  "reviewStatus": "TRANSLATION_DRAFT"
+}

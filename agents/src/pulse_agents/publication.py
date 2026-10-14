@@ -21,6 +21,8 @@ def approved_wordings(persona: str) -> tuple[str, ...]:
 
 
 def validate_publishable_draft(request: InsightRequest, draft: NarrationDraft) -> None:
+    if request["locale"] != "en-GB":
+        raise ValueError("Translated locales are template-only pending language review")
     expected = deepcopy(insights(request)["draft"])
     text = draft.get("text")
     if text not in approved_wordings(request["persona"]):
