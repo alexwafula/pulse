@@ -138,12 +138,8 @@ async function storyAndMaps(page, replay, mobile) {
     assert.equal(Number(await point.getAttribute("cy")), 68-event.from.y);
   }
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-shot-map.png`), fullPage: true });
-  const map = page.locator('[data-graphic="map"]');
-  await map.scrollIntoViewIfNeeded();
-  const size = await map.boundingBox();
-  const position = {x:(shots[0].from.x+2)/109*size.width, y:(68-shots[0].from.y+2)/72*size.height};
-  if (mobile) await map.tap({position});
-  else await map.click({position});
+  await tapMap({x: shots[0].from.x, y: 68-shots[0].from.y});
+  await page.waitForFunction(() => document.body.dataset.section === "live" && !!document.querySelector("#match-clock"));
   assert.equal(await page.locator("#match-clock").textContent(),clock(shots[0].timeMs),"click or tap on a source shot must open its evidence");
   await section(page,"insights");
   await page.getByRole("button",{name:"Pitch maps",exact:true}).click();
