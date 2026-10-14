@@ -21,9 +21,9 @@ param ownerId int = 91899603
 param repositoryId int = 1404538837
 
 @allowed([
-  'feat/meeting-readiness'
+  'main'
 ])
-param branch string = 'feat/meeting-readiness'
+param branch string = 'main'
 
 var repositoryParts = split(repository, '/')
 
@@ -38,7 +38,7 @@ resource identity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' 
 
 resource federation 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
   parent: identity
-  name: 'github-meeting-readiness'
+  name: 'github-main'
   properties: {
     issuer: 'https://token.actions.githubusercontent.com'
     subject: 'repo:${repositoryParts[0]}@${ownerId}/${repositoryParts[1]}@${repositoryId}:ref:refs/heads/${branch}'

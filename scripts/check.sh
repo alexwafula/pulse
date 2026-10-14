@@ -89,6 +89,7 @@ fi
 
 $BICEP_CMD build --file infra/azure/main.bicep --stdout > /dev/null
 $BICEP_CMD build --file infra/azure/github-build.bicep --stdout > /dev/null
+$BICEP_CMD build --file infra/azure/github-deploy.bicep --stdout > /dev/null
 $BICEP_CMD build --file infra/azure/budget.bicep --stdout > /dev/null
 $BICEP_CMD build-params --file infra/azure/main.bicepparam --stdout > /dev/null
 echo "✓ Azure Bicep templates build cleanly with 0 errors/warnings."

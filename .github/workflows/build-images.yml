@@ -3,16 +3,7 @@ name: Build Azure Images
 on:
   workflow_dispatch:
   push:
-    branches: ['feat/meeting-readiness']
-    paths:
-      - '.github/workflows/build-images.yml'
-      - 'Dockerfile'
-      - '.dockerignore'
-      - 'go.mod'
-      - 'app/**'
-      - 'agents/**'
-      - 'data/**'
-      - 'tests/integration/container-smoke.mjs'
+    branches: ['main']
 
 permissions:
   contents: read
@@ -22,8 +13,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  checks:
+    if: github.repository == 'alexwafula/pulse' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
   build:
-    if: github.repository == 'alexwafula/pulse' && github.ref == 'refs/heads/feat/meeting-readiness'
+    needs: checks
+    if: github.repository == 'alexwafula/pulse' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -49,6 +45,9 @@ jobs:
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-agents:$GITHUB_SHA" -f agents/Dockerfile .
 
+      - name: Install browser test dependencies
+        run: npm ci
+
       - name: Test both containers without model calls
         shell: bash
         run: |
@@ -61,6 +60,7 @@ jobs:
           for attempt in {1..30}; do curl --fail --silent http://127.0.0.1:8090/healthz && break; sleep 1; done
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:8090/insights)" = 401
           PULSE_URL=http://127.0.0.1:8080 node tests/integration/container-smoke.mjs
+          PULSE_URL=http://127.0.0.1:8080 CHROME_PATH=/usr/bin/google-chrome node tests/integration/homepage-browser.mjs
 
       - name: Azure login with federated identity
         uses: azure/login@v2
@@ -86,3 +86,55 @@ jobs:
           docker logs pulse-agents 2>&1 || true
           docker rm -f pulse-web pulse-agents || true
           docker network rm pulse-smoke || true
+
+  deploy:
+    needs: build
+    if: github.repository == 'alexwafula/pulse' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      REGISTRY: ${{ vars.PULSE_ACR_NAME }}.azurecr.io
+      RESOURCE_GROUP: pulse-hackathon
+    steps:
+      - name: Checkout tested source
+        uses: actions/checkout@v4
+
+      - name: Skip superseded release
+        id: current
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [[ "$latest" == "$GITHUB_SHA" ]]; then echo 'release=true' >> "$GITHUB_OUTPUT"; else echo 'release=false' >> "$GITHUB_OUTPUT"; fi
+
+      - name: Azure login with app-scoped deployment identity
+        if: steps.current.outputs.release == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.PULSE_AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.PULSE_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.PULSE_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Update only the two runtime images
+        if: steps.current.outputs.release == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          az containerapp update --resource-group "$RESOURCE_GROUP" --name pulse-agents --image "$REGISTRY/pulse-agents:$GITHUB_SHA" --output none
+          az containerapp update --resource-group "$RESOURCE_GROUP" --name pulse-web --image "$REGISTRY/pulse-web:$GITHUB_SHA" --output none
+          host=$(az containerapp show --resource-group "$RESOURCE_GROUP" --name pulse-web --query properties.configuration.ingress.fqdn --output tsv)
+          echo "PULSE_URL=https://$host" >> "$GITHUB_ENV"
+          agent_host=$(az containerapp show --resource-group "$RESOURCE_GROUP" --name pulse-agents --query properties.configuration.ingress.fqdn --output tsv)
+          echo "PULSE_AGENT_URL=https://$agent_host" >> "$GITHUB_ENV"
+
+      - name: Verify deployed homepage, replay and authenticated insights
+        if: steps.current.outputs.release == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/integration/container-smoke.mjs
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 60 -H 'Content-Type: application/json' -d '{}' "$PULSE_AGENT_URL/insights")" = 401
+          printf 'Deployed tested main source `%s`.\n\n[Open Pulse](%s/)\n' "$GITHUB_SHA" "$PULSE_URL" >> "$GITHUB_STEP_SUMMARY"

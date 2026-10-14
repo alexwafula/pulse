@@ -82,11 +82,13 @@ SSE remains unimplemented. Explainer/Narrator/Verifier are wired to the
 opt-in Foundry backend; one live CASUAL corner workflow has been verified, not
 broader model quality or latency. The Go gate still
 rejects free prose, unsupported facts and incomplete evidence.
-The separate `/experience` preview uses locally bundled HTMX for replay-clock
+The homepage uses locally bundled HTMX for replay-clock
 Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existing
 controller and gated cue feed. The preview now ports the supplied stadium and
 articulated character presentation; textured kits/ball and close perspective
-cameras replace the original capsule-and-number view on that route only.
+cameras replace the original capsule-and-number view. `/experience` remains an
+alias; `/legacy` preserves the original dashboard. The homepage defaults to
+late-siege; API defaults stay corner, so always send the selected scenario.
 Gait uses recorded tracking velocity and the replay clock, never a second timer
 or inferred ball flight. The model field is opt-in in the preview.
 Story now includes clock-bounded Catch up, source-event Highlights and Player
@@ -102,6 +104,10 @@ paint Go paths/cells with SVG fallback. Passing-map positions average elapsed
 completed-pass involvement locations. Soft heat shading is presentation only;
 source cell time, sample intervals and evidence remain available.
 Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
+Main releases reuse CI, test both containers and the desktop/mobile homepage,
+then publish SHA-tagged images and update the existing Azure apps. Separate
+main-only identities grant registry push and app-scoped deployment access.
+Recorded mode, zero model calls and service-token authentication are preserved.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -221,6 +227,7 @@ Local checks:
 - Offline agent boundary evaluation: `py tests/evaluations/run_agents.py` (fake backend, not model accuracy)
 - Core UI: `node tests/integration/core-browser.mjs` (running local Go server required)
 - Replay analytics: `node tests/integration/analytics-browser.mjs` (running local Go server; set `PULSE_URL` and, if needed, `CHROME_PATH`)
+- Default homepage: `node tests/integration/homepage-browser.mjs` (desktop/mobile, stadium pixels and routing)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions

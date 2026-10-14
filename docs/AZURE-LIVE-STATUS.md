@@ -1,4 +1,17 @@
-# Azure live deployment: 2026-10-13
+# Azure live deployment
+
+## Main release path
+
+The homepage is the prototype-inspired experience, with `/experience` retained
+as an alias and the original dashboard at `/legacy`. Main releases run reusable
+CI, container/API and desktop/mobile homepage checks before publishing both
+SHA-tagged images and updating the existing apps. Recorded mode, model cap zero
+and service-token authentication stay unchanged. See
+[release decision](decisions/0020-main-release-and-default-experience.md) and
+[latest release runs](https://github.com/alexwafula/pulse/actions/workflows/build-images.yml)
+for the deployed source SHA and rollout result.
+
+The Oct 13 record below is historical; it does not identify later main images.
 
 ## Links
 
@@ -7,7 +20,7 @@
 - [Image build and container smoke test](https://github.com/alexwafula/pulse/actions/runs/38463448318)
 - [Full CI for the deployed image source](https://github.com/alexwafula/pulse/actions/runs/38463448290)
 
-Branch: `feat/meeting-readiness`. Main was not merged or changed.
+Initial deployment branch: `feat/meeting-readiness`. Main was not changed by that deployment.
 Image source: `2cd09b9ae0164bfdb4d204e08d3889def92c7a20`.
 Later deployment-helper/docs commits do not change these runtime images.
 
@@ -23,6 +36,7 @@ Resource group: `pulse-hackathon`; region: `southafricanorth`.
 | `pulse-agents` | Python recorded insights; service-token protection |
 | `id-pulse-demo` | Runtime registry-pull identity |
 | `id-pulse-github-build` | Registry-push identity; exact repo/branch OIDC trust |
+| `id-pulse-github-deploy` | Main-only image deployment identity; app-scoped access |
 | `log-pulse-demo` | Log Analytics workspace |
 
 Both apps: 0.25 vCPU, 0.5 GiB memory, minimum zero and maximum one replica.

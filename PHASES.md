@@ -221,6 +221,12 @@ Full design in `Pulse-Play-Fingerprint.docx`. Deterministic Go retrieval over ea
 
 ## Change log
 
+Main-release update (Oct 14): prototype experience promoted to `/`, with the
+original dashboard preserved at `/legacy`. Reusable CI, container/browser gates
+and separate main-only Azure identities support automatic image-only releases.
+The existing contracts, cue gate, recorded mode and model cap are unchanged.
+This release work does not complete streaming, broader agent or phase exit checks.
+
 Readiness update (Oct 13): `feat/meeting-readiness` adds independently checked
 agent publishing for the existing corner fact, canonical demo player identities,
 tap/keyboard map inspection and a native local launcher. Contract v2 is unchanged.
