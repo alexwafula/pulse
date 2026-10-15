@@ -21,6 +21,11 @@ const pause = async page => { if (await page.locator("#play-button").getAttribut
 const section = async (page, name) => page.locator(`.experience-navigation [data-section="${name}"]`).click();
 const panelAt = async (page, at) => page.waitForFunction(at => document.querySelector(".story-content")?.getAttribute("data-time-ms") === String(at) && document.querySelector(".story-content")?.getAttribute("data-panel") === document.querySelector('#experience-inputs [name="panel"]')?.value, at);
 const clock = ms => `${String(Math.floor(ms / 60000)).padStart(2, "0")}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
+async function select2(page, selector, value) {
+  const name=await page.locator(`${selector} option[value="${value}"]`).textContent();
+  await page.locator(`${selector} + .select2-container .select2-selection`).click();
+  await page.getByRole("option",{name,exact:true}).click();
+}
 
 async function storyAndMaps(page, replay, mobile) {
   await section(page, "story");
@@ -37,7 +42,7 @@ async function storyAndMaps(page, replay, mobile) {
   assert.deepEqual(await ids(), elapsed.filter(event => ["SHOT", "CORNER", "CROSS"].includes(event.type)).map(event => event.id));
   await page.getByRole("button", { name: "Player focus", exact: true }).click();
   const player = replay.match.players.find(player => player.id === elapsed.at(-1).actorId);
-  await page.getByLabel("Story player", { exact: true }).selectOption(player.id);
+  await select2(page, 'select[name="playerId"]', player.id);
   await page.waitForFunction(name => document.querySelector(".story-content h3")?.textContent === name, player.name);
   const involved = elapsed.filter(event => event.actorId === player.id || event.recipientId === player.id);
   assert.deepEqual(await ids(), involved.map(event => event.id));
@@ -70,7 +75,7 @@ async function storyAndMaps(page, replay, mobile) {
   await page.waitForFunction(() => document.body.dataset.insightView === "maps");
   assert.ok(await page.locator('[data-graphic="map"]').isVisible());
   for (const team of replay.match.teams) {
-    await page.getByLabel("Map team", { exact: true }).selectOption(team.id);
+    await select2(page, 'select[name="teamId"]', team.id);
     await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
     const count = replay.match.players.filter(player => player.teamId === team.id).length;
     assert.equal(Number(await page.locator("[data-total-player-seconds]").getAttribute("data-total-player-seconds")), Number((count * (at - replay.match.startMs) / 1000).toFixed(1)));
@@ -97,9 +102,9 @@ async function storyAndMaps(page, replay, mobile) {
   assert.equal(await page.locator("#map-selection").inputValue(), heatTarget.key);
   assert.equal(await page.locator("#map-detail").textContent(), heatTarget.text);
   assert.equal(await page.locator(".map-inspector-evidence button").count(), 0, "occupancy must not invent event evidence");
-  await page.locator("#map-selection").focus();
-  await page.keyboard.press("Home");
+  await page.locator("#map-selection + .select2-container .select2-selection").click();
   await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
   assert.notEqual(await page.locator("#map-selection").inputValue(), "", "heat cells must be keyboard selectable");
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-charts-heatmap.png`), fullPage: true });
   await page.getByRole("button", { name: "Pass network", exact: true }).click();
@@ -115,8 +120,9 @@ async function storyAndMaps(page, replay, mobile) {
   assert.equal(await page.locator("#map-detail").textContent(), nodeTarget.text);
   const playerEvidence = elapsed.filter(event => event.teamId === replay.match.teams[1].id && event.type === "PASS" && event.outcome === "COMPLETE" && (event.actorId === nodeTarget.id || event.recipientId === nodeTarget.id));
   assert.deepEqual(await page.locator(".map-inspector-evidence [data-inspect-event]").evaluateAll(items => items.map(item => item.dataset.inspectEvent)), playerEvidence.map(event => event.id));
-  await page.locator("#map-selection").focus();
-  await page.keyboard.press("End");
+  await page.locator("#map-selection + .select2-container .select2-selection").click();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
   assert.notEqual(await page.locator("#map-detail").textContent(), "", "network inspection must be keyboard accessible");
   await page.screenshot({ path: path.join(output, `${mobile ? "mobile" : "desktop"}-pitch-network.png`), fullPage: true });
   await page.getByRole("button", { name: "Heatmap", exact: true }).click();
@@ -128,7 +134,7 @@ async function storyAndMaps(page, replay, mobile) {
   await page.getByRole("button", { name: "Shots", exact: true }).click();
   await page.waitForFunction(() => document.querySelector(".story-content")?.dataset.mapMode === "shots");
   const team = replay.match.teams.find(team => replay.events.some(event => event.type === "SHOT" && event.teamId === team.id));
-  await page.getByLabel("Map team", { exact: true }).selectOption(team.id);
+  await select2(page, 'select[name="teamId"]', team.id);
   await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
   const shots = replay.events.filter(event => event.type === "SHOT" && event.teamId === team.id);
   assert.deepEqual(await page.locator("[data-shot-event]").evaluateAll(items => items.map(item => item.dataset.shotEvent)), shots.map(event => event.id));
@@ -235,7 +241,7 @@ try {
           assert.equal(await page.locator(".stadium-player-tag").getAttribute("data-player-id"),current.actorId,"tag must identify the source event actor, not an invented possessor");
           const captures = [];
           for (const camera of ["broadcast", "tactical", "follow"]) {
-            await page.locator("#camera-mode").selectOption(camera);
+            await select2(page, "#camera-mode", camera);
             await page.waitForTimeout(300);
             captures.push(await pixels(page.locator("#canvas-host canvas"), `${mobile}-${camera}`));
             await page.evaluate(() => scrollTo(0, 0));
@@ -243,7 +249,7 @@ try {
           }
           assert.notDeepEqual(captures[0], captures[1], "camera presets must change framing");
           assert.notDeepEqual(captures[1], captures[2]);
-          await page.locator("#camera-mode").selectOption("broadcast");
+          await select2(page, "#camera-mode", "broadcast");
         }
       }
       await section(page, "story");
@@ -333,7 +339,8 @@ try {
   await fallback.getByRole("button",{name:"Pitch maps",exact:true}).click();
   assert.ok(await fallback.locator(".pitch-map").isVisible(),"failed canvas must retain the Go-rendered map");
   assert.ok(await fallback.locator(".smoothed-note").isHidden(),"fallback grid must not claim smoothing");
-  await fallback.locator("#map-selection").selectOption({index:1});
+  await fallback.locator("#map-selection + .select2-container .select2-selection").click();
+  await fallback.locator('.select2-results__option[aria-selected]').nth(1).click();
   assert.notEqual(await fallback.locator("#map-detail").textContent(), "", "inspection must work without Canvas 2D");
   await fallback.screenshot({path:path.join(output,"mobile-prototype-svg-fallback.png"),fullPage:true});
   await fallback.close();

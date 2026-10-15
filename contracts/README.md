@@ -35,7 +35,7 @@ CORNER and SHOT. Do not remove the corner scenario to fit a future event list.
 Other event kinds need agreed schemas and examples before implementation.
 
 All field names are camelCase. Enums are UPPER_SNAKE; locales are `en-GB`
-and `sw-KE`, personas are `CASUAL` and `ANALYST`. IDs match
+`sw-KE` and opt-in `hi-IN`, personas are `CASUAL` and `ANALYST`. IDs match
 `[A-Za-z0-9_.:-]{1,64}`. Match clocks remain elapsed milliseconds, not UTC
 timestamps. Future wall-clock fields must use UTC ISO-8601 with milliseconds.
 
@@ -88,8 +88,14 @@ replay. This is HTTP fixture delivery, not SSE or a live-server match clock.
 Python. The runnable Go API produces its own deterministic packs and cues.
 The local Python adapter validates request structure and template inputs with
 standard-library code; it is not a generic JSON Schema validation service.
-Template capability is currently en-GB only, despite sw-KE being reserved in
-the schemas. The three Python stages are replacement points, not real agents.
+Template capability covers `en-GB`, `sw-KE` and `hi-IN` for both personas.
+`locale-template-cases.json` provides six shared positive wordings and invalid
+locale examples, exercised independently by Go and Python. Translations are
+drafts for native-speaker review, not model-verified output. Model-backed
+publishing remains English-only; translated requests do not call a model.
+The v2 payload shape and evidence requirements are unchanged. Existing English
+clients are unaffected; clients must understand the extended locale enum before
+opting into Hindi. The three deterministic stages remain replacement points.
 
 The Go loader also checks facts that JSON Schema cannot express across the
 fixture: matching IDs and period, two opposite attacking directions,

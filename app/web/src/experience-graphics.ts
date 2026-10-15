@@ -88,6 +88,7 @@ function mapInteraction(host: HTMLElement, svg: SVGSVGElement, canvas?: HTMLCanv
   selection.value = mapSelections.get(memoryKey) ?? "";
   function inspect(): void {
     mapSelections.set(memoryKey, selection.value);
+    selection.dispatchEvent(new CustomEvent("pulse:selection", {bubbles:true}));
     const option = selection.selectedOptions[0];
     detail.textContent = option?.dataset.detail ?? "";
     evidence.replaceChildren();

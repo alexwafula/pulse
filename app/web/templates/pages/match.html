@@ -7,12 +7,14 @@
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
   <link rel="stylesheet" href="/static/tokens.css">
   <link rel="stylesheet" href="/static/pitch.css">
+  <link rel="stylesheet" href="/static/select2.css">
   {{if .Experience}}
   <meta name="htmx-config" content='{"allowEval":false,"allowScriptTags":false,"timeout":5000}'>
   <link rel="stylesheet" href="/static/experience.css">
   <script src="/static/htmx.js" defer></script>
   <script type="module" src="/static/experience.js"></script>
   {{end}}
+  <link rel="stylesheet" href="/static/controls.css">
   <script type="module" src="/static/pitch.js"></script>
 </head>
 <body{{if .Experience}} class="experience" data-section="live"{{end}}>
@@ -45,25 +47,29 @@
       <span class="header-context">{{if .Experience}}Match workspace{{else}}Match replay{{end}}</span>
       
       <label for="scenario" class="sr-only">Scenario</label>
-      <select id="scenario" class="scenario-picker" aria-label="Scenario">
+      <select id="scenario" class="scenario-picker" aria-label="Scenario" {{if .Experience}}hidden{{end}}>
         <option value="corner" {{if eq .Scenario "corner"}}selected{{end}}>Corner chance</option>
         <option value="central" {{if eq .Scenario "central"}}selected{{end}}>Central entry</option>
         <option value="exchange" {{if eq .Scenario "exchange"}}selected{{end}}>Passing exchange</option>
         <option value="late-siege" {{if eq .Scenario "late-siege"}}selected{{end}}>Late siege (11v11)</option>
         <option value="calm-midfield" {{if eq .Scenario "calm-midfield"}}selected{{end}}>Calm midfield (11v11)</option>
       </select>
+      {{if .Experience}}<button type="button" id="scenario-library-open" class="scenario-library-button" aria-haspopup="dialog"><i data-lucide="clapperboard"></i><span>Scenarios</span></button>{{end}}
       
-      <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo">
+      <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo" {{if .Experience}}hidden{{end}}>
         <i data-lucide="play"></i><span>Run demo</span>
       </button>
       
       <div class="audience-controls" role="group" aria-label="Audience">
         <button type="button" data-persona="CASUAL" aria-pressed="true">Casual</button>
         <button type="button" data-persona="ANALYST" aria-pressed="false">Analyst</button>
+      </div>
+      <div class="language-control">
         <label class="sr-only" for="locale">Language</label>
-        <select id="locale" aria-label="Language">
+        <select id="locale" aria-label="Language" data-no-translate>
           <option value="en-GB">English</option>
-          <option value="sw-KE" disabled>Kiswahili</option>
+          <option value="sw-KE">Kiswahili</option>
+          <option value="hi-IN">Hindi</option>
         </select>
       </div>
       
@@ -71,6 +77,15 @@
       {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-label="Score not recorded">&ndash; : &ndash;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
     </div>
   </header>
+  {{if .Experience}}
+  <dialog id="scenario-dialog" class="scenario-dialog" aria-labelledby="scenario-library-title">
+    <header class="library-heading"><div><h2 id="scenario-library-title">Scenarios</h2><small>Synthetic replays</small></div><button type="button" id="scenario-library-close" class="icon-button" aria-label="Close scenarios" title="Close scenarios"><i data-lucide="x"></i></button></header>
+    <div class="library-tools"><input type="search" id="scenario-search" placeholder="Search scenarios" aria-label="Search scenarios"><div class="library-filters" role="group" aria-label="Scenario type"><button type="button" data-scenario-filter="all" aria-pressed="true">All</button><button type="button" data-scenario-filter="full" aria-pressed="false">11v11</button><button type="button" data-scenario-filter="short" aria-pressed="false">Short sequences</button></div></div>
+    <div id="scenario-library" hx-get="/scenarios" hx-trigger="pulse:library" hx-swap="innerHTML"><p class="library-message">Loading replays</p></div>
+    <p id="scenario-library-empty" class="library-message" hidden>No matching scenarios</p>
+    <button type="button" id="scenario-library-retry" class="scenario-library-button" hidden><i data-lucide="rotate-ccw"></i><span>Retry</span></button>
+  </dialog>
+  {{end}}
 
   <main class="app-main">
     {{if .Experience}}
@@ -317,12 +332,18 @@
               <button type="button" id="evidence-button" class="evidence-button"><i data-lucide="list-video"></i><span>Evidence</span></button>
             </div>
           </div>
+          <details id="fact-check" class="fact-check" hidden>
+            <summary>Fact check</summary>
+            <dl><dt>Publication</dt><dd id="fact-check-publication"></dd><dt>Claims</dt><dd id="fact-check-counts"></dd><dt>Evidence window</dt><dd id="fact-check-window"></dd><dt>Facts</dt><dd id="fact-check-facts" data-no-translate></dd></dl>
+            <ul id="fact-check-claims"></ul>
+            <small id="fact-check-policy"></small>
+          </details>
         </section>
 
         {{if .Experience}}
         <section id="experience-panel" aria-label="Story, charts and maps" hidden>
           <form id="experience-inputs">
-            <input type="hidden" name="scenario" value="{{.Scenario}}"><input type="hidden" name="panel" value="story"><input type="hidden" name="atMs" value="{{.Match.StartMS}}"><input type="hidden" name="persona" value="CASUAL">
+            <input type="hidden" name="scenario" value="{{.Scenario}}"><input type="hidden" name="panel" value="story"><input type="hidden" name="atMs" value="{{.Match.StartMS}}"><input type="hidden" name="persona" value="CASUAL"><input type="hidden" name="locale" value="en-GB">
             <div id="story-controls" class="experience-controls">
               <div class="story-modes" role="group" aria-label="Story view">
                 <button type="button" data-story-mode="live" aria-pressed="true">Live story</button>

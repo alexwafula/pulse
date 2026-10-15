@@ -3,6 +3,9 @@ export {};
 import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } from "lucide";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
 import { createAnalytics, type Moment } from "./analytics";
+import { locale, localize, observeLocalization, supportedLocale, t } from "./i18n";
+import { closeDropdowns, initializeSelects, syncSelects } from "./selects";
+import { renderFactCheck } from "./fact-check";
 
 type ThreeModule = typeof import("./renderers/three");
 type PixiModule = typeof import("./renderers/pixi");
@@ -34,7 +37,7 @@ type Event = {
 type TrackedPlayer = Point & { playerId: string };
 type Frame = { timeMs: number; ball: Ball; players: TrackedPlayer[] };
 export type Replay = { schemaVersion: string; match: Match; events: Event[]; tracking: Frame[] };
-export type Cue = { id: string; startMs: number; endMs: number; replayStartMs: number; replayEndMs: number; text: string; eventIds: string[]; verification: { status: string } };
+export type Cue = { id: string; startMs: number; endMs: number; replayStartMs: number; replayEndMs: number; text: string; factIds: string[]; eventIds: string[]; verification: { status: string; claimsChecked: number; claimsPassed: number; claims: { claimId: string; supported: boolean; reason: string; eventIds: string[] }[] } };
 type CueFeed = { schemaVersion: string; cues: Cue[] };
 
 const svgNS = "http://www.w3.org/2000/svg";
@@ -113,6 +116,30 @@ function setDrawerTab(tabId: string, isUser = false): void {
 
 const localePicker = required<HTMLSelectElement>("#locale");
 const scenarioPicker = required<HTMLSelectElement>("#scenario");
+const preferences = new URL(location.href).searchParams;
+function savedPreference(key: string): string | null {
+  try { return localStorage.getItem(`pulse:${key}`); } catch { return null; }
+}
+const initialLocale = preferences.get("locale") ?? savedPreference("locale");
+localePicker.value = supportedLocale(initialLocale) ? initialLocale : "en-GB";
+persona = (preferences.get("persona") ?? savedPreference("persona")) === "ANALYST" ? "ANALYST" : "CASUAL";
+function saveAudience(): void {
+  document.body.dataset.locale = localePicker.value;
+  document.body.dataset.persona = persona;
+  document.documentElement.lang = localePicker.value.split("-")[0];
+  for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-persona]")) button.setAttribute("aria-pressed", String(button.dataset.persona === persona));
+  const url = new URL(location.href);
+  for (const [key, value, fallback] of [["locale", localePicker.value, "en-GB"], ["persona", persona, "CASUAL"]]) {
+    if (value === fallback) url.searchParams.delete(key); else url.searchParams.set(key, value);
+    try { localStorage.setItem(`pulse:${key}`, value); } catch { /* Storage can be disabled in private contexts. */ }
+  }
+  history.replaceState(null, "", url);
+  localize();
+  syncSelects();
+}
+saveAudience();
+observeLocalization();
+initializeSelects();
 function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenarioPicker.value)}`; }
 
 function clearEvidence(): void {
@@ -131,6 +158,7 @@ function renderInsight(): void {
   insightText.textContent = cue?.text ?? "Awaiting next moment";
   insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
   insightEvidence.hidden = !cue;
+  renderFactCheck(cue, insightSource, matchTime);
   if (cue) insightWindow.textContent = `${matchTime(cue.replayStartMs)}–${matchTime(cue.replayEndMs)} · ${cue.eventIds.length} events`;
 }
 
@@ -234,7 +262,7 @@ function matchTime(milliseconds: number): string {
 }
 
 function label(type: Event["type"]): string {
-  return type.charAt(0) + type.slice(1).toLowerCase();
+  return t(type.charAt(0) + type.slice(1).toLowerCase());
 }
 
 function playerName(id: string): string {
@@ -249,12 +277,12 @@ function eventSentence(event: Event): string {
   const actor = playerName(event.actorId);
   const recipient = event.recipientId ? playerName(event.recipientId) : "";
   switch (event.type) {
-    case "PASS": return `${actor} passes to ${recipient}`;
-    case "CARRY": return `${actor} carries the ball`;
-    case "CROSS": return `${actor} sends a cross`;
-    case "CLEARANCE": return `${actor} clears the ball`;
-    case "CORNER": return `${actor} delivers a corner to ${recipient}`;
-    case "SHOT": return event.outcome === "BLOCKED" ? `${actor}'s shot is blocked` : event.outcome === "INCOMPLETE" ? `${actor}'s shot is unsuccessful` : `${actor} takes a shot`;
+    case "PASS": return t("event.pass", {actor, recipient});
+    case "CARRY": return t("event.carry", {actor});
+    case "CROSS": return t("event.cross", {actor});
+    case "CLEARANCE": return t("event.clearance", {actor});
+    case "CORNER": return t("event.corner", {actor, recipient});
+    case "SHOT": return t(event.outcome === "BLOCKED" ? "event.blocked" : event.outcome === "INCOMPLETE" ? "event.incomplete" : "event.shot", {actor});
   }
 }
 
@@ -303,6 +331,20 @@ function createTimeline(): void {
     eventList.append(item);
     eventButtons.set(event.id, button);
   }
+}
+
+function refreshReplayText(): void {
+  eventCount.textContent = t("stats.actions", {count:replay.events.length});
+  const home = replay.match.teams[0];
+  pitchStamp.textContent = t("team.stamp", {team:home.name.toUpperCase(), direction:t(home.attackingDirection)});
+  document.querySelectorAll<HTMLElement>(".team-sub").forEach((element,index) => {
+    const team = replay.match.teams[index];
+    if (team) element.textContent = t("team.direction", {team:team.name, direction:t(team.attackingDirection)});
+  });
+  const phase = document.querySelector<HTMLElement>(".left-rail .rail-card .rail-sub");
+  if (phase) phase.textContent = t("stats.window", {start:matchTime(replay.match.startMs), end:matchTime(replay.match.endMs)});
+  const events = document.querySelector<HTMLElement>("#summary-actions")?.parentElement?.querySelector<HTMLElement>(".rail-sub");
+  if (events) events.textContent = t("stats.eventMeta", {count:replay.events.length, length:replay.match.pitch.lengthM, width:replay.match.pitch.widthM});
 }
 
 function interpolate(a: number, b: number, fraction: number): number {
@@ -358,8 +400,9 @@ function renderEvent(): void {
     if (currentEventId) eventButtons.get(currentEventId)?.removeAttribute("aria-current");
     if (event) {
       currentAction.textContent = `${label(event.type)} · ${eventSentence(event)}`;
-      detailTitle.textContent = `${label(event.type)} at ${matchTime(event.timeMs)}`;
-      detailDescription.textContent = `${teamName(event.teamId)} · ${event.outcome}`;
+      detailTitle.textContent = t("event.at", {kind:label(event.type), clock:matchTime(event.timeMs)});
+      detailDescription.textContent = `${teamName(event.teamId)} · ${t(event.outcome)}`;
+      if (persona === "ANALYST") detailDescription.textContent += ` · ${event.id} · ${event.from.x.toFixed(1)}, ${event.from.y.toFixed(1)} → ${event.to.x.toFixed(1)}, ${event.to.y.toFixed(1)} m`;
       eventButtons.get(nextID)?.setAttribute("aria-current", "true");
       const from = pitchPoint(event.from);
       const to = pitchPoint(event.to);
@@ -370,9 +413,9 @@ function renderEvent(): void {
       eventStart.setAttribute("cx", String(from.x));
       eventStart.setAttribute("cy", String(from.y));
     } else {
-      currentAction.textContent = `${replay.match.teams[0].name} building the attack`;
+      currentAction.textContent = t("event.building", {team:replay.match.teams[0].name});
       detailTitle.textContent = "Awaiting first action";
-      detailDescription.textContent = `The sequence starts at ${matchTime(replay.match.startMs)}.`;
+      detailDescription.textContent = t("event.start", {clock:matchTime(replay.match.startMs)});
     }
     currentEventId = nextID;
   }
@@ -414,12 +457,12 @@ function render(): void {
   if (playLabel !== nextPlayLabel) {
     playLabel = nextPlayLabel;
     playButton.replaceChildren(createElement(playing ? Pause : Play));
-    playButton.setAttribute("aria-label", playLabel);
-    playButton.title = playLabel;
+    playButton.setAttribute("aria-label", t(playLabel));
+    playButton.title = t(playLabel);
   }
   pitchRenderer?.update(sceneState);
   pitchRenderer?.draw();
-  const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}:${persona}`;
+  const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}`;
   if (publication !== publishedClock) {
     publishedClock = publication;
     document.dispatchEvent(new CustomEvent("pulse:clock", { detail: { timeMs: Math.floor(clock), playing, scenario: scenarioPicker.value } }));
@@ -455,6 +498,7 @@ function stopDemo(): void {
   if (runDemoButton) {
     runDemoButton.textContent = "Run demo";
     runDemoButton.setAttribute("aria-pressed", "false");
+    runDemoButton.hidden = document.body.classList.contains("experience");
   }
 }
 
@@ -465,6 +509,7 @@ async function startDemo(): Promise<void> {
   }
   demoRunning = true;
   if (runDemoButton) {
+    runDemoButton.hidden = false;
     runDemoButton.textContent = "Stop demo";
     runDemoButton.setAttribute("aria-pressed", "true");
   }
@@ -525,8 +570,8 @@ async function startDemo(): Promise<void> {
       clearEvidence();
       clock = returnClock;
       playing = true;
-      speed = 8;
-      for (const option of speedButtons) option.setAttribute("aria-pressed", String(option.dataset.speed === "8"));
+      speed = 10;
+      for (const option of speedButtons) option.setAttribute("aria-pressed", String(option.dataset.speed === "10"));
       previousFrameTime = 0;
       render();
     }
@@ -539,7 +584,8 @@ async function startDemo(): Promise<void> {
     playing = false;
     clock = replay.match.endMs;
     render();
-    recapPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (document.body.classList.contains("experience")) document.dispatchEvent(new CustomEvent("pulse:demo-complete"));
+    else recapPanel.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (_e) {
     // Aborted or cancelled
   } finally {
@@ -548,6 +594,7 @@ async function startDemo(): Promise<void> {
     if (runDemoButton) {
       runDemoButton.textContent = "Run demo";
       runDemoButton.setAttribute("aria-pressed", "false");
+      runDemoButton.hidden = document.body.classList.contains("experience");
     }
   }
 }
@@ -566,10 +613,10 @@ async function start(): Promise<void> {
       framePlayers.set(frame.timeMs, new Map(frame.players.map((player) => [player.playerId, player])));
     }
     clock = replay.match.startMs;
-    eventCount.textContent = `${replay.events.length} actions`;
+    eventCount.textContent = t("stats.actions", {count:replay.events.length});
     startLabel.textContent = matchTime(replay.match.startMs);
     endLabel.textContent = matchTime(replay.match.endMs);
-    pitchStamp.textContent = `${replay.match.teams[0].name.toUpperCase()} ATTACKING ${replay.match.teams[0].attackingDirection.toUpperCase()}`;
+    refreshReplayText();
     const clockPeriod = document.querySelector<HTMLElement>(".clock-period");
     if (clockPeriod) {
       clockPeriod.textContent = replay.match.period === 2 ? "2nd Half" : "1st Half";
@@ -640,6 +687,11 @@ async function start(): Promise<void> {
       stopDemo();
       const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
     });
+    document.addEventListener("pulse:library-open", () => { stopDemo(); playing = false; render(); });
+    document.querySelector("#fact-check")!.addEventListener("click", event => {
+      const id = (event.target as Element).closest<HTMLButtonElement>("[data-fact-source]")?.dataset.factSource;
+      if (id) eventButtons.get(id)?.click();
+    });
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-pass-evidence]"))) {
       const id = button.dataset.passEvidence ?? "";
       const event = replay.events.find((item) => item.id === id);
@@ -671,22 +723,36 @@ async function start(): Promise<void> {
       });
     }
     required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
-      const lines = Array.from(recapPanel.querySelectorAll("li p")).map((item) => item.textContent ?? "");
-      const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, "Synthetic sequence recap", `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
+      const source = document.querySelector('.story-content[data-panel="recap"]') ?? recapPanel;
+      const lines = Array.from(source.querySelectorAll("li p")).map((item) => item.textContent ?? "");
+      const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, t("Synthetic sequence recap"), `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
       const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
       const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
-    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) {
-      button.addEventListener("click", () => {
+    function changeAudience(nextPersona: string): void {
         stopDemo();
-        if (evidenceCue || momentClip) clock = returnClock;
-        clearEvidence(); playing = false;
-        persona = button.dataset.persona ?? "CASUAL";
-        for (const item of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-persona]"))) item.setAttribute("aria-pressed", String(item === button));
+        if (evidenceCue || momentClip) { clock = returnClock; playing = false; }
+        closeDropdowns(); clearEvidence();
+        persona = nextPersona;
+        saveAudience();
+        for (const event of replay.events) {
+          const button = eventButtons.get(event.id)!;
+          button.querySelector("strong")!.textContent = label(event.type);
+          button.querySelector(".event-copy > span")!.textContent = eventSentence(event);
+          button.setAttribute("aria-label", `Jump to ${matchTime(event.timeMs)}: ${eventSentence(event)}`);
+        }
+        if (currentEventId) eventButtons.get(currentEventId)?.removeAttribute("aria-current");
+        currentEventId = null; playLabel = "";
+        refreshReplayText();
         cues = []; displayedCueID = undefined; render(); void loadInsights();
-      });
+        document.dispatchEvent(new CustomEvent("pulse:audience", { detail: { persona, locale: locale() } }));
     }
+    for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-persona]"))) {
+      button.addEventListener("click", () => changeAudience(button.dataset.persona ?? "CASUAL"));
+    }
+    localePicker.addEventListener("change", () => changeAudience(persona));
+    document.dispatchEvent(new CustomEvent("pulse:audience", { detail: { persona, locale: locale() } }));
     evidenceButton.addEventListener("click", () => {
       stopDemo();
       setDrawerTab("timeline");
@@ -760,7 +826,10 @@ async function start(): Promise<void> {
     await switchView(["three", "pixi", "svg"].includes(preferredView) ? preferredView : "three");
     if (pitchLoading) pitchLoading.hidden = true;
     requestAnimationFrame(animate);
-    void loadInsights();
+    if (preferences.get("demo") === "1") {
+      const url = new URL(location.href); url.searchParams.delete("demo"); history.replaceState(null, "", url);
+      void startDemo();
+    } else void loadInsights();
     void analytics.load();
   } catch (error: unknown) {
     if (pitchLoading) pitchLoading.hidden = true;

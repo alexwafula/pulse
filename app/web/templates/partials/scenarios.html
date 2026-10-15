@@ -1,0 +1,14 @@
+<div class="scenario-grid">
+{{range .}}
+  <article class="scenario-tile" data-scenario-id="{{.ID}}" data-scenario-kind="{{.Kind}}" data-player-count="{{.Players}}" data-event-count="{{.Events}}" data-frame-count="{{.Frames}}">
+    <div class="scenario-thumb"><svg viewBox="-2 -2 109 72" role="img" aria-label="{{.Name}} starting positions">
+      {{template "mini-pitch"}}
+      {{range .Positions}}<circle cx="{{.X}}" cy="{{.Y}}" r="1.5" fill="{{.Fill}}" stroke="#fff" stroke-width="0.3"></circle>{{end}}
+      <circle cx="{{.BallX}}" cy="{{.BallY}}" r="0.9" fill="#fff" stroke="#14201c" stroke-width="0.4"></circle>
+    </svg><span class="scenario-duration">{{.Duration}}</span></div>
+    <div class="scenario-meta"><h3>{{.Name}}</h3><p>{{.Home}} &middot; {{.Away}}</p><p><span>{{.Players}}</span> <span>players</span> &middot; <span>{{.Events}}</span> <span>actions</span> &middot; {{if eq .Kind "full"}}11v11{{else}}<span>Short sequence</span>{{end}}</p><p>{{.Window}}</p>
+      <div class="scenario-actions"><a href="/?scenario={{.ID}}" data-scenario-link="{{.ID}}"><i data-lucide="play"></i><span>Replay</span></a><a href="/?scenario={{.ID}}&amp;demo=1" data-scenario-link="{{.ID}}" data-guided-demo><i data-lucide="clapperboard"></i><span>Guided demo</span></a></div>
+    </div>
+  </article>
+{{end}}
+</div>

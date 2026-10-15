@@ -1,12 +1,16 @@
 {
   "private": true,
   "scripts": {
-    "build:web": "esbuild app/web/src/renderers/three.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/three-renderer.js && esbuild app/web/src/renderers/pixi.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/pixi-renderer.js && esbuild app/web/src/pitch.ts --bundle --minify --format=esm --target=es2020 --external:./*-renderer.js --outfile=app/web/static/pitch.js && esbuild app/web/src/experience.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/experience.js && esbuild node_modules/htmx.org/dist/htmx.js --bundle --minify --outfile=app/web/static/htmx.js",
+    "build:web": "esbuild app/web/src/renderers/three.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/three-renderer.js && esbuild app/web/src/renderers/pixi.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/pixi-renderer.js && esbuild app/web/src/pitch.ts --bundle --minify --format=esm --target=es2020 --external:./*-renderer.js --outfile=app/web/static/pitch.js && esbuild app/web/src/experience.ts --bundle --minify --format=esm --target=es2020 --outfile=app/web/static/experience.js && esbuild node_modules/htmx.org/dist/htmx.js --bundle --minify --outfile=app/web/static/htmx.js && esbuild node_modules/select2/dist/css/select2.css --minify --outfile=app/web/static/select2.css",
     "check:web": "tsc --noEmit",
     "test:web": "node tests/integration/pitch-browser.mjs",
-    "test:experience": "node tests/integration/character-poses.mjs && node tests/integration/experience-browser.mjs"
+    "test:experience": "node tests/integration/character-poses.mjs && node tests/integration/experience-browser.mjs",
+    "test:controls": "node tests/integration/controls-browser.mjs",
+    "test:library": "node tests/integration/library-browser.mjs"
   },
   "devDependencies": {
+    "@types/jquery": "^4.0.1",
+    "@types/select2": "^4.0.63",
     "@types/three": "^0.186.0",
     "esbuild": "^0.28.2",
     "playwright-core": "^1.63.0",
@@ -14,8 +18,10 @@
   },
   "dependencies": {
     "htmx.org": "2.0.11",
+    "jquery": "3.7.1",
     "lucide": "^1.52.0",
     "pixi.js": "^8.22.0",
+    "select2": "4.0.13",
     "three": "^0.186.1"
   }
 }

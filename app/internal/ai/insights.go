@@ -18,7 +18,7 @@ import (
 
 // Template is intentionally narrow: arbitrary prose cannot pass the initial gate.
 func Template(pack domain.FactPack, locale, persona string) (domain.InsightResponse, error) {
-	if locale != "en-GB" || (persona != "CASUAL" && persona != "ANALYST") {
+	if !domain.SupportedLocale(locale) || (persona != "CASUAL" && persona != "ANALYST") {
 		return domain.InsightResponse{}, fmt.Errorf("unsupported template audience")
 	}
 	if pack.SchemaVersion != domain.SchemaVersion || len(pack.Facts) != 1 || pack.Period < 1 || pack.Period > 4 || pack.WindowStartMS < 0 || pack.WindowEndMS < pack.WindowStartMS {
@@ -34,10 +34,7 @@ func Template(pack domain.FactPack, locale, persona string) (domain.InsightRespo
 	if !ok || count != 1 || fact.Metric != "set_piece_shots" || fact.Unit != "shots" || len(fact.EventIDs) != 2 {
 		return domain.InsightResponse{}, fmt.Errorf("unsupported corner fact")
 	}
-	text := "The corner produced 1 shot."
-	if persona == "ANALYST" {
-		text = "Set-piece sequence: 1 shot following the corner."
-	}
+	text := templateTexts[locale][persona]
 	draft := domain.NarrationDraft{SchemaVersion: domain.SchemaVersion, ID: "draft-" + pack.ID,
 		FactPackID: pack.ID, Locale: locale, Persona: persona, Text: text,
 		Claims: []domain.Claim{{ID: "claim-" + fact.ID, Text: text, FactIDs: []string{fact.ID}, EventIDs: append([]string{}, fact.EventIDs...)}}}

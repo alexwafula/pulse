@@ -80,8 +80,7 @@ try {
         }
     }
     [pscustomobject]@{
-        Preview = "$webURL/experience?scenario=corner&view=three"
-        Stadium = "$webURL/experience?scenario=late-siege&view=three"
+        Pulse = "$webURL/"
         AgentURL = $agentURL
         AgentMode = $AgentMode
         WebPID = $web.Id

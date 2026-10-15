@@ -1,5 +1,5 @@
 {{define "experience-panel"}}
-<div class="story-content" data-time-ms="{{.TimeMS}}" data-panel="{{.View}}" data-story-mode="{{.Mode}}" data-persona="{{.Persona}}" data-map-mode="{{.MapMode}}">
+<div class="story-content" data-time-ms="{{.TimeMS}}" data-panel="{{.View}}" data-story-mode="{{.Mode}}" data-persona="{{.Persona}}" data-locale="{{.Locale}}" data-map-mode="{{.MapMode}}">
   <div class="section-heading"><h3>{{if eq .View "recap"}}Sequence recap{{else if eq .View "analytics"}}Match patterns{{else if eq .Mode "catchup"}}Story so far{{else if eq .Mode "highlights"}}Chances &amp; deliveries{{else if .Focus}}{{.Focus.Name}}{{else}}Match story{{end}}</h3><time>{{.Clock}}</time></div>
   {{if eq .View "recap"}}
     {{if .Complete}}

@@ -49,7 +49,7 @@ Windows two-service startup (Go + Python, free template mode, automatic free por
 .\scripts\start-local.ps1
 ```
 
-The printed Preview/Stadium URLs and process IDs are authoritative. Use
+The printed Pulse URL and process IDs are authoritative. Use
 `-SkipWebBuild` for committed assets. See [collaborator meeting](docs/COLLABORATOR-MEETING.md)
 for prerequisites, checks, owners and the demo walkthrough.
 
@@ -180,8 +180,10 @@ replay contract, so the header shows a neutral unavailable-score placeholder.
 Evidence replays
 27:52-27:58 at 1x, highlights the corner and shot, and stops at the clip end.
 Return to match restores your previous clock. Restart clears the insight until
-the moment occurs again. The template supports English CASUAL and ANALYST;
-Kiswahili remains unsupported until language review and glossary work.
+the moment occurs again. CASUAL and ANALYST templates are supported in all three
+locales. English, Kiswahili and Hindi interfaces and deterministic templates are available
+locally. Translations are drafts requiring native-speaker review before the demo;
+model-backed publishing remains English-only.
 
 Go calculates the first shot after a completed corner, in the same possession
 phase and within 12 seconds, before any opponent event or another corner. A
@@ -234,7 +236,7 @@ entries and entry-to-shot conversion. Statistics follow rewind and evidence
 playback; conversion is N/A when there are no qualifying entries.
 
 Casual/Analyst buttons request the corresponding English insight wording.
-Kiswahili remains disabled until native-speaker review. At the sequence end,
+Kiswahili and Hindi select translated templates without model calls. At the sequence end,
 a deterministic recap appears with event evidence and a text download. No
 goal outcome has been added pending shared-contract approval.
 
@@ -275,6 +277,22 @@ JSON replay, insight and fact-pack responses support negotiated gzip. Cached
 metrics/moments already support gzip and ETags; they are not compressed twice.
 Streaming transport is still pending. See [decision 0011](docs/decisions/0011-replay-backed-analytics.md)
 for scope and the local compression benchmark.
+
+## Language and control review
+
+Select2 dropdowns are bundled and served locally with searchable options,
+keyboard controls and one open menu at a time. Replay-panel refreshes are deferred
+while a menu is open. Header and view controls wrap on narrow screens.
+Language/persona choices persist across navigation, scenarios and reloads.
+Casual keeps source-event wording concise; Analyst adds event IDs, phases and
+coordinates. Changing either preserves the replay clock and ordinary playback.
+
+The opt-in `hi-IN` locale extends the existing v2 locale enum alongside `en-GB`
+and `sw-KE`. Both Go and Python use the shared six-case template examples and
+retain complete fact/event references. Translated output is template-only,
+not fresh model analysis or a claim of reviewed language quality.
+Run `node tests/integration/controls-browser.mjs` against the local server.
+See [decision 0021](docs/decisions/0021-localized-interface-and-controls.md).
 
 With the Go server running, check all renderers and mobile layouts:
 

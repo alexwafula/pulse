@@ -28,6 +28,9 @@ func validateResponse(pack domain.FactPack, response domain.InsightResponse, loc
 	if response.Verification.Status == "FALLBACK_TEMPLATE" {
 		return ValidateTemplateResponse(pack, response, locale, persona)
 	}
+	if locale != "en-GB" {
+		return fmt.Errorf("cue gate: translated locales are template-only pending language review")
+	}
 	trusted, err := Template(pack, locale, persona)
 	if err != nil {
 		return err

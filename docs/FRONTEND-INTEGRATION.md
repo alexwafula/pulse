@@ -117,7 +117,9 @@ server-to-server boundary, not a browser endpoint.
   with empty `reasons`; `contextEventIds` are context, never evidence.
 - Insight text comes only from `/api/insights` after the Go cue gate. Current
   `FALLBACK_TEMPLATE` output is deterministic, not real AI verification.
-- English CASUAL/ANALYST work. Kiswahili remains disabled pending review.
+- CASUAL/ANALYST templates work in `en-GB`, `sw-KE` and `hi-IN`. Translations are
+  drafts for native-speaker review, not new model-backed analysis. Use `locale`
+  on insight/panel requests. Raw replay and metric values are never translated.
 - Occupancy sums recorded player milliseconds in 21 x 17 cells (5 x 4 metres),
   holding each position until the next frame or the cutoff. No future positions
   are used. Team totals sum all selected players' time, so they can exceed elapsed
@@ -199,8 +201,8 @@ restores them on Live. Avoid cached parent assumptions. Map canvases dispatch
 `pulse:inspect` command. Canvas observers are disposed on each HTMX swap; SVG and
 source evidence buttons remain the fallback. Do not calculate football in canvas.
 
-Map cells and passing players now support touch/click selection plus the native
-`#map-selection` selector. `#map-detail` announces the selected source detail;
+Map cells and passing players now support touch/click selection plus the Select2
+`#map-selection` inspector. `#map-detail` announces the selected source detail;
 passing-player evidence comes from elapsed completed-pass involvements in Go.
 Heatmap cells carry player-time only and must never fabricate event evidence.
 Selection is scoped by scenario/team/map and cleared when rewinding removes it.
@@ -241,6 +243,8 @@ $env:PULSE_URL = 'http://127.0.0.1:8080'
 node tests/integration/pitch-browser.mjs
 node tests/integration/core-browser.mjs
 node tests/integration/analytics-browser.mjs
+npm run test:controls
+npm run test:library
 npm run test:experience
 ```
 
@@ -251,3 +255,19 @@ No live model calls, paid services or cloud deployment are required for this dem
 Competition fit and unimplemented prototype features:
 [Story and maps decision](decisions/0014-story-views-and-replay-maps.md).
 Full visual port: [prototype presentation decision](decisions/0015-prototype-visual-system.md).
+
+## Replay library and dropdown lifecycle
+
+`GET /scenarios` returns HTML from Go's available fixture catalog. The Scenarios
+dialog loads it once through HTMX; it does not fetch entire replays for every
+thumbnail or recreate the running pitch. Links retain audience and renderer.
+`?demo=1` starts the guided flow once and is removed from the URL afterward.
+
+Enhance selects on `htmx:afterSettle`, not after swap: HTMX otherwise restores
+class/style and reveals native controls alongside Select2. Destroy instances
+before cleanup. A `pulse:selection` event from a native select synchronizes its
+widget without changing the match clock or requesting a new fragment.
+
+Fact check renders the gated cue's existing verification/fact/event metadata.
+Do not turn template output into a Verified badge. See the
+[prototype audit and cloud checklist](PROTOTYPE-REVIEW-2026-10-15.md).

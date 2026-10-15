@@ -43,3 +43,33 @@ func recap(replay domain.Replay) []recapItem {
 	}
 	return items
 }
+
+func localizedRecap(replay domain.Replay, catalog uiCatalog, locale string) []recapItem {
+	items := []recapItem{}
+	series, _ := metrics.AttackSeries(replay)
+	for _, team := range series[len(series)-1].Teams {
+		if team.Shots > 0 {
+			items = append(items, recapItem{Text: catalog.text(locale, "recap.count", map[string]string{"team": team.Team.Name, "count": fmt.Sprint(team.Shots)}), EventIDs: team.ShotEventIDs})
+		}
+	}
+	for _, event := range replay.Events {
+		if event.Type != "SHOT" {
+			continue
+		}
+		key := "recap.completed"
+		if event.Outcome == "BLOCKED" {
+			key = "recap.blocked"
+		} else if event.Outcome == "INCOMPLETE" {
+			key = "recap.incomplete"
+		}
+		text := catalog.text(locale, key, nil)
+		for _, player := range replay.Match.Players {
+			if player.ID == event.ActorID {
+				text = player.Name + ": " + text
+				break
+			}
+		}
+		items = append(items, recapItem{Text: text, EventIDs: []string{event.ID}})
+	}
+	return items
+}

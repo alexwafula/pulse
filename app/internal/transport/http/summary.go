@@ -56,11 +56,7 @@ func replayPage(replay domain.Replay, graphs []graphSnapshot, attacks []metrics.
 	if scenario == "" {
 		scenario = "corner"
 	}
-	names := map[string]string{"corner": "Corner chance", "central": "Central entry", "exchange": "Passing exchange", "late-siege": "Late siege", "calm-midfield": "Calm midfield"}
-	name := names[scenario]
-	if name == "" {
-		name = "Match replay"
-	}
+	name := scenarioName(scenario)
 	initials := make([]string, len(replay.Match.Teams))
 	for i, team := range replay.Match.Teams {
 		if chars := []rune(team.Name); len(chars) > 0 {

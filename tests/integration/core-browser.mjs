@@ -78,9 +78,11 @@ try {
     await page.locator('[data-recap-evidence="evt-04"]').first().click();
     assert.equal(await page.locator("#match-clock").textContent(), "27:36");
     assert.equal(await page.locator("#recap-panel").isVisible(), false);
-    assert.equal(await page.locator('#locale option[value="sw-KE"]').isDisabled(), true);
+    assert.equal(await page.locator('#locale option[value="sw-KE"]').isDisabled(), false);
+    assert.equal(await page.locator('#locale option[value="hi-IN"]').isDisabled(), false);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-    await page.locator("#scenario").selectOption("exchange");
+    await page.locator("#scenario + .select2-container .select2-selection").click();
+    await page.getByRole("option",{name:"Passing exchange",exact:true}).click();
     await page.waitForURL(/scenario=exchange/);
     await page.waitForFunction(() => document.querySelector("#play-button")?.title === "Pause");
     await page.getByRole("button", { name: "Pause", exact: true }).click();

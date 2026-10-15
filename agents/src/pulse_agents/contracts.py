@@ -39,7 +39,7 @@ class NarrationDraft(TypedDict):
     schemaVersion: str
     id: str
     factPackId: str
-    locale: Literal["en-GB", "sw-KE"]
+    locale: Literal["en-GB", "sw-KE", "hi-IN"]
     persona: Literal["CASUAL", "ANALYST"]
     text: str
     claims: list[Claim]
@@ -64,7 +64,7 @@ class VerificationResult(TypedDict):
 class InsightRequest(TypedDict):
     schemaVersion: str
     factPack: FactPack
-    locale: Literal["en-GB", "sw-KE"]
+    locale: Literal["en-GB", "sw-KE", "hi-IN"]
     persona: Literal["CASUAL", "ANALYST"]
 
 
@@ -83,7 +83,7 @@ class OverlayCue(TypedDict):
     endMs: int
     replayStartMs: int
     replayEndMs: int
-    locale: Literal["en-GB", "sw-KE"]
+    locale: Literal["en-GB", "sw-KE", "hi-IN"]
     persona: Literal["CASUAL", "ANALYST"]
     kind: Literal["COMMENTARY"]
     verification: VerificationResult
@@ -109,7 +109,7 @@ def unique_ids(values: list[str]) -> bool:
 def validate_draft(draft: NarrationDraft, pack: FactPack) -> None:
     if (draft["schemaVersion"] != SCHEMA_VERSION or not valid_id(draft["id"])
             or draft["factPackId"] != pack["id"]
-            or draft["locale"] not in ("en-GB", "sw-KE")
+            or draft["locale"] not in ("en-GB", "sw-KE", "hi-IN")
             or draft["persona"] not in ("CASUAL", "ANALYST")
             or not 1 <= len(draft["text"]) <= 240 or not draft["claims"]):
         raise ValueError("Invalid narration draft")

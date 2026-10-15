@@ -74,7 +74,7 @@ npm run build:web
 echo "✓ Web assets build succeeded."
 
 echo "=== [9/10] Verifying web bundle reproducibility ==="
-git diff --exit-code -- app/web/static/pitch.js app/web/static/three-renderer.js app/web/static/pixi-renderer.js app/web/static/experience.js app/web/static/htmx.js
+git diff --exit-code -- app/web/static/pitch.js app/web/static/three-renderer.js app/web/static/pixi-renderer.js app/web/static/experience.js app/web/static/htmx.js app/web/static/select2.css
 echo "✓ Web bundle is up-to-date with source."
 
 echo "=== [10/10] Validating Azure Bicep templates ==="

@@ -12,7 +12,7 @@ import (
 
 // Presentation data only: the shared v2 contracts and cue gate stay unchanged.
 type experiencePanel struct {
-	View, Clock            string
+	View, Clock, Locale    string
 	Mode, Persona, MapMode string
 	TimeMS                 int64
 	Complete               bool
@@ -34,12 +34,15 @@ type playerStoryStats struct {
 }
 
 type experienceOptions struct {
-	mode, persona, playerID, teamID, mapMode string
+	mode, persona, playerID, teamID, mapMode, locale string
 }
 
 func storyPanel(replay domain.Replay, page pageData, view string, at int64, options experienceOptions) experiencePanel {
+	if options.locale == "" {
+		options.locale = "en-GB"
+	}
 	panel := experiencePanel{View: view, TimeMS: at, Clock: clockText(at), Complete: at == replay.Match.EndMS,
-		Mode: options.mode, Persona: options.persona, MapMode: options.mapMode}
+		Mode: options.mode, Persona: options.persona, MapMode: options.mapMode, Locale: options.locale}
 	if view == "analytics" {
 		panel.Analytics = analyticsPanel(replay, page, at, options.teamID)
 		return panel
@@ -107,11 +110,19 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 		case "SHOT":
 			text = actor + " attempts a shot."
 		}
+		if options.locale != "en-GB" {
+			key := "story." + strings.ToLower(event.Type)
+			if event.Type == "PASS" && event.RecipientID == "" {
+				key = "story.passOnly"
+			}
+			text = page.catalog.text(options.locale, key, map[string]string{"actor": actor, "recipient": players[event.RecipientID]})
+		}
 		outcome := shotOutcome(event.Outcome)
 		if event.Type != "SHOT" {
 			outcome = strings.ToLower(event.Outcome)
 		}
-		panel.Actions = append(panel.Actions, storyAction{ID: event.ID, Clock: clockText(event.TimeMS), Kind: event.Type,
+		outcome = page.catalog.text(options.locale, outcome, nil)
+		panel.Actions = append(panel.Actions, storyAction{ID: event.ID, Clock: clockText(event.TimeMS), Kind: page.catalog.text(options.locale, event.Type, nil),
 			Team: teams[event.TeamID], Text: text, Outcome: outcome, Phase: event.PhaseID,
 			Coordinates: fmt.Sprintf("(%.1f, %.1f) to (%.1f, %.1f) m", event.From.X, event.From.Y, event.To.X, event.To.Y)})
 	}
@@ -121,6 +132,9 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 	}
 	if panel.Complete {
 		panel.Recap = page.Recap
+		if options.locale != "en-GB" {
+			panel.Recap = localizedRecap(replay, page.catalog, options.locale)
+		}
 	}
 	return panel
 }
@@ -143,7 +157,10 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 			return
 		}
 		options := experienceOptions{mode: r.URL.Query().Get("mode"), persona: r.URL.Query().Get("persona"),
-			playerID: r.URL.Query().Get("playerId"), teamID: r.URL.Query().Get("teamId"), mapMode: r.URL.Query().Get("map")}
+			playerID: r.URL.Query().Get("playerId"), teamID: r.URL.Query().Get("teamId"), mapMode: r.URL.Query().Get("map"), locale: r.URL.Query().Get("locale")}
+		if options.locale == "" {
+			options.locale = "en-GB"
+		}
 		if options.mode == "" {
 			options.mode = "live"
 		}
@@ -166,7 +183,7 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 		for _, team := range replay.Match.Teams {
 			validTeam = validTeam || team.ID == options.teamID
 		}
-		if !validPlayer || !validTeam ||
+		if !validPlayer || !validTeam || !domain.SupportedLocale(options.locale) ||
 			(options.persona != "CASUAL" && options.persona != "ANALYST") ||
 			(options.mode != "live" && options.mode != "catchup" && options.mode != "highlights" && options.mode != "player") ||
 			(options.mapMode != "occupancy" && options.mapMode != "shots" && options.mapMode != "network") {

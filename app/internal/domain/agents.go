@@ -59,7 +59,7 @@ type VerificationResult struct {
 
 func (d NarrationDraft) Validate(pack FactPack) error {
 	if d.SchemaVersion != SchemaVersion || !validID(d.ID) || d.FactPackID != pack.ID ||
-		(d.Locale != "en-GB" && d.Locale != "sw-KE") || (d.Persona != "CASUAL" && d.Persona != "ANALYST") ||
+		!SupportedLocale(d.Locale) || (d.Persona != "CASUAL" && d.Persona != "ANALYST") ||
 		!validText(d.Text) || len(d.Claims) == 0 {
 		return fmt.Errorf("invalid narration draft")
 	}

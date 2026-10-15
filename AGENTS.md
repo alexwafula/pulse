@@ -138,7 +138,7 @@ Deterministic work (metrics, moment detection, cue building, validation) is **co
 
 Rules from the broader contract draft (verify in `contracts/`; several below
 remain future work). Current golden path supports the six existing replay
-event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE only:
+event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE/hi-IN templates:
 
 - A completed pass has a recipient. A possession change is between two different teams and `teamId` is the team that gains the ball.
 - Narrative cues need at least one evidence event and verification status `VERIFIED` or `FALLBACK_TEMPLATE`. Data-only cues use `NOT_REQUIRED`.
@@ -201,7 +201,7 @@ Failure handling: Verifier rejects -> Narrator retries once with the rejection r
 
 ### 7.4 Locales
 
-- Supported: `en-GB`, `sw-KE`. Generate natively from facts using the glossary in `locales/`. Do not translate finished English.
+- Interface/template locales: `en-GB`, `sw-KE`, `hi-IN`. Kiswahili/Hindi are deterministic translation drafts pending native-speaker review; model-backed publication remains English-only and translated requests make no model calls.
 - If a football term has no established term in the glossary, keep the English term. Never invent terms.
 - Swahili output is reviewed by a native speaker before the demo.
 
@@ -228,6 +228,8 @@ Local checks:
 - Core UI: `node tests/integration/core-browser.mjs` (running local Go server required)
 - Replay analytics: `node tests/integration/analytics-browser.mjs` (running local Go server; set `PULSE_URL` and, if needed, `CHROME_PATH`)
 - Default homepage: `node tests/integration/homepage-browser.mjs` (desktop/mobile, stadium pixels and routing)
+- UI controls: `node tests/integration/controls-browser.mjs` (Select2, all locales/personas, persistence, menu stability and 320/390/768/1440px layouts)
+- Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions
