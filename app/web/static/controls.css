@@ -86,3 +86,5 @@ html[lang=hi] body { --font-ui: 'Nirmala UI', 'Noto Sans Devanagari', sans-serif
   .experience .language-control { grid-column: 1; grid-row: 4; }
   .experience .demo-button { grid-column: 2; grid-row: 4; justify-self: end; }
 }
+.build-footer { display: flex; justify-content: flex-end; padding: 18px 4px 4px; }
+.build-footer small { font: 500 11px/1.4 var(--font-mono, ui-monospace, monospace); color: #8a95a5; letter-spacing: .02em; }

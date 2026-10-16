@@ -136,6 +136,8 @@ function saveAudience(): void {
   history.replaceState(null, "", url);
   localize();
   syncSelects();
+  const build = document.querySelector<HTMLElement>("#build-label");
+  if (build) build.textContent = t("build.label", { sha: build.dataset.build || "unknown" });
 }
 saveAudience();
 observeLocalization();

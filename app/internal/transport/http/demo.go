@@ -41,7 +41,11 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 	if err != nil {
 		return nil, err
 	}
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return withBuild(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/version" {
+			serveVersion(w, r)
+			return
+		}
 		if r.URL.Path == "/scenarios" {
 			library.ServeHTTP(w, r)
 			return
@@ -59,5 +63,5 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 			return
 		}
 		handler.ServeHTTP(w, r)
-	}), nil
+	})), nil
 }
