@@ -27,9 +27,13 @@ rejects unauthenticated insight requests with 401. The model-call cap is zero.
 Foundry deployment `pulse-insights` (`gpt-4.1-mini`, `2025-04-14`) is provisioned.
 These read-only checks made no model calls or resource changes.
 
-The localized controls/replay-library branch is not deployed yet. Feature-branch
-pushes run CI but do not replace production; merging to main triggers the gated
-release. Logs, ingress isolation, soak testing and broader live evaluations
+As of October 16 the localized controls/replay-library release (PR #25, main
+`ce435e2d5906dc5ed86741799e2e2cd9b1a44cec`) is live: its Build Azure Images run
+passed checks, build and deploy, and the served page and every static bundle
+match a local build of that commit byte for byte. From the next release on, read
+the exact live commit from `/version` (see [release and rollback](RELEASE.md))
+instead of this file. Feature-branch pushes run CI but do not replace
+production; merging to main triggers the gated release. Logs, ingress isolation, soak testing and broader live evaluations
 remain open. See the [current review/checklist](PROTOTYPE-REVIEW-2026-10-15.md).
 
 ## Links

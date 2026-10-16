@@ -33,3 +33,22 @@ branch restriction still applies. Docs-only pushes do not rebuild images.
 App deployment is a separate, explicitly approved Bicep operation by the project
 owner. Check both uploaded tags and CI before deployment, then verify public Go
 health, internal Python delivery, rendered pitch and source evidence.
+
+## Update: subjects now target `main` (Oct 14, ADR 0020)
+
+The subject above is historical. Since `3eade0a` (PR #24) both federated
+credentials trust `main` only, and the workflow can mint a token only for it:
+
+- Build identity, `infra/azure/github-build.bicep:24-26` and `:44`: `branch` allows
+  and defaults to `'main'`, giving
+  `repo:alexwafula@91899603/pulse@1404538837:ref:refs/heads/main`
+  (credential `github-main`, formerly `github-meeting-readiness`).
+- Deploy identity, `infra/azure/github-deploy.bicep:15`:
+  `subject: 'repo:alexwafula@91899603/pulse@1404538837:ref:refs/heads/main'`.
+- Workflow, `.github/workflows/build-images.yml:3-6`: the triggers are
+  `push: branches: ['main']` and `workflow_dispatch`. Every job that requests a
+  token checks `github.ref == 'refs/heads/main'` (`:17`, `:22`, `:93`).
+
+These lines describe the repository. The credentials configured in Azure were not
+re-read for this note. Release and rollback steps are in
+[RELEASE.md](../RELEASE.md).
