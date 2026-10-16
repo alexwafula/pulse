@@ -31,6 +31,16 @@ try {
       assert.equal(await page.locator("body").getAttribute("data-locale"), locale);
       assert.equal(await build.textContent(), `build ${version.shortSha}`);
     }
+    if (mobile) {
+      // At the end of the page the label sits just above the fixed bottom nav; it must never be covered by it.
+      await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+      const [label, nav] = [await build.boundingBox(), await page.locator(".experience-nav").boundingBox()];
+      assert.ok(label && nav, "build label and bottom nav must both have layout boxes");
+      const overlaps = label.x < nav.x+nav.width && nav.x < label.x+label.width && label.y < nav.y+nav.height && nav.y < label.y+label.height;
+      assert.equal(overlaps, false, `build label ${JSON.stringify(label)} overlaps bottom nav ${JSON.stringify(nav)}`);
+      assert.ok(label.y >= 0 && label.y+label.height <= nav.y, "build label must be on screen above the bottom nav at the end of the page");
+      await page.evaluate(() => scrollTo(0, 0));
+    }
     assert.equal(await page.locator("#scenario").inputValue(), "late-siege");
     assert.equal(await page.locator("#player-layer g").count(), 22);
     assert.equal(await page.locator(".dashboard-link").textContent(), "Legacy");
