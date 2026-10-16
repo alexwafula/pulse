@@ -1,6 +1,6 @@
 {
   "en-GB": {
-    "stats.window":"Both teams • {start} - {end}", "stats.eventMeta":"{count} actions • {length}m × {width}m", "team.stamp":"{team} ATTACKING {direction}", "team.direction":"{team} • Attacking {direction}",
+    "build.label":"build {sha}", "stats.window":"Both teams • {start} - {end}", "stats.eventMeta":"{count} actions • {length}m × {width}m", "team.stamp":"{team} ATTACKING {direction}", "team.direction":"{team} • Attacking {direction}",
     "stats.of":"{count} of {total}", "stats.attacks":"{entries} {entry} / {shots} {shot}", "stats.converted":"{count} of {total} converted", "stats.passes":"{count} completed {pass}", "stats.actions":"{count} actions",
     "event.pass": "{actor} passes to {recipient}",
     "event.carry": "{actor} carries the ball",
@@ -23,7 +23,7 @@
     "recap.count":"{team} recorded {count} shot attempts in this sequence.", "recap.blocked":"The shot was blocked.", "recap.incomplete":"The shot was unsuccessful.", "recap.completed":"The shot was completed; no goal outcome is recorded."
   },
   "sw-KE": {
-    "Scenarios":"Matukio", "Synthetic replays":"Marudio ya kubuni", "Close scenarios":"Funga matukio", "Search scenarios":"Tafuta matukio", "Scenario type":"Aina ya tukio", "All":"Yote", "Short sequences":"Mifululizo mifupi", "Short sequence":"Mfululizo mfupi", "Loading replays":"Inapakia marudio", "No matching scenarios":"Hakuna matukio yanayolingana", "players":"wachezaji", "actions":"matukio", "Guided demo":"Onyesho elekezi",
+    "build.label":"build {sha}", "Scenarios":"Matukio", "Synthetic replays":"Marudio ya kubuni", "Close scenarios":"Funga matukio", "Search scenarios":"Tafuta matukio", "Scenario type":"Aina ya tukio", "All":"Yote", "Short sequences":"Mifululizo mifupi", "Short sequence":"Mfululizo mfupi", "Loading replays":"Inapakia marudio", "No matching scenarios":"Hakuna matukio yanayolingana", "players":"wachezaji", "actions":"matukio", "Guided demo":"Onyesho elekezi",
     "Replays unavailable":"Marudio hayapatikani", "Fact check":"Ukaguzi wa ukweli", "Publication":"Uchapishaji", "Claims":"Madai", "Evidence window":"Muda wa ushahidi", "Facts":"Ukweli", "Not model-verified":"Haijathibitishwa na modeli", "Supported":"Ina ushahidi", "Rejected":"Imekataliwa", "Go publication checks passed":"Ukaguzi wa Go wa uchapishaji umepita", "Deterministic template; Go publication checks passed":"Kiolezo cha kanuni; ukaguzi wa Go wa uchapishaji umepita",
     "stats.window":"Timu zote • {start} - {end}", "stats.eventMeta":"Matukio {count} • {length}m × {width}m", "team.stamp":"{team} INASHAMBULIA {direction}", "team.direction":"{team} • Inashambulia {direction}", "LEFT":"KUSHOTO", "RIGHT":"KULIA",
     "On the pitch":"Uwanjani", "Selected action":"Tukio lililochaguliwa", "First half":"Kipindi cha kwanza", "1st half":"KIPINDI CHA KWANZA", "Tracking metrics unavailable":"Vipimo vya nafasi havipatikani", "Metrics unavailable":"Vipimo havipatikani", "Box Entries → Shots":"Kuingia eneo la penalti → Mashuti",
@@ -63,7 +63,7 @@
     "Completed shot; no goal outcome recorded":"Shuti limekamilika; bao halijarekodiwa"
   },
   "hi-IN": {
-    "Scenarios":"परिदृश्य", "Synthetic replays":"काल्पनिक रीप्ले", "Close scenarios":"परिदृश्य बंद करें", "Search scenarios":"परिदृश्य खोजें", "Scenario type":"परिदृश्य का प्रकार", "All":"सभी", "Short sequences":"छोटे क्रम", "Short sequence":"छोटा क्रम", "Loading replays":"रीप्ले लोड हो रहे हैं", "No matching scenarios":"कोई मेल खाता परिदृश्य नहीं", "players":"खिलाड़ी", "actions":"घटनाएं", "Guided demo":"निर्देशित डेमो",
+    "build.label":"build {sha}", "Scenarios":"परिदृश्य", "Synthetic replays":"काल्पनिक रीप्ले", "Close scenarios":"परिदृश्य बंद करें", "Search scenarios":"परिदृश्य खोजें", "Scenario type":"परिदृश्य का प्रकार", "All":"सभी", "Short sequences":"छोटे क्रम", "Short sequence":"छोटा क्रम", "Loading replays":"रीप्ले लोड हो रहे हैं", "No matching scenarios":"कोई मेल खाता परिदृश्य नहीं", "players":"खिलाड़ी", "actions":"घटनाएं", "Guided demo":"निर्देशित डेमो",
     "Replays unavailable":"रीप्ले उपलब्ध नहीं हैं", "Fact check":"तथ्य जांच", "Publication":"प्रकाशन", "Claims":"दावे", "Evidence window":"साक्ष्य का समय", "Facts":"तथ्य", "Not model-verified":"मॉडल द्वारा सत्यापित नहीं", "Supported":"समर्थित", "Rejected":"अस्वीकृत", "Go publication checks passed":"Go प्रकाशन जांच सफल", "Deterministic template; Go publication checks passed":"नियम आधारित टेम्पलेट; Go प्रकाशन जांच सफल",
     "stats.window":"दोनों टीमें • {start} - {end}", "stats.eventMeta":"{count} घटनाएँ • {length}m × {width}m", "team.stamp":"{team} — {direction} ओर आक्रमण", "team.direction":"{team} • {direction} ओर आक्रमण", "LEFT":"बाईं", "RIGHT":"दाईं",
     "On the pitch":"मैदान पर", "Selected action":"चुनी गई घटना", "First half":"पहला हाफ़", "1st half":"पहला हाफ़", "Tracking metrics unavailable":"ट्रैकिंग मेट्रिक उपलब्ध नहीं हैं", "Metrics unavailable":"मेट्रिक उपलब्ध नहीं हैं", "Box Entries → Shots":"पेनल्टी क्षेत्र में प्रवेश → शॉट",

@@ -42,7 +42,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
+          built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          docker build --build-arg PULSE_BUILD_SHA="$GITHUB_SHA" --build-arg PULSE_BUILD_TIME="$built_at" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-agents:$GITHUB_SHA" -f agents/Dockerfile .
 
       - name: Install browser test dependencies

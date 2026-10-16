@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/alexwafula/pulse/app/internal/ai"
+	"github.com/alexwafula/pulse/app/internal/buildinfo"
 	"github.com/alexwafula/pulse/app/internal/domain"
 	"github.com/alexwafula/pulse/app/internal/engine/metrics"
 	"github.com/alexwafula/pulse/app/internal/facts"
@@ -28,6 +29,7 @@ type pageData struct {
 	StartClock   string
 	EndClock     string
 	Experience   bool
+	Build        string
 	Story        experiencePanel
 	catalog      uiCatalog
 }
@@ -179,6 +181,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return
 		}
 	})
+	mux.HandleFunc("/version", serveVersion)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
@@ -201,9 +204,10 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		data := view
 		data.Experience = r.URL.Path != "/legacy"
+		data.Build = buildinfo.Current().ShortSHA
 		if err := page.Execute(w, data); err != nil {
 			return
 		}
 	})
-	return gzipJSON(mux), nil
+	return withBuild(gzipJSON(mux)), nil
 }
