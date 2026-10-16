@@ -18,8 +18,19 @@ try {
     const context = await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:900},isMobile:mobile,hasTouch:mobile});
     const page = await context.newPage();
     page.on("pageerror", error => errors.push(error.message));
-    await page.goto(`${base}/`, {waitUntil:"networkidle"});
+    const home = await page.goto(`${base}/`, {waitUntil:"networkidle"});
     assert.equal(await page.locator("body").getAttribute("class"), "experience");
+    const version = await (await fetch(`${base}/version`)).json();
+    assert.match(version.shortSha, /^([0-9a-f]{7}|unknown)$/);
+    assert.equal(home.headers()["x-pulse-build"], version.shortSha);
+    const build = page.locator("#build-label");
+    assert.ok(await build.isVisible(), "build label must be visible");
+    assert.ok(parseFloat(await build.evaluate(element => getComputedStyle(element).fontSize)) <= 12, "build label must stay small");
+    for (const locale of ["en-GB","sw-KE","hi-IN","en-GB"]) {
+      await page.evaluate(code => { const select = document.querySelector("#locale"); select.value = code; select.dispatchEvent(new Event("change",{bubbles:true})); }, locale);
+      assert.equal(await page.locator("body").getAttribute("data-locale"), locale);
+      assert.equal(await build.textContent(), `build ${version.shortSha}`);
+    }
     assert.equal(await page.locator("#scenario").inputValue(), "late-siege");
     assert.equal(await page.locator("#player-layer g").count(), 22);
     assert.equal(await page.locator(".dashboard-link").textContent(), "Legacy");
