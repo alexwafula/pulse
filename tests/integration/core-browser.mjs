@@ -78,6 +78,7 @@ try {
     await page.locator('[data-recap-evidence="evt-04"]').first().click();
     assert.equal(await page.locator("#match-clock").textContent(), "27:36");
     assert.equal(await page.locator("#recap-panel").isVisible(), false);
+    assert.deepEqual(await page.locator("#locale option").evaluateAll(options => options.map(option => option.value)), ["en-GB", "sw-KE", "hi-IN"]);
     assert.equal(await page.locator('#locale option[value="sw-KE"]').isDisabled(), false);
     assert.equal(await page.locator('#locale option[value="hi-IN"]').isDisabled(), false);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
