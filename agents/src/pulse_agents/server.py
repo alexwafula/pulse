@@ -17,6 +17,21 @@ def reject_constant(value: str) -> None:
     raise ValueError(f"Nonfinite JSON constant: {value}")
 
 
+def model_request_cap() -> int:
+    """Paid workflows allowed per process; unset or invalid means none."""
+    raw = os.getenv("PULSE_MODEL_REQUEST_CAP")
+    if raw is None:
+        return 0
+    try:
+        cap = int(raw)
+    except ValueError:
+        cap = -1
+    if not 0 <= cap <= 100:
+        logging.warning("PULSE_MODEL_REQUEST_CAP=%r is not an integer from 0 to 100; using 0", raw)
+        return 0
+    return cap
+
+
 class Handler(BaseHTTPRequestHandler):
     def setup(self) -> None:
         super().setup()
@@ -97,7 +112,7 @@ def main() -> None:
         if args.mode in ("foundry-shadow", "foundry"):
             from .foundry import FoundryBackend
             backend = FoundryBackend.from_environment()
-        server.service = AgentService(backend, max_requests=int(os.getenv("PULSE_MODEL_REQUEST_CAP", "10")),
+        server.service = AgentService(backend, max_requests=model_request_cap(),
                                       publish=args.mode == "foundry", recordings=recordings)
         print(f"Pulse insights ({server.service.mode}): http://{args.host}:{args.port}", flush=True)
         try:
