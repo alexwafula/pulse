@@ -300,3 +300,9 @@ With the Go server running, check all renderers and mobile layouts:
 $env:PULSE_URL = 'http://127.0.0.1:8080'
 node tests/integration/analytics-browser.mjs
 ```
+
+## Third-party software
+
+The browser bundles and fonts include third-party software. Names, versions,
+licences and upstream links are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+The font licence files are in [app/web/static/fonts](app/web/static/fonts).
