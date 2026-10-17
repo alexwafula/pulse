@@ -178,7 +178,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
       }
       frameCamera(); positionTag();
     },
-    draw() { controls.update(); positionTag(); renderer.render(scene,camera); },
+    draw() { const moving = controls.update(); positionTag(); renderer.render(scene,camera); return moving; },
     resetCamera() { followCamera = true; frameCamera(); },
     setCamera(value) { mode = value; followCamera = true; frameCamera(); },
     destroy() {

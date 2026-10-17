@@ -165,7 +165,7 @@ export function createThree(host: HTMLElement, players: RenderPlayer[]): PitchRe
         positions.needsUpdate = true; pathGeometry.computeBoundingSphere(); path.computeLineDistances();
       }
     },
-    draw() { controls.update(); renderer.render(scene, camera); },
+    draw() { const moving = controls.update(); renderer.render(scene, camera); return moving; },
     resetCamera() { reset(); },
     setCamera(mode) { cameraMode = mode; reset(); },
     destroy() {
