@@ -87,7 +87,7 @@ Story/Recap HTML panels; its pitch stays mounted. Live/Insights reuse the existi
 controller and gated cue feed. The preview now ports the supplied stadium and
 articulated character presentation; textured kits/ball and close perspective
 cameras replace the original capsule-and-number view. `/experience` remains an
-alias; `/legacy` preserves the original dashboard. The homepage defaults to
+alias; `/legacy` preserves the original view, unlinked from the nav. The homepage defaults to
 late-siege; API defaults stay corner, so always send the selected scenario.
 Gait uses recorded tracking velocity and the replay clock, never a second timer
 or inferred ball flight. The model field is opt-in in the preview.
@@ -229,6 +229,7 @@ Local checks:
 - Replay analytics: `node tests/integration/analytics-browser.mjs` (running local Go server; set `PULSE_URL` and, if needed, `CHROME_PATH`)
 - Default homepage: `node tests/integration/homepage-browser.mjs` (desktop/mobile, stadium pixels and routing)
 - UI controls: `node tests/integration/controls-browser.mjs` (Select2, all locales/personas, persistence, menu stability and 320/390/768/1440px layouts)
+- Locales and model labels: `node tests/integration/locale-browser.mjs` (running local Go server; locale allowlist and storage, hi-IN catalog routing, Control vs Chaos `indexDelta` headline, canonical `model estimate, uncalibrated` label, translated insights never Verified)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
