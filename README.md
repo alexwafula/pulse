@@ -37,6 +37,7 @@ by **Build Azure Images**. The homepage is the prototype-inspired experience;
 
 - [Architecture Decision Brief](docs/Pulse-Architecture-Decision-Brief.docx)
 - [Hackathon Team Plan](docs/Pulse-Hackathon-Team-Plan.pdf)
+- [Delivery phases and current status](PHASES.md)
 
 Both are team drafts. Current implementation choices and open recommendations
 are recorded in [docs/decisions](docs/decisions).
