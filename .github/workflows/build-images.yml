@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          docker build --build-arg PULSE_BUILD_SHA="$GITHUB_SHA" --build-arg PULSE_BUILD_TIME="$built_at" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
+          docker build --build-arg PULSE_BUILD_SHA="$GITHUB_SHA" --build-arg PULSE_BUILD_TIME="$built_at" --build-arg PULSE_BUILD_REF="${{ github.ref_name }}" --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-web:$GITHUB_SHA" -f Dockerfile .
           docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --label "org.opencontainers.image.source=https://github.com/alexwafula/pulse" -t "$REGISTRY/pulse-agents:$GITHUB_SHA" -f agents/Dockerfile .
 
       - name: Install browser test dependencies
@@ -139,3 +139,35 @@ jobs:
           node tests/integration/container-smoke.mjs
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 60 -H 'Content-Type: application/json' -d '{}' "$PULSE_AGENT_URL/insights")" = 401
           printf 'Deployed tested main source `%s`.\n\n[Open Pulse](%s/)\n' "$GITHUB_SHA" "$PULSE_URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Confirm live /version is this release
+        if: steps.current.outputs.release == 'true'
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -uo pipefail
+          if [[ -z "${PULSE_URL:-}" || "$PULSE_URL" == "https://" ]]; then
+            echo "::error::PULSE_URL is empty; cannot read the live /version."
+            exit 1
+          fi
+          live_sha="" reached=false deadline=$((SECONDS + 120))
+          while (( SECONDS < deadline )); do
+            if body=$(curl --fail --silent --show-error --max-time 10 "$PULSE_URL/version"); then
+              reached=true
+              live_sha=$(jq -r '.sha // empty' <<<"$body" 2>/dev/null || true)
+              [[ "$live_sha" == "$EXPECTED_SHA" ]] && break
+            fi
+            sleep 5
+          done
+          echo "expected sha: $EXPECTED_SHA"
+          echo "live sha:     ${live_sha:-<none>}"
+          if [[ "$reached" != true ]]; then
+            echo "::error::$PULSE_URL/version did not respond successfully within 120 s."
+            exit 1
+          fi
+          if [[ "$live_sha" != "$EXPECTED_SHA" ]]; then
+            echo "::error::Live /version reports ${live_sha:-no sha}, expected $EXPECTED_SHA."
+            exit 1
+          fi
+          echo "Live /version matches this release."

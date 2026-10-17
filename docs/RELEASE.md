@@ -9,7 +9,7 @@ always be traced back to a commit and its pull request.
 
 ```bash
 curl -s https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/version
-# {"sha":"<40-char commit>","shortSha":"<7 chars>","builtAt":"<UTC build time>","ref":"unknown"}
+# {"sha":"<40-char commit>","shortSha":"<7 chars>","builtAt":"<UTC build time>","ref":"main"}
 ```
 
 - `/version` is never redirected and is served with `Cache-Control: no-store`.
@@ -20,14 +20,14 @@ curl -s https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps
 - The page footer shows `build <shortSha>` in every language.
 - A local `go run`/`go build` without build flags reports `unknown` in every
   field. That is expected; only release images are stamped.
-- `ref` reads `unknown` on release images because the workflow passes only the SHA
-  and build time. Releases are always built from `refs/heads/main`
-  (`build-images.yml:17`, `:22`).
+- `ref` is `github.ref_name`, so it reads `main` on release images. Releases are
+  only built from `refs/heads/main` (`build-images.yml:17`, `:22`). Images built
+  before this was added report `unknown`.
 
 **How the build is stamped.** `Dockerfile` turns the build args
 `PULSE_BUILD_SHA`, `PULSE_BUILD_TIME` and `PULSE_BUILD_REF` into Go `-ldflags -X`
-values on `app/internal/buildinfo`. `build-images.yml` passes `$GITHUB_SHA` and
-the UTC build time for `pulse-web` only. The Python `pulse-agents` image is
+values on `app/internal/buildinfo`. `build-images.yml` passes `$GITHUB_SHA`, the
+UTC build time and `${{ github.ref_name }}` for `pulse-web` only (`:46`). The Python `pulse-agents` image is
 unchanged. For a local stamped build:
 
 ```bash
@@ -37,8 +37,11 @@ go build -ldflags "-X $P.SHA=$(git rev-parse HEAD) -X $P.BuiltAt=$(date -u +%Y-%
 
 ## Map a SHA to its pull request
 
-Pull requests are merged with merge commits, and a release runs for the head of
-`main` after each merge, so the live `sha` is normally the merge commit itself:
+**The SHA shown on live is the merge commit on `main`, not the PR's head commit.**
+Pull requests are merged with merge commits, and a release builds the head of
+`main` after each merge. So `/version` reports the merge commit, whose parents
+are the previous `main` and the PR head. The PR's own branch SHAs never reach
+production. Look the live SHA up on `main`:
 
 ```bash
 git fetch origin
@@ -111,7 +114,7 @@ All three jobs live in `.github/workflows/build-images.yml` and are chained with
 | trigger | `:3-6` | push to `main`, plus manual `workflow_dispatch` |
 | `checks` | `:16-18` | calls `.github/workflows/ci.yml` (`workflow_call`, `ci.yml:4`), which runs `./scripts/check.sh` (`ci.yml:42-43`): all 10 gates |
 | `build` | `:20-22` | `needs: checks`; builds both images (SHA-stamped `pulse-web`), runs them together without model calls, and requires `container-smoke.mjs` and `homepage-browser.mjs` to pass (`:63-64`) before pushing the tags |
-| `deploy` | `:91-93` | `needs: build`; skips itself if `main` has moved on (`:106-112`), updates both Container Apps to the tested tag (`:127-128`), then re-runs `container-smoke.mjs` against production (`:139`) |
+| `deploy` | `:91-93` | `needs: build`; skips itself if `main` has moved on (`:106-112`), updates both Container Apps to the tested tag (`:127-128`), re-runs `container-smoke.mjs` against production (`:139`), then requires the live `/version` `.sha` to equal `github.sha` within 120 s, otherwise the job fails (`:143-173`) |
 
 Each of `checks`, `build` and `deploy` also requires `github.repository == 'alexwafula/pulse'`
 and `github.ref == 'refs/heads/main'` (`:17`, `:22`, `:93`). Forks and branches
