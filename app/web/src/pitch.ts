@@ -120,8 +120,9 @@ const preferences = new URL(location.href).searchParams;
 function savedPreference(key: string): string | null {
   try { return localStorage.getItem(`pulse:${key}`); } catch { return null; }
 }
-const initialLocale = preferences.get("locale") ?? savedPreference("locale");
-localePicker.value = supportedLocale(initialLocale) ? initialLocale : "en-GB";
+// A supported ?locale= wins over storage; unsupported values are ignored and
+// saveAudience() overwrites a stale stored value with the locale actually used.
+localePicker.value = [preferences.get("locale"), savedPreference("locale")].find(supportedLocale) ?? "en-GB";
 persona = (preferences.get("persona") ?? savedPreference("persona")) === "ANALYST" ? "ANALYST" : "CASUAL";
 function saveAudience(): void {
   document.body.dataset.locale = localePicker.value;
@@ -161,7 +162,7 @@ function renderInsight(): void {
   insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
   insightEvidence.hidden = !cue;
   renderFactCheck(cue, insightSource, matchTime);
-  if (cue) insightWindow.textContent = `${matchTime(cue.replayStartMs)}–${matchTime(cue.replayEndMs)} · ${cue.eventIds.length} events`;
+  if (cue) insightWindow.textContent = t("insight.window", { start: matchTime(cue.replayStartMs), end: matchTime(cue.replayEndMs), count: cue.eventIds.length, events: t(cue.eventIds.length === 1 ? "event" : "events") });
 }
 
 async function loadInsights(): Promise<void> {
@@ -337,6 +338,8 @@ function createTimeline(): void {
 
 function refreshReplayText(): void {
   eventCount.textContent = t("stats.actions", {count:replay.events.length});
+  const clockPeriod = document.querySelector<HTMLElement>(".clock-period");
+  if (clockPeriod) clockPeriod.textContent = t(replay.match.period === 2 ? "2nd Half" : "1st Half");
   const home = replay.match.teams[0];
   pitchStamp.textContent = t("team.stamp", {team:home.name.toUpperCase(), direction:t(home.attackingDirection)});
   document.querySelectorAll<HTMLElement>(".team-sub").forEach((element,index) => {
@@ -619,10 +622,6 @@ async function start(): Promise<void> {
     startLabel.textContent = matchTime(replay.match.startMs);
     endLabel.textContent = matchTime(replay.match.endMs);
     refreshReplayText();
-    const clockPeriod = document.querySelector<HTMLElement>(".clock-period");
-    if (clockPeriod) {
-      clockPeriod.textContent = replay.match.period === 2 ? "2nd Half" : "1st Half";
-    }
     const halfLabel = document.querySelector<HTMLElement>(".half-label");
     if (halfLabel) {
       halfLabel.textContent = replay.match.period === 2 ? "Second half" : "First half";

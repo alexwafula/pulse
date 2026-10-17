@@ -15,7 +15,7 @@ insights require a server-side service token. See the
 [deployment record](docs/AZURE-LIVE-STATUS.md) for checks, source images and limits.
 Runtime changes on `main` are checked, container-tested and automatically deployed
 by **Build Azure Images**. The homepage is the prototype-inspired experience;
-`/experience` remains an alias and `/legacy` preserves the original dashboard.
+`/experience` remains an alias and `/legacy` preserves the original view (no longer linked from the nav).
 
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
