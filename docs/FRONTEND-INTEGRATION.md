@@ -110,16 +110,25 @@ server-to-server boundary, not a browser endpoint.
 - Render only ticks, events and cumulative snapshots at or before the clock.
   Rewind must remove future numbers, stories, moments and highlights.
 - Score is unavailable. A COMPLETE shot is not proof of a goal.
-- Metrics are **model estimate, uncalibrated**. The index is experimental;
-  formation geometry biases absolute shares (issue #17). Do not make headline
-  probability claims or move tracking estimates into v2 FactPacks.
+- Metrics are **model estimate, uncalibrated**. Show that wording, from the one
+  `model estimate, uncalibrated` catalog key, beside any model value; no other
+  label wording is allowed. Formation geometry biases absolute shares (issue
+  #17), so the Control vs Chaos headline is the API's `indexDelta` for the first
+  team ("Index difference", its index minus the opponent's), never an absolute
+  per-team index or share. It is not recomputed in the browser and shows N/A
+  when `indexDelta` is missing. Do not make headline probability claims or move
+  tracking estimates into v2 FactPacks.
 - Event moments cite `reasons`. CONTROL_SWING uses `tickTimes` as evidence,
   with empty `reasons`; `contextEventIds` are context, never evidence.
 - Insight text comes only from `/api/insights` after the Go cue gate. Current
   `FALLBACK_TEMPLATE` output is deterministic, not real AI verification.
 - CASUAL/ANALYST templates work in `en-GB`, `sw-KE` and `hi-IN`. Translations are
   drafts for native-speaker review, not new model-backed analysis. Use `locale`
-  on insight/panel requests. Raw replay and metric values are never translated.
+  on insight/panel requests; any other value falls back to `en-GB`. The page
+  uses a supported `?locale=`, then a supported stored choice, then `en-GB`.
+  Raw replay and metric values are never translated. Server-rendered text with
+  values uses `data-i18n` plus `data-i18n-arg-*`/`data-i18n-term-*` attributes;
+  untranslated attribute strings are tracked in `docs/I18N-BACKLOG.md`.
 - Occupancy sums recorded player milliseconds in 21 x 17 cells (5 x 4 metres),
   holding each position until the next frame or the cutoff. No future positions
   are used. Team totals sum all selected players' time, so they can exceed elapsed
