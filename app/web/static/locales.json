@@ -20,7 +20,10 @@
     "event.at": "{kind} at {clock}",
     "event.start": "The sequence starts at {clock}.",
     "event.building": "{team} building the attack",
-    "recap.count":"{team} recorded {count} shot attempts in this sequence.", "recap.blocked":"The shot was blocked.", "recap.incomplete":"The shot was unsuccessful.", "recap.completed":"The shot was completed; no goal outcome is recorded."
+    "recap.count":"{team} recorded {count} shot attempts in this sequence.", "recap.blocked":"The shot was blocked.", "recap.incomplete":"The shot was unsuccessful.", "recap.completed":"The shot was completed; no goal outcome is recorded.",
+    "insight.window":"{start}–{end} · {count} {events}", "recap.countOne":"{team} recorded {count} shot attempt in this sequence.", "stats.count":"{count} {noun}", "control.finalThird":"{team} final third",
+    "evidence.tickAt":"Metric tick at {clock}",
+    "evidence.moment":"{moment} / {team}"
   },
   "sw-KE": {
     "build.label":"build {sha}", "Scenarios":"Matukio", "Synthetic replays":"Marudio ya kubuni", "Close scenarios":"Funga matukio", "Search scenarios":"Tafuta matukio", "Scenario type":"Aina ya tukio", "All":"Yote", "Short sequences":"Mifululizo mifupi", "Short sequence":"Mfululizo mfupi", "Loading replays":"Inapakia marudio", "No matching scenarios":"Hakuna matukio yanayolingana", "players":"wachezaji", "actions":"matukio", "Guided demo":"Onyesho elekezi",
@@ -60,7 +63,10 @@
     "story.pass":"{actor} anajaribu kumpasia {recipient}.", "story.passOnly":"{actor} anajaribu kupiga pasi.", "story.carry":"{actor} anabeba mpira.", "story.cross":"{actor} anatuma krosi.", "story.clearance":"{actor} anaondosha mpira.", "story.corner":"{actor} anapiga kona.", "story.shot":"{actor} anajaribu kupiga shuti.",
     "event.at":"{kind} saa {clock}", "event.start":"Mfululizo unaanza saa {clock}.", "event.building":"{team} inajenga shambulio",
     "recap.count":"{team} ilirekodi mashuti {count} katika mfululizo huu.", "recap.blocked":"Shuti lilizuiwa.", "recap.incomplete":"Shuti halikufaulu.", "recap.completed":"Shuti lilikamilika; matokeo ya bao hayajarekodiwa.",
-    "Completed shot; no goal outcome recorded":"Shuti limekamilika; bao halijarekodiwa"
+    "Completed shot; no goal outcome recorded":"Shuti limekamilika; bao halijarekodiwa",
+    "insight.window":"{start}–{end} · {count} {events}", "recap.countOne":"{team} recorded {count} shot attempt in this sequence.", "stats.count":"{count} {noun}", "control.finalThird":"{team} final third", "1st Half":"1st Half", "2nd Half":"2nd Half", "Extra Time":"Extra Time", "Seek match replay":"Seek match replay", "Tactical Intelligence Drawer":"Tactical Intelligence Drawer", "Download":"Download", "event":"event", "events":"events", "Sent":"Sent", "Received":"Received", "No completed passes yet":"No completed passes yet", "Control field":"Control field", "Entropy":"Entropy", "Pressing estimate":"Pressing estimate", "Ball carrier":"Ball carrier", "Control vs Chaos":"Control vs Chaos", "Detected moments":"Detected moments", "Sustained pressure":"Sustained pressure", "Control swing":"Control swing", "Set-piece shot":"Set-piece shot", "Attacking routes":"Attacking routes", "Entry to shot":"Entry to shot", "Index difference":"Index difference", "Index difference before":"Index difference before", "Index difference after":"Index difference after", "Change":"Change", "Final-third actions":"Final-third actions", "Final-third control":"Final-third control",
+    "evidence.tickAt":"Metric tick at {clock}", "Evidence trail":"Evidence trail", "No selection":"No selection", "No evidence selected":"No evidence selected", "Insight source events":"Insight source events", "Metric ticks":"Metric ticks", "Tick":"Tick", "No moments yet":"No moments yet", "No moments detected":"No moments detected", "Moments unavailable":"Moments unavailable",
+    "evidence.moment":"{moment} / {team}"
   },
   "hi-IN": {
     "build.label":"build {sha}", "Scenarios":"परिदृश्य", "Synthetic replays":"काल्पनिक रीप्ले", "Close scenarios":"परिदृश्य बंद करें", "Search scenarios":"परिदृश्य खोजें", "Scenario type":"परिदृश्य का प्रकार", "All":"सभी", "Short sequences":"छोटे क्रम", "Short sequence":"छोटा क्रम", "Loading replays":"रीप्ले लोड हो रहे हैं", "No matching scenarios":"कोई मेल खाता परिदृश्य नहीं", "players":"खिलाड़ी", "actions":"घटनाएं", "Guided demo":"निर्देशित डेमो",
@@ -100,6 +106,9 @@
     "story.pass":"{actor} ने {recipient} को पास देने का प्रयास किया।", "story.passOnly":"{actor} ने पास देने का प्रयास किया।", "story.carry":"{actor} गेंद ले जा रहे हैं।", "story.cross":"{actor} ने क्रॉस भेजा।", "story.clearance":"{actor} ने गेंद दूर की।", "story.corner":"{actor} ने कॉर्नर लिया।", "story.shot":"{actor} ने शॉट का प्रयास किया।",
     "event.at":"{clock} पर {kind}", "event.start":"क्रम {clock} पर शुरू होता है।", "event.building":"{team} आक्रमण बना रहे हैं",
     "recap.count":"इस क्रम में {team} के {count} शॉट प्रयास दर्ज हैं।", "recap.blocked":"शॉट रोका गया।", "recap.incomplete":"शॉट असफल रहा।", "recap.completed":"शॉट पूरा हुआ; गोल का परिणाम दर्ज नहीं है।",
-    "Completed shot; no goal outcome recorded":"शॉट पूरा हुआ; गोल का परिणाम दर्ज नहीं है"
+    "Completed shot; no goal outcome recorded":"शॉट पूरा हुआ; गोल का परिणाम दर्ज नहीं है",
+    "insight.window":"{start}–{end} · {count} {events}", "recap.countOne":"{team} recorded {count} shot attempt in this sequence.", "stats.count":"{count} {noun}", "control.finalThird":"{team} final third", "1st Half":"1st Half", "2nd Half":"2nd Half", "Extra Time":"Extra Time", "Seek match replay":"Seek match replay", "Tactical Intelligence Drawer":"Tactical Intelligence Drawer", "Download":"Download", "event":"event", "events":"events", "Sent":"Sent", "Received":"Received", "No completed passes yet":"No completed passes yet", "Control field":"Control field", "Entropy":"Entropy", "Pressing estimate":"Pressing estimate", "Ball carrier":"Ball carrier", "Control vs Chaos":"Control vs Chaos", "Detected moments":"Detected moments", "Sustained pressure":"Sustained pressure", "Control swing":"Control swing", "Set-piece shot":"Set-piece shot", "Attacking routes":"Attacking routes", "Entry to shot":"Entry to shot", "Index difference":"Index difference", "Index difference before":"Index difference before", "Index difference after":"Index difference after", "Change":"Change", "Final-third actions":"Final-third actions", "Final-third control":"Final-third control",
+    "evidence.tickAt":"Metric tick at {clock}", "Evidence trail":"Evidence trail", "No selection":"No selection", "No evidence selected":"No evidence selected", "Insight source events":"Insight source events", "Metric ticks":"Metric ticks", "Tick":"Tick", "No moments yet":"No moments yet", "No moments detected":"No moments detected", "Moments unavailable":"Moments unavailable",
+    "evidence.moment":"{moment} / {team}"
   }
 }
