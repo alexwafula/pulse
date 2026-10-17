@@ -2,9 +2,22 @@ package transporthttp
 
 import (
 	"encoding/json"
+	"net/http"
 	"os"
 	"strings"
+
+	"github.com/alexwafula/pulse/app/internal/domain"
 )
+
+// requestLocale is the single locale allowlist for locale-aware endpoints:
+// supported locales pass through and anything else, including a missing or
+// garbage value, falls back to en-GB rather than failing the request.
+func requestLocale(r *http.Request) string {
+	if locale := r.URL.Query().Get("locale"); domain.SupportedLocale(locale) {
+		return locale
+	}
+	return "en-GB"
+}
 
 type uiCatalog map[string]map[string]string
 

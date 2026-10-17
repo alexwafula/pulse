@@ -157,10 +157,7 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 			return
 		}
 		options := experienceOptions{mode: r.URL.Query().Get("mode"), persona: r.URL.Query().Get("persona"),
-			playerID: r.URL.Query().Get("playerId"), teamID: r.URL.Query().Get("teamId"), mapMode: r.URL.Query().Get("map"), locale: r.URL.Query().Get("locale")}
-		if options.locale == "" {
-			options.locale = "en-GB"
-		}
+			playerID: r.URL.Query().Get("playerId"), teamID: r.URL.Query().Get("teamId"), mapMode: r.URL.Query().Get("map"), locale: requestLocale(r)}
 		if options.mode == "" {
 			options.mode = "live"
 		}
@@ -183,7 +180,7 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 		for _, team := range replay.Match.Teams {
 			validTeam = validTeam || team.ID == options.teamID
 		}
-		if !validPlayer || !validTeam || !domain.SupportedLocale(options.locale) ||
+		if !validPlayer || !validTeam ||
 			(options.persona != "CASUAL" && options.persona != "ANALYST") ||
 			(options.mode != "live" && options.mode != "catchup" && options.mode != "highlights" && options.mode != "player") ||
 			(options.mapMode != "occupancy" && options.mapMode != "shots" && options.mapMode != "network") {

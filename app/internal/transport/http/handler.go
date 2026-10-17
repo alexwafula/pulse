@@ -122,14 +122,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			http.Error(w, "unsupported persona", 400)
 			return
 		}
-		locale := r.URL.Query().Get("locale")
-		if locale == "" {
-			locale = "en-GB"
-		}
-		if !domain.SupportedLocale(locale) {
-			http.Error(w, "unsupported locale", 400)
-			return
-		}
+		locale := requestLocale(r)
 		feed := domain.CueFeed{SchemaVersion: domain.SchemaVersion, Cues: []domain.OverlayCue{}}
 		source := "go-template"
 		for _, pack := range packs {
