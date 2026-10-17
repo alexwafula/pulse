@@ -43,7 +43,9 @@ try {
     }
     assert.equal(await page.locator("#scenario").inputValue(), "late-siege");
     assert.equal(await page.locator("#player-layer g").count(), 22);
-    assert.equal(await page.locator(".dashboard-link").textContent(), "Legacy");
+    // The Legacy nav link is hidden; the /legacy route itself stays (checked below).
+    assert.equal(await page.locator(".dashboard-link").isVisible(), false);
+    assert.equal(await page.locator(".dashboard-link").getAttribute("title"), "Open the original view");
     assert.ok((await page.locator(".dashboard-link").getAttribute("href")).startsWith("/legacy?"));
     await page.waitForSelector("#canvas-host canvas");
     const pixels = PNG.sync.read(await page.locator("#canvas-host canvas").screenshot());
