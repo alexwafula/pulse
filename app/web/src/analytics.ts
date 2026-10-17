@@ -3,7 +3,8 @@ import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
 
-type TeamTick = { finalThird: number; index: number };
+// indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
+type TeamTick = { finalThird: number; indexDelta: number | null };
 type Tick = { timeMs: number; entropy: number; pressing: number | null; carrier: { playerId: string; teamId: string } | null; teams: Record<string, TeamTick>; grid: number[] };
 type Metrics = { label: string; reason: string; supported: boolean; cols: number; rows: number; teamId: string; ticks: Tick[] };
 export type Moment = {
@@ -42,7 +43,9 @@ function decodeMetrics(raw: unknown, replay: Replay, scenario: string): Metrics 
     for (const team of replay.match.teams) {
       const values = rawTick.teams[team.id];
       if (!object(values) || !unit(values.finalThird) || !unit(values.index)) throw new Error("Invalid team metrics");
-      teams[team.id] = { finalThird: values.finalThird, index: values.index };
+      const indexDelta = values.indexDelta ?? null;
+      if (indexDelta !== null && !(finite(indexDelta) && indexDelta >= -1 && indexDelta <= 1)) throw new Error("Invalid index difference");
+      teams[team.id] = { finalThird: values.finalThird, indexDelta };
     }
     let carrier: Tick["carrier"] = null;
     if (rawTick.carrier !== null) {
@@ -92,6 +95,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const momentsState = element("#moments-state");
   const evidenceList = element<HTMLOListElement>("#evidence-list");
   const valuesList = element<HTMLDListElement>("#moment-values");
+  const valuesLabel = element("#moment-values-label");
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
   let metrics: Metrics | undefined;
@@ -195,10 +199,9 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         write("#metric-pressing", tick.pressing === null ? "N/A" : tick.pressing.toFixed(4));
         write("#metric-carrier", tick.carrier ? replay.match.players.find(player => player.id === tick.carrier?.playerId)?.name ?? "N/A" : "N/A");
         replay.match.teams.forEach((team, index) => {
-          const side = index === 0 ? "home" : "away";
-          write(`#metric-${side}-third`, tick.teams[team.id].finalThird.toFixed(4));
-          write(`#metric-${side}-index`, tick.teams[team.id].index.toFixed(4));
+          write(`#metric-${index === 0 ? "home" : "away"}-third`, tick.teams[team.id].finalThird.toFixed(4));
         });
+        write("#metric-index-delta", tick.teams[replay.match.teams[0].id].indexDelta?.toFixed(4) ?? "N/A");
         field = { cols: metrics.cols, rows: metrics.rows, values: tick.grid, homeTeamGrid: metrics.teamId === replay.match.teams[0].id };
       } else { field = undefined; }
     }
@@ -220,17 +223,18 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     const key = `${locale()}:${selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none"}`;
     if (key === evidenceKey) return;
     evidenceKey = key;
-    evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected;
+    const modelValues = Object.entries(selected?.values ?? {});
+    evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected; valuesLabel.hidden = !modelValues.length;
     write("#evidence-kind", selected?.evidenceKind === "tick" ? "Metric ticks" : selected || cue ? "Source events" : "No selection");
-    write("#evidence-state", selected ? `${momentName(selected)} / ${teamName(selected.teamId)}` : cue ? "Insight source events" : "No evidence selected");
+    write("#evidence-state", selected ? t("evidence.moment", { moment: t(momentName(selected)), team: teamName(selected.teamId) }) : cue ? "Insight source events" : "No evidence selected");
     if (selected) {
-      for (const [name, value] of Object.entries(selected.values)) {
+      for (const [name, value] of modelValues) {
         const row = document.createElement("div"), term = document.createElement("dt"), number = document.createElement("dd");
-        term.textContent = valueLabels[name] ?? name; number.textContent = String(value); row.append(term, number); valuesList.append(row);
+        term.textContent = t(valueLabels[name] ?? name); number.textContent = String(value); row.append(term, number); valuesList.append(row);
       }
     }
     const entries = selected?.evidenceKind === "tick"
-      ? selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: `Metric tick at ${hooks.matchTime(timeMs)}` }))
+      ? selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: t("evidence.tickAt", { clock: hooks.matchTime(timeMs) }) }))
       : (selected?.reasons ?? cue?.eventIds ?? []).flatMap(id => {
         const event = replay.events.find(item => item.id === id);
         return event ? [{ timeMs: event.timeMs, id: event.id, title: hooks.eventSentence(event) }] : [];
@@ -241,7 +245,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (entry.id) button.dataset.sourceEvent = entry.id;
       else button.dataset.sourceTick = String(entry.timeMs);
       button.setAttribute("aria-label", entry.id ? `Inspect ${entry.id} at ${hooks.matchTime(entry.timeMs)}` : entry.title);
-      title.textContent = `${entry.id || "Tick"} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
+      title.textContent = `${entry.id || t("Tick")} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
       button.append(createElement(ListVideo, { width: 16, height: 16, "aria-hidden": "true" }), title, description);
       button.addEventListener("click", () => hooks.inspectTime(entry.timeMs, entry.id || undefined));
       row.append(button); evidenceList.append(row);
@@ -275,7 +279,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       banner.hidden = !active;
       if (active) {
         write("#moment-banner-title", momentName(active));
-        write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? " / model estimate" : ""}`);
+        write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? ` / ${t("model estimate, uncalibrated")}` : ""}`);
       }
       renderEvidence(cue, selected);
       return control;
