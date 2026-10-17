@@ -15,7 +15,7 @@
       "value": "template"
     },
     "modelRequestCap": {
-      "value": 10
+      "value": 0
     },
     "minReplicasWeb": {
       "value": 1

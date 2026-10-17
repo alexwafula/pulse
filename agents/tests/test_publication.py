@@ -120,7 +120,7 @@ class PublishingServiceTests(unittest.TestCase):
         class SlowBackend:
             async def complete(self, *args):
                 await asyncio.sleep(1)
-        service = AgentService(SlowBackend(), publish=True, workflow_timeout_seconds=.01)
+        service = AgentService(SlowBackend(), max_requests=1, publish=True, workflow_timeout_seconds=.01)
         self.assertEqual(service.respond(self.request), insights(self.request))
         self.assertEqual(service.respond(self.request), insights(self.request))
         self.assertEqual(service.requests, 1)

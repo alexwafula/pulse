@@ -15,7 +15,7 @@ from .workflow import AgentBackend, ShadowRun, run_agents
 
 
 class AgentService:
-    def __init__(self, backend: AgentBackend | None = None, max_requests: int = 10,
+    def __init__(self, backend: AgentBackend | None = None, max_requests: int = 0,
                  *, publish: bool = False, workflow_timeout_seconds: float = 12.0,
                  recordings: list[tuple[InsightRequest, InsightResponse]] | None = None):
         if not 0 <= max_requests <= 100:

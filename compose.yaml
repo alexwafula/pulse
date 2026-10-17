@@ -8,7 +8,7 @@ services:
       PULSE_FOUNDRY_ENDPOINT: ${PULSE_FOUNDRY_ENDPOINT:-}
       PULSE_FOUNDRY_DEPLOYMENT: ${PULSE_FOUNDRY_DEPLOYMENT:-}
       PULSE_FOUNDRY_API_KEY: ${PULSE_FOUNDRY_API_KEY:-}
-      PULSE_MODEL_REQUEST_CAP: ${PULSE_MODEL_REQUEST_CAP:-10}
+      PULSE_MODEL_REQUEST_CAP: ${PULSE_MODEL_REQUEST_CAP:-0}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz', timeout=3)"]
       interval: 10s
