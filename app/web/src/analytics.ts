@@ -6,7 +6,8 @@ import type { ControlField } from "./renderers/types";
 // indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
 type TeamTick = { finalThird: number; indexDelta: number | null };
 type Tick = { timeMs: number; entropy: number; pressing: number | null; carrier: { playerId: string; teamId: string } | null; teams: Record<string, TeamTick>; grid: number[] };
-type Metrics = { label: string; reason: string; supported: boolean; cols: number; rows: number; teamId: string; ticks: Tick[] };
+// teams is the API's own order: each tick's indexDelta for teams[0] is its index minus teams[1]'s.
+type Metrics = { label: string; reason: string; supported: boolean; teams: [string, string]; cols: number; rows: number; teamId: string; ticks: Tick[] };
 export type Moment = {
   type: "SET_PIECE_SHOT" | "SUSTAINED_PRESSURE" | "CONTROL_SWING";
   teamId: string; timeMs: number; windowStartMs: number; windowEndMs: number;
@@ -28,7 +29,9 @@ function strings(value: unknown): value is string[] { return Array.isArray(value
 function decodeMetrics(raw: unknown, replay: Replay, scenario: string): Metrics {
   if (!object(raw) || raw.model !== "time-to-reach-control-v1" || raw.matchId !== replay.match.id || raw.scenario !== scenario || typeof raw.label !== "string" || !Array.isArray(raw.ticks) || !["supported", "unsupported"].includes(String(raw.trackingMetrics))) throw new Error("Invalid metrics response");
   const supported = raw.trackingMetrics === "supported";
-  const result: Metrics = { label: raw.label, reason: typeof raw.reason === "string" ? raw.reason : "", supported, cols: 0, rows: 0, teamId: "", ticks: [] };
+  const order = raw.teams;
+  if (!strings(order) || order.length !== 2 || order[0] === order[1] || !order.every(id => replay.match.teams.some(team => team.id === id))) throw new Error("Invalid metrics team order");
+  const result: Metrics = { label: raw.label, reason: typeof raw.reason === "string" ? raw.reason : "", supported, teams: [order[0], order[1]], cols: 0, rows: 0, teamId: "", ticks: [] };
   if (!supported) {
     if (raw.ticks.length) throw new Error("Unsupported tracking returned metric ticks");
     return result;
@@ -96,6 +99,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const evidenceList = element<HTMLOListElement>("#evidence-list");
   const valuesList = element<HTMLDListElement>("#moment-values");
   const valuesLabel = element("#moment-values-label");
+  const indexTeams = element("#metric-index-teams");
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
   let metrics: Metrics | undefined;
@@ -201,9 +205,16 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         replay.match.teams.forEach((team, index) => {
           write(`#metric-${index === 0 ? "home" : "away"}-third`, tick.teams[team.id].finalThird.toFixed(4));
         });
-        write("#metric-index-delta", tick.teams[replay.match.teams[0].id].indexDelta?.toFixed(4) ?? "N/A");
+        const [first, second] = metrics.teams, delta = tick.teams[first].indexDelta;
+        write("#metric-index-delta", delta?.toFixed(4) ?? "N/A");
+        indexTeams.textContent = delta === null ? "" : `${teamName(first)} − ${teamName(second)}`;
+        indexTeams.hidden = delta === null;
         field = { cols: metrics.cols, rows: metrics.rows, values: tick.grid, homeTeamGrid: metrics.teamId === replay.match.teams[0].id };
-      } else { field = undefined; }
+      } else {
+        field = undefined;
+        write("#metric-index-delta", "N/A");
+        indexTeams.textContent = ""; indexTeams.hidden = true;
+      }
     }
     const visible = controlToggle.checked ? field : undefined;
     if (visible !== lastField) {

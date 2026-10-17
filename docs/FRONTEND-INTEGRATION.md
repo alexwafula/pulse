@@ -113,10 +113,11 @@ server-to-server boundary, not a browser endpoint.
 - Metrics are **model estimate, uncalibrated**. Show that wording, from the one
   `model estimate, uncalibrated` catalog key, beside any model value; no other
   label wording is allowed. Formation geometry biases absolute shares (issue
-  #17), so the Control vs Chaos headline is the API's `indexDelta` for the first
-  team ("Index difference", its index minus the opponent's), never an absolute
-  per-team index or share. It is not recomputed in the browser and shows N/A
-  when `indexDelta` is missing. Do not make headline probability claims or move
+  #17), so the Control vs Chaos headline is the API's `indexDelta` for
+  `/api/metrics` `teams[0]` ("Index difference", labelled `teams[0] − teams[1]`
+  from that same API order), never an absolute per-team index or share. It is
+  not recomputed in the browser; it shows N/A, with no team label, when
+  `indexDelta` is missing or the replay has no tracking metrics. Do not make headline probability claims or move
   tracking estimates into v2 FactPacks.
 - Event moments cite `reasons`. CONTROL_SWING uses `tickTimes` as evidence,
   with empty `reasons`; `contextEventIds` are context, never evidence.

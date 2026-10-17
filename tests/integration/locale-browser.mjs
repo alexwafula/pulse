@@ -183,40 +183,69 @@ try {
     return ` (${reviewed.length} reviewed strings)`;
   });
 
-  // 4. Control vs Chaos headline is the API's indexDelta for the home team; N/A when missing.
-  await section('Control vs Chaos headline = API indexDelta, N/A when missing', async () => {
-    const scenario = "late-siege";
-    const [replay, metrics] = await Promise.all([api("/api/replay", scenario), (await fetch(`${base}/api/metrics?scenario=${scenario}`)).json()]);
-    const home = replay.match.teams[0].id, away = replay.match.teams[1].id;
-    const page = await openPage(`/?scenario=${scenario}`);
-    await pause(page);
-    await seekTo(page, replay, 5332000);
-    await page.locator("#tab-control").click();
-    const tickTime = Number(await page.locator("#metrics-clock").getAttribute("data-time-ms"));
-    const tick = metrics.ticks.find(item => item.timeMs === tickTime);
-    assert.ok(tick, `no metric tick at ${tickTime}`);
-    assert.equal(tick.teams[home].indexDelta, -0.5537, "fixture drifted: expected late-siege home indexDelta -0.5537");
-    const headline = page.locator("#metric-index-delta");
-    assert.equal(await headline.textContent(), "-0.5537");
-    assert.equal(await page.locator(".metric-headline dt").evaluate(element => element.firstChild?.textContent?.trim()), "Index difference");
-    const section = await page.locator(".control-index").innerText();
-    for (const value of [tick.teams[home].index, tick.teams[away].index]) assert.ok(!section.includes(value.toFixed(4)), `absolute index ${value} shown in the headline section`);
-    await page.close();
+  // 4. Control vs Chaos headline: the API's indexDelta for its own teams[0], labelled from the API's
+  //    team order (teams[0] − teams[1]); N/A with no label when there is no indexDelta.
+  await section('Control vs Chaos headline = API indexDelta, label from API team order, N/A when missing', async () => {
+    const read = async (scenario, timeMs, transform) => {
+      const replay = await api("/api/replay", scenario);
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      page.on("pageerror", error => errors.push(error.message));
+      if (transform) await page.route("**/api/metrics?*", async route => {
+        const body = await (await route.fetch()).json();
+        transform(body);
+        await route.fulfill({ json: body });
+      });
+      await page.goto(`${base}${svg(`/?scenario=${scenario}`)}`, { waitUntil: "networkidle" });
+      await pause(page);
+      if (timeMs === undefined) await seek(page, 1000); else await seekTo(page, replay, timeMs);
+      await page.locator("#tab-control").click();
+      const label = page.locator("#metric-index-teams");
+      const shown = {
+        replay,
+        tickTime: Number(await page.locator("#metrics-clock").getAttribute("data-time-ms")),
+        value: await page.locator("#metric-index-delta").textContent(),
+        label: await label.isVisible() ? await label.textContent() : null,
+        term: await page.locator(".metric-headline dt").evaluate(element => element.firstChild?.textContent?.trim()),
+        section: await page.locator(".control-index").innerText(),
+        entropy: await page.locator("#metric-entropy").textContent(),
+      };
+      await page.close();
+      return shown;
+    };
+    const name = (replay, id) => replay.match.teams.find(team => team.id === id).name;
+    const values = [];
+    for (const [scenario, timeMs] of [["late-siege", 5332000], ["calm-midfield", undefined]]) {
+      const metrics = await api("/api/metrics", scenario);
+      const shown = await read(scenario, timeMs);
+      const tick = metrics.ticks.find(item => item.timeMs === shown.tickTime);
+      assert.ok(tick, `${scenario}: no metric tick at ${shown.tickTime}`);
+      const [first, second] = metrics.teams;
+      // The API's definition: teams[0]'s indexDelta is its index minus teams[1]'s, and the reverse is its negation.
+      assert.ok(Math.abs(tick.teams[first].indexDelta - (tick.teams[first].index - tick.teams[second].index)) <= 1e-4, `${scenario}: indexDelta sign`);
+      assert.ok(Math.abs(tick.teams[first].indexDelta + tick.teams[second].indexDelta) <= 1e-9, `${scenario}: indexDelta antisymmetry`);
+      assert.equal(shown.term, "Index difference");
+      assert.equal(shown.value, tick.teams[first].indexDelta.toFixed(4), `${scenario}: headline value`);
+      assert.equal(shown.label, `${name(shown.replay, first)} − ${name(shown.replay, second)}`, `${scenario}: headline label`);
+      for (const value of [tick.teams[first].index, tick.teams[second].index]) assert.ok(!shown.section.includes(value.toFixed(4)), `${scenario}: absolute index ${value} shown in the headline section`);
+      values.push(`${scenario} ${shown.label} = ${shown.value}`);
+    }
+    assert.ok(values[0].endsWith("Bastion City − Aurora Vale = -0.5537"), `fixture drifted: ${values[0]}`);
 
-    const missing = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    missing.on("pageerror", error => errors.push(error.message));
-    await missing.route("**/api/metrics?*", async route => {
-      const body = await (await route.fetch()).json();
-      for (const item of body.ticks) for (const team of Object.values(item.teams)) delete team.indexDelta;
-      await route.fulfill({ json: body });
-    });
-    await missing.goto(`${base}${svg(`/?scenario=${scenario}`)}`, { waitUntil: "networkidle" });
-    await pause(missing);
-    await seekTo(missing, replay, 5332000);
-    await missing.locator("#tab-control").click();
-    assert.equal(await missing.locator("#metric-entropy").textContent(), tick.entropy.toFixed(4), "metrics must still render without indexDelta");
-    assert.equal(await missing.locator("#metric-index-delta").textContent(), "N/A");
-    await missing.close();
+    // Reversing only the API's team order flips label and sign, so neither comes from the replay or template order.
+    const flipped = await read("late-siege", 5332000, body => body.teams.reverse());
+    assert.equal(flipped.label, "Aurora Vale − Bastion City");
+    assert.equal(flipped.value, "0.5537");
+
+    const missing = await read("late-siege", 5332000, body => { for (const item of body.ticks) for (const team of Object.values(item.teams)) delete team.indexDelta; });
+    assert.notEqual(missing.entropy, "N/A", "metrics must still render without indexDelta");
+    assert.equal(missing.value, "N/A");
+    assert.equal(missing.label, null, "no team label without a value");
+
+    const corner = await read("corner");
+    assert.equal(corner.value, "N/A", "corner has no tracking metrics");
+    assert.equal(corner.label, null, "no team label without a value");
+    assert.equal(corner.entropy, "N/A");
+    return ` (${values.join("; ")}; reversed API order: ${flipped.label} = ${flipped.value}; corner: N/A, no label)`;
   });
 
   // 5. Canonical model label next to model values in Control and the Evidence trail, in every locale.

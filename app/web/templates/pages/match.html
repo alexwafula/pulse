@@ -395,8 +395,8 @@
               <div><dt><span class="team-swatch away"></span> <span data-i18n="control.finalThird" data-i18n-arg-team="{{(index .Match.Teams 1).Name}}">{{(index .Match.Teams 1).Name}} final third</span></dt><dd id="metric-away-third">N/A</dd></div>
             </dl>
             <h4>Control vs Chaos <span class="model-label">model estimate, uncalibrated</span></h4>
-            <!-- Headline is the API's indexDelta for the first team (its index minus the opponent's); never computed here. -->
-            <dl class="metric-values control-index"><div class="metric-headline"><dt>Index difference <small data-no-translate>{{(index .Match.Teams 0).Name}} &minus; {{(index .Match.Teams 1).Name}}</small></dt><dd id="metric-index-delta">N/A</dd></div></dl>
+            <!-- Headline and team label come from /api/metrics: indexDelta of teams[0], i.e. its index minus teams[1]'s; never computed here. -->
+            <dl class="metric-values control-index"><div class="metric-headline"><dt>Index difference <small id="metric-index-teams" data-no-translate hidden></small></dt><dd id="metric-index-delta">N/A</dd></div></dl>
             <div class="section-heading"><h3>Detected moments</h3><span id="moment-count">0</span></div>
             <p id="moments-state" class="model-label">Loading moments</p>
             <ol id="moment-list" class="moment-list"></ol>
