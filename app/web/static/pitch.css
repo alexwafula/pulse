@@ -564,6 +564,11 @@ button {
   border-radius: var(--radius-pill);
 }
 
+/* Both teams' completion: not a team colour in the experience (see experience.css). */
+#summary-pass-fill {
+  background: var(--team-a);
+}
+
 /* CENTER HERO PITCH COLUMN */
 .pitch-column {
   min-width: 0;

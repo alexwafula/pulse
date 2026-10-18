@@ -212,6 +212,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 /* pitch.css tints these lime; the timeline buttons carry no .event-button class. */
 .experience .event-list button[aria-current="true"], .experience .event-list button.evidence-event { background: var(--c-accent-tint); border-left-color: var(--c-accent); box-shadow: none; }
 .experience .build-footer small { color: var(--c-ink-muted); }
+.experience #summary-pass-fill { background: var(--c-accent); }
 .experience .pitch-error strong { color: var(--c-error); }
 .experience .crest-svg.home path { stroke: var(--team-home); }
 .experience .crest-svg.away path { stroke: var(--team-away); }
