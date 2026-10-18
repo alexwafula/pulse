@@ -30,6 +30,8 @@ async function open(context, url, view) {
   if (await page.locator("#play-button").getAttribute("aria-label") === "Pause") await page.locator("#play-button").click();
   return page;
 }
+// DOM clicks: the replay keeps re-rendering, so Playwright's stability wait can time out.
+const press = (page, selector) => page.locator(selector).first().evaluate(node => node.click());
 const rgb = hex => `rgb(${[1,3,5].map(i => parseInt(hex.slice(i,i+2),16)).join(", ")})`;
 
 // Aurora Vale is teams[1] in late-siege and teams[0] in corner.
@@ -38,10 +40,11 @@ await check("Aurora Vale keeps one colour across scenarios and renderers", async
   const context = await browser.newContext(viewports.desktop);
   for (const scenario of ["late-siege","corner"]) for (const view of views) {
     const page = await open(context, `/?scenario=${scenario}&view=${view}`, view);
+    const aurora = (await (await fetch(`${base}/api/replay?scenario=${scenario}`)).json()).match.teams.find(team => team.name === "Aurora Vale").id;
     const swatch = await page.locator(".team-name", {has:page.locator(".team-name-text", {hasText:"Aurora Vale"})}).locator(".team-swatch").evaluate(node => getComputedStyle(node).backgroundColor);
     const kit = view === "svg"
       ? await page.evaluate(() => { const title = [...document.querySelectorAll("#player-layer title")].find(node => node.textContent.endsWith(", Aurora Vale")); return title && getComputedStyle(title.parentElement.querySelector("circle")).fill; })
-      : await page.locator("#canvas-host canvas").evaluate(node => { const pair = (node.dataset.teamColours ?? "").split(" ").find(entry => entry.startsWith("aurora:")); return pair?.slice(7); });
+      : await page.locator("#canvas-host canvas").evaluate((node, id) => (node.dataset.teamColours ?? "").split(" ").find(entry => entry.startsWith(`${id}:`))?.slice(id.length + 1), aurora);
     seen.push({scenario, view, swatch, kit: kit?.startsWith("#") ? rgb(kit) : kit});
     await page.close();
   }
@@ -70,10 +73,10 @@ await check("audited text pairs reach 4.5:1", async () => {
   for (const [size, options] of Object.entries(viewports)) {
     const context = await browser.newContext(options);
     const page = await open(context, "/?scenario=late-siege&view=svg", "svg");
-    await seek(page, 1000);
+    await seek(page, 400); // mid-replay, so a timeline row is current
     rows.push(...(await page.evaluate(measure, pairs)).map(row => ({size, ...row})));
-    await page.locator("#tab-control").click();
-    await page.locator('[data-moment-type="SUSTAINED_PRESSURE"]').first().click();
+    await press(page, "#tab-control");
+    await press(page, '[data-moment-type="SUSTAINED_PRESSURE"]');
     await page.waitForSelector(".source-event-button");
     rows.push(...(await page.evaluate(measure, pairs)).map(row => ({size, ...row})));
     await context.close();
@@ -85,7 +88,7 @@ await check("audited text pairs reach 4.5:1", async () => {
   assert.deepEqual(failing.map(row => `${row.size} ${row.selector} ${row.ratio}`), []);
 });
 
-await check("Inter is not requested on / but /legacy is unchanged", async () => {
+await check("Inter is not requested on /", async () => {
   const context = await browser.newContext(viewports.desktop);
   const page = await context.newPage();
   const fonts = [];
@@ -94,11 +97,21 @@ await check("Inter is not requested on / but /legacy is unchanged", async () => 
   await page.evaluate(() => document.fonts.ready);
   assert.deepEqual(fonts.filter(name => name.includes("Inter")), [], `fonts on /: ${fonts.join(", ")}`);
   await context.close();
+});
+
+await check("/legacy renders the baseline pixels", async () => {
   for (const view of views) {
     const legacy = await open(await browser.newContext(viewports.desktop), `/legacy?scenario=corner&view=${view}`, view);
-    await seek(legacy, 400);
     await legacy.evaluate(() => document.fonts.ready);
+    await legacy.waitForTimeout(1500);
+    // Autoplay can start after open() paused it; pause again, then seek, so the frame depends only on the seek.
+    if (await legacy.locator("#play-button").getAttribute("aria-label") === "Pause") await press(legacy, "#play-button");
+    await seek(legacy, 400);
     await legacy.waitForTimeout(500);
+    assert.equal(await legacy.locator("#play-button").getAttribute("aria-label"), "Play", `/legacy ${view} must be paused`);
+    // SVG drop-shadow filters rasterise slightly differently run to run, even on main; compare without them.
+    await legacy.addStyleTag({content:"svg *, svg { filter: none !important; }"});
+    await legacy.waitForTimeout(200);
     const shot = await legacy.screenshot({animations:"disabled", caret:"hide", mask:[legacy.locator("#build-label")]});
     fs.writeFileSync(path.join(output, `legacy-${view}.png`), shot);
     await legacy.context().close();
@@ -117,7 +130,7 @@ await check("reduced motion never requests smooth scrolling", async () => {
   await context.addInitScript(() => { const original = Element.prototype.scrollIntoView; window.scrollCalls = []; Element.prototype.scrollIntoView = function (options) { window.scrollCalls.push(typeof options === "object" ? options.behavior ?? "auto" : "auto"); return original.call(this, options); }; });
   const page = await open(context, "/?scenario=late-siege&view=svg", "svg");
   await seek(page, 1000);
-  for (const selector of ["#tab-passing","[data-pass-evidence]","#tab-recap","[data-recap-evidence]"]) await page.locator(selector).first().click();
+  for (const selector of ["#tab-passing","[data-pass-evidence]","#tab-recap","[data-recap-evidence]"]) await press(page, selector);
   const calls = await page.evaluate(() => window.scrollCalls);
   assert.ok(calls.length > 0, "selecting evidence must scroll the pitch into view");
   assert.ok(!calls.includes("smooth"), `scrollIntoView behaviours: ${calls.join(", ")}`);
