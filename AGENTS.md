@@ -116,6 +116,10 @@ Main releases reuse CI, test both containers and the desktop/mobile homepage,
 then publish SHA-tagged images and update the existing Azure apps. Separate
 main-only identities grant registry push and app-scoped deployment access.
 Recorded mode, zero model calls and service-token authentication are preserved.
+On Live, a hero states the API's `indexDelta` as one plain line (2 dp) with its exact
+signed value (U+2212), team-order label and estimate chip; there is no score or share
+meter. The server renders the first headline from the cached `/api/metrics` result and
+the team kits from team ids (`team_kit.go`); scripts only read and update them.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -229,7 +233,7 @@ Known from `package.json`:
 
 Local checks:
 
-- Full gate: `./scripts/check.sh` runs 10 steps: gofmt, go vet, Go tests, checkdata on every generated scenario in `data/scenarios`, Python tests, agent evaluations, tsc, esbuild, web bundle reproducibility, Bicep.
+- Full gate: `./scripts/check.sh` runs 10 steps: gofmt, go vet, Go tests (plus `-race` on the shared metrics cache test), checkdata on every generated scenario in `data/scenarios`, Python tests, agent evaluations, tsc, esbuild, web bundle reproducibility, Bicep.
 - Go: `go build ./...`, `go vet ./...`, `gofmt -l .`, `go test ./...`
 - Python: `py -m unittest discover -s agents/tests -v` (standard library; pytest is not configured)
 - Offline agent boundary evaluation: `py tests/evaluations/run_agents.py` (fake backend, not model accuracy)
@@ -239,6 +243,7 @@ Local checks:
 - UI controls: `node tests/integration/controls-browser.mjs` (Select2, all locales/personas, persistence, menu stability and 320/390/768/1440px layouts)
 - Locales and model labels: `node tests/integration/locale-browser.mjs` (running local Go server; locale allowlist and storage, hi-IN catalog routing, Control vs Chaos `indexDelta` headline, canonical `model estimate, uncalibrated` label, translated insights never Verified)
 - Render loop: `node tests/integration/render-loop-browser.mjs` (running local Go server; counts WebGL draw frames while paused, playing and hidden)
+- Hero (D3a): `node --test tests/integration/index-headline.test.mjs` (headline wording) and `node tests/integration/hero-browser.mjs` (running local Go server; server-rendered team kits and headline present before scripts and unchanged by hydration, headline equals `/api/metrics`, mobile pitch within 360px, paused renderer switch draws 0 frames)
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.

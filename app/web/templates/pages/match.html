@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/static/controls.css">
   <script type="module" src="/static/pitch.js"></script>
 </head>
-<body{{if .Experience}} class="experience" data-section="live"{{end}}>
+<body{{if .Experience}} class="experience" data-section="live" data-home-kit="{{index .TeamKits 0}}" data-away-kit="{{index .TeamKits 1}}"{{end}}>
   {{if .Experience}}
   <nav class="experience-nav" aria-label="Match workspace">
     <a class="experience-brand" href="/?scenario={{.Scenario}}"><i data-lucide="activity"></i><span>Pulse</span></a>
@@ -74,7 +74,7 @@
       </div>
       
       <span class="header-badge">Synthetic fixture</span>
-      {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-label="Score not recorded">&ndash; : &ndash;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
+      {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-hidden="true">&middot;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
     </div>
   </header>
   {{if .Experience}}
@@ -93,6 +93,25 @@
     <div id="experience-transport" hidden></div>
     <div id="experience-watch-dock" hidden><div class="watch-dock-tools"><button type="button" id="watch-expand" class="icon-button" title="Return to Live" aria-label="Return to Live"><i data-lucide="maximize-2"></i></button><button type="button" id="watch-close" class="icon-button" title="Hide match player" aria-label="Hide match player"><i data-lucide="x"></i></button></div></div>
     {{end}}
+    {{if .Experience}}
+    <!-- HERO (DIRECTION C1): teams, clock and the API's index difference; no score, no share meter.
+         data-team-kit comes from the team id on the server (team_kit.go); scripts only read it. -->
+    <section class="match-hero" data-index="{{if .Hero.HasValue}}value{{else}}none{{end}}">
+      <p class="hero-fixture"><span class="fixture-label">{{.ScenarioName}}</span></p>
+      <div class="hero-teams">
+        <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}" data-team-kit="{{index .TeamKits 0}}"><span class="team-swatch home"></span><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 0).Name}}</span><span class="team-sub">{{(index .Match.Teams 0).Name}} &bull; Attacking {{(index .Match.Teams 0).AttackingDirection}}</span></span></div>
+        <div class="hero-clock"><time id="match-clock" class="match-clock">{{.StartClock}}</time><span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span><span class="score-unavailable" aria-label="Score unavailable" title="Score is not recorded in this replay">Score unavailable</span></div>
+        <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}" data-team-kit="{{index .TeamKits 1}}"><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 1).Name}}</span><span class="team-sub">{{(index .Match.Teams 1).Name}} &bull; Attacking {{(index .Match.Teams 1).AttackingDirection}}</span></span><span class="team-swatch away"></span></div>
+      </div>
+      <!-- First paint: /api/metrics' own start tick, rendered by the server (index_headline.go). analytics.ts
+           updates it for later ticks with the same rules (index-headline.ts). teams[0]'s indexDelta, API team order. -->
+      <div class="hero-index">
+        <p class="hero-eyebrow">Control vs Chaos</p>
+        <p id="hero-index-headline" class="hero-index-headline">{{.Hero.Headline}}</p>
+        <p class="hero-index-ledger"><span id="hero-index-delta" class="hero-index-value" data-no-translate{{if not .Hero.HasValue}} hidden{{end}}>{{.Hero.Signed}}</span><span id="hero-index-teams" class="hero-index-teams" data-no-translate{{if not .Hero.HasValue}} hidden{{end}}>{{.Hero.Label}}</span><span id="hero-index-chip" class="estimate-chip"{{if not .Hero.Chip}} hidden{{end}}>{{.Hero.Chip}}</span></p>
+      </div>
+    </section>
+    {{else}}
     <!-- MATCH STRIP / SCOREBOARD & COMPUTED SHARE BAR -->
     <section class="match-strip" aria-label="Match scoreboard and pass share">
       <!-- First replay team; colours follow the team id (team-colour.ts) -->
@@ -139,26 +158,9 @@
         </svg>
       </div>
 
-      <!-- Computed Share Bar (strict computed numbers: completed passes, NEVER possession) -->
-      <div class="computed-share-bar" role="region" aria-label="Completed passes share">
-        <div class="share-labels">
-          <span class="share-home-val">
-            <span class="share-desktop" id="home-pass-share">0 completed passes</span>
-            <span class="share-mobile" id="home-pass-share-mobile">0 passes</span>
-          </span>
-          <span class="share-title">Completed passes (replay window)</span>
-          <span class="share-away-val">
-            <span class="share-desktop" id="away-pass-share">0 completed passes</span>
-            <span class="share-mobile" id="away-pass-share-mobile">0 passes</span>
-          </span>
-        </div>
-        <div class="share-track">
-          <div class="share-fill-home" id="home-pass-fill" style="width: 0%;"></div>
-          <div class="share-fill-away" id="away-pass-fill" style="width: 0%;"></div>
-        </div>
-        <span class="share-caption">Completed passes (replay window)</span>
-      </div>
+      {{template "share-bar"}}
     </section>
+    {{end}}
 
     <!-- MAIN WORKSPACE: Floating Glass Panels Layout -->
     <div class="workspace">
@@ -187,6 +189,7 @@
           <strong class="rail-value" id="summary-attacks">0 entries / 0 shots</strong>
           <span class="rail-sub" id="summary-conversion">N/A</span>
         </div>
+      {{if .Experience}}<div class="rail-card rail-share">{{template "share-bar"}}</div>{{end}}
       </aside>
 
       <div id="summary-series" hidden>
@@ -536,3 +539,24 @@
   </main>
 </body>
 </html>
+{{define "share-bar"}}
+      <!-- Computed Share Bar (strict computed numbers: completed passes, NEVER possession) -->
+      <div class="computed-share-bar" role="region" aria-label="Completed passes share">
+        <div class="share-labels">
+          <span class="share-home-val">
+            <span class="share-desktop" id="home-pass-share">0 completed passes</span>
+            <span class="share-mobile" id="home-pass-share-mobile">0 passes</span>
+          </span>
+          <span class="share-title">Completed passes (replay window)</span>
+          <span class="share-away-val">
+            <span class="share-desktop" id="away-pass-share">0 completed passes</span>
+            <span class="share-mobile" id="away-pass-share-mobile">0 passes</span>
+          </span>
+        </div>
+        <div class="share-track">
+          <div class="share-fill-home" id="home-pass-fill" style="width: 0%;"></div>
+          <div class="share-fill-away" id="away-pass-fill" style="width: 0%;"></div>
+        </div>
+        <span class="share-caption">Completed passes (replay window)</span>
+      </div>
+{{end}}

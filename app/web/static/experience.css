@@ -9,14 +9,18 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   --text-primary: var(--c-ink); --text-secondary: var(--c-ink-muted); --text-muted: var(--c-ink-muted);
   --text-inverse: var(--c-on-accent); --accent-lime: var(--c-accent); --accent-lime-bg: var(--c-accent-tint);
   --team-a: var(--c-team-a); --team-b: var(--c-team-b);
-  /* Defaults only: pitch.ts points the slots at each team's own colour from its id. */
-  --team-home: var(--c-team-a); --team-away: var(--c-team-b);
   --border-hairline: 1px solid var(--c-rule); --border-subtle: 1px solid var(--c-rule);
   --glass-panel: var(--c-surface); --glass-header: transparent; --glass-surface: var(--c-surface-2);
   --glass-blur: none; --glow-lime-sm: none; --shadow-card: none;
   --radius-md: 8px; --radius-lg: 8px;
   margin: 0; padding: 0 0 0 236px; font-family: var(--font-ui); background: var(--c-canvas);
 }
+/* The positional slots follow the kits the server rendered from each team id (team_kit.go), so
+   the first paint already has each team's own colour and no script repaints it. */
+.experience[data-home-kit=a] { --team-home: var(--c-team-a); }
+.experience[data-home-kit=b] { --team-home: var(--c-team-b); }
+.experience[data-away-kit=a] { --team-away: var(--c-team-a); }
+.experience[data-away-kit=b] { --team-away: var(--c-team-b); }
 .experience *, .experience *::before, .experience *::after { letter-spacing: 0; }
 .experience button, .experience select, .experience input { font-family: inherit; }
 .experience button:focus-visible, .experience a:focus-visible, .experience select:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; }
@@ -57,13 +61,32 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience-screen-actions { display: flex; align-items: center; gap: 12px; }
 .fixture-label { font-size: 12px; color: var(--c-ink-muted); }
 .experience-screen-actions .icon-button { background: var(--c-surface); color: var(--c-accent); border: 0; border-radius: 50%; }
-.experience .match-strip { margin: 0 0 18px; padding: 18px 0; background: transparent; border: 0; box-shadow: none; gap: 14px; }
-.experience .team-name-text { font: 700 22px/1.2 var(--font-display); white-space: normal; overflow: visible; }
-.experience .team-sub { font-size: 10px; color: var(--c-ink-muted); }
-.experience .crest-svg { width: 46px; flex-basis: 46px; filter: none; }
-.experience .clock-badge { background: var(--c-surface); border: 0; border-radius: 20px; }
-.experience .live-pulse-dot { background: var(--c-verified); animation: none; box-shadow: none; }
-.experience .score-unavailable { color: var(--c-ink); font: 700 28px var(--font-display); }
+/* Hero (DIRECTION C1): one number, the API's index difference, stated as a plain line. No score,
+   no two-colour meter, no absolute share. The "Live" title stays for assistive tech only. */
+.experience[data-section=live] .experience-screen-heading, .experience[data-section=live] .experience-mini-score { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; margin: 0; }
+.match-hero { display: grid; gap: var(--space-4); margin: var(--space-2) 0 var(--space-6); padding: var(--space-5) var(--space-6); background: var(--c-surface); border-radius: var(--radius-stage); box-shadow: var(--elev-2); }
+.hero-fixture { margin: 0; font: 600 var(--text-xs) var(--font-ui); }
+.hero-teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: var(--space-4); }
+.match-hero .team-name { gap: var(--space-2); }
+.match-hero .team-name-text { font: 700 var(--text-xl) var(--font-display); white-space: normal; overflow-wrap: anywhere; }
+.match-hero .team-swatch { height: 24px; }
+.match-hero .team-sub { font-size: 12px; color: var(--c-ink-muted); }
+.hero-clock { display: grid; justify-items: center; grid-template-columns: auto auto; column-gap: var(--space-2); align-items: baseline; }
+.match-hero .match-clock { font: 700 var(--text-lg) var(--font-ui); color: var(--c-ink); }
+.match-hero .clock-period { border: 0; padding: 0; font-size: 12px; letter-spacing: .04em; color: var(--c-ink-muted); }
+.match-hero .score-unavailable { grid-column: 1 / -1; font: 500 var(--text-xs) var(--font-ui); color: var(--c-ink-muted); }
+.hero-index { min-width: 0; padding-top: var(--space-4); border-top: 1px solid var(--c-rule); }
+.hero-eyebrow { margin: 0 0 var(--space-1); font: 600 var(--text-xs) var(--font-ui); color: var(--c-ink-muted); }
+.hero-index-headline { margin: 0; max-width: var(--measure); font: 700 var(--text-3xl) var(--font-display); color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.hero-index-ledger { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin: var(--space-2) 0 0; font: var(--text-sm) var(--font-ui); color: var(--c-ink-muted); }
+.match-hero[data-index=none] .hero-index-headline { font: 600 var(--text-lg) var(--font-ui); color: var(--c-ink-muted); }
+.hero-index-value { font-weight: 700; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+.estimate-chip { padding: 2px var(--space-2); border-radius: var(--radius-pill); background: var(--c-estimate-tint); color: var(--c-estimate); font: 600 var(--text-xs) var(--font-ui); }
+/* Completed passes moved from the strip into the rail as counts only: no share track. */
+.experience .rail-share { grid-column: 1 / -1; }
+.experience .rail-share .computed-share-bar { margin: 0; padding: 0; border: 0; }
+.experience .rail-share .share-labels { margin: 0; font-size: 13px; }
+.experience .rail-share .share-track, .experience .rail-share .share-caption { display: none; }
 .experience .share-title { text-transform: none; color: var(--c-ink-muted); }
 .experience .share-track { background: var(--c-rule); }
 .experience .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 20px; padding: 0; align-items: start; }
@@ -188,7 +211,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .metric-values dt { font-size: 11px; }
 .experience .metric-values dd { font: 700 25px/1.3 var(--font-display); text-align: left; margin-top: 8px; overflow-wrap: anywhere; }
 .experience .model-label { font-size: 10px; color: var(--c-ink-muted); line-height: 1.6; }
-.experience:not([data-section=live]) .match-strip, .experience:not([data-section=live]) .left-rail { display: none; }
+.experience:not([data-section=live]) .match-hero, .experience:not([data-section=live]) .left-rail { display: none; }
 .experience:not([data-section=live]) .workspace { grid-template-columns: minmax(0,1fr) 320px; }
 .experience:not([data-section=live]) .right-drawer { display: contents; }
 .experience:not([data-section=live]) #experience-panel { grid-column: 1; grid-row: 1; min-width: 0; }
@@ -214,10 +237,6 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .build-footer small { color: var(--c-ink-muted); }
 .experience #summary-pass-fill { background: var(--c-accent); }
 .experience .pitch-error strong { color: var(--c-error); }
-.experience .crest-svg.home path { stroke: var(--team-home); }
-.experience .crest-svg.away path { stroke: var(--team-away); }
-.experience .crest-svg.home text { fill: var(--team-home); }
-.experience .crest-svg.away text { fill: var(--team-away); }
 /* The same renderer moves between the live stage and the optional watch dock. */
 #experience-transport { margin: 0 0 22px; border-bottom: var(--border-hairline); padding-bottom: 10px; }
 #experience-transport .transport { padding-top: 0; max-width: 900px; }
@@ -267,7 +286,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience-navigation button { flex-direction: column; gap: 2px; font-size: 10px; padding: 4px 16px; min-height: 52px; }
   .experience-navigation span { display: inline; }
   .experience-navigation button[aria-current] { background: var(--c-accent-tint); color: var(--c-accent); box-shadow: none; }
-  .experience .header-inner { padding: 14px; }
+  .experience .header-inner { padding: 12px 14px; }
   .experience .header-inner { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; }
   .experience .header-inner .brand { display: flex; grid-column: 1; grid-row: 1; }
   .experience .header-inner .brand-mark { display: none; }
@@ -280,12 +299,22 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience-screen-heading { padding: 10px 0 18px; }
   .experience-screen-heading h1 { font-size: 28px; }
   .fixture-label { display: none; }
-  .experience .match-strip { grid-template-columns: minmax(0,1fr) 90px minmax(0,1fr); gap: 8px; padding-top: 0; }
-  .experience .team-name-text { font-size: 14px; overflow-wrap: anywhere; }
-  .experience .crest-svg, .experience .clock-period, .experience .half-label, .experience .share-title { display: none; }
-  .experience .scoreboard { min-width: 0; }
-  .experience .score-unavailable { font-size: 22px; }
-  .experience .clock-badge { padding: 4px 6px; }
+  /* Mobile hero: compact, so the pitch starts within the first 360px; the view switch and the
+     Control toggle follow the transport, under the pitch. */
+  .match-hero { gap: var(--space-3); margin: 0 0 var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-card); }
+  .hero-teams { gap: var(--space-2); }
+  .experience .team-name-text { font-size: 15px; line-height: 20px; }
+  .match-hero .team-swatch { height: 18px; }
+  .hero-clock { grid-template-columns: auto; }
+  .match-hero .match-clock { font-size: 15px; line-height: 20px; }
+  .match-hero .score-unavailable { font-size: 11px; line-height: 14px; text-align: center; }
+  .hero-index { padding-top: var(--space-3); }
+  .hero-eyebrow { display: none; }
+  .match-hero .fixture-label { display: inline; }
+  .hero-index-headline { font-size: 20px; line-height: 26px; }
+  .hero-index-ledger { margin-top: var(--space-1); font-size: 12px; line-height: 16px; }
+  .experience .pitch-column > .section-heading, .experience .pitch-column > .pitch-overlay-tools { order: 1; }
+  .experience .clock-period, .experience .half-label, .experience .share-title { display: none; }
   .experience .pitch-column > .section-heading h1 { font-size: 15px; }
   .experience .pitch-shell { aspect-ratio: 1.45; }
   .experience .pitch-overlay-tools { flex-wrap: wrap; gap: 10px; }

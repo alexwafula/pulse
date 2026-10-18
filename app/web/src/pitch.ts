@@ -6,19 +6,7 @@ import { createAnalytics, type Moment } from "./analytics";
 import { locale, localize, observeLocalization, supportedLocale, t } from "./i18n";
 import { closeDropdowns, initializeSelects, syncSelects } from "./selects";
 import { renderFactCheck } from "./fact-check";
-import { teamColour, teamColourToken, teamKit } from "./team-colour";
-
-// Experience only: point the positional .home/.away slots at each team's own colour.
-function applyTeamColours(): void {
-  if (!document.body.classList.contains("experience")) return;
-  const strips = Array.from(document.querySelectorAll<HTMLElement>(".team-name[data-team-id]"));
-  const teamIds = strips.map((strip) => strip.dataset.teamId ?? "");
-  ["--team-home", "--team-away"].forEach((slot, index) => {
-    if (teamIds[index]) document.body.style.setProperty(slot, `var(${teamColourToken(teamIds[index], teamIds)})`);
-  });
-  for (const strip of strips) strip.dataset.teamColour = teamColour(strip.dataset.teamId ?? "", teamIds);
-}
-applyTeamColours();
+import { teamColour, teamKit } from "./team-colour";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
