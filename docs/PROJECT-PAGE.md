@@ -1,8 +1,8 @@
 # Project-page copy
 
-Use this draft while registering. It describes the current local prototype
-and clearly labels cloud/model integration as planned. Update it after a
-successful live Foundry run and Azure deployment; do not present plans as done.
+Updated October 18, 2026. Hosting and one bounded live workflow were demonstrated;
+the public judge demo deliberately uses recorded output and deterministic templates,
+not fresh model calls. The readiness additions are local until merged/deployed.
 
 ## Title
 
@@ -34,28 +34,35 @@ shows player movement and ball actions in 3D or 2D. Passing networks show who
 connected with whom, while attacking-route panels track lane usage, penalty-area
 entries and entry-to-shot conversion under an explicit attribution rule.
 
-The local prototype includes three authored scenarios, Casual and Analyst
+The prototype includes three authored scenarios and two seeded 11v11 sequences, Casual and Analyst
 explanations, clickable evidence replay and a downloadable sequence recap.
 Rewinding also rewinds the statistics, so future actions cannot appear as
 current evidence. All clubs, players and match data in the demo are fictional.
 
 ### Purposeful agent collaboration
 
-We are preparing three Python agents: an Explainer selects supported meaning,
+Three Python agents are wired: an Explainer selects supported meaning,
 a Narrator adapts the wording for the viewer, and a Verifier checks each claim
 against the fact pack. Their workflow has bounded retries and deterministic
-template fallback. The current browser uses trusted templates; a Microsoft
-Foundry REST adapter and offline test harness are implemented, but live model
-integration has not yet been demonstrated. Model agreement alone will not
-override the final Go publishing checks.
+template fallback. One explicitly capped, English Casual corner workflow passed
+Python and independent Go checks on October 13. The public Azure demo serves that
+stored response as **Verified (recorded)** only when the complete request matches;
+other supported requests use templates. This is not a general live-model quality
+claim. The recording declares Foundry/model metadata; original provider-response
+provenance remains pending. Model agreement alone cannot override Go's gate.
 
-### Goals for the submitted demo
+### Deployment and current limits
 
-Connect the model-backed workflow through Microsoft Foundry, deploy the Go
-and Python services to Azure Container Apps, and demonstrate an explanation
-whose supporting events can be replayed. We also plan reviewed English and
-Kiswahili storytelling. Cloud deployment, broader model-generated wording
-and Kiswahili are not claimed as working in this registration draft.
+Go and Python are deployed to Azure Container Apps, with GitHub Actions builds,
+Azure Container Registry and service-authenticated insight requests. Microsoft
+Foundry is provisioned for opt-in bounded development runs; public model calls
+remain disabled. Console logs are available in Log Analytics.
+
+The readiness branch adds evidence-backed sustained-pressure templates. These
+are **not model-verified**. Tracking-derived control values are uncalibrated
+model estimates. English, Kiswahili and Hindi interface/template options exist;
+Kiswahili/Hindi remain drafts pending native review. Recaps are deterministic,
+scores are unavailable, and no goal, live event streaming or speech is claimed.
 
 Pulse's goal is simple: make football intelligence understandable, inspectable
 and adaptable, without allowing an AI model to invent the match.
@@ -67,9 +74,10 @@ dropdown label still needs checking on your project form. Do not select a
 different Microsoft event just because its wording also mentions agents.
 
 If the form instead asks for a prize category, **Best Multi-Agent System Prize**
-is a candidate after live specialized agents are demonstrated. The official
+is a candidate for the bounded specialized workflow; do not describe the recorded
+public demo as a fresh live-agent evaluation. The official
 rules also list Foundry and Azure categories; their existence does not mean
-the current local prototype already qualifies for those implementation claims.
+the project automatically qualifies for a prize or any unimplemented claim.
 [Official rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
 
 ## Writing code
@@ -98,26 +106,16 @@ Kiswahili review. Please coordinate shared-contract changes with the team.
 
 ## Media
 
-Actual product screenshots are generated into `docs/media/` by
-`node tests/integration/capture-media.mjs` with the local server running.
-Use `pulse-overview.png` as the cover, then `pulse-analytics.png`,
-`pulse-tactics.png`, `pulse-evidence.png` and `pulse-recap.png`. Captions should identify the fictional replay and the
-current template mode. Do not imply these are real match footage or live AI.
+Use the actual product screenshots in `docs/media/`. The readiness recording
+script is `node scripts/capture-demo.mjs` against the local recorded service.
+See [demo script and upload checklist](DEMO-VIDEO.md) and
+[judge instructions](JUDGE-INSTRUCTIONS.md). All footage is fictional replay;
+recorded/template output must not be described as fresh AI generation.
 
 The official final submission calls for a functioning-demo video under two
 minutes, a public video URL on an accepted platform, and a public GitHub repo.
 Screenshots alone are not a replacement for that final video.
 [Submission requirements](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
 
-### Suggested 90-second video outline
-
-1. 0-10 s: "Pulse connects football actions to explanations you can inspect."
-2. 10-30 s: play the fictional sequence; show the pitch and synchronized actions.
-3. 30-45 s: show passing links and attacking routes; inspect one pass.
-4. 45-65 s: show the corner insight and replay its evidence.
-5. 65-80 s: switch Casual/Analyst, show the sequence recap.
-6. 80-90 s: after deployment/model testing, show the Azure URL and actual
-   Foundry run/rejection logs. Until then, label this segment planned rather
-   than fabricating a completed cloud/AI demo.
-
 Avoid unlicensed real-match footage, club marks, copyrighted music and secrets.
+Publish only after [permission and review sign-offs](SUBMISSION-READINESS.md).

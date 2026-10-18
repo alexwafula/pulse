@@ -319,6 +319,15 @@
       <aside class="events-panel right-drawer" aria-labelledby="drawer-heading">
         <h2 id="drawer-heading" class="sr-only">Tactical Intelligence Drawer</h2>
         
+        <section id="pressure-insight" class="pressure-insight" aria-labelledby="pressure-heading" data-source="deterministic-moment-template" hidden>
+          <div class="section-heading"><h2 id="pressure-heading">Sustained pressure</h2><span>Template</span></div>
+          <p id="pressure-text" aria-live="polite"></p>
+          <p class="model-label">model estimate, uncalibrated</p>
+          <small>Not model-verified</small>
+          <p id="pressure-window" data-no-translate></p>
+          <button type="button" id="pressure-evidence" class="evidence-button"><i data-lucide="list-video"></i><span>Evidence</span></button>
+        </section>
+
         <!-- Pinned Signature Match Insight Card -->
         <section class="insight-panel" aria-labelledby="insight-heading">
           <div class="section-heading">

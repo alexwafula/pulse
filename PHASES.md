@@ -100,7 +100,7 @@ PR numbers checked with `gh pr list` on Oct 18. The only open PR is #31 (this do
 
 | ID | Item | Status | PR |
 |---|---|---|---|
-| I | Shot-map test and canvas stability | OPEN | none (earlier related fix: #23, merged Oct 14) |
+| I | Shot-map test and canvas stability | LOCAL DONE: resize-safe canvas lifecycle, context recovery/SVG fallback and source shot-pixel checks at desktop/mobile sizes | `fix/demo-readiness`, not deployed |
 | F | Model request cap default 0, plus the parameters file | DONE: `server.py:20` `model_request_cap()` (unset or invalid → 0), `service.py:18` `max_requests: int = 0`, `main.parameters.json:18` `0`, `compose.yaml:11` `:-0`; `test_model_cap.py` 5/5 pass, including `test_no_infra_or_compose_file_sets_a_nonzero_model_request_cap` | #30 (merged Oct 17) |
 | A1 | Locale allowlist | DONE: one `LOCALES` list (`app/web/src/i18n.ts:4`); server `requestLocale()` falls back to `en-GB` (`app/internal/transport/http/locales.go:15-20`); `TestUnknownLocaleFallsBackToEnglish` pass; locale-browser "locale allowlist" and "storage and URL precedence (17 cases)" pass | #32 (merged Oct 18) |
 | A2 | i18n routing of 30 visible strings | DONE: locale-browser "hi-IN visible text routed through i18n (27 reviewed strings)" passes. Of the 30, 27 are asserted by name, 2 labels were removed under A5, and the pitch stamp was already routed. The 43 new keys still hold English text in sw-KE and hi-IN (see G) | #32 (merged Oct 18) |
@@ -108,10 +108,27 @@ PR numbers checked with `gh pr list` on Oct 18. The only open PR is #31 (this do
 | A4 | Evidence Trail label | DONE: `#moment-values-label` sits before `#moment-values` (`match.html:519`); locale-browser "canonical model label in Control, Evidence trail and banner" passes | #32 (merged Oct 18) |
 | A5 | Canonical label | DONE: one `model estimate, uncalibrated` key; `Experimental` and `Formation-sensitive` appear 0 times in `match.html`, `pitch.js` and `experience.js`; `TestModelLabelIsCanonicalInServedHTMLAndBundles` and `TestModelLabelHasOneCatalogKey` pass | #32 (merged Oct 18) |
 | A6 | Hide the Legacy link | DONE: the link carries `hidden` (`match.html:30`) and `/legacy` still serves; `TestPageCopy` passes; live `/` on Oct 18 served the link with `hidden` | #32 (merged Oct 18) |
-| B | Clicking a moment stays in Live | OPEN | none |
-| E | `SUSTAINED_PRESSURE` deterministic template narration (template only, never VERIFIED) | OPEN | none |
-| G | `sw-KE` and `hi-IN` translation review. Now also covers the 43 keys #32 added with English text in both locales (`docs/I18N-BACKLOG.md`) | OPEN | none |
-| H | gzip and `Cache-Control` for static assets. Now: `/static/` is a plain `http.FileServer` (`handler.go:87`), and `gzipJSON` covers only three API paths (`compression.go:32-33`). On Oct 17 and again on Oct 18 (build `08eafa9`), live `/static/pitch.js` with `Accept-Encoding: gzip` returned neither `Content-Encoding` nor `Cache-Control` | OPEN | none |
+| B | Clicking a moment stays in Live | LOCAL DONE: explicit Live navigation, mounted pitch retained, persona changes preserve detector clips | `fix/demo-readiness`, not deployed |
+| E | `SUSTAINED_PRESSURE` deterministic template narration (template only, never VERIFIED) | LOCAL DONE: Go-backed count/estimate, source actions and ticks, validation/expiry tests; no v2 cue or gate change | `fix/demo-readiness`, not deployed |
+| G | `sw-KE` and `hi-IN` translation review, including the #32 keys and pressure text | PARTIAL: missing translations drafted; all 252 translated keys/placeholders checked. Native-speaker sign-off still pending (`docs/LOCALE-REVIEW.md`) | `fix/demo-readiness` |
+| H | gzip and `Cache-Control` for static assets | LOCAL DONE: gzip, representation-specific ETags, GET/HEAD/304/ranges and must-revalidate. Production headers must be rechecked after release | `fix/demo-readiness`, not deployed |
+
+### Oct 18 local readiness verification
+
+Main fast-forwarded from `70790a8` to `7a1e154`; changes isolated on
+`fix/demo-readiness`. Go tests/vet, TypeScript checks/build, five focused
+pressure/catalog tests, six locale-browser sections, full experience-browser,
+analytics-browser and new readiness desktop/mobile checks pass. Agent fake-backend
+evaluation remains 30/30 with zero false accepts, not live-model quality.
+Windows Python baseline is 33 pass / 1 failure: the model-cap inventory test
+compares backslash paths to slash keys; agent-owner approval is needed for the
+one-line `.as_posix()` test fix. Cap behavior remains zero-default and unchanged.
+
+Judge instructions, project-page copy, provenance audit and submission sign-offs
+are in `docs/`. An actual captioned local demo draft was captured (87.40 seconds);
+public upload, final human watch-through, permissions and native approval remain
+open. The demo stays recorded, no paid model calls/resources were used or changed.
+See ADR 0023 and `docs/SUBMISSION-READINESS.md`.
 
 ---
 
@@ -119,7 +136,7 @@ PR numbers checked with `gh pr list` on Oct 18. The only open PR is #31 (this do
 
 - **Matchlens permission is unconfirmed.** This blocks submission.
 - **Recording provenance.** The model and provider for the `corner-casual.en-GB` recording are typed by hand in `scripts/record-insight.mjs:34` and are not proven by the recording itself.
-- **Docs disagree on live model use.** `docs/PROJECT-PAGE.md:46-50` says "live model integration has not yet been demonstrated". `README.md`, `AGENTS.md` §4 and this file record one live CASUAL corner workflow that passed both checks. The conflict is recorded here and not resolved.
+- **Project-page status corrected locally.** The readiness branch distinguishes the one bounded live corner workflow from the public recorded/template demo. Original provider provenance is still pending (`docs/RECORDING-PROVENANCE.md`).
 - **Late-siege cannot be VERIFIED.** The approved sentences cover the corner-shot fact only (`app/internal/ai/publication.go:12-25`).
 - **215 aria and tooltip strings are outside i18n.** The count comes from the Oct 16 locale scan at `ce435e2` and was not re-measured. #32 left these strings unchanged and lists them in `docs/I18N-BACKLOG.md`. One visible string is also still English: the raw `reason` from `/api/metrics`.
 - **No LICENSE file: team decision pending, check hackathon rules.** There is no project `LICENSE` at the repo root (checked Oct 18).
@@ -163,7 +180,7 @@ Goal: one command shows a verified cue on screen, with either side stubbed.
 - [x] **DONE.** Go builds the fact pack and exposes it through the HTTP boundary. *Evidence:* `/api/fact-packs` at `handler.go:101`.
 - [x] **DONE.** Deterministic template builds a cue. The conservative **cue gate** recomputes evidence and accepts canonical templates only. *Evidence:* `app/internal/ai/publication.go:27-61`; `go test ./app/internal/ai` ok.
 - [ ] **PARTIAL.** SSE delivery with heartbeats. `app/web/src/pitch.ts` shows the cue over a placeholder video or pitch. *Done:* the cue is drawn over the pitch on the replay clock. *Missing:* SSE. No `text/event-stream`, `EventSource` or heartbeat exists in `app/` or `agents/` (`grep`), and `AGENTS.md` §4 says "SSE remains unimplemented".
-- [ ] **PARTIAL.** Deploy the skeleton to Azure Container Apps and run a 15-minute SSE soak test. *Done:* deployed (live `/version` = `08eafa9`). *Missing:* any soak. `tests/integration/cloud-soak.mjs` exists (HTTP only, not SSE), but no 900 s run is recorded (`docs/AZURE-LIVE-STATUS.md:114-115`).
+- [ ] **PARTIAL.** Deploy the skeleton to Azure Container Apps and run a 15-minute SSE soak test. *Done:* deployed; the Oct 15 PR #25 handoff records a 904.27-second HTTP/template soak on `ce435e2`, 112 requests with zero failures. *Missing:* SSE implementation and SSE soak, not all reliability evidence. Historical scope/source is now in `docs/CLOUD-READINESS-2026-10-15.md`; this is not a new soak of the readiness branch.
 
 **A**
 - [x] **DONE.** Python HTTP skeleton with three deterministic, agent-shaped stages returning contract-valid templates. *Evidence:* `agents/src/pulse_agents/server.py`, `pipeline.py`; 34 Python tests pass.

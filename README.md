@@ -9,13 +9,20 @@ and tracking data.
 or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three).
 
 Go and Python are deployed in South Africa North. The public demo uses reviewed,
-recorded Foundry output, labelled `Verified (recorded)`, with template fallback.
+recorded corner output, labelled `Verified (recorded)`, with template fallback.
 It makes no runtime model calls; Azure hosting still consumes credits. Python
 insights require a server-side service token. See the
 [deployment record](docs/AZURE-LIVE-STATUS.md) for checks, source images and limits.
 Runtime changes on `main` are checked, container-tested and automatically deployed
 by **Build Azure Images**. The homepage is the prototype-inspired experience;
 `/experience` remains an alias and `/legacy` preserves the original view (no longer linked from the nav).
+
+Start with the [judge instructions](docs/JUDGE-INSTRUCTIONS.md). The
+[submission checklist](docs/SUBMISSION-READINESS.md) tracks native review,
+prototype reuse permission and the [recording provenance audit](docs/RECORDING-PROVENANCE.md).
+The recording's provider/model metadata is declared, not independently attested.
+The [demo storyboard and local video](docs/DEMO-VIDEO.md) show only working,
+fictional replay with honest recorded/template labels.
 
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
@@ -54,7 +61,7 @@ The printed Pulse URL and process IDs are authoritative. Use
 `-SkipWebBuild` for committed assets. See [collaborator meeting](docs/COLLABORATOR-MEETING.md)
 for prerequisites, checks, owners and the demo walkthrough.
 
-Use `-AgentMode recorded` to replay the reviewed Foundry corner response without
+Use `-AgentMode recorded` to replay the checked corner response without
 a key or paid model calls. The cue is labelled `Verified (recorded)`; unmatched
 requests use templates. Live mode is separate, opt-in and narrowly constrained.
 

@@ -1,5 +1,10 @@
 # Uploadable media
 
+Oct 18: an actual captioned local demo draft (87.40 seconds) is available at
+`demo-draft/pulse-demo.webm`, with a local `demo-draft/index.html` player.
+The video is ignored by Git and requires human approval/public upload; regenerate
+with `node scripts/capture-demo.mjs`. See [publish checklist](../DEMO-VIDEO.md).
+
 These are screenshots of the actual local application, using fictional data.
 They show template insights, not live model-generated or real-match footage.
 

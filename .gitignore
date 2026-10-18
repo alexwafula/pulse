@@ -24,4 +24,7 @@ review-artifacts/
 review-screenshots/
 
 .DS_Store
+/docs/media/demo-draft/*.webm
+/docs/media/demo-draft/*.mp4
+/docs/media/demo-draft/*.json
 Thumbs.db

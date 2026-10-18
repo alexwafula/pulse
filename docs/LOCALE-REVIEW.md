@@ -3,6 +3,12 @@
 Status: **PENDING HUMAN REVIEW**. Automated parity/evidence tests do not certify
 linguistic accuracy. No native-speaker approval has been recorded.
 
+Oct 18 local readiness branch: all 252 interface keys exist in each translated
+locale, with matching English placeholder sets (literal English keys fall back
+to themselves). The recently added English placeholders now
+have translation drafts. `Entropy` in Kiswahili and `Control vs Chaos` remain
+English glossary terms. This is a technical audit, not native approval.
+
 Review sources:
 
 - `app/web/static/locales.json`: interface and source-event/recap sentences.
@@ -29,6 +35,29 @@ Review sources:
    in English when a reviewed local equivalent is unavailable.
 6. Record corrections and a real reviewer/date in the table. Update both Go and
    Python template texts plus shared examples together; run locale tests.
+
+## Reviewer handoff
+
+Open `/?scenario=late-siege&locale=sw-KE` (or `hi-IN`). Pause, seek to the end,
+open Control, then replay Sustained pressure. Compare Casual and Analyst. The
+count, time window, fictional team name, event IDs and tracking timestamps must
+not change. Check that "Not model-verified" cannot be mistaken for verification.
+Then review the Corner chance insight in both personas; it reports a shot,
+never a goal. Review the glossary below before approving the complete catalog.
+
+| Concept | Meaning that must survive translation |
+|---|---|
+| Verified (recorded) | A stored response, checked again; not fresh model generation |
+| Template / Not model-verified | Deterministic wording; no model-verification claim |
+| model estimate, uncalibrated | Experimental tracking calculation, not measured possession |
+| Final-third actions | Completed passes/carries/crosses/corners in the detector window; not shots |
+| Tracking occupancy | Player-time in a grid cell, not touches or pressure |
+| Score unavailable | No recorded result; must not become 0:0 or a goal |
+| Metric ticks | Sample timestamps supporting a model calculation, not event IDs |
+
+Record approval as: reviewer name, native locale, date, reviewed commit, screens
+and template sources reviewed, corrections and remaining exceptions. Do not add
+private contact details. If only part is reviewed, state that scope explicitly.
 
 Non-English requests remain deterministic templates with no model calls.
 Native sign-off alone does not authorize model publication; that needs its own

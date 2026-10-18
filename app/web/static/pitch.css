@@ -1810,3 +1810,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
 }
 .metric-headline dt small { display: block; margin-top: 2px; font-size: 11px; color: var(--text-secondary); }
 .metric-headline dd { font-size: 18px; font-weight: 700; }
+.pressure-insight { padding: 16px 0; border-bottom: 1px solid var(--border-color, #dce1e7); }
+.pressure-insight h2 { font-size: 16px; }
+.pressure-insight p { margin: 8px 0; font-size: 13px; line-height: 1.6; }
+.pressure-insight small, #pressure-window { font-size: 11px; color: var(--text-secondary, #66748a); overflow-wrap: anywhere; }

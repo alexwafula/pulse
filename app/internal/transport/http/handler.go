@@ -84,7 +84,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
 	mux.HandleFunc("/api/moments", tracking.serveMoments)
 	mux.HandleFunc("/experience/panel", experiencePanelHandler(page, replay, view))
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
+	mux.Handle("/static/", http.StripPrefix("/static/", staticAssets(staticDir)))
 	mux.HandleFunc("/design", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)

@@ -210,8 +210,11 @@ document.addEventListener("htmx:beforeSwap", event => {
   if (detail.target === content && dropdownOpen()) detail.shouldSwap = false;
 });
 document.addEventListener("pulse:pane-selected", (event) => {
-  const pane = (event as CustomEvent<{ pane: string }>).detail.pane;
-  if (pane === "evidence") openAnalysis(pane, false);
+  const { pane, section } = (event as CustomEvent<{ pane: string; section?: "live" }>).detail;
+  if (section === "live") {
+    selectSection("live", false);
+    pitch.scrollIntoView({block: "nearest"});
+  } else if (pane === "evidence") openAnalysis(pane, false);
   else if (document.body.dataset.section === "insights" && content.hidden) {
     insightView = pane;
     updateInsightView();

@@ -58,7 +58,7 @@ async function storyAndMaps(page, replay, mobile) {
   await section(page, "insights");
   await panelAt(page, at);
   assert.equal(await page.locator("#workspace-title").textContent(), "Insights");
-  assert.ok(await page.locator('[data-graphic="chart"]').first().isVisible());
+  await page.locator('[data-graphic="chart"][data-ready="true"]').first().waitFor({state:"visible"});
   const chartPixels = PNG.sync.read(await page.locator('[data-graphic="chart"]').first().screenshot());
   let chartColor = 0;
   for (let index = 0; index < chartPixels.data.length; index += 16) {
@@ -73,7 +73,7 @@ async function storyAndMaps(page, replay, mobile) {
   }
   await page.getByRole("button", { name: "Pitch maps", exact: true }).click();
   await page.waitForFunction(() => document.body.dataset.insightView === "maps");
-  assert.ok(await page.locator('[data-graphic="map"]').isVisible());
+  await page.locator('[data-graphic="map"][data-ready="true"]').waitFor({state:"visible"});
   for (const team of replay.match.teams) {
     await select2(page, 'select[name="teamId"]', team.id);
     await page.waitForFunction(teamId => document.querySelector(".pitch-map")?.getAttribute("data-map-team") === teamId, team.id);
