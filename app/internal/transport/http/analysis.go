@@ -9,6 +9,11 @@ import (
 type recapItem struct {
 	Text     string
 	EventIDs []string
+	// Key, Line, Actor, Team and Count let the page re-render the English
+	// recap through the UI catalog: Line is Key's en-GB text and Actor, when
+	// set, prefixes it as "Actor: Line".
+	Key, Line, Actor, Team string
+	Count                  int
 }
 
 func recap(replay domain.Replay) []recapItem {
@@ -17,28 +22,30 @@ func recap(replay domain.Replay) []recapItem {
 	last := series[len(series)-1]
 	for _, team := range last.Teams {
 		if team.Shots > 0 {
-			noun := "shot attempts"
+			noun, key := "shot attempts", "recap.count"
 			if team.Shots == 1 {
-				noun = "shot attempt"
+				noun, key = "shot attempt", "recap.countOne"
 			}
-			items = append(items, recapItem{Text: fmt.Sprintf("%s recorded %d %s in this sequence.", team.Team.Name, team.Shots, noun), EventIDs: team.ShotEventIDs})
+			text := fmt.Sprintf("%s recorded %d %s in this sequence.", team.Team.Name, team.Shots, noun)
+			items = append(items, recapItem{Text: text, EventIDs: team.ShotEventIDs, Key: key, Line: text, Team: team.Team.Name, Count: team.Shots})
 		}
 	}
 	for _, event := range replay.Events {
 		if event.Type == "SHOT" {
-			text := "The shot was completed; no goal outcome is recorded."
+			text, key := "The shot was completed; no goal outcome is recorded.", "recap.completed"
 			if event.Outcome == "BLOCKED" {
-				text = "The shot was blocked."
+				text, key = "The shot was blocked.", "recap.blocked"
 			} else if event.Outcome == "INCOMPLETE" {
-				text = "The shot was unsuccessful."
+				text, key = "The shot was unsuccessful.", "recap.incomplete"
 			}
+			item := recapItem{Text: text, EventIDs: []string{event.ID}, Key: key, Line: text}
 			for _, player := range replay.Match.Players {
 				if player.ID == event.ActorID {
-					text = player.Name + ": " + text
+					item.Text, item.Actor = player.Name+": "+text, player.Name
 					break
 				}
 			}
-			items = append(items, recapItem{Text: text, EventIDs: []string{event.ID}})
+			items = append(items, item)
 		}
 	}
 	return items

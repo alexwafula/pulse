@@ -1808,3 +1808,5 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
   .rail-value { font-size: 16px; }
   .pitch-column { width: 100%; }
 }
+.metric-headline dt small { display: block; margin-top: 2px; font-size: 11px; color: var(--text-secondary); }
+.metric-headline dd { font-size: 18px; font-weight: 700; }

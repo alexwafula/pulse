@@ -27,7 +27,7 @@
       <button type="button" data-section="insights" aria-label="Insights" title="Insights"><i data-lucide="chart-no-axes-combined"></i><span>Insights</span></button>
       <button type="button" data-section="recap" aria-label="Recap" title="Recap"><i data-lucide="file-text"></i><span>Recap</span></button>
     </div>
-    <a class="dashboard-link" href="/legacy?scenario={{.Scenario}}" title="Open the legacy dashboard"><i data-lucide="layout-dashboard"></i><span>Legacy</span></a>
+    <a class="dashboard-link" href="/legacy?scenario={{.Scenario}}" title="Open the original view" hidden><i data-lucide="layout-dashboard"></i><span>Legacy</span></a>
   </nav>
   {{end}}
   <!-- PROCEDURAL BACKDROP (No photos, pure dark stadium glow & architectural stands) -->
@@ -391,12 +391,12 @@
               <div><dt>Entropy</dt><dd id="metric-entropy">N/A</dd></div>
               <div><dt title="Tracking-derived reach estimate, not a count of pressure events">Pressing estimate</dt><dd id="metric-pressing">N/A</dd></div>
               <div><dt>Ball carrier</dt><dd id="metric-carrier">N/A</dd></div>
-              <div><dt><span class="team-swatch home"></span> {{(index .Match.Teams 0).Name}} final third</dt><dd id="metric-home-third">N/A</dd></div>
-              <div><dt><span class="team-swatch away"></span> {{(index .Match.Teams 1).Name}} final third</dt><dd id="metric-away-third">N/A</dd></div>
+              <div><dt><span class="team-swatch home"></span> <span data-i18n="control.finalThird" data-i18n-arg-team="{{(index .Match.Teams 0).Name}}">{{(index .Match.Teams 0).Name}} final third</span></dt><dd id="metric-home-third">N/A</dd></div>
+              <div><dt><span class="team-swatch away"></span> <span data-i18n="control.finalThird" data-i18n-arg-team="{{(index .Match.Teams 1).Name}}">{{(index .Match.Teams 1).Name}} final third</span></dt><dd id="metric-away-third">N/A</dd></div>
             </dl>
-            <h4>Control vs Chaos <span class="model-label">Experimental</span></h4>
-            <dl class="metric-values"><div><dt>{{(index .Match.Teams 0).Name}}</dt><dd id="metric-home-index">N/A</dd></div><div><dt>{{(index .Match.Teams 1).Name}}</dt><dd id="metric-away-index">N/A</dd></div></dl>
-            <p class="model-label">Formation-sensitive model estimates. Not calibrated match probabilities.</p>
+            <h4>Control vs Chaos <span class="model-label">model estimate, uncalibrated</span></h4>
+            <!-- Headline and team label come from /api/metrics: indexDelta of teams[0], i.e. its index minus teams[1]'s; never computed here. -->
+            <dl class="metric-values control-index"><div class="metric-headline"><dt>Index difference <small id="metric-index-teams" data-no-translate hidden></small></dt><dd id="metric-index-delta">N/A</dd></div></dl>
             <div class="section-heading"><h3>Detected moments</h3><span id="moment-count">0</span></div>
             <p id="moments-state" class="model-label">Loading moments</p>
             <ol id="moment-list" class="moment-list"></ol>
@@ -426,12 +426,12 @@
               <div class="passing-snapshot" data-cutoff="{{.TimeMS}}" hidden>
                 {{range .Teams}}
                 <div class="passing-team">
-                  <h4>{{.Name}} <span>{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
+                  <h4>{{.Name}} <span data-i18n="stats.passes" data-i18n-arg-count="{{.Total}}" data-i18n-term-pass="{{if eq .Total 1}}pass{{else}}passes{{end}}">{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
                   <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
                     <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
                     {{$marker := .Marker}}
                     {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
-                    {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} passes sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
+                    {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} {{if eq .Sent 1}}pass{{else}}passes{{end}} sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
                   </svg>
                   <table class="passing-table">
                     <thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead>
@@ -441,7 +441,7 @@
                     {{range .Edges}}
                     <li>
                       <strong>{{.From}} &rarr; {{.To}}</strong>
-                      <span>{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span>
+                      <span data-i18n="stats.count" data-i18n-arg-count="{{.Count}}" data-i18n-term-noun="{{if eq .Count 1}}pass{{else}}passes{{end}}">{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span>
                       <div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}" aria-label="Show events for {{.}}"><span>{{.}}</span></button>{{end}}</div>
                     </li>
                     {{else}}
@@ -479,7 +479,7 @@
                 <dl class="attack-stats">
                   <div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div>
                   <div><dt>Shots</dt><dd>{{.Shots}}</dd></div>
-                  <div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}{{.EntryShots}} of {{.BoxEntries}}{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div>
+                  <div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}<span data-i18n="stats.of" data-i18n-arg-count="{{.EntryShots}}" data-i18n-arg-total="{{.BoxEntries}}">{{.EntryShots}} of {{.BoxEntries}}</span>{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div>
                 </dl>
                 {{end}}
               </div>
@@ -497,7 +497,7 @@
               <ol>
                 {{range .Recap}}
                 <li>
-                  <p>{{.Text}}</p>
+                  <p>{{if .Actor}}{{.Actor}}: {{end}}<span data-i18n="{{.Key}}"{{if .Team}} data-i18n-arg-team="{{.Team}}" data-i18n-arg-count="{{.Count}}"{{end}}>{{.Line}}</span></p>
                   {{range .EventIDs}}
                   <button type="button" class="evidence-button" data-recap-evidence="{{.}}" aria-label="Show events for {{.}}">
                     <i data-lucide="list-video"></i><span>Evidence</span>
@@ -516,7 +516,7 @@
               <span class="evidence-counter" id="evidence-kind">No selection</span>
             </div>
             <p id="evidence-state" class="model-label">No evidence selected</p>
-            <dl id="moment-values" class="metric-values" hidden></dl>
+            <p id="moment-values-label" class="model-label" hidden>model estimate, uncalibrated</p><dl id="moment-values" class="metric-values" hidden></dl>
             <ol id="evidence-list" class="evidence-trail-list"></ol>
           </div>
         </div>

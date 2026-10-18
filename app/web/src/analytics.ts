@@ -3,9 +3,11 @@ import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
 
-type TeamTick = { finalThird: number; index: number };
+// indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
+type TeamTick = { finalThird: number; indexDelta: number | null };
 type Tick = { timeMs: number; entropy: number; pressing: number | null; carrier: { playerId: string; teamId: string } | null; teams: Record<string, TeamTick>; grid: number[] };
-type Metrics = { label: string; reason: string; supported: boolean; cols: number; rows: number; teamId: string; ticks: Tick[] };
+// teams is the API's own order: each tick's indexDelta for teams[0] is its index minus teams[1]'s.
+type Metrics = { label: string; reason: string; supported: boolean; teams: [string, string]; cols: number; rows: number; teamId: string; ticks: Tick[] };
 export type Moment = {
   type: "SET_PIECE_SHOT" | "SUSTAINED_PRESSURE" | "CONTROL_SWING";
   teamId: string; timeMs: number; windowStartMs: number; windowEndMs: number;
@@ -27,7 +29,9 @@ function strings(value: unknown): value is string[] { return Array.isArray(value
 function decodeMetrics(raw: unknown, replay: Replay, scenario: string): Metrics {
   if (!object(raw) || raw.model !== "time-to-reach-control-v1" || raw.matchId !== replay.match.id || raw.scenario !== scenario || typeof raw.label !== "string" || !Array.isArray(raw.ticks) || !["supported", "unsupported"].includes(String(raw.trackingMetrics))) throw new Error("Invalid metrics response");
   const supported = raw.trackingMetrics === "supported";
-  const result: Metrics = { label: raw.label, reason: typeof raw.reason === "string" ? raw.reason : "", supported, cols: 0, rows: 0, teamId: "", ticks: [] };
+  const order = raw.teams;
+  if (!strings(order) || order.length !== 2 || order[0] === order[1] || !order.every(id => replay.match.teams.some(team => team.id === id))) throw new Error("Invalid metrics team order");
+  const result: Metrics = { label: raw.label, reason: typeof raw.reason === "string" ? raw.reason : "", supported, teams: [order[0], order[1]], cols: 0, rows: 0, teamId: "", ticks: [] };
   if (!supported) {
     if (raw.ticks.length) throw new Error("Unsupported tracking returned metric ticks");
     return result;
@@ -42,7 +46,9 @@ function decodeMetrics(raw: unknown, replay: Replay, scenario: string): Metrics 
     for (const team of replay.match.teams) {
       const values = rawTick.teams[team.id];
       if (!object(values) || !unit(values.finalThird) || !unit(values.index)) throw new Error("Invalid team metrics");
-      teams[team.id] = { finalThird: values.finalThird, index: values.index };
+      const indexDelta = values.indexDelta ?? null;
+      if (indexDelta !== null && !(finite(indexDelta) && indexDelta >= -1 && indexDelta <= 1)) throw new Error("Invalid index difference");
+      teams[team.id] = { finalThird: values.finalThird, indexDelta };
     }
     let carrier: Tick["carrier"] = null;
     if (rawTick.carrier !== null) {
@@ -92,6 +98,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const momentsState = element("#moments-state");
   const evidenceList = element<HTMLOListElement>("#evidence-list");
   const valuesList = element<HTMLDListElement>("#moment-values");
+  const valuesLabel = element("#moment-values-label");
+  const indexTeams = element("#metric-index-teams");
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
   let metrics: Metrics | undefined;
@@ -195,12 +203,18 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         write("#metric-pressing", tick.pressing === null ? "N/A" : tick.pressing.toFixed(4));
         write("#metric-carrier", tick.carrier ? replay.match.players.find(player => player.id === tick.carrier?.playerId)?.name ?? "N/A" : "N/A");
         replay.match.teams.forEach((team, index) => {
-          const side = index === 0 ? "home" : "away";
-          write(`#metric-${side}-third`, tick.teams[team.id].finalThird.toFixed(4));
-          write(`#metric-${side}-index`, tick.teams[team.id].index.toFixed(4));
+          write(`#metric-${index === 0 ? "home" : "away"}-third`, tick.teams[team.id].finalThird.toFixed(4));
         });
+        const [first, second] = metrics.teams, delta = tick.teams[first].indexDelta;
+        write("#metric-index-delta", delta?.toFixed(4) ?? "N/A");
+        indexTeams.textContent = delta === null ? "" : `${teamName(first)} − ${teamName(second)}`;
+        indexTeams.hidden = delta === null;
         field = { cols: metrics.cols, rows: metrics.rows, values: tick.grid, homeTeamGrid: metrics.teamId === replay.match.teams[0].id };
-      } else { field = undefined; }
+      } else {
+        field = undefined;
+        write("#metric-index-delta", "N/A");
+        indexTeams.textContent = ""; indexTeams.hidden = true;
+      }
     }
     const visible = controlToggle.checked ? field : undefined;
     if (visible !== lastField) {
@@ -220,17 +234,18 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     const key = `${locale()}:${selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none"}`;
     if (key === evidenceKey) return;
     evidenceKey = key;
-    evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected;
+    const modelValues = Object.entries(selected?.values ?? {});
+    evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected; valuesLabel.hidden = !modelValues.length;
     write("#evidence-kind", selected?.evidenceKind === "tick" ? "Metric ticks" : selected || cue ? "Source events" : "No selection");
-    write("#evidence-state", selected ? `${momentName(selected)} / ${teamName(selected.teamId)}` : cue ? "Insight source events" : "No evidence selected");
+    write("#evidence-state", selected ? t("evidence.moment", { moment: t(momentName(selected)), team: teamName(selected.teamId) }) : cue ? "Insight source events" : "No evidence selected");
     if (selected) {
-      for (const [name, value] of Object.entries(selected.values)) {
+      for (const [name, value] of modelValues) {
         const row = document.createElement("div"), term = document.createElement("dt"), number = document.createElement("dd");
-        term.textContent = valueLabels[name] ?? name; number.textContent = String(value); row.append(term, number); valuesList.append(row);
+        term.textContent = t(valueLabels[name] ?? name); number.textContent = String(value); row.append(term, number); valuesList.append(row);
       }
     }
     const entries = selected?.evidenceKind === "tick"
-      ? selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: `Metric tick at ${hooks.matchTime(timeMs)}` }))
+      ? selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: t("evidence.tickAt", { clock: hooks.matchTime(timeMs) }) }))
       : (selected?.reasons ?? cue?.eventIds ?? []).flatMap(id => {
         const event = replay.events.find(item => item.id === id);
         return event ? [{ timeMs: event.timeMs, id: event.id, title: hooks.eventSentence(event) }] : [];
@@ -241,7 +256,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (entry.id) button.dataset.sourceEvent = entry.id;
       else button.dataset.sourceTick = String(entry.timeMs);
       button.setAttribute("aria-label", entry.id ? `Inspect ${entry.id} at ${hooks.matchTime(entry.timeMs)}` : entry.title);
-      title.textContent = `${entry.id || "Tick"} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
+      title.textContent = `${entry.id || t("Tick")} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
       button.append(createElement(ListVideo, { width: 16, height: 16, "aria-hidden": "true" }), title, description);
       button.addEventListener("click", () => hooks.inspectTime(entry.timeMs, entry.id || undefined));
       row.append(button); evidenceList.append(row);
@@ -275,7 +290,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       banner.hidden = !active;
       if (active) {
         write("#moment-banner-title", momentName(active));
-        write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? " / model estimate" : ""}`);
+        write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? ` / ${t("model estimate, uncalibrated")}` : ""}`);
       }
       renderEvidence(cue, selected);
       return control;

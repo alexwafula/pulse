@@ -1,12 +1,14 @@
 import messages from "../static/locales.json";
 
-export type Locale = "en-GB" | "sw-KE" | "hi-IN";
+// The only supported locales; the Go server keeps the same allowlist.
+export const LOCALES = ["en-GB", "sw-KE", "hi-IN"] as const;
+export type Locale = typeof LOCALES[number];
 const catalog: Record<Locale, Record<string, string>> = messages;
 const originals = new WeakMap<Text, { source: string; rendered: string }>();
 const attributes = new WeakMap<Element, Map<string, { source: string; rendered: string }>>();
 
 export function supportedLocale(value: string | null | undefined): value is Locale {
-  return value === "en-GB" || value === "sw-KE" || value === "hi-IN";
+  return (LOCALES as readonly (string | null | undefined)[]).includes(value);
 }
 
 export function locale(): Locale {
@@ -19,11 +21,27 @@ export function t(key: string, values: Record<string, string | number> = {}): st
   return text.replace(/\{([a-zA-Z]+)\}/g, (placeholder, name: string) => String(values[name] ?? placeholder));
 }
 
+// Server-rendered text with values names its key in data-i18n. Literal values
+// come from data-i18n-arg-<name> and translated terms from data-i18n-term-<name>.
+function keyedText(element: Element): string {
+  const values: Record<string, string> = {};
+  for (const { name, value } of Array.from(element.attributes)) {
+    if (name.startsWith("data-i18n-arg-")) values[name.slice("data-i18n-arg-".length)] = value;
+    else if (name.startsWith("data-i18n-term-")) values[name.slice("data-i18n-term-".length)] = t(value);
+  }
+  return t(element.getAttribute("data-i18n") ?? "", values);
+}
+
 export function localize(root: Node = document.body): void {
+  const keyed = root instanceof Element ? [...(root.matches("[data-i18n]") ? [root] : []), ...root.querySelectorAll("[data-i18n]")] : [];
+  for (const element of keyed) {
+    const text = keyedText(element);
+    if (element.textContent !== text) element.textContent = text;
+  }
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
     const node = walker.currentNode as Text;
-    if (node.parentElement?.closest("script,style,svg,code,[data-no-translate]")) continue;
+    if (node.parentElement?.closest("script,style,svg,code,[data-no-translate],[data-i18n]")) continue;
     const previous = originals.get(node);
     const source = previous && node.data === previous.rendered ? previous.source : node.data;
     const key = source.trim();
