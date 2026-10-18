@@ -5,7 +5,7 @@
 # Covers:
 # 1. Go formatting (gofmt)
 # 2. Go static analysis (go vet)
-# 3. Go unit tests (go test)
+# 3. Go unit tests (go test), plus the shared metrics cache under the race detector
 # 4. Data quality of every generated scenario in data/scenarios (checkdata)
 # 5. Python unit tests (unittest)
 # 6. Agent boundary evaluation suite (run_agents.py)
@@ -35,6 +35,8 @@ echo "✓ go vet passed."
 
 echo "=== [3/10] Running Go tests ==="
 go test ./...
+# The page and the metrics API share one cache; race them on a cold cache.
+go test -race -count=1 -run TestMetricsAPI_ComputeOnceConcurrent ./app/internal/transport/http/
 echo "✓ Go tests passed."
 
 echo "=== [4/10] Checking data quality of generated scenarios (checkdata) ==="
