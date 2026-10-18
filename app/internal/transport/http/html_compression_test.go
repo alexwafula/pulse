@@ -10,13 +10,13 @@ import (
 	"testing"
 )
 
-// htmlRoutes pins each HTML route to the Cache-Control it already sends;
-// compression must not change it.
+// htmlRoutes pins each HTML route to its Cache-Control; compression must not
+// change it. The homepage and /experience revalidate; /legacy is unchanged.
 var htmlRoutes = []struct{ path, cacheControl string }{
-	{"/", ""},
-	{"/experience", ""},
+	{"/", "no-cache"},
+	{"/experience", "no-cache"},
 	{"/legacy", ""},
-	{"/?scenario=corner", ""},
+	{"/?scenario=corner", "no-cache"},
 	{"/scenarios", "no-store"},
 	{"/experience/panel?panel=story&atMs=5300000&scenario=late-siege", "no-store"},
 	{"/experience/panel?panel=recap&atMs=5300000&scenario=late-siege", "no-store"},

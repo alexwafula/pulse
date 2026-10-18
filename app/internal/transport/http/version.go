@@ -9,9 +9,7 @@ import (
 
 // serveVersion reports the running build; it is never cached or redirected.
 func serveVersion(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.Header().Set("Allow", http.MethodGet)
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	if !allowGetHead(w, r) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
