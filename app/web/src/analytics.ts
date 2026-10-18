@@ -118,6 +118,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   let evidenceKey = "";
   const rows: { moment: Moment; row: HTMLLIElement; button: HTMLButtonElement }[] = [];
   const cells: SVGRectElement[] = [];
+  // The legacy view keeps its original overlay palette; the experience uses each team's own colour.
+  const controlFill = document.body.classList.contains("experience") ? ["var(--team-home)", "var(--team-away)"] : ["#f47761", "#48bed3"];
   const write = (id: string, text: string) => { element(id).textContent = text; };
   const teamName = (id: string) => replay.match.teams.find(team => team.id === id)?.name ?? id;
   const valueLabels: Record<string, string> = { deltaFrom: "Index difference before", deltaTo: "Index difference after", signal: "Change", actions: "Final-third actions", finalThird: "Final-third control" };
@@ -229,7 +231,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (visible) cells.forEach((cell, i) => {
         const value = visible.values[i];
         const home = (value >= .5) === visible.homeTeamGrid;
-        cell.setAttribute("fill", home ? "#f47761" : "#48bed3");
+        cell.style.fill = home ? controlFill[0] : controlFill[1];
         cell.setAttribute("fill-opacity", String(Math.abs(value - .5) * .55));
       });
     }

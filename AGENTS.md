@@ -239,6 +239,7 @@ Local checks:
 - UI controls: `node tests/integration/controls-browser.mjs` (Select2, all locales/personas, persistence, menu stability and 320/390/768/1440px layouts)
 - Locales and model labels: `node tests/integration/locale-browser.mjs` (running local Go server; locale allowlist and storage, hi-IN catalog routing, Control vs Chaos `indexDelta` headline, canonical `model estimate, uncalibrated` label, translated insights never Verified)
 - Render loop: `node tests/integration/render-loop-browser.mjs` (running local Go server; counts WebGL draw frames while paused, playing and hidden)
+- Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 

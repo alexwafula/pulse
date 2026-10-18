@@ -203,10 +203,10 @@ button {
 }
 
 .demo-button.demo-active {
-  background: var(--team-aurora);
+  background: var(--team-a);
   color: #fff;
-  border-color: var(--team-aurora);
-  box-shadow: var(--team-aurora-glow);
+  border-color: var(--team-a);
+  box-shadow: var(--team-a-glow);
 }
 
 .audience-controls {
@@ -326,12 +326,12 @@ button {
 }
 
 .team-swatch.home {
-  background: var(--team-aurora);
+  background: var(--team-home);
   box-shadow: 0 0 8px rgba(234, 112, 92, 0.4);
 }
 
 .team-swatch.away {
-  background: var(--team-bastion);
+  background: var(--team-away);
   box-shadow: 0 0 8px rgba(74, 168, 195, 0.4);
 }
 
@@ -436,7 +436,7 @@ button {
 }
 
 .share-home-val {
-  color: var(--team-aurora);
+  color: var(--team-home);
   font-weight: 600;
 }
 
@@ -449,7 +449,7 @@ button {
 }
 
 .share-away-val {
-  color: var(--team-bastion);
+  color: var(--team-away);
   font-weight: 600;
 }
 
@@ -470,12 +470,12 @@ button {
 }
 
 .share-fill-home {
-  background: var(--team-aurora);
+  background: var(--team-home);
   transition: width var(--motion-base);
 }
 
 .share-fill-away {
-  background: var(--team-bastion);
+  background: var(--team-away);
   transition: width var(--motion-base);
 }
 
@@ -673,14 +673,14 @@ button {
 }
 
 .player-home {
-  fill: var(--team-aurora);
+  fill: var(--team-home);
   stroke: #ffffff;
   stroke-width: 2.5;
   filter: drop-shadow(0 2px 6px rgba(234, 112, 92, 0.5));
 }
 
 .player-away {
-  fill: var(--team-bastion);
+  fill: var(--team-away);
   stroke: #ffffff;
   stroke-width: 2.5;
   filter: drop-shadow(0 2px 6px rgba(74, 168, 195, 0.5));
@@ -728,7 +728,7 @@ button {
   bottom: 58px;
   max-width: min(340px, calc(100% - 40px));
   padding: 10px 14px;
-  border-left: 3px solid var(--team-aurora);
+  border-left: 3px solid var(--team-a);
   background: rgba(15, 23, 19, 0.90);
   backdrop-filter: var(--glass-blur);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -1255,11 +1255,11 @@ button {
   display: block;
   width: 100%;
   height: 180px;
-  color: var(--team-aurora);
+  color: var(--team-home);
 }
 
 .passing-team:nth-child(2) .passing-graph {
-  color: var(--team-bastion);
+  color: var(--team-away);
 }
 
 .passing-graph circle {
@@ -1372,7 +1372,7 @@ button {
 .lane-row meter {
   width: 100%;
   height: 8px;
-  accent-color: var(--team-bastion);
+  accent-color: var(--team-b);
   background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-pill);
 }
@@ -1512,7 +1512,7 @@ button {
 .pitch-error strong {
   font-family: var(--font-display);
   font-size: 18px;
-  color: var(--team-aurora);
+  color: var(--team-a);
 }
 
 .pitch-error p {
@@ -1810,7 +1810,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
 }
 .metric-headline dt small { display: block; margin-top: 2px; font-size: 11px; color: var(--text-secondary); }
 .metric-headline dd { font-size: 18px; font-weight: 700; }
-.pressure-insight { padding: 16px 0; border-bottom: 1px solid var(--border-color, #dce1e7); }
+.pressure-insight { padding: 16px 0; border-bottom: 1px solid var(--c-rule, #dce1e7); }
 .pressure-insight h2 { font-size: 16px; }
 .pressure-insight p { margin: 8px 0; font-size: 13px; line-height: 1.6; }
 .pressure-insight small, #pressure-window { font-size: 11px; color: var(--text-secondary, #66748a); overflow-wrap: anywhere; }
