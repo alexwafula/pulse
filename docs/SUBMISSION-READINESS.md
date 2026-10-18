@@ -8,6 +8,7 @@ Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on mai
 | Shot-map/canvas, Live moment navigation | Implemented; desktop/mobile regression passes |
 | Pressure narration and both evidence types | Deterministic UI template; not model-verified; no contract change |
 | Static gzip and conditional caching | Implemented and unit-tested; verify headers again after deployment |
+| HTML page/panel gzip | Implemented and unit-tested; verify `Content-Encoding` on the deployed URL after release |
 | Native-language review | Drafts and key/placeholder checks complete; human approval **pending** |
 | Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
 | Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |

@@ -108,7 +108,7 @@ The readiness branch adds deterministic sustained-pressure presentation with
 source events and ticks, explicitly Template / Not model-verified. It is not a
 new v2 cue or agent fact pack. Moment clips stay in Live; persona/locale changes
 preserve detector clips. Static assets use gzip and conditional revalidation,
-never immutable caching on unfingerprinted URLs. Human submission sign-offs are
+never immutable caching on unfingerprinted URLs; HTML pages and panels are gzipped too. Human submission sign-offs are
 tracked in `docs/SUBMISSION-READINESS.md`; none are certified by automated tests.
 Original provider/run evidence for the corner recording is pending; its manually
 declared metadata is not attestation (`docs/RECORDING-PROVENANCE.md`).
