@@ -57,9 +57,9 @@ export function createCharacterFactory(textures: THREE.Texture[]): (player: Rend
   function shirtTexture(player: RenderPlayer): THREE.CanvasTexture {
     const canvas = document.createElement("canvas"); canvas.width = 512; canvas.height = 256;
     const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = player.home ? "#d9485f" : "#3a7fd5"; ctx.fillRect(0,0,512,256);
-    ctx.fillStyle = player.home ? "#fff" : "#bce8f1";
-    if (player.home) { ctx.fillRect(115,0,20,256); ctx.fillRect(377,0,20,256); }
+    ctx.fillStyle = player.colour; ctx.fillRect(0,0,512,256);
+    ctx.fillStyle = player.kit === "a" ? "#fff" : "#bce8f1";
+    if (player.kit === "a") { ctx.fillRect(115,0,20,256); ctx.fillRect(377,0,20,256); }
     else ctx.fillRect(0,83,512,25);
     ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.font = "bold 22px Arial"; ctx.fillText(player.name.toUpperCase(),256,56,200);
@@ -73,9 +73,9 @@ export function createCharacterFactory(textures: THREE.Texture[]): (player: Rend
     const seed = avatarSeed(player.id);
     const skins = [0x6b4129,0x8a5634,0xb07a4f,0xd39d72,0xe9c09a,0xf1cfae];
     const hairs = [0x120d0a,0x2a1b12,0x3f2a1b,0x6a4628];
-    const kit = material(player.home ? 0xd9485f : 0x3a7fd5);
-    const shorts = material(player.home ? 0xf3f4f2 : 0x142f3c);
-    const socks = material(player.home ? 0xd9485f : 0x142f3c);
+    const kit = material(player.colour);
+    const shorts = material(player.kit === "a" ? 0xf3f4f2 : 0x142f3c);
+    const socks = material(player.kit === "a" ? player.colour : 0x142f3c);
     const skin = material(skins[seed % skins.length], .62);
     const hair = material(hairs[(seed >>> 3) % hairs.length]);
     const boots = material([0x141615,0xf1ede4,0xe75e36,0xe6bf30][(seed >>> 5) % 4], .4);

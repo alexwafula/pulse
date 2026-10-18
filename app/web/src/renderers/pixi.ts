@@ -1,5 +1,5 @@
 import { Application, Container, Graphics, Text } from "pixi.js";
-import type { ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
+import { kitColours, type ControlField, type PitchRenderer, type RenderPlayer, type SceneState } from "./types";
 
 export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Promise<PitchRenderer> {
   const stadium = document.body.classList.contains("experience");
@@ -10,7 +10,7 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   host.append(app.canvas);
   app.canvas.setAttribute("aria-label", "Tactical pitch with animated players and ball");
   app.canvas.setAttribute("role", "img");
-  if (stadium) app.canvas.dataset.presentation = "stadium";
+  if (stadium) Object.assign(app.canvas.dataset, { presentation: "stadium", teamColours: kitColours(players) });
   app.ticker.stop();
   const world = new Container();
   app.stage.addChild(world);
@@ -32,9 +32,11 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   const path = new Graphics();
   world.addChild(path);
   const tokens = new Map<string, Container>();
+  const sideColour = (home: boolean): string | number => players.find((player) => player.home === home)?.colour || (home ? 0xf47761 : 0x48bed3);
+  const controlColours = stadium ? [sideColour(true), sideColour(false)] : [0xf47761, 0x48bed3];
   for (const player of players) {
     const token = new Container();
-    const color = stadium ? (player.home ? 0xd9485f : 0x3a7fd5) : (player.home ? 0xf47761 : 0x48bed3);
+    const color = stadium ? player.colour : (player.home ? 0xf47761 : 0x48bed3);
     token.addChild(new Graphics().circle(.22, .35, 1.8).fill({ color: 0x071b13, alpha: .35 }));
     token.addChild(new Graphics().circle(0, 0, 1.65).fill(color).stroke({ color: 0xffffff, width: .24 }));
     const label = new Text({ text: String(player.number), style: { fontFamily: "Arial", fontSize: 32, fontWeight: "bold", fill: stadium ? 0xffffff : 0x10231c }, resolution: 2 });
@@ -68,7 +70,7 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
           const field = state.control;
           for (let row = 0; row < field.rows; row++) for (let col = 0; col < field.cols; col++) {
             const value = field.values[row * field.cols + col];
-            const color = (value >= .5) === field.homeTeamGrid ? 0xf47761 : 0x48bed3;
+            const color = (value >= .5) === field.homeTeamGrid ? controlColours[0] : controlColours[1];
             control.rect(col * 105 / field.cols, 68 - (row + 1) * 68 / field.rows, 105 / field.cols, 68 / field.rows)
               .fill({ color, alpha: Math.abs(value - .5) * .55 });
           }

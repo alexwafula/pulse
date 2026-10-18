@@ -95,8 +95,8 @@
     {{end}}
     <!-- MATCH STRIP / SCOREBOARD & COMPUTED SHARE BAR -->
     <section class="match-strip" aria-label="Match scoreboard and pass share">
-      <!-- First replay team: coral -->
-      <div class="team-name home">
+      <!-- First replay team; colours follow the team id (team-colour.ts) -->
+      <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}">
         <svg class="crest-svg home" viewBox="0 0 64 64" fill="none" aria-hidden="true" role="img">
           <path d="M32 4L10 12V32C10 45.2 19.4 57.5 32 60C44.6 57.5 54 45.2 54 32V12L32 4Z" fill="#141e19" stroke="#ea705c" stroke-width="2.5"/>
           <path d="M32 8L14 14.5V32C14 43 21.8 53.2 32 55.5C42.2 53.2 50 43 50 32V14.5L32 8Z" fill="rgba(234, 112, 92, 0.12)"/>
@@ -122,8 +122,8 @@
         </div>
       </div>
 
-      <!-- Second replay team: teal -->
-      <div class="team-name away">
+      <!-- Second replay team -->
+      <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}">
         <div class="team-meta away-meta">
           <div class="team-title-row">
             <span class="team-name-text">{{(index .Match.Teams 1).Name}}</span>
@@ -179,7 +179,7 @@
         <div class="rail-card">
           <span class="rail-label">Pass Completion</span>
           <strong class="rail-value" id="summary-passes">0 of 0</strong>
-          <div class="rail-mini-bar"><div id="summary-pass-fill" style="width: 0%; background: var(--team-aurora);"></div></div>
+          <div class="rail-mini-bar"><div id="summary-pass-fill" style="width: 0%;"></div></div>
         </div>
 
         <div class="rail-card">

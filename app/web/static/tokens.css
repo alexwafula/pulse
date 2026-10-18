@@ -103,16 +103,20 @@
   --glow-lime-md: 0 0 16px rgba(200, 228, 109, 0.40);
   --glow-lime-focus: 0 0 0 2px #090e0c, 0 0 0 4px #c8e46d;
 
-  /* Team Colors (RESERVED FOR TEAMS ONLY - Aurora Vale / Bastion City) */
-  --team-aurora: #ea705c;
-  --team-aurora-glow: 0 0 12px rgba(234, 112, 92, 0.35);
-  --team-aurora-bg: rgba(234, 112, 92, 0.14);
-  --team-aurora-border: rgba(234, 112, 92, 0.40);
+  /* Team Colors (RESERVED FOR TEAMS ONLY). Legacy view: A = match.teams[0], B = [1]. */
+  --team-a: #ea705c;
+  --team-a-glow: 0 0 12px rgba(234, 112, 92, 0.35);
+  --team-a-bg: rgba(234, 112, 92, 0.14);
+  --team-a-border: rgba(234, 112, 92, 0.40);
 
-  --team-bastion: #4aa8c3;
-  --team-bastion-glow: 0 0 12px rgba(74, 168, 195, 0.35);
-  --team-bastion-bg: rgba(74, 168, 195, 0.14);
-  --team-bastion-border: rgba(74, 168, 195, 0.40);
+  --team-b: #4aa8c3;
+  --team-b-glow: 0 0 12px rgba(74, 168, 195, 0.35);
+  --team-b-bg: rgba(74, 168, 195, 0.14);
+  --team-b-border: rgba(74, 168, 195, 0.40);
+
+  /* Positional slots read by .home/.away rules; the experience points them at each team's own colour. */
+  --team-home: var(--team-a);
+  --team-away: var(--team-b);
 
   /* Semantic Typography Colors */
   --text-primary: #f2f7f4;
@@ -175,6 +179,36 @@
   --z-modal: 50;
 }
 
+/* Semantic layer for the match experience (light only). experience.css consumes these roles. */
+.experience {
+  /* Outfit = display and numerals, Plus Jakarta Sans = UI; both ship tnum, so Inter is not needed here. */
+  --font-display: Outfit, 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-ui: 'Plus Jakarta Sans', 'Noto Sans Devanagari', system-ui, sans-serif; /* local Devanagari only; never fetched */
+  --font-tabular: var(--font-ui); /* pair with font-variant-numeric: tabular-nums */
+  --text-xs: 12px/16px; --text-sm: 13px/20px; --text-md: 15px/24px; --text-lg: 17px/24px;
+  --text-xl: 20px/28px; --text-2xl: 24px/30px; --text-3xl: 30px/36px; --text-num: 40px/44px;
+  --measure: 68ch;
+  --space-12: 48px;
+  --radius-control: 8px; --radius-card: 16px; --radius-stage: 20px;
+  --elev-0: none;
+  --elev-1: 0 1px 2px rgba(20, 26, 24, 0.06), 0 4px 16px rgba(20, 26, 24, 0.05);
+  --elev-2: 0 8px 26px rgba(20, 26, 24, 0.08);
+  --elev-3: 0 20px 48px rgba(20, 26, 24, 0.16);
+  --dur-1: 120ms; --dur-2: 200ms; --dur-3: 320ms;
+  --ease-out: cubic-bezier(.2, .7, .2, 1); --ease-in-out: cubic-bezier(.4, 0, .2, 1); --ease-exit: cubic-bezier(.4, 0, 1, 1);
+  --c-canvas: #f2f3f5; --c-surface: #ffffff; --c-surface-2: #eef0f2; --c-rule: #dde1e6;
+  --c-ink: #1c2838; --c-ink-muted: #4f5d72;
+  --c-accent: #24536a; --c-on-accent: #ffffff; --c-accent-tint: #e4eef3;
+  /* By team identity (see team-colour.ts), not list position. */
+  --c-team-a: #b8374d; --c-team-b: #2e68b3;
+  --c-team-a-tint: #f7e3e7; --c-team-b-tint: #e3ecf8;
+  --c-verified: #1e6b48; --c-verified-tint: #e3f1ea;
+  --c-template: #5c6675; --c-template-tint: #eef0f2;
+  --c-estimate: #8a5a00; --c-estimate-tint: #fbf1dc;
+  --c-error: #a8321f; /* always with icon and text: shares a hue with team A */
+  --c-overlay: rgba(16, 22, 31, 0.88);
+}
+
 /* Reduced Transparency Fallbacks (High Contrast / Accessible) */
 @media (prefers-reduced-transparency: reduce) {
   :root {
@@ -191,10 +225,12 @@
 
 /* Reduced Motion Fallbacks */
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root, .experience {
     --motion-fast: 0ms;
     --motion-base: 0ms;
     --motion-slow: 0ms;
+    --dur-2: 120ms;
+    --dur-3: 120ms;
   }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
