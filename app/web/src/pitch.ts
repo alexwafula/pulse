@@ -239,6 +239,9 @@ let clock = 0;
 let speed = 4;
 let playing = false;
 let previousFrameTime = 0;
+let frame = 0;
+let drawPending = false;
+let pitchVisible = true;
 let currentEventId: string | null = null;
 const playerElements = new Map<string, SVGGElement>();
 const eventButtons = new Map<string, HTMLButtonElement>();
@@ -465,8 +468,8 @@ function render(): void {
     playButton.setAttribute("aria-label", t(playLabel));
     playButton.title = t(playLabel);
   }
-  pitchRenderer?.update(sceneState);
-  pitchRenderer?.draw();
+  paint();
+  if (playing) wake();
   const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}`;
   if (publication !== publishedClock) {
     publishedClock = publication;
@@ -474,7 +477,30 @@ function render(): void {
   }
 }
 
+// Draw on demand: the scene changes only through render(), resizes and camera
+// input, so a paused, hidden or off-screen pitch costs no frames.
+function paint(): void {
+  if (!pitchRenderer) return;
+  drawPending = true;
+  if (document.hidden || !pitchVisible) return;
+  drawPending = false;
+  pitchRenderer.update(sceneState);
+  // A true result means the orbit camera is still easing after input.
+  if (pitchRenderer.draw()) requestDraw();
+}
+
+function requestDraw(): void {
+  drawPending = true;
+  wake();
+}
+
+function wake(): void {
+  if (!frame && replay && !document.hidden) frame = requestAnimationFrame(animate);
+}
+
 function animate(time: number): void {
+  frame = 0;
+  if (document.hidden) return;
   if (playing) {
     if (previousFrameTime) {
       const end = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? replay.match.endMs;
@@ -486,8 +512,8 @@ function animate(time: number): void {
   } else {
     previousFrameTime = 0;
   }
-  if (!playing) pitchRenderer?.draw();
-  requestAnimationFrame(animate);
+  if (drawPending && !playing) paint();
+  if (playing || (drawPending && pitchVisible)) wake();
 }
 
 let demoRunning = false;
@@ -779,7 +805,20 @@ async function start(): Promise<void> {
       render();
     });
     for (const button of viewButtons) button.addEventListener("click", () => { void switchView(button.dataset.view ?? "svg"); });
-    cameraReset.addEventListener("click", () => pitchRenderer?.resetCamera());
+    cameraReset.addEventListener("click", () => { pitchRenderer?.resetCamera(); requestDraw(); });
+    // Resizes clear the WebGL buffer; orbit input moves the camera outside render().
+    new ResizeObserver(requestDraw).observe(canvasHost);
+    window.addEventListener("resize", requestDraw);
+    const orbit = (event: PointerEvent | WheelEvent): void => { if (event.type !== "pointermove" || event.buttons) requestDraw(); };
+    for (const type of ["pointerdown", "pointermove", "wheel"] as const) canvasHost.addEventListener(type, orbit, { passive: true });
+    new IntersectionObserver((entries) => {
+      pitchVisible = entries.some(entry => entry.isIntersecting);
+      if (pitchVisible && drawPending) wake();
+    }).observe(canvasHost);
+    document.addEventListener("visibilitychange", () => {
+      previousFrameTime = 0;
+      if (!document.hidden && (playing || drawPending)) wake();
+    });
     fullscreen.addEventListener("click", () => {
       const shell = required<HTMLElement>(".pitch-shell");
       const operation = document.fullscreenElement ? document.exitFullscreen() : shell.requestFullscreen();
@@ -827,7 +866,7 @@ async function start(): Promise<void> {
     const preferredView = new URLSearchParams(location.search).get("view") ?? "three";
     await switchView(["three", "pixi", "svg"].includes(preferredView) ? preferredView : "three");
     if (pitchLoading) pitchLoading.hidden = true;
-    requestAnimationFrame(animate);
+    wake();
     if (preferences.get("demo") === "1") {
       const url = new URL(location.href); url.searchParams.delete("demo"); history.replaceState(null, "", url);
       void startDemo();

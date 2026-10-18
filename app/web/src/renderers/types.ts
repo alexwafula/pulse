@@ -13,7 +13,8 @@ export type SceneState = {
 };
 export interface PitchRenderer {
   update(state: SceneState): void;
-  draw(): void;
+  /** Returns true while the camera is still easing and needs another frame. */
+  draw(): boolean | void;
   resetCamera(): void;
   setCamera?(mode: CameraMode): void;
   destroy(): void;
