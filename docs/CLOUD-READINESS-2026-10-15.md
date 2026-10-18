@@ -53,6 +53,20 @@ prints elapsed time, sample counts, failures and measured p50/p95/max latency.
 Attach the results to the release PR without publishing secrets or full logs.
 Preflight failures stop the script; nonzero steady-state failures fail the run.
 
+## Historical measured results, added Oct 18
+
+The [Oct 15 release handoff](https://github.com/alexwafula/pulse/pull/25#issuecomment-6187087966)
+records a completed run against **`ce435e2`**, not this readiness branch or a
+fresh test of today's deployment: 904.27 seconds, 28 rounds, 112 steady-state
+requests, zero failures. Aggregate client latency was p50 1,109 ms, p95 1,229 ms,
+max 1,367 ms. An earlier interrupted/failed attempt remains a separate result.
+
+One deterministic Kiswahili request took 4,625 ms after Python had zero replicas,
+through already-warm Go. This includes client latency; it is not a full-stack
+cold-start or live-model benchmark. Logs from both services were observed.
+These results cover HTTP/template reliability, not SSE, fresh AI quality or
+current-branch production performance. SSE and ingress isolation remain open.
+
 ## Approval-gated work
 
 - New Application Insights/Foundry tracing resources and telemetry dependencies.

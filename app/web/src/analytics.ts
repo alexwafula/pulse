@@ -2,6 +2,7 @@ import { createElement, ListVideo } from "lucide";
 import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
+import { pressureNarration } from "./moment-narration";
 
 // indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
 type TeamTick = { finalThird: number; indexDelta: number | null };
@@ -102,6 +103,11 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const indexTeams = element("#metric-index-teams");
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
+  const pressurePanel = element("#pressure-insight");
+  const pressureEvidence = element<HTMLButtonElement>("#pressure-evidence");
+  let pressureMoment: Moment | undefined;
+  let pressureKey = "";
+  pressureEvidence.addEventListener("click", () => { if (pressureMoment) hooks.playMoment(pressureMoment); });
   let metrics: Metrics | undefined;
   let moments: Moment[] = [];
   let momentsLoaded = false;
@@ -236,7 +242,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     evidenceKey = key;
     const modelValues = Object.entries(selected?.values ?? {});
     evidenceList.replaceChildren(); valuesList.replaceChildren(); valuesList.hidden = !selected; valuesLabel.hidden = !modelValues.length;
-    write("#evidence-kind", selected?.evidenceKind === "tick" ? "Metric ticks" : selected || cue ? "Source events" : "No selection");
+    write("#evidence-kind", selected?.type === "SUSTAINED_PRESSURE" ? "Source events & metric ticks" : selected?.evidenceKind === "tick" ? "Metric ticks" : selected || cue ? "Source events" : "No selection");
     write("#evidence-state", selected ? t("evidence.moment", { moment: t(momentName(selected)), team: teamName(selected.teamId) }) : cue ? "Insight source events" : "No evidence selected");
     if (selected) {
       for (const [name, value] of modelValues) {
@@ -250,6 +256,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         const event = replay.events.find(item => item.id === id);
         return event ? [{ timeMs: event.timeMs, id: event.id, title: hooks.eventSentence(event) }] : [];
       });
+    if (selected?.type === "SUSTAINED_PRESSURE") entries.push(...selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: t("evidence.tickAt", { clock: hooks.matchTime(timeMs) }) })));
     for (const entry of entries) {
       const row = document.createElement("li"), button = document.createElement("button"), title = document.createElement("strong"), description = document.createElement("span");
       row.className = "evidence-card"; button.type = "button"; button.className = "source-event-button";
@@ -291,6 +298,24 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (active) {
         write("#moment-banner-title", momentName(active));
         write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? ` / ${t("model estimate, uncalibrated")}` : ""}`);
+      }
+      const pressure = selected ?? [...moments].reverse().find(moment => moment.type === "SUSTAINED_PRESSURE" && clock >= moment.timeMs && clock < moment.timeMs + 10000);
+      const narration = pressure && pressureNarration(pressure, replay, document.body.dataset.persona ?? "CASUAL");
+      pressurePanel.hidden = !narration;
+      element(".insight-panel").hidden = Boolean(narration);
+      pressureMoment = narration ? pressure : undefined;
+      const nextPressureKey = narration ? `${locale()}:${narration.key}:${pressure!.timeMs}` : "";
+      if (nextPressureKey !== pressureKey) {
+        pressureKey = nextPressureKey;
+        if (narration) {
+          pressurePanel.dataset.eventIds = narration.eventIds.join(" ");
+          pressurePanel.dataset.tickTimes = narration.tickTimesMs.join(" ");
+          pressurePanel.dataset.startMs = String(narration.startMs);
+          pressurePanel.dataset.endMs = String(narration.endMs);
+          write("#pressure-text", t(narration.key, { team: narration.team, count: narration.count, control: narration.control,
+            start: hooks.matchTime(narration.startMs), end: hooks.matchTime(narration.endMs) }));
+          write("#pressure-window", `${hooks.matchTime(narration.startMs)} - ${hooks.matchTime(narration.endMs)} / ${narration.eventIds.join(", ")}`);
+        }
       }
       renderEvidence(cue, selected);
       return control;

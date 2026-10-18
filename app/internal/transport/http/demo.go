@@ -3,6 +3,7 @@ package transporthttp
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -41,7 +42,12 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 	if err != nil {
 		return nil, err
 	}
+	assets := http.StripPrefix("/static/", staticAssets(filepath.Join(webDir, "static")))
 	return withBuild(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/static/") {
+			assets.ServeHTTP(w, r)
+			return
+		}
 		if r.URL.Path == "/version" {
 			serveVersion(w, r)
 			return

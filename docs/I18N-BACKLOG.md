@@ -4,7 +4,7 @@ These strings are not routed through `t()` yet. They are `aria-label`, `title` a
 
 Source: the hi-IN scan in the 2026-10-16 locale review (`review-artifacts/verify-pr24-25-2026-10-16/VERIFY-PR24-25.md`, item 3, raw list `03-untranslated-hi.txt`), taken at `ce435e2`. It found 245 hardcoded strings: 30 visible text strings and 215 attribute strings.
 
-- The 30 visible strings now go through the catalog. Their new keys still hold English text in sw-KE and hi-IN and need native-speaker translation; `tests/integration/locale-browser.mjs` fails if visible hi-IN text is not from the catalog.
+- The 30 visible strings now go through the catalog. The Oct 18 readiness branch replaces the English placeholders with Kiswahili/Hindi drafts, including the later Evidence/moment labels and pressure narration. Native-speaker approval is still pending; catalog routing is not linguistic review. `tests/integration/locale-browser.mjs` checks routing and `locale-catalog.test.mjs` checks keys/placeholders.
 - The 215 attribute strings below were deliberately left unchanged. Strings are verbatim from the scan, so some contain Hindi fragments produced by already-translated event sentences. Player and team names are fictional.
 - Two changes since the scan: the Legacy link title is now `Open the original view` (the link is hidden), and passing-node labels now say `1 pass sent` instead of `1 passes sent`.
 

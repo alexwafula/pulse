@@ -100,7 +100,7 @@ let userSelectedTab: string | null = null;
 let drawerTabs: HTMLButtonElement[] = [];
 let drawerPanes: HTMLElement[] = [];
 
-function setDrawerTab(tabId: string, isUser = false): void {
+function setDrawerTab(tabId: string, isUser = false, section?: "live"): void {
   if (isUser) userSelectedTab = tabId;
   for (const tab of drawerTabs) {
     const active = tab.dataset.tab === tabId;
@@ -111,7 +111,7 @@ function setDrawerTab(tabId: string, isUser = false): void {
   for (const pane of drawerPanes) {
     pane.classList.toggle("active", pane.dataset.pane === tabId);
   }
-  document.dispatchEvent(new CustomEvent("pulse:pane-selected", { detail: { pane: tabId } }));
+  document.dispatchEvent(new CustomEvent("pulse:pane-selected", { detail: { pane: tabId, section } }));
 }
 
 const localePicker = required<HTMLSelectElement>("#locale");
@@ -657,7 +657,7 @@ async function start(): Promise<void> {
         for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
         for (const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
         evidenceReturn.hidden = false;
-        setDrawerTab("evidence", true);
+        setDrawerTab("evidence", true, "live");
         render();
       },
       inspectTime: (timeMs, eventId) => {
@@ -733,8 +733,9 @@ async function start(): Promise<void> {
     });
     function changeAudience(nextPersona: string): void {
         stopDemo();
-        if (evidenceCue || momentClip) { clock = returnClock; playing = false; }
-        closeDropdowns(); clearEvidence();
+        // A cue belongs to an audience; a detector moment does not.
+        if (evidenceCue) { clock = returnClock; playing = false; clearEvidence(); }
+        closeDropdowns();
         persona = nextPersona;
         saveAudience();
         for (const event of replay.events) {

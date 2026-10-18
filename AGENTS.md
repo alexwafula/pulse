@@ -104,6 +104,14 @@ paint Go paths/cells with SVG fallback. Passing-map positions average elapsed
 completed-pass involvement locations. Soft heat shading is presentation only;
 source cell time, sample intervals and evidence remain available.
 Contributor routes and DOM events are documented in `docs/FRONTEND-INTEGRATION.md`.
+The readiness branch adds deterministic sustained-pressure presentation with
+source events and ticks, explicitly Template / Not model-verified. It is not a
+new v2 cue or agent fact pack. Moment clips stay in Live; persona/locale changes
+preserve detector clips. Static assets use gzip and conditional revalidation,
+never immutable caching on unfingerprinted URLs. Human submission sign-offs are
+tracked in `docs/SUBMISSION-READINESS.md`; none are certified by automated tests.
+Original provider/run evidence for the corner recording is pending; its manually
+declared metadata is not attestation (`docs/RECORDING-PROVENANCE.md`).
 Main releases reuse CI, test both containers and the desktop/mobile homepage,
 then publish SHA-tagged images and update the existing Azure apps. Separate
 main-only identities grant registry push and app-scoped deployment access.

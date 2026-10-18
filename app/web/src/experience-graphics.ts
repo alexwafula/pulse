@@ -162,10 +162,28 @@ export function paintExperienceGraphics(root: HTMLElement): () => void {
     canvas.setAttribute("role","img"); canvas.setAttribute("aria-label",svg.getAttribute("aria-label")!);
     canvas.dataset.graphic = host.classList.contains("map-art") ? "map" : "chart";
     const graphic = {canvas, context, svg, host};
+    let disposed = false;
+    let contextLost = false;
+    let frame = 0;
+    const smoothingNote = host.closest(".experience-map")?.querySelector<HTMLElement>(".smoothed-note");
+    function fallback(): void {
+      canvas.hidden = true;
+      delete canvas.dataset.ready;
+      svg.style.visibility = "";
+      if (smoothingNote) smoothingNote.hidden = true;
+    }
     function draw(): void {
-      if (!host.isConnected || host.clientWidth === 0 || host.clientHeight === 0) return;
-      const width = host.clientWidth, height = host.clientHeight, dpr = Math.min(devicePixelRatio || 1,2);
-      canvas.width = Math.round(width*dpr); canvas.height = Math.round(height*dpr);
+      frame = 0;
+      if (disposed || contextLost || !host.isConnected) return;
+      const { width, height } = host.getBoundingClientRect();
+      if (width <= 0 || height <= 0) return;
+      const dpr = Math.min(devicePixelRatio || 1,2);
+      const pixelWidth = Math.max(1, Math.round(width*dpr)), pixelHeight = Math.max(1, Math.round(height*dpr));
+      // Assigning a canvas dimension clears it, even when its value is unchanged.
+      if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+      if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
+      context!.setTransform(1,0,0,1,0,0);
+      context!.clearRect(0,0,canvas.width,canvas.height);
       if (canvas.dataset.graphic === "map") {
         context!.setTransform(canvas.width/109,0,0,canvas.height/72,canvas.width/109*2,canvas.height/72*2);
         drawMap(graphic);
@@ -173,14 +191,36 @@ export function paintExperienceGraphics(root: HTMLElement): () => void {
         context!.setTransform(canvas.width/280,0,0,canvas.height/100,0,0);
         drawChart(graphic);
       }
+      canvas.hidden = false;
+      canvas.dataset.ready = "true";
+      svg.style.visibility = "hidden";
+      if (smoothingNote) smoothingNote.hidden = false;
     }
-    host.append(canvas); svg.style.visibility = "hidden";
-    const smoothingNote = host.closest(".experience-map")?.querySelector<HTMLElement>(".smoothed-note");
-    if (smoothingNote) smoothingNote.hidden = false;
+    function scheduleDraw(): void {
+      if (!disposed && !frame) frame = requestAnimationFrame(draw);
+    }
+    const lost = (event: Event): void => {
+      event.preventDefault(); contextLost = true;
+      cancelAnimationFrame(frame); frame = 0; fallback();
+    };
+    const restored = (): void => { contextLost = false; scheduleDraw(); };
+    canvas.hidden = true;
+    host.append(canvas);
+    canvas.addEventListener("contextlost", lost);
+    canvas.addEventListener("contextrestored", restored);
     if (canvas.dataset.graphic === "map") cleanups.push(mapInteraction(host, svg, canvas));
-    const observer = new ResizeObserver(draw); observer.observe(host); draw();
-    void document.fonts.ready.then(draw);
-    cleanups.push(() => { observer.disconnect(); canvas.remove(); host.querySelector(".graphic-tooltip")?.remove(); svg.style.visibility = ""; if (smoothingNote) smoothingNote.hidden = true; });
+    const observer = new ResizeObserver(scheduleDraw); observer.observe(host); draw();
+    window.addEventListener("resize", scheduleDraw);
+    void document.fonts.ready.then(scheduleDraw);
+    cleanups.push(() => {
+      disposed = true;
+      observer.disconnect(); cancelAnimationFrame(frame);
+      window.removeEventListener("resize", scheduleDraw);
+      canvas.removeEventListener("contextlost", lost);
+      canvas.removeEventListener("contextrestored", restored);
+      canvas.remove(); host.querySelector(".graphic-tooltip")?.remove();
+      svg.style.visibility = ""; if (smoothingNote) smoothingNote.hidden = true;
+    });
   }
   return () => { for (const cleanup of cleanups) cleanup(); };
 }

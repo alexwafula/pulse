@@ -1,0 +1,61 @@
+# Submission readiness and human sign-offs
+
+Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on main
+`7a1e154`. Local changes are not a claim of deployment or submission.
+
+| Deliverable | State / next action |
+|---|---|
+| Shot-map/canvas, Live moment navigation | Implemented; desktop/mobile regression passes |
+| Pressure narration and both evidence types | Deterministic UI template; not model-verified; no contract change |
+| Static gzip and conditional caching | Implemented and unit-tested; verify headers again after deployment |
+| Native-language review | Drafts and key/placeholder checks complete; human approval **pending** |
+| Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
+| Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |
+| Recording provenance | Content bound; original provider response/trace **pending**; see audit |
+| Prototype contributor permission | **UNCONFIRMED; blocks submission** |
+| Project licence | Team decision pending; do not choose a licence for someone else's work |
+
+## Prototype reuse confirmation
+
+Reference: Matchlens HTML prototype. The reference hash supplied by Jefferson is
+`f0c91dfb92d8e287c3942527c20c12de7ff6240fd199ce6615ccf1d7b9486428`
+(551,931 bytes; original outside this repo). This identifies the supplied
+reference, not permission or authorship evidence.
+
+Ask the actual rights holder to confirm in writing: contributor name, original
+work and creation date, which files/assets they own, authority to contribute,
+permission for modification, public GitHub distribution and hackathon/demo
+publication, required attribution, and any third-party restrictions. Confirm
+team membership/rights with the representative. Keep private correspondence
+private; commit only a contributor-approved summary and reference/date.
+
+| Confirmation field | Value |
+|---|---|
+| Rights holder / contribution | Pending |
+| Permission wording and date | Pending |
+| Third-party assets and attribution | Pending; also review `THIRD-PARTY-NOTICES.md` |
+| Team representative confirmation | Pending |
+| Approved public summary / evidence reference | Pending |
+
+Do not tick this from verbal assumptions, an AI-generated statement or a repo
+invite. If permission cannot be confirmed, remove/replace the affected work
+before submission. No legal compliance certification is made here.
+
+## Final release checklist
+
+1. Get native reviews in `LOCALE-REVIEW.md`, contributor confirmation above and
+   original recording evidence or appropriately narrowed provider claims.
+2. Review/merge the tested branch. Let main's existing CI/image workflow deploy.
+   Check `/version` matches that main SHA and rerun the judge instructions.
+3. Watch the complete video; verify duration, readable captions, correct labels,
+   fictional data, no credentials and no unsupported claims. Upload it to an
+   accepted public video platform and test the URL while signed out.
+4. Confirm public repo, project fields, representative and final links. Keep
+   hosting funded/available through the end of judging; recorded mode stays on.
+
+Requirements were rechecked against the [official rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md)
+on Oct 18: sections 4.3-4.4 require working, accurately represented functionality,
+a video under two minutes and a public repo/video link; 4.6-4.8 cover rights
+and judge access; 4.9 requires English submission materials or translations.
+The representative must read the full rules rather than treat this checklist
+as an eligibility determination.

@@ -186,7 +186,9 @@ document.dispatchEvent(new CustomEvent("pulse:camera", {
 `pulse:inspect` pauses at a validated source event/time. `pulse:clock` publishes
 on clock-second/event/play-state changes, with exact paused seek time. Pane
 options: `timeline`, `passing`, `control`, `routes`, `recap`, `evidence`.
-`pulse:pane-selected` reports `{ pane }`. This DOM bridge is presentation-only,
+`pulse:pane-selected` reports `{ pane, section? }`. A detector-moment replay sets
+`section: "live"` so its Evidence inspector does not send viewers into Insights.
+Ordinary pane selection retains its existing navigation. This DOM bridge is presentation-only,
 not a new shared football contract or streaming API.
 
 | Contributor area | Files |
@@ -262,6 +264,10 @@ Chrome must be installed; set `CHROME_PATH` if necessary. The preview test uses
 real mobile viewports, checks nonblank/moving canvas pixels and saves screenshots
 to the temporary `pulse-experience-preview` folder (override `PULSE_SCREENSHOTS`).
 No live model calls, paid services or cloud deployment are required for this demo.
+The focused readiness regression is `node tests/integration/demo-readiness-browser.mjs`;
+pressure-template tests are `node --test tests/integration/moment-narration.test.mjs`.
+Pressure text uses Go's existing moments with both event/tick evidence, not an
+agent FactPack. It must stay labelled Template and Not model-verified.
 Competition fit and unimplemented prototype features:
 [Story and maps decision](decisions/0014-story-views-and-replay-maps.md).
 Full visual port: [prototype presentation decision](decisions/0015-prototype-visual-system.md).

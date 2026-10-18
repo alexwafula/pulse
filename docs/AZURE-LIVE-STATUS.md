@@ -33,7 +33,10 @@ passed checks, build and deploy, and the served page and every static bundle
 match a local build of that commit byte for byte. From the next release on, read
 the exact live commit from `/version` (see [release and rollback](RELEASE.md))
 instead of this file. Feature-branch pushes run CI but do not replace
-production; merging to main triggers the gated release. Logs, ingress isolation, soak testing and broader live evaluations
+production; merging to main triggers the gated release. Historical Oct 15 logs,
+one Python scale-from-zero sample and a 904.27-second HTTP/template soak passed;
+see [measured scope and source](CLOUD-READINESS-2026-10-15.md). These are not a
+new soak of today's commit. Ingress isolation, SSE and broader live evaluations
 remain open. See the [current review/checklist](PROTOTYPE-REVIEW-2026-10-15.md).
 
 ## Links
@@ -109,9 +112,11 @@ browser experience suite.
   and tested; do not claim network isolation until this discrepancy is resolved.
   Health probes intentionally remain unauthenticated. See decision 0019.
 - Azure CLI console logs failed with a missing `eventStreamEndpoint` field.
-  The workspace exists, but log retrieval/ingestion needs a separate check.
+  Direct Log Analytics queries subsequently confirmed ingestion for both apps;
+  the CLI stream limitation is separate from ingestion.
 - An initial request during the first rollout used Go's safe template fallback;
-  final ready-revision checks received the recording. A full idle/cold-start and
-  sustained-load soak test is still pending, as is SSE implementation.
+  final ready-revision checks received the recording. Oct 15's HTTP/template soak
+  and one Python cold-start sample are documented separately; a full-stack idle
+  benchmark, fresh-release soak and SSE implementation remain pending.
 - Broader fact packs, live-model quality evaluations and reviewed Kiswahili
   output are not enabled by this deployment.
