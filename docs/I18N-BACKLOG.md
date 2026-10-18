@@ -24,7 +24,7 @@ These keys were added with the hero. Their sw-KE and hi-IN values are the Englis
 |---|---|---|---|
 | `index.higher` | `{team}'s control index is {value} higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `index.level` | `Neither team's control index is higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `Score not recorded` | `Score not recorded` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Score unavailable` | `Score unavailable` (literal key; also the existing `aria-label`) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 
 Keep `{team}` and `{value}`. The sentence must stay a plain comparison of two model numbers: no "winning", "ahead" or "likely".
 

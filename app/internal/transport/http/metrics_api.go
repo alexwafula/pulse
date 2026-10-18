@@ -98,6 +98,7 @@ type metricsAPI struct {
 	computes atomic.Int32
 
 	err                           error
+	rounded                       trackmetrics.Result // what /api/metrics encodes
 	metrics, metricsGrid, moments cachedBody
 }
 
@@ -127,6 +128,7 @@ func (a *metricsAPI) compute() {
 		return
 	}
 	rounded := res.Rounded(4)
+	a.rounded = rounded
 	base := metricsResponse{Model: res.Model, Label: res.Label, Scenario: a.scenario, MatchID: a.replay.Match.ID,
 		TrackingMetrics: res.TrackingMetrics, Reason: res.Reason, Teams: rounded.Teams, Params: res.Params,
 		Ticks: make([]tickOut, len(rounded.Ticks))}
@@ -147,6 +149,24 @@ func (a *metricsAPI) compute() {
 		}
 	}
 	a.err = err
+}
+
+// startTick returns the served result and its last tick at or before the
+// replay start, the client's first clock. It reads the same cached
+// computation /api/metrics encodes, so the page never recomputes a value.
+func (a *metricsAPI) startTick() (trackmetrics.Result, *trackmetrics.Tick, error) {
+	a.once.Do(a.compute)
+	if a.err != nil {
+		return trackmetrics.Result{}, nil, a.err
+	}
+	var at *trackmetrics.Tick
+	for i := range a.rounded.Ticks {
+		if a.rounded.Ticks[i].TimeMS > a.replay.Match.StartMS {
+			break
+		}
+		at = &a.rounded.Ticks[i]
+	}
+	return a.rounded, at, nil
 }
 
 // rowMajorGrid returns team A's control as grid[j*cols+i] (row j from the

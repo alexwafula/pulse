@@ -65,6 +65,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
    no two-colour meter, no absolute share. The "Live" title stays for assistive tech only. */
 .experience[data-section=live] .experience-screen-heading, .experience[data-section=live] .experience-mini-score { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; margin: 0; }
 .match-hero { display: grid; gap: var(--space-4); margin: var(--space-2) 0 var(--space-6); padding: var(--space-5) var(--space-6); background: var(--c-surface); border-radius: var(--radius-stage); box-shadow: var(--elev-2); }
+.hero-fixture { margin: 0; font: 600 var(--text-xs) var(--font-ui); }
 .hero-teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: var(--space-4); }
 .match-hero .team-name { gap: var(--space-2); }
 .match-hero .team-name-text { font: 700 var(--text-xl) var(--font-display); white-space: normal; overflow-wrap: anywhere; }
@@ -309,6 +310,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .match-hero .score-unavailable { font-size: 11px; line-height: 14px; text-align: center; }
   .hero-index { padding-top: var(--space-3); }
   .hero-eyebrow { display: none; }
+  .match-hero .fixture-label { display: inline; }
   .hero-index-headline { font-size: 20px; line-height: 26px; }
   .hero-index-ledger { margin-top: var(--space-1); font-size: 12px; line-height: 16px; }
   .experience .pitch-column > .section-heading, .experience .pitch-column > .pitch-overlay-tools { order: 1; }

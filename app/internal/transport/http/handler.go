@@ -24,6 +24,7 @@ type pageData struct {
 	ScenarioName string
 	TeamInitials []string
 	TeamKits     []string
+	Hero         heroView
 	Summaries    []summarySnapshot
 	TotalEvents  int
 	Window       string
@@ -197,6 +198,9 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 		data := view
 		data.Experience = r.URL.Path != "/legacy"
+		if data.Experience {
+			data.Hero = heroFor(tracking, view.catalog, requestLocale(r))
+		}
 		data.Build = buildinfo.Current().ShortSHA
 		if err := page.Execute(w, data); err != nil {
 			return

@@ -105,6 +105,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   // The experience hero (absent on /legacy) restates the same tick's indexDelta.
   const hero = document.querySelector<HTMLElement>(".match-hero");
   let heroKey = "";
+  // The server painted the start tick; keep it until /api/metrics settles.
+  let metricsSettled = false;
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
   const pressurePanel = element("#pressure-insight");
@@ -158,6 +160,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       metricsLabel.textContent = "Metrics unavailable";
       metricsState.textContent = "Metrics unavailable";
       console.warn("Metrics unavailable", error);
+    } finally {
+      metricsSettled = true;
     }
     hooks.repaint();
   }
@@ -244,11 +248,11 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   }
 
   function renderHero(tick: Tick | undefined): void {
-    if (!hero) return;
-    const key = `${locale()}:${metrics?.supported ?? "loading"}:${tick?.timeMs ?? "none"}`;
+    if (!hero || !metricsSettled) return;
+    const key = `${locale()}:${metrics?.supported ?? "failed"}:${tick?.timeMs ?? "none"}`;
     if (key === heroKey) return;
     heroKey = key;
-    const result = indexHeadline(tick && metrics ? tick.teams[metrics.teams[0]].indexDelta : null, metrics?.teams ?? ["", ""], teamName, metrics?.supported ?? true);
+    const result = indexHeadline(tick && metrics ? tick.teams[metrics.teams[0]].indexDelta : null, metrics?.teams ?? ["", ""], teamName, locale(), metrics?.supported ?? true);
     write("#hero-index-headline", t(result.headline.key, result.headline.values));
     write("#hero-index-delta", result.signed);
     element("#hero-index-delta").hidden = !result.label;

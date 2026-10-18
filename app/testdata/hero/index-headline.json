@@ -1,0 +1,19 @@
+{
+  "about": "Shared golden for the hero headline. Go (index_headline_test.go) and TypeScript (index-headline.test.mjs) must both produce these strings in every listed locale. delta is teams[0]'s indexDelta. value is the headline magnitude at 2 dp; signed is the exact value with U+2212 for minus.",
+  "locales": ["en-GB", "sw-KE", "hi-IN"],
+  "names": { "vale": "Aurora Vale", "bastion": "Bastion City" },
+  "cases": [
+    { "delta": 0, "teams": ["bastion", "vale"], "key": "index.level", "team": "", "value": "", "signed": "0.0000", "label": "Bastion City − Aurora Vale" },
+    { "delta": 0.00004, "teams": ["bastion", "vale"], "key": "index.level", "team": "", "value": "", "signed": "+0.00004", "label": "Bastion City − Aurora Vale" },
+    { "delta": -0.00004, "teams": ["bastion", "vale"], "key": "index.level", "team": "", "value": "", "signed": "−0.00004", "label": "Bastion City − Aurora Vale" },
+    { "delta": 0.0049, "teams": ["bastion", "vale"], "key": "index.level", "team": "", "value": "", "signed": "+0.0049", "label": "Bastion City − Aurora Vale" },
+    { "delta": 0.005, "teams": ["bastion", "vale"], "key": "index.higher", "team": "Bastion City", "value": "0.01", "signed": "+0.0050", "label": "Bastion City − Aurora Vale" },
+    { "delta": 0.5537, "teams": ["bastion", "vale"], "key": "index.higher", "team": "Bastion City", "value": "0.55", "signed": "+0.5537", "label": "Bastion City − Aurora Vale" },
+    { "delta": -0.5537, "teams": ["bastion", "vale"], "key": "index.higher", "team": "Aurora Vale", "value": "0.55", "signed": "−0.5537", "label": "Bastion City − Aurora Vale" },
+    { "delta": 0.5537, "teams": ["vale", "bastion"], "key": "index.higher", "team": "Aurora Vale", "value": "0.55", "signed": "+0.5537", "label": "Aurora Vale − Bastion City" },
+    { "delta": -0.5537, "teams": ["vale", "bastion"], "key": "index.higher", "team": "Bastion City", "value": "0.55", "signed": "−0.5537", "label": "Aurora Vale − Bastion City" },
+    { "delta": -0.4287, "teams": ["bastion", "vale"], "key": "index.higher", "team": "Aurora Vale", "value": "0.43", "signed": "−0.4287", "label": "Bastion City − Aurora Vale" },
+    { "delta": -0.125, "teams": ["vale", "bastion"], "key": "index.higher", "team": "Bastion City", "value": "0.13", "signed": "−0.1250", "label": "Aurora Vale − Bastion City" },
+    { "delta": 1, "teams": ["vale", "bastion"], "key": "index.higher", "team": "Aurora Vale", "value": "1.00", "signed": "+1.0000", "label": "Aurora Vale − Bastion City" }
+  ]
+}
