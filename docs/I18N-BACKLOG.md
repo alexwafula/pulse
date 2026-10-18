@@ -16,6 +16,18 @@ Visible text beyond the review's 30: a stricter scan also selects Control-swing 
 
 Routing these needs format keys with placeholders (player, clock, event ID, counts) rather than one key per string.
 
+## New keys: NEEDS TRANSLATION (D3a hero, 2026-10-18)
+
+These keys were added with the hero. Their sw-KE and hi-IN values are the English text, so the catalog key and placeholder checks pass, but the strings show in English. `locale-browser.mjs` therefore cannot flag them; this table is the record. A native speaker must replace them.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `index.higher` | `{team}'s control index is {value} higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `index.level` | `Neither team's control index is higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Score not recorded` | `Score not recorded` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+Keep `{team}` and `{value}`. The sentence must stay a plain comparison of two model numbers: no "winning", "ahead" or "likely".
+
 ## Summary
 
 | Pattern | Count |

@@ -25,7 +25,8 @@
     "evidence.tickAt":"Metric tick at {clock}",
     "evidence.moment":"{moment} / {team}", "Source events & metric ticks":"Source events & metric ticks",
     "pressure.casual":"{team} completed {count} final-third actions in this window. The tracking model flagged sustained pressure.",
-    "pressure.analyst":"{team}: {count} completed final-third actions from {start} to {end}; model-estimated final-third control at detection: {control}."
+    "pressure.analyst":"{team}: {count} completed final-third actions from {start} to {end}; model-estimated final-third control at detection: {control}.",
+    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher"
   },
   "sw-KE": {
     "build.label":"build {sha}", "Scenarios":"Matukio", "Synthetic replays":"Marudio ya kubuni", "Close scenarios":"Funga matukio", "Search scenarios":"Tafuta matukio", "Scenario type":"Aina ya tukio", "All":"Yote", "Short sequences":"Mifululizo mifupi", "Short sequence":"Mfululizo mfupi", "Loading replays":"Inapakia marudio", "No matching scenarios":"Hakuna matukio yanayolingana", "players":"wachezaji", "actions":"matukio", "Guided demo":"Onyesho elekezi",
@@ -70,7 +71,8 @@
     "evidence.tickAt":"Sampuli ya vipimo saa {clock}", "Evidence trail":"Mfuatano wa ushahidi", "No selection":"Hakuna kilichochaguliwa", "No evidence selected":"Hakuna ushahidi uliochaguliwa", "Insight source events":"Matukio ya chanzo cha ufafanuzi", "Metric ticks":"Sampuli za vipimo", "Tick":"Sampuli", "No moments yet":"Bado hakuna matukio", "No moments detected":"Hakuna matukio yaliyogunduliwa", "Moments unavailable":"Matukio hayapatikani",
     "evidence.moment":"{moment} / {team}", "Source events & metric ticks":"Matukio ya chanzo na sampuli za vipimo",
     "pressure.casual":"{team} ilikamilisha matukio {count} katika theluthi ya mwisho katika kipindi hiki. Modeli ya tracking ilionyesha shinikizo endelevu.",
-    "pressure.analyst":"{team}: matukio {count} yaliyokamilika katika theluthi ya mwisho kuanzia {start} hadi {end}; udhibiti uliokadiriwa na modeli wakati wa ugunduzi: {control}."
+    "pressure.analyst":"{team}: matukio {count} yaliyokamilika katika theluthi ya mwisho kuanzia {start} hadi {end}; udhibiti uliokadiriwa na modeli wakati wa ugunduzi: {control}.",
+    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score not recorded":"Score not recorded"
   },
   "hi-IN": {
     "build.label":"build {sha}", "Scenarios":"परिदृश्य", "Synthetic replays":"काल्पनिक रीप्ले", "Close scenarios":"परिदृश्य बंद करें", "Search scenarios":"परिदृश्य खोजें", "Scenario type":"परिदृश्य का प्रकार", "All":"सभी", "Short sequences":"छोटे क्रम", "Short sequence":"छोटा क्रम", "Loading replays":"रीप्ले लोड हो रहे हैं", "No matching scenarios":"कोई मेल खाता परिदृश्य नहीं", "players":"खिलाड़ी", "actions":"घटनाएं", "Guided demo":"निर्देशित डेमो",
@@ -115,6 +117,7 @@
     "evidence.tickAt":"{clock} पर मेट्रिक नमूना", "Evidence trail":"साक्ष्य क्रम", "No selection":"कुछ नहीं चुना गया", "No evidence selected":"कोई साक्ष्य नहीं चुना गया", "Insight source events":"विश्लेषण की स्रोत घटनाएँ", "Metric ticks":"मेट्रिक नमूने", "Tick":"नमूना", "No moments yet":"अभी कोई घटना नहीं", "No moments detected":"कोई घटना नहीं पहचानी गई", "Moments unavailable":"घटनाएँ उपलब्ध नहीं हैं",
     "evidence.moment":"{moment} / {team}", "Source events & metric ticks":"स्रोत घटनाएँ और मेट्रिक नमूने",
     "pressure.casual":"{team} ने इस अवधि में अंतिम तिहाई में {count} क्रियाएँ पूरी कीं। ट्रैकिंग मॉडल ने लगातार दबाव का संकेत दिया।",
-    "pressure.analyst":"{team}: {start} से {end} तक अंतिम तिहाई में {count} पूरी हुई क्रियाएँ; पहचान के समय मॉडल-अनुमानित अंतिम तिहाई नियंत्रण: {control}।"
+    "pressure.analyst":"{team}: {start} से {end} तक अंतिम तिहाई में {count} पूरी हुई क्रियाएँ; पहचान के समय मॉडल-अनुमानित अंतिम तिहाई नियंत्रण: {control}।",
+    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score not recorded":"Score not recorded"
   }
 }

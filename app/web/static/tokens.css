@@ -199,7 +199,7 @@
   --c-canvas: #f2f3f5; --c-surface: #ffffff; --c-surface-2: #eef0f2; --c-rule: #dde1e6;
   --c-ink: #1c2838; --c-ink-muted: #4f5d72;
   --c-accent: #24536a; --c-on-accent: #ffffff; --c-accent-tint: #e4eef3;
-  /* By team identity (see team-colour.ts), not list position. */
+  /* By team identity, not list position: the server picks a kit per team id (team_kit.go). */
   --c-team-a: #b8374d; --c-team-b: #2e68b3;
   --c-team-a-tint: #f7e3e7; --c-team-b-tint: #e3ecf8;
   --c-verified: #1e6b48; --c-verified-tint: #e3f1ea;

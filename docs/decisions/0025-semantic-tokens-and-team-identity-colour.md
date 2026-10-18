@@ -15,12 +15,14 @@ values yet; `html:has(body.experience)` still forces `color-scheme: light`.
 heat and renderer-owned colours, plus the `html` background, which sits outside
 the `.experience` scope.
 
-Team colour follows the team, not its position in `match.teams`.
-`app/web/src/team-colour.ts` maps `vale` (Aurora Vale) to kit A (`--c-team-a`) and
-`bastion` to kit B (`--c-team-b`). An unknown id takes the kit its opponent does not wear, or its position when neither id is known.
-At start-up `pitch.ts` points the positional `--team-home`/`--team-away` slots
-at those tokens. That recolours the crest, swatch, share bars, charts, maps,
-mini score and SVG players. The SVG, PixiJS and Three.js presentations paint
+Team colour follows the team, not its position in `match.teams`. `vale`
+(Aurora Vale) wears kit A (`--c-team-a`) and `bastion` kit B (`--c-team-b`). An
+unknown id takes the kit its opponent does not wear, or its position when
+neither id is known. Since 0026 the server owns this mapping
+(`app/internal/transport/http/team_kit.go`) and renders it on first paint;
+`team-colour.ts` only reads the rendered kits. The positional
+`--team-home`/`--team-away` slots follow the root's kit attributes in CSS. That
+colours the swatch, share counts, charts, maps, mini score and SVG players. The SVG, PixiJS and Three.js presentations paint
 kits and control overlays from the same colour.
 
 The legacy raw tokens are renamed `--team-aurora*` to `--team-a*` and

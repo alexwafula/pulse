@@ -23,6 +23,7 @@ type pageData struct {
 	Scenario     string
 	ScenarioName string
 	TeamInitials []string
+	TeamKits     []string
 	Summaries    []summarySnapshot
 	TotalEvents  int
 	Window       string

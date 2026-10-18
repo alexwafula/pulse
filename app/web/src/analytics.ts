@@ -3,6 +3,7 @@ import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
 import { pressureNarration } from "./moment-narration";
+import { indexHeadline } from "./index-headline";
 
 // indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
 type TeamTick = { finalThird: number; indexDelta: number | null };
@@ -101,6 +102,9 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const valuesList = element<HTMLDListElement>("#moment-values");
   const valuesLabel = element("#moment-values-label");
   const indexTeams = element("#metric-index-teams");
+  // The experience hero (absent on /legacy) restates the same tick's indexDelta.
+  const hero = document.querySelector<HTMLElement>(".match-hero");
+  let heroKey = "";
   const banner = element("#moment-banner");
   const rangeMarker = element("#evidence-range-marker");
   const pressurePanel = element("#pressure-insight");
@@ -224,6 +228,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         indexTeams.textContent = ""; indexTeams.hidden = true;
       }
     }
+    renderHero(tick);
     const visible = controlToggle.checked ? field : undefined;
     if (visible !== lastField) {
       lastField = visible;
@@ -236,6 +241,21 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       });
     }
     return visible;
+  }
+
+  function renderHero(tick: Tick | undefined): void {
+    if (!hero) return;
+    const key = `${locale()}:${metrics?.supported ?? "loading"}:${tick?.timeMs ?? "none"}`;
+    if (key === heroKey) return;
+    heroKey = key;
+    const result = indexHeadline(tick && metrics ? tick.teams[metrics.teams[0]].indexDelta : null, metrics?.teams ?? ["", ""], teamName, metrics?.supported ?? true);
+    write("#hero-index-headline", t(result.headline.key, result.headline.values));
+    write("#hero-index-delta", result.signed);
+    element("#hero-index-delta").hidden = !result.label;
+    hero.dataset.index = result.label ? "value" : "none";
+    const teams = element("#hero-index-teams"), chip = element("#hero-index-chip");
+    teams.textContent = result.label; teams.hidden = !result.label;
+    chip.textContent = t(result.chip); chip.hidden = !result.chip;
   }
 
   function renderEvidence(cue: Cue | undefined, selected: Moment | undefined): void {
