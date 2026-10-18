@@ -69,6 +69,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .match-hero .team-name { gap: var(--space-2); }
 .match-hero .team-name-text { font: 700 var(--text-xl) var(--font-display); white-space: normal; overflow-wrap: anywhere; }
 .match-hero .team-swatch { height: 24px; }
+.match-hero .team-sub { font-size: 12px; color: var(--c-ink-muted); }
 .hero-clock { display: grid; justify-items: center; grid-template-columns: auto auto; column-gap: var(--space-2); align-items: baseline; }
 .match-hero .match-clock { font: 700 var(--text-lg) var(--font-ui); color: var(--c-ink); }
 .match-hero .clock-period { border: 0; padding: 0; font-size: 12px; letter-spacing: .04em; color: var(--c-ink-muted); }
@@ -271,6 +272,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience:not([data-section=live]) .drawer-main { order: 1; }
   .experience:not([data-section=live]) .insight-panel { order: 2; }
   .experience .player-story-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .experience .team-sub { display: none; }
   .experience .team-name-text { font-size: 18px; }
   .experience .left-rail { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .experience .header-inner { gap: 8px; }

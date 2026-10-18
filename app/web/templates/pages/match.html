@@ -98,9 +98,9 @@
          data-team-kit comes from the team id on the server (team_kit.go); scripts only read it. -->
     <section class="match-hero" data-index="none">
       <div class="hero-teams">
-        <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}" data-team-kit="{{index .TeamKits 0}}"><span class="team-swatch home"></span><span class="team-name-text">{{(index .Match.Teams 0).Name}}</span></div>
+        <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}" data-team-kit="{{index .TeamKits 0}}"><span class="team-swatch home"></span><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 0).Name}}</span><span class="team-sub">{{(index .Match.Teams 0).Name}} &bull; Attacking {{(index .Match.Teams 0).AttackingDirection}}</span></span></div>
         <div class="hero-clock"><time id="match-clock" class="match-clock">{{.StartClock}}</time><span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span><span class="score-unavailable" aria-label="Score unavailable" title="Score is not recorded in this replay">Score not recorded</span></div>
-        <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}" data-team-kit="{{index .TeamKits 1}}"><span class="team-name-text">{{(index .Match.Teams 1).Name}}</span><span class="team-swatch away"></span></div>
+        <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}" data-team-kit="{{index .TeamKits 1}}"><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 1).Name}}</span><span class="team-sub">{{(index .Match.Teams 1).Name}} &bull; Attacking {{(index .Match.Teams 1).AttackingDirection}}</span></span><span class="team-swatch away"></span></div>
       </div>
       <!-- Written by analytics.ts from /api/metrics: teams[0]'s indexDelta in the API's team order (index-headline.ts). -->
       <div class="hero-index">
