@@ -3,6 +3,7 @@ package transporthttp
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -128,4 +129,52 @@ func TestUnknownTeamTakesTheColourItsOpponentDoesNotWear(t *testing.T) {
 func swapped(replay domain.Replay) domain.Replay {
 	replay.Match.Teams = []domain.Team{replay.Match.Teams[1], replay.Match.Teams[0]}
 	return replay
+}
+
+// headMatchesKitPage checks that HEAD describes the same kit-bearing page as GET
+// (#37): same status and headers, identical Content-Length per encoding, no body.
+func headMatchesKitPage(t *testing.T, server *httptest.Server, path string) {
+	t.Helper()
+	for _, encoding := range []string{"", "gzip"} {
+		headers := map[string]string{}
+		if encoding != "" {
+			headers["Accept-Encoding"] = encoding
+		}
+		get, page := wireRequest(t, server, http.MethodGet, path, headers)
+		head, body := wireRequest(t, server, http.MethodHead, path, headers)
+		if encoding == "" {
+			renderedKits(t, string(page)) // the GET body HEAD describes carries the kits
+		}
+		if get.StatusCode != http.StatusOK || head.StatusCode != http.StatusOK || len(body) != 0 {
+			t.Fatalf("HEAD %s (%q): status %d/%d, %d body bytes", path, encoding, get.StatusCode, head.StatusCode, len(body))
+		}
+		for _, name := range headHeaders {
+			if g, h := get.Header.Values(name), head.Header.Values(name); len(g) != len(h) || (len(g) > 0 && g[0] != h[0]) {
+				t.Errorf("HEAD %s (%q): %s = %v, GET has %v", path, encoding, name, h, g)
+			}
+		}
+		if head.Header.Get("Cache-Control") != "no-cache" {
+			t.Errorf("HEAD %s (%q): Cache-Control %q, want no-cache", path, encoding, head.Header.Get("Cache-Control"))
+		}
+	}
+}
+
+func TestTeamKitPagesAnswerHead(t *testing.T) {
+	demo, _ := apiScenarios(t)
+	server := httptest.NewServer(demo)
+	defer server.Close()
+	for _, path := range []string{"/?scenario=late-siege", "/experience?scenario=late-siege", "/?scenario=corner", "/experience?scenario=corner"} {
+		headMatchesKitPage(t, server, path)
+	}
+	base, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "samples", "first-sequence.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	unknown, err := NewHandler(renamed(t, base, "bastion", "harbour"), filepath.Join("..", "..", "..", "web"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fallback := httptest.NewServer(unknown)
+	defer fallback.Close()
+	headMatchesKitPage(t, fallback, "/experience")
 }
