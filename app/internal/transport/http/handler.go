@@ -202,5 +202,5 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			return
 		}
 	})
-	return withBuild(gzipJSON(mux)), nil
+	return withBuild(gzipResponses(mux)), nil
 }
