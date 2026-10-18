@@ -1,0 +1,41 @@
+{
+  "about": "sha256 and length of each /api/metrics and /api/moments body served by main fcf275a (raw, identity encoding). metrics_cache_test.go asserts the served bodies are byte-identical.",
+  "bodies": {
+    "/api/metrics?scenario=corner": {
+      "sha256": "58d623064a5ddb298ed039c50fc87c4428bde5c1562f4da20241307e018ddf0a",
+      "length": 766
+    },
+    "/api/metrics?scenario=corner&grid=1": {
+      "sha256": "b6e7107d8e8dfbe0905e4ac7d9ecf84490c0a473bbb530fbd9cd6fc2bf01b68e",
+      "length": 860
+    },
+    "/api/moments?scenario=corner": {
+      "sha256": "81f509d1013f208e03b398fa7a13fb36c820d527f2e68601176f55a4516769bd",
+      "length": 460
+    },
+    "/api/metrics?scenario=late-siege": {
+      "sha256": "a69f5b7658a5a99d1268f5e8f1e07b297d9372018f4d4411d1e3b89c3c283f60",
+      "length": 79804
+    },
+    "/api/metrics?scenario=late-siege&grid=1": {
+      "sha256": "09f613a0bbf23ee68103c787bea1470722952017d0891db91c7770b31b6886d5",
+      "length": 342145
+    },
+    "/api/moments?scenario=late-siege": {
+      "sha256": "5cfe43c47478e650ca839eb1c27b09eb1b2ec570400a0b2d8f580fde877e7a42",
+      "length": 1252
+    },
+    "/api/metrics?scenario=calm-midfield": {
+      "sha256": "d9649c576826b078358f035846f9eaf6543e92f06fb22a2c8a89b3847e5a7da6",
+      "length": 62686
+    },
+    "/api/metrics?scenario=calm-midfield&grid=1": {
+      "sha256": "3bb6ee948c17cc2d5de84a123631a976b47ac702c6eed424ff73d3b875e3b6f3",
+      "length": 276738
+    },
+    "/api/moments?scenario=calm-midfield": {
+      "sha256": "efc3f06e451ef8b7280a9c859147f292ca9fe65b4a4dd0df257dd8ff020053f0",
+      "length": 181
+    }
+  }
+}

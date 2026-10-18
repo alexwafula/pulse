@@ -412,41 +412,40 @@ func TestMetricsAPI_CachingHeadersAndGzip(t *testing.T) {
 	}
 }
 
-// Computed once per scenario, safe under concurrency (run with -race).
+// Computed once per scenario, each body encoded once, safe under concurrency
+// (run with -race): page renders and API requests race on a cold cache.
 func TestMetricsAPI_ComputeOnceConcurrent(t *testing.T) {
-	r, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "scenarios", "late-siege.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	api := newMetricsAPI("late-siege", r)
-	paths := []string{"/api/metrics", "/api/metrics?grid=1", "/api/moments"}
-	const workers = 24
+	handler, tracking := lateSiegeHandler(t)
+	paths := []string{"/", "/api/metrics", "/experience?locale=hi-IN", "/api/metrics?grid=1", "/?locale=sw-KE", "/api/moments"}
+	const workers = 36
 	bodies := make([][]byte, workers)
 	var wg sync.WaitGroup
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			path := paths[i%len(paths)]
 			rec := httptest.NewRecorder()
-			req := httptest.NewRequest(http.MethodGet, path, nil)
-			if strings.HasPrefix(path, "/api/moments") {
-				api.serveMoments(rec, req)
-			} else {
-				api.serveMetrics(rec, req)
-			}
+			handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, paths[i%len(paths)], nil))
 			if rec.Code == http.StatusOK {
 				bodies[i] = rec.Body.Bytes()
 			}
 		}(i)
 	}
 	wg.Wait()
-	if n := api.computes.Load(); n != 1 {
+	if n := tracking.computes.Load(); n != 1 {
 		t.Fatalf("computed %d times, want exactly 1", n)
+	}
+	for name, body := range map[string]*lazyBody{"metrics": &tracking.metrics, "metrics?grid=1": &tracking.metricsGrid, "moments": &tracking.moments} {
+		if n := body.encodes.Load(); n != 1 {
+			t.Errorf("%s encoded %d times, want exactly 1", name, n)
+		}
+	}
+	if n := tracking.encodes.Load(); n != 3 {
+		t.Errorf("%d encodes in total, want 3", n)
 	}
 	for i := range bodies {
 		if bodies[i] == nil || !bytes.Equal(bodies[i], bodies[i%len(paths)]) {
-			t.Fatalf("worker %d: body differs from worker %d (or not 200)", i, i%len(paths))
+			t.Fatalf("worker %d (%s): body differs from worker %d (or not 200)", i, paths[i%len(paths)], i%len(paths))
 		}
 	}
 }
