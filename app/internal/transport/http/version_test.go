@@ -73,7 +73,7 @@ func TestVersionEndpoint(t *testing.T) {
 			}
 			post := httptest.NewRecorder()
 			handler.ServeHTTP(post, httptest.NewRequest(http.MethodPost, "/version", nil))
-			if post.Code != http.StatusMethodNotAllowed || post.Header().Get("Allow") != http.MethodGet {
+			if post.Code != http.StatusMethodNotAllowed || post.Header().Get("Allow") != "GET, HEAD" {
 				t.Fatalf("POST /version: status %d Allow %q", post.Code, post.Header().Get("Allow"))
 			}
 		})

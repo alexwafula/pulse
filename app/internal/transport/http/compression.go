@@ -36,7 +36,7 @@ func gzipResponses(next http.Handler) http.Handler {
 			return
 		}
 		w.Header().Add("Vary", "Accept-Encoding")
-		if r.Method != http.MethodGet || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
+		if (r.Method != http.MethodGet && r.Method != http.MethodHead) || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
 			next.ServeHTTP(w, r)
 			return
 		}

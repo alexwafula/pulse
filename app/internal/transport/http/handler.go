@@ -176,9 +176,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 	})
 	mux.HandleFunc("/version", serveVersion)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !allowGetHead(w, r) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -189,12 +187,13 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			http.NotFound(w, r)
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !allowGetHead(w, r) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if r.URL.Path != "/legacy" {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
 		data := view
 		data.Experience = r.URL.Path != "/legacy"
 		data.Build = buildinfo.Current().ShortSHA
@@ -203,4 +202,15 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 		}
 	})
 	return withBuild(gzipResponses(mux)), nil
+}
+
+// allowGetHead admits GET and HEAD. HEAD runs the GET path unchanged and
+// net/http drops the body, so the headers always match.
+func allowGetHead(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method == http.MethodGet || r.Method == http.MethodHead {
+		return true
+	}
+	w.Header().Set("Allow", "GET, HEAD")
+	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	return false
 }
