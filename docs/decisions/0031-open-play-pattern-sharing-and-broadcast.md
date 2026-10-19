@@ -1,7 +1,7 @@
 # 0031: Open-play pattern, evidence links and broadcast presentation
 
 Date: 2026-10-19
-Status: Implemented on `feat/patterns-sharing-broadcast`; local preview, not deployed
+Status: Implemented; merged to main via PR #44 and deployed by the main release workflow
 
 ## Scope
 

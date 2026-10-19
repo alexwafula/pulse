@@ -133,7 +133,7 @@ Replay follow-up (decision 0029) unifies exact source-event inspection in
 Live, prepares bounded 1x action clips and separates recorded shot postroll from
 unchanged evidence windows. Scenario/clip completion and tracking-tail states
 offer replay/recap/scenario actions; no football or post-sequence motion is invented.
-Local priority 3-5 work (decision 0031) adds a second narrow agent-supported metric,
+Priority 3-5 work (decision 0031, PR #44) adds a second narrow agent-supported metric,
 open-play completed passes before a phase's first shot (20-second maximum), with
 Go source recomputation and shared Go/Python positive/negative examples. Its
 three-call original Foundry capture retains role outputs/IDs; recorded/default

@@ -69,6 +69,9 @@ IDs, timestamps, model metadata, role outputs and usage are retained in
 Unlike the corner reference above, this is the original capture for its own
 recording. It does not recover or alter the old corner provenance.
 
+Capture approved by: <to be confirmed by Alex>. The approver of this paid run is
+not recorded in the capture file or this repository.
+
 Python accepted the workflow on the first attempt in exactly three calls. Go
 independently matched every source fact and accepted the recorded response and
 its retained role outputs. Usage: **1,726 input / 326 output tokens**; estimated

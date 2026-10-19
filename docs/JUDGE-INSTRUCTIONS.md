@@ -51,9 +51,9 @@ evidence buttons inspect their source event in Live. The comparison icon beside
 a detected moment opens that team's windows ending at detection. Rewinding before
 two full windows hides the comparison, not replacing missing data with invented values.
 
-## Local priorities 3-5 preview
+## Priorities 3-5: open-play insight, evidence links and broadcast
 
-On `feat/patterns-sharing-broadcast` only, until merge/deployment:
+Merged to main via PR #44 and deployed by the main release workflow:
 
 1. Open Late siege, seek to the end in English/Casual and inspect the open-play
    pass-count explanation. Fact check cites the pass, carry and shot. Inspector
