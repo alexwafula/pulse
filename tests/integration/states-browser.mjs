@@ -186,8 +186,17 @@ try {
     await page.waitForFunction(() => document.querySelector(".comparison")?.dataset.comparisonTeam === "bastion");
     assert.equal(await page.locator(".comparison .state-text").textContent(), `${bastion} has no passes, carries or shots in this sequence`);
     await press(page, '[data-insight-view="maps"]'); await settled(page);
-    assert.equal(await page.locator(".experience-map .state-text").textContent(), `${bastion} has no passes, carries or shots in this sequence`);
-    assert.equal(await page.locator(".experience-lanes, .map-art").count(), 0, "no empty pitch or lanes");
+    // Its tracking heatmap is real data and stays; its event maps and lanes are one line.
+    assert.ok(await page.locator(".heat-cells rect").count() > 0, "bastion keeps its tracking heatmap");
+    assert.equal(await page.locator(".experience-lanes .state-text").textContent(), `${bastion} has no passes, carries or shots in this sequence`);
+    assert.equal(await page.locator(".experience-lanes progress").count(), 0, "no zero lane meters");
+    for (const mode of ["network", "shots"]) {
+      await press(page, `[data-map-mode="${mode}"]`);
+      await page.waitForFunction(mode => document.querySelector(".story-content")?.dataset.mapMode === mode, mode);
+      await settled(page);
+      assert.equal(await page.locator(".experience-map .state-text").textContent(), `${bastion} has no passes, carries or shots in this sequence`, `${mode}: one line`);
+      assert.equal(await page.locator(".map-art").count(), 0, `${mode}: no empty pitch`);
+    }
     await page.close();
     // Story player focus at the start: one line instead of 0 / 0 rows.
     const story = await open(context, "/?scenario=late-siege&view=svg&section=story");

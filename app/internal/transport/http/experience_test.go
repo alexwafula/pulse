@@ -261,8 +261,8 @@ func TestAnalyticsHTMLIsClockBounded(t *testing.T) {
 			if response.Code != 200 {
 				t.Fatalf("analytics template failed: %d %s", response.Code, body)
 			}
-			// Before any action the charts and map collapse into state lines (C7);
-			// once actions exist they render in full.
+			// Before any action the three zero charts collapse into one state line (C7);
+			// once actions exist they render in full. The map is drawn either way.
 			drawn := strings.Contains(body, `data-chart="Completed passes"`) && strings.Contains(body, `class="pitch-map"`)
 			if at == replay.Match.EndMS && !drawn {
 				t.Fatalf("analytics at the end lacks its charts or map: %s", body)

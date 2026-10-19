@@ -110,7 +110,7 @@ Added with the default focus and C7 states (ADR 0031). As above, the sw-KE and h
 | `No completed passes or carries yet` | `No completed passes or carries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `Details` | `Details` (literal key; the summary of the raw-reason disclosure) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 
-These existing visible strings were not in the catalog. They now render as keyed state lines, so they are added with the same English placeholders:
+These existing visible strings were not in the catalog. `Loading moments` now renders as a keyed state line; the three map strings are unchanged in place and are added so the catalog covers them. All carry the same English placeholders:
 
 | Key | sw-KE | hi-IN |
 |---|---|---|

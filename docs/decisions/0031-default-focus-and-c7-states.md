@@ -53,7 +53,7 @@ page localizer re-renders them per locale. Scripts clone the same markup from
 | Drawer Recap | 0 px pane before the end | the Recap section's "Recap available at the end of the sequence." |
 | Story Player focus | 0 / 0 / 0 / 0 | "{player}: no passes, carries or shots yet", or "…in this sequence" for a player with none |
 | Insights charts | three flat 0·0 charts | one line while all are zero; a zero chart keeps its title with "None yet" |
-| Insights maps and lanes | empty pitch, zero meters | one team line for an inactive team; otherwise one line per empty map and for zero lanes |
+| Insights maps and lanes | empty pitch, zero meters | inactive team: its pass-network and shot maps and its lanes are one team line, while its tracking heatmap (real player-time) stays; active team: zero lanes are one line, and maps keep their pitch with the existing "…yet" line |
 | What changed? | six 0→0 rows over two empty pitches | inactive team: one line; two empty windows: "{team}: no completed passes, carries or shots from {start} to {end}"; otherwise only rows with a non-zero side, plus "N metrics with none in either window" |
 | Panel status | "Updating" / failure text | loading and error lines |
 
