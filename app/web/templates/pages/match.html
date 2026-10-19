@@ -459,11 +459,13 @@
                 {{range .Teams}}
                 <div class="passing-team">
                   <h4>{{.Name}} <span data-i18n="stats.passes" data-i18n-arg-count="{{.Total}}" data-i18n-term-pass="{{if eq .Total 1}}pass{{else}}passes{{end}}">{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
-                  <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
+                  {{if .Nodes}}
+                  <!-- passing.go sizes the viewBox to the node count and places each label radially outside its circle. -->
+                  <svg viewBox="0 0 {{.Width}} {{.Height}}" width="{{.Width}}" height="{{.Height}}" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
                     <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
                     {{$marker := .Marker}}
                     {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
-                    {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} {{if eq .Sent 1}}pass{{else}}passes{{end}} sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
+                    {{range .Nodes}}<g class="passing-node" data-player-id="{{.ID}}" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} {{if eq .Sent 1}}pass{{else}}passes{{end}} sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle cx="{{.X}}" cy="{{.Y}}" r="18"></circle><text x="{{.X}}" y="{{.Y}}" text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text x="{{.LabelX}}" y="{{.LabelY}}" text-anchor="{{.Anchor}}" dominant-baseline="central" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
                   </svg>
                   <table class="passing-table">
                     <thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead>
@@ -476,10 +478,12 @@
                       <span data-i18n="stats.count" data-i18n-arg-count="{{.Count}}" data-i18n-term-noun="{{if eq .Count 1}}pass{{else}}passes{{end}}">{{.Count}} {{if eq .Count 1}}pass{{else}}passes{{end}}</span>
                       <div>{{range .EventIDs}}<button type="button" data-pass-evidence="{{.}}" title="Inspect pass {{.}}" aria-label="Show events for {{.}}"><span>{{.}}</span></button>{{end}}</div>
                     </li>
-                    {{else}}
-                    <li class="passing-empty">No completed passes yet</li>
                     {{end}}
                   </ul>
+                  {{else}}
+                  <!-- D4b-1 (default team and empty states) is not merged; reconcile this line with its empty state. -->
+                  <p class="passing-team-empty">No players with completed passes yet</p>
+                  {{end}}
                 </div>
                 {{end}}
               </div>
