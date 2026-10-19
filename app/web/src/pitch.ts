@@ -96,6 +96,19 @@ const playbackStatus = required<HTMLElement>("#playback-status");
 const playbackHeading = required<HTMLElement>("#playback-heading");
 const playbackDetail = required<HTMLElement>("#playback-detail");
 const sequenceActions = required<HTMLElement>("#sequence-actions");
+// While a moment's clip plays, the experience shows its evidence trail under the pitch on Live
+// rather than far down the drawer (DIRECTION C4). /legacy has no slot and keeps it in place.
+const evidenceTrail = required<HTMLElement>("#evidence-trail");
+const evidenceTrailHome = evidenceTrail.parentElement!;
+const clipTrailSlot = document.querySelector<HTMLElement>("#clip-trail-slot");
+const evidenceMoved = document.querySelector<HTMLElement>("#evidence-moved");
+function placeEvidenceTrail(underPitch: boolean): void {
+  if (!clipTrailSlot || !evidenceMoved) return;
+  if (underPitch) clipTrailSlot.append(evidenceTrail);
+  else evidenceTrailHome.append(evidenceTrail);
+  clipTrailSlot.hidden = !underPitch;
+  evidenceMoved.hidden = !underPitch;
+}
 const pitchLoading = document.querySelector<HTMLElement>("#pitch-loading");
 const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
@@ -169,6 +182,7 @@ function clearEvidence(): void {
   inspectedAction = undefined;
   previousFrameTime = 0;
   evidenceReturn.hidden = true;
+  placeEvidenceTrail(false);
   for (const button of speedButtons) { button.disabled = false; button.setAttribute("aria-pressed", String(Number(button.dataset.speed) === speed)); }
   for (const button of eventButtons.values()) button.classList.remove("evidence-event");
 }
@@ -368,6 +382,9 @@ function createPlayers(): void {
 }
 
 function createTimeline(): void {
+  // The experience's timeline is a rail with one dot per row in the team's server-rendered kit (DIRECTION C6).
+  const teamDots = document.body.classList.contains("experience");
+  const teamIds = replay.match.teams.map((team) => team.id);
   for (const event of replay.events) {
     const item = document.createElement("li");
     const button = document.createElement("button");
@@ -383,7 +400,16 @@ function createTimeline(): void {
     const description = document.createElement("span");
     description.textContent = eventSentence(event);
     copy.append(type, description);
-    button.append(time, copy);
+    button.append(time);
+    if (teamDots) {
+      const dot = document.createElement("span");
+      dot.className = "event-team-dot";
+      dot.dataset.teamId = event.teamId;
+      dot.dataset.teamKit = teamKit(event.teamId, teamIds);
+      dot.setAttribute("aria-hidden", "true");
+      button.append(dot);
+    }
+    button.append(copy);
     button.addEventListener("click", () => {
       inspectAt(event.timeMs, event.id);
     });
@@ -520,7 +546,7 @@ function render(): void {
   renderEvent();
   renderInsight();
   const cue = evidenceCue ?? [...cues].reverse().find(item => clock >= item.startMs && clock <= item.endMs);
-  sceneState.control = analytics?.render(clock, cue, momentClip);
+  sceneState.control = analytics?.render(clock, cue, momentClip, evidenceCue !== undefined || momentClip !== undefined);
   const snapshot = [...passingSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
   if (snapshot !== activePassingSnapshot) {
     if (activePassingSnapshot) activePassingSnapshot.hidden = true;
@@ -779,6 +805,7 @@ async function start(): Promise<void> {
         playing = true; previousFrameTime = 0;
         for (const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
         evidenceReturn.hidden = false;
+        placeEvidenceTrail(true);
         setDrawerTab("evidence", true, "live");
         render();
       },
