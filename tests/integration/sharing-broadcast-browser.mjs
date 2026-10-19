@@ -63,6 +63,10 @@ try {
   const cueURL=await copy(page);
   await restored(other,cueURL,Math.floor(clipAt),'svg');
   assert.equal(await other.locator('#evidence-return').isVisible(),true);
+  // D4a: a shared clip shows the trail under the pitch, like the clicked clip it came from.
+  const trailUnderPitch=target=>target.locator('#clip-trail-slot:not([hidden]) #evidence-trail').count();
+  assert.equal(await trailUnderPitch(page),1,'clicked insight clip puts the trail under the pitch');
+  assert.equal(await trailUnderPitch(other),1,'shared insight clip puts the trail under the pitch');
   assert.equal(new URL(cueURL).searchParams.get('cue'),open.cueId);
   console.log('ok second recorded agent pattern, actual trace and cue replay link');
 
@@ -72,6 +76,8 @@ try {
   const momentURL=await copy(page);
   await restored(other,momentURL,momentAt,'svg');
   assert.equal(await other.locator('#evidence-kind').textContent(),'Source events & metric ticks');
+  assert.equal(await trailUnderPitch(page),1,'clicked moment clip puts the trail under the pitch');
+  assert.equal(await trailUnderPitch(other),1,'shared moment clip puts the trail under the pitch');
   assert.ok(await other.locator('#pane-evidence').isVisible());
   await seek(page,1000);
   await page.evaluate(({start,end})=>document.dispatchEvent(new CustomEvent('pulse:replay-window',{detail:{startMs:start,endMs:end}})),{start:replay.match.endMs-10000,end:replay.match.endMs-1});
