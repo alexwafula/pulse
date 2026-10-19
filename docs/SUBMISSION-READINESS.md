@@ -15,7 +15,7 @@ Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on mai
 | Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
 | Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |
 | Recording provenance | Content bound; original provider response/trace **pending**; see audit |
-| Prototype contributor permission | **UNCONFIRMED; blocks submission** |
+| Prototype contributor permission | Ved confirmed |
 | Project licence | Team decision pending; do not choose a licence for someone else's work |
 
 ## Prototype reuse confirmation
