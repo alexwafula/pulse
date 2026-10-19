@@ -147,7 +147,7 @@ Deterministic work (metrics, moment detection, cue building, validation) is **co
 
 - Structure lives in JSON Schema. **Business rules live in code in each language**, guarded by shared examples. A schema alone catches only part of the rules.
 - **No rule without an invalid example.** Adding or changing a rule means adding a valid and an invalid case in `contracts/examples/`, then making every language's tests pass.
-- Changing a contract: update the schema, the examples, `contracts/README.md`, and both Go and Python models in the same change. Bump `schemaVersion` for breaking changes. Tell the other engineer first.
+- Changing a contract: update the schema, the examples, `contracts/README.md`, and both Go and Python models in the same change. Bump `schemaVersion` for breaking changes. Tell the other engineers first.
 - Conventions: IDs are strings matching `[A-Za-z0-9_.:-]{1,64}`; timestamps are UTC ISO-8601 with milliseconds; pitch is 105 by 68 metres with origin bottom-left; scores and probabilities are 0 to 1; enums are `UPPER_SNAKE`.
 
 Rules from the broader contract draft (verify in `contracts/`; several below
@@ -273,7 +273,7 @@ Ask a human first before:
 
 - Changing anything in `contracts/` or a Go/Python model that mirrors it.
 - Adding a dependency, changing CI, or creating or changing Azure resources that cost money.
-- Working in the other engineer's area or deleting fixtures and tests.
+- Working in another engineer's area or deleting fixtures and tests.
 
 Never:
 
@@ -282,8 +282,11 @@ Never:
 
 ## 11. Ownership and handoffs
 
-- **Pipeline engineer:** `app/`, `data/`, `infra/azure/`, web shell and overlay island, engine metrics, MCP tool server, cue gate, delivery.
-- **Agents engineer:** `agents/`, prompts, locales, `tests/evaluations/`, Speech integration, Foundry wiring and tracing.
+Three registered engineers: Jefferson, Alex and Ved.
+
+- **Pipeline engineer (Jefferson):** `app/`, `data/`, `infra/azure/`, web shell and overlay island, engine metrics, MCP tool server, cue gate, delivery.
+- **Agents engineer (Alex):** `agents/`, prompts, locales, `tests/evaluations/`, Speech integration, Foundry wiring and tracing.
+- **Design engineer (Ved):** the Matchlens prototype that is the visual basis of the UI (ADR 0015) and `docs/design/`. No code ownership: UI code changes go through the Pipeline engineer.
 - **Shared:** `contracts/`, `tests/integration/`, `docs/`, CI. Announce changes before merging.
 
 The two sides stub each other: the engine ships recorded fact packs, the agent service ships a template-only mode. Neither side blocks on the other.
