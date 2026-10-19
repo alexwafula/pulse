@@ -27,7 +27,7 @@ button) and the insight's clip (`#evidence-button`, next to the Fact check, the
 judge-path trigger of §3.3 row 3). Both keep Live and the pitch in view. The slot
 comes after the transport, the Return button, "On the pitch" and the playback status (ADR 0029). A moment clip still opens
 the Evidence tab, which says "Evidence trail shown under the pitch". The insight clip
-still opens the Timeline tab with its events highlighted, as before. `clearEvidence()` moves the trail
+opened the Timeline tab with its events highlighted; since ADR 0031 it opens the Evidence tab too. `clearEvidence()` moves the trail
 back. Moving the node, rather than rendering a copy, keeps one set of ids and the same
 listeners. The same pattern already moves the transport between Live and the watch
 dock. In the experience trail, the source-event list now comes before the model values, and ADR 0029's

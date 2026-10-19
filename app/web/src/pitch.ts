@@ -337,7 +337,8 @@ let activePassingSnapshot: HTMLElement | undefined;
 const attackSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".attack-snapshot"));
 const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
-const recapPanel = required<HTMLElement>("#recap-panel");
+// Only /legacy has the drawer Recap pane; experience pages show Recap in its sidebar section.
+const recapPanel = document.querySelector<HTMLElement>("#recap-panel");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
 let publishedClock = "";
 
@@ -576,8 +577,8 @@ function render(): void {
     activeAttackSnapshot = attack;
   }
   attackClock.textContent = matchTime(clock);
-  recapPanel.hidden = clock < replay.match.endMs;
-  if (clock >= replay.match.endMs && !userSelectedTab && !momentClip) {
+  if (recapPanel) recapPanel.hidden = clock < replay.match.endMs;
+  if (recapPanel && clock >= replay.match.endMs && !userSelectedTab && !momentClip) {
     setDrawerTab("recap");
   } else if (!userSelectedTab && evidenceCue) {
     setDrawerTab("timeline");
@@ -744,7 +745,7 @@ async function startDemo(): Promise<void> {
     clock = replay.match.endMs;
     render();
     if (document.body.classList.contains("experience")) document.dispatchEvent(new CustomEvent("pulse:demo-complete"));
-    else recapPanel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+    else recapPanel?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   } catch (_e) {
     // Aborted or cancelled
   } finally {
@@ -878,14 +879,18 @@ async function start(): Promise<void> {
         inspectAt(NaN, button.dataset.recapEvidence ?? "");
       });
     }
-    required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
+    // The sidebar Recap section asks for the download by event; /legacy has its own button.
+    const downloadRecap = (): void => {
       const source = document.querySelector('.story-content[data-panel="recap"]') ?? recapPanel;
+      if (!source) return;
       const lines = Array.from(source.querySelectorAll("li p")).map((item) => item.textContent ?? "");
       const text = [`Pulse - ${replay.match.teams[0].name} vs ${replay.match.teams[1].name}`, t("Synthetic sequence recap"), `${matchTime(replay.match.startMs)} - ${matchTime(replay.match.endMs)}`, ...lines].join("\n");
       const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
       const link = document.createElement("a"); link.href = url; link.download = "pulse-sequence-recap.txt"; link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
+    };
+    document.querySelector<HTMLButtonElement>("#download-recap")?.addEventListener("click", downloadRecap);
+    document.addEventListener("pulse:download-recap", downloadRecap);
     function changeAudience(nextPersona: string): void {
         stopDemo();
         // A cue belongs to an audience; a detector moment does not.
@@ -919,9 +924,9 @@ async function start(): Promise<void> {
       setClip(evidencePlaybackRange(replay, {startMs: cue.replayStartMs, endMs: cue.replayEndMs}, cue.eventIds));
       clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
       for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
-      // Like a moment clip: the trail goes under the pitch.
+      // Like a moment clip: the trail goes under the pitch and the drawer shows the Evidence tab.
       placeEvidenceTrail(true);
-      setDrawerTab("timeline", true, "live");
+      setDrawerTab("evidence", true, "live");
       render();
       revealEvidenceTrail();
     });
@@ -931,7 +936,7 @@ async function start(): Promise<void> {
       clock = returnClock;
       playing = false;
       previousFrameTime = 0;
-      if (clock >= replay.match.endMs && !userSelectedTab) setDrawerTab("recap");
+      if (recapPanel && clock >= replay.match.endMs && !userSelectedTab) setDrawerTab("recap");
       else if (userSelectedTab) setDrawerTab(userSelectedTab);
       render();
     });
@@ -999,7 +1004,7 @@ async function start(): Promise<void> {
     required<HTMLButtonElement>("#sequence-recap").addEventListener("click", () => {
       stopDemo(); clearEvidence(); playing = false; clock = replay.match.endMs; render();
       if (document.body.classList.contains("experience")) document.dispatchEvent(new CustomEvent("pulse:open-recap"));
-      else { setDrawerTab("recap", true); recapPanel.scrollIntoView({behavior: scrollBehavior(), block: "start"}); }
+      else { setDrawerTab("recap", true); recapPanel?.scrollIntoView({behavior: scrollBehavior(), block: "start"}); }
     });
     const scenarios = required<HTMLButtonElement>("#sequence-scenarios");
     scenarios.hidden = !document.body.classList.contains("experience");

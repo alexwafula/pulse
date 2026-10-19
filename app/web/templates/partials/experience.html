@@ -104,5 +104,4 @@
   {{end}}
 </section>
 <section class="experience-lanes" aria-label="Attacking lanes"><h4>Attacking lanes</h4><span class="story-source">Completed pass/carry destinations &middot; attack-relative</span><div>{{range .Analytics.Lanes}}<label><span>{{.Name}}</span><progress max="{{$.Analytics.LaneMax}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} completed passes and carries"></progress><b>{{.Count}}</b></label>{{end}}</div></section>
-<div class="analytics-links"><button type="button" class="evidence-button" data-analysis-pane="passing"><i data-lucide="network"></i><span>Passing network</span></button><button type="button" class="evidence-button" data-analysis-pane="control"><i data-lucide="activity"></i><span>Metric evidence</span></button><button type="button" class="evidence-button" data-analysis-pane="routes"><i data-lucide="route"></i><span>Route evidence</span></button></div>
 {{end}}
