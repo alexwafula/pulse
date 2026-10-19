@@ -26,3 +26,10 @@ If public Python health is reachable, that is not a privacy guarantee or a faile
 insights-auth check: health returns only service status/mode. Verify `/insights`
 rejects untrusted requests and Go still receives its approved recording. Continue
 to configure internal ingress and investigate the discrepancy separately.
+
+## October 18 follow-up
+
+The current stable API accepted an ingress-only update, but public health still
+returned 200 afterward while unauthenticated insights returned 401. Alex chose
+to keep the existing hosting and defer migration. Authentication is verified;
+network isolation is not. Full observations: [ingress follow-up](../INGRESS-REVIEW-2026-10-18.md).

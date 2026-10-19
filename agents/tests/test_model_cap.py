@@ -90,7 +90,7 @@ class DeployedCapTests(unittest.TestCase):
         for path in files:
             values = CAP_SETTING.findall(path.read_text(encoding="utf-8", errors="ignore"))
             if values:
-                found[str(path.relative_to(ROOT))] = values
+                found[path.relative_to(ROOT).as_posix()] = values
         # Guard against the pattern silently matching nothing.
         for expected in ("infra/azure/main.bicep", "infra/azure/main.bicepparam",
                          "infra/azure/main.parameters.json", "compose.yaml"):
