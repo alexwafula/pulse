@@ -119,6 +119,7 @@ try {
         const line = `Control metrics unavailable: tracking has a gap of ${(Number(ms) / 1000).toFixed(1)} s at ${clock(Number(at))}`;
         assert.equal(label, line, `${scenario}: Live label`);
         assert.ok(await page.locator("#metrics-label").isVisible(), `${scenario}: Live label visible`);
+        assert.equal(await page.locator("#metrics-label").getAttribute("data-i18n"), "state.trackingGap", `${scenario}: Live label re-renders per locale`);
         await press(page, '.drawer-tab[data-tab="control"]');
         const state = page.locator('#metrics-state .state-line[data-state="no-tracking"]');
         assert.equal(await state.locator(".state-text").textContent(), line);

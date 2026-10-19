@@ -163,6 +163,9 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (experience && !metrics.supported) {
         // Name the real cause on Live and in the pane; the raw reason goes in <details>.
         const { key, values } = trackingState(metrics.reason, hooks.matchTime);
+        // Keyed like the state lines, so a locale change re-renders it (i18n.ts).
+        metricsLabel.setAttribute("data-i18n", key);
+        for (const [name, value] of Object.entries(values)) metricsLabel.setAttribute(`data-i18n-arg-${name}`, value);
         metricsLabel.textContent = t(key, values);
         renderState(metricsState, "no-tracking", key, values, metrics.reason);
         for (const node of document.querySelectorAll<HTMLElement>("#pane-control .metric-values, #pane-control h4")) node.hidden = true;
