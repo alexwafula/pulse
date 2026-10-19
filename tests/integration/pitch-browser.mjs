@@ -4,6 +4,7 @@ import path from "node:path";
 import { chromium } from "playwright-core";
 
 const url = process.env.PULSE_URL ?? "http://127.0.0.1:8080";
+const insightSource = process.env.PULSE_INSIGHT_SOURCE ?? "python-template";
 const defaultChrome = process.platform === "linux" ? "/usr/bin/chromium-browser" : "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const executablePath = process.env.CHROME_PATH ?? defaultChrome;
 const browser = await chromium.launch({ executablePath, headless: true });
@@ -68,14 +69,16 @@ try {
   assert.equal(await desktop.locator("#action-result").isVisible(), true);
   assert.equal(await desktop.locator("#result-title").textContent(), "Shot blocked");
   await desktop.waitForFunction(() => document.querySelector("#insight-text")?.textContent === "The corner produced 1 shot.");
-  assert.equal(await desktop.locator("#insight-status").textContent(), "Template");
+  assert.equal(await desktop.locator("#insight-status").textContent(), insightSource === "python-recorded" ? "Verified (recorded)" : "Template");
   await desktop.screenshot({ path: path.join(os.tmpdir(), "pulse-insight-desktop.png"), fullPage: true });
   await desktop.locator("#evidence-button").click();
   assert.match(await desktop.locator("#match-clock").textContent(), /27:5[2-3]/);
   assert.equal(await desktop.locator(".event-list .evidence-event").count(), 2);
   assert.equal(await desktop.locator('[data-speed="1"]').getAttribute("aria-pressed"), "true");
   assert.equal(await desktop.locator('[data-speed="4"]').isDisabled(), true);
-  await desktop.waitForFunction(() => document.querySelector("#match-clock")?.textContent === "27:58", null, { timeout: 10000 });
+  await desktop.waitForFunction(() => document.querySelector("#play-button")?.getAttribute("aria-label") === "Replay evidence", null, { timeout: 12000 });
+  assert.equal(await desktop.locator("#match-clock").textContent(), "28:00", "the recorded blocked-shot movement must finish, not stop at shot start");
+  assert.equal(await desktop.locator("#insight-window").textContent(), "27:52–27:58 · 2 events", "visual postroll must not broaden the fact window");
   assert.equal(await desktop.getByRole("button", { name: "Replay evidence", exact: true }).count(), 1);
   await desktop.getByRole("button", { name: "Return to match", exact: true }).click();
   assert.equal(await desktop.locator("#match-clock").textContent(), "28:00");

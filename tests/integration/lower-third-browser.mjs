@@ -149,19 +149,19 @@ await check("each insight status has a distinct accessible name, icon and shape;
   const verifiedFeed = async () => {
     const feed = await (await fetch(`${base}/api/insights?scenario=corner&persona=CASUAL&locale=en-GB`)).json();
     for (const cue of feed.cues) cue.verification = { ...cue.verification, status: "VERIFIED" };
-    return feed;
+    return {version:"pulse-inspection-v1",feed,inspections:[]};
   };
   const scenes = [
     { label: "waiting", query: "scenario=corner", at: 0, expected: "Waiting" },
     { label: "verified-recorded", query: "scenario=corner", at: 1000, expected: source === "python-recorded" ? "Verified (recorded)" : "Template" },
     { label: "template", query: "scenario=corner&persona=ANALYST", at: 1000, expected: "Template" },
     { label: "verified", query: "scenario=corner", at: 1000, expected: "Verified", route: async () => ({ contentType: "application/json", body: JSON.stringify(await verifiedFeed()) }) },
-    { label: "no-moment", query: "scenario=corner", at: 1000, expected: "No moment", route: async () => ({ contentType: "application/json", body: JSON.stringify({ schemaVersion: "2.0.0", cues: [] }) }) },
+    { label: "no-moment", query: "scenario=corner", at: 1000, expected: "No moment", route: async () => ({ contentType: "application/json", body: JSON.stringify({version:"pulse-inspection-v1",feed:{schemaVersion:"2.0.0",cues:[]},inspections:[]}) }) },
     { label: "unavailable", query: "scenario=corner", at: 1000, expected: "Unavailable", route: async () => ({ status: 503, body: "Unavailable" }) },
   ];
   for (const scene of scenes) {
     const page = await browser.newPage(viewports.desktop);
-    if (scene.route) await page.route("**/api/insights?**", async route => route.fulfill(await scene.route()));
+    if (scene.route) await page.route("**/api/agent-inspection?**", async route => route.fulfill(await scene.route()));
     await open(page, scene.query);
     await seek(page, scene.at);
     await page.waitForFunction(text => document.querySelector("#insight-status")?.textContent === text, scene.expected, { timeout: 15000 });

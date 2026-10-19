@@ -22,6 +22,7 @@ type experiencePanel struct {
 	Focus                  *domain.Player
 	PlayerStats            playerStoryStats
 	Analytics              experienceAnalytics
+	Comparison             comparisonView
 }
 
 type storyAction struct {
@@ -35,6 +36,7 @@ type playerStoryStats struct {
 
 type experienceOptions struct {
 	mode, persona, playerID, teamID, mapMode, locale string
+	windowMS                                         int64
 }
 
 func storyPanel(replay domain.Replay, page pageData, view string, at int64, options experienceOptions) experiencePanel {
@@ -45,6 +47,10 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 		Mode: options.mode, Persona: options.persona, MapMode: options.mapMode, Locale: options.locale}
 	if view == "analytics" {
 		panel.Analytics = analyticsPanel(replay, page, at, options.teamID)
+		return panel
+	}
+	if view == "comparison" {
+		panel.Comparison = compareWindows(replay, page, at, options.windowMS, options.teamID)
 		return panel
 	}
 	for _, summary := range page.Summaries {
@@ -145,7 +151,7 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 			return
 		}
 		kind := r.URL.Query().Get("panel")
-		if kind != "story" && kind != "recap" && kind != "analytics" {
+		if kind != "story" && kind != "recap" && kind != "analytics" && kind != "comparison" {
 			http.Error(w, "unsupported panel", http.StatusBadRequest)
 			return
 		}
@@ -156,6 +162,14 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 		}
 		options := experienceOptions{mode: r.URL.Query().Get("mode"), persona: r.URL.Query().Get("persona"),
 			playerID: r.URL.Query().Get("playerId"), teamID: r.URL.Query().Get("teamId"), mapMode: r.URL.Query().Get("map"), locale: requestLocale(r)}
+		options.windowMS = 10000
+		if raw := r.URL.Query().Get("windowMs"); raw != "" {
+			options.windowMS, err = strconv.ParseInt(raw, 10, 64)
+			if err != nil || (options.windowMS != 10000 && options.windowMS != 20000 && options.windowMS != 30000) {
+				http.Error(w, "unsupported comparison window", http.StatusBadRequest)
+				return
+			}
+		}
 		if options.mode == "" {
 			options.mode = "live"
 		}

@@ -13,8 +13,8 @@ Updated 2026-10-19 (prototype provenance); 2026-10-18 otherwise. Readiness imple
 | Python ingress | Current hosting retained by Alex's decision; token auth works, network isolation unresolved/deferred (`INGRESS-REVIEW-2026-10-18.md`) |
 | Windows Python tests | Path comparison normalized without changing the model-cap checks; all 34 tests pass locally |
 | Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
-| Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |
-| Recording provenance | Content bound; original provider response/trace **pending**; see audit |
+| Video | Alex accepted the existing 87.40-second draft on Oct 19; final public upload pending. Refresh after feature freeze if the new features are included |
+| Recording provenance | Original capture trace unavailable; a new approved three-call reference run with retained provider IDs reproduces it exactly. See audit; never describe it as recovered original evidence |
 | Prototype contributor permission | Ved confirmed |
 | Project licence | Team decision pending; do not choose a licence for someone else's work |
 
@@ -42,14 +42,18 @@ private; commit only a contributor-approved summary and reference/date.
 | Team representative confirmation | Recorded by Jefferson (commit `fec91b5`, 2026-10-19) |
 | Approved public summary / evidence reference | Written confirmation held by the team outside the repo. This table and ADR 0015 are the public summary; Ved signed off on it (2026-10-19) |
 
+Alex also confirmed Ved's team membership and prototype reuse permission in the
+project conversation on Oct 19. This corroborates the team record above; no
+private correspondence is copied and no independent rights audit is claimed.
+
 Do not tick this from verbal assumptions, an AI-generated statement or a repo
 invite. If permission cannot be confirmed, remove/replace the affected work
 before submission. No legal compliance certification is made here.
 
 ## Final release checklist
 
-1. Retain the language-review confirmation in `LOCALE-REVIEW.md`, contributor confirmation is recorded above (2026-10-19); get
-   original recording evidence or appropriately narrowed provider claims.
+1. Retain the language-review and contributor confirmations, review third-party
+   assets/attribution and keep original-versus-reference recording claims distinct.
 2. Review/merge the tested branch. Let main's existing CI/image workflow deploy.
    Check `/version` matches that main SHA and rerun the judge instructions.
 3. Watch the complete video; verify duration, readable captions, correct labels,

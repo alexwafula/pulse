@@ -1,9 +1,11 @@
 """Opt-in Microsoft Foundry v1 REST adapter. Tests never call a paid endpoint."""
 
 import asyncio
+from datetime import datetime, timezone
 from dataclasses import dataclass, field
 import json
 import os
+import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -35,6 +37,8 @@ class FoundryBackend:
     deployment: str
     api_key: str = field(repr=False)
     timeout_seconds: float = 4.0
+    max_completion_tokens: int = 2048
+    observations: list[dict[str, object]] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         url = urlparse(self.endpoint)
@@ -43,7 +47,8 @@ class FoundryBackend:
                 or url.username or url.password or url.query or url.fragment
                 or url.port not in (None, 443) or url.path.rstrip("/") not in ("", "/openai/v1")):
             raise ValueError("Use a public Azure model resource HTTPS endpoint, not a Foundry project endpoint")
-        if not self.deployment or not self.api_key or not 0 < self.timeout_seconds <= 10:
+        if (not self.deployment or not self.api_key or not 0 < self.timeout_seconds <= 10
+                or not 1 <= self.max_completion_tokens <= 2048):
             raise ValueError("Foundry deployment, key and bounded timeout are required")
 
     @classmethod
@@ -71,7 +76,7 @@ class FoundryBackend:
         body = {"model": self.deployment,
                 "messages": [{"role": "system", "content": prompt},
                              {"role": "user", "content": json.dumps(payload, allow_nan=False)}],
-                "max_completion_tokens": 2048,
+                "max_completion_tokens": self.max_completion_tokens,
                 "response_format": {"type": "json_schema", "json_schema": {
                     "name": f"pulse_{role}", "strict": True, "schema": output_schema(example)}}}
         base = self.endpoint.rstrip("/")
@@ -80,6 +85,7 @@ class FoundryBackend:
         request = Request(base + "/chat/completions", data=json.dumps(body).encode(),
                           headers={"Content-Type": "application/json", "api-key": self.api_key})
         try:
+            started = time.monotonic()
             with build_opener(NoRedirect()).open(request, timeout=self.timeout_seconds) as response:
                 raw = response.read(65537)
             if len(raw) > 65536:
@@ -91,6 +97,13 @@ class FoundryBackend:
             result = json.loads(choice["message"]["content"])
             if not isinstance(result, dict):
                 raise ValueError("Foundry did not return a JSON object")
+            if self.observations is not None:
+                # Explicit opt-in local capture. Never retain keys, headers or hidden reasoning.
+                self.observations.append({"role": role, "responseId": completion.get("id"),
+                                          "model": completion.get("model"), "created": completion.get("created"),
+                                          "observedAt": datetime.now(timezone.utc).isoformat(),
+                                          "durationMs": round((time.monotonic() - started) * 1000),
+                                          "usage": completion.get("usage"), "output": result})
             return result
         except HTTPError as error:
             code = error.code

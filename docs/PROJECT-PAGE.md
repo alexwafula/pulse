@@ -51,6 +51,13 @@ other supported requests use templates. This is not a general live-model quality
 claim. The recording declares Foundry/model metadata; original provider-response
 provenance remains pending. Model agreement alone cannot override Go's gate.
 
+Oct 19 branch addition (include only after deployment): Agent Inspector exposes
+source facts, delivery and independent publication checks. A separately captured
+three-role Foundry reference run reproduces the stored response and retains actual
+provider IDs, role outputs, usage and timings; it does not recover original-capture
+provenance. What Changed? compares equal, elapsed source-event windows for one
+team, with pitch diagrams and replay links. It reports observed changes, not cause.
+
 ### Deployment and current limits
 
 Go and Python are deployed to Azure Container Apps, with GitHub Actions builds,

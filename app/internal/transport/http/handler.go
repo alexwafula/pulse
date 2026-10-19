@@ -3,12 +3,10 @@ package transporthttp
 import (
 	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
-	"github.com/alexwafula/pulse/app/internal/ai"
 	"github.com/alexwafula/pulse/app/internal/buildinfo"
 	"github.com/alexwafula/pulse/app/internal/domain"
 	"github.com/alexwafula/pulse/app/internal/engine/metrics"
@@ -115,60 +113,9 @@ func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL st
 		w.Header().Set("Cache-Control", "no-store")
 		json.NewEncoder(w).Encode(packs)
 	})
-	mux.HandleFunc("/api/insights", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", "GET")
-			http.Error(w, "method not allowed", 405)
-			return
-		}
-		persona := r.URL.Query().Get("persona")
-		if persona == "" {
-			persona = "CASUAL"
-		}
-		if persona != "CASUAL" && persona != "ANALYST" {
-			http.Error(w, "unsupported persona", 400)
-			return
-		}
-		locale := requestLocale(r)
-		feed := domain.CueFeed{SchemaVersion: domain.SchemaVersion, Cues: []domain.OverlayCue{}}
-		source := "go-template"
-		for _, pack := range packs {
-			response, err := ai.Template(pack, locale, persona)
-			if err != nil {
-				http.Error(w, "unsupported fact pack", 500)
-				return
-			}
-			if agentsURL != "" {
-				remote, mode, remoteErr := ai.RequestWithMode(r.Context(), agentsURL, pack, locale, persona)
-				if remoteErr == nil {
-					_, remoteErr = ai.Cue(replay, pack, remote, locale, persona)
-					if remoteErr == nil {
-						response = remote
-						source = "python-template"
-						if remote.Verification.Status == "VERIFIED" {
-							source = "python-verified"
-							if mode == "recorded" {
-								source = "python-recorded"
-							}
-						}
-					}
-				}
-				if remoteErr != nil {
-					log.Printf("Python insight rejected/unavailable; using Go template: %v", remoteErr)
-				}
-			}
-			cue, err := ai.Cue(replay, pack, response, locale, persona)
-			if err != nil {
-				http.Error(w, "cue validation failed", 500)
-				return
-			}
-			feed.Cues = append(feed.Cues, cue)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Cache-Control", "no-store")
-		w.Header().Set("X-Pulse-Insight-Source", source)
-		json.NewEncoder(w).Encode(feed)
-	})
+	reference := loadAgentReference(webDir)
+	mux.HandleFunc("/api/insights", insightHandler(replay, packs, agentsURL, false, nil))
+	mux.HandleFunc("/api/agent-inspection", insightHandler(replay, packs, agentsURL, true, reference))
 	mux.HandleFunc("/api/replay", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)

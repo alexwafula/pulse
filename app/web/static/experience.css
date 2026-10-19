@@ -254,6 +254,48 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .experience-lanes progress { width: 100%; height: 8px; accent-color: var(--team-away); }
 .experience .experience-lanes b { text-align: right; }
 .experience .analytics-links { padding: 18px 0; }
+.experience .comparison-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 16px 0; border-bottom: var(--border-hairline); }
+.experience .comparison-windows { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; padding: 20px 0; }
+.experience .comparison-window { min-width: 0; margin: 0; }
+.experience .comparison-window figcaption { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; font-size: 13px; margin-bottom: 12px; }
+.experience .comparison-window .pitch-map { display: block; width: 100%; aspect-ratio: 109 / 72; }
+.experience .comparison-window .story-evidence { margin-top: 12px; gap: 6px; flex-wrap: wrap; }
+.experience .comparison-paths { stroke: var(--team-home); fill: var(--team-home); stroke-width: .55; }
+.experience .comparison[data-team-index="1"] .comparison-paths { stroke: var(--team-away); fill: var(--team-away); }
+.experience .comparison-paths [data-kind=shot] { stroke: var(--c-ink); fill: var(--c-ink); stroke-dasharray: 1 1; }
+.experience .comparison-destination { fill: var(--c-surface); stroke-dasharray: none; }
+.experience .comparison-ledger > div { display: grid; grid-template-columns: minmax(0,2fr) repeat(3,minmax(0,1fr)); align-items: center; gap: 8px; padding: 12px 0; border-bottom: var(--border-hairline); font-size: 13px; font-variant-numeric: tabular-nums; }
+.experience .comparison-ledger [role=cell], .experience .comparison-ledger [role=columnheader]:not(:first-child) { text-align: right; }
+.experience .comparison-labels { color: var(--c-ink-muted); }
+.experience .comparison-bars { grid-column: 1 / -1; display: grid; gap: 4px; }
+.experience .comparison-bars span { height: 4px; display: block; background: var(--c-ink-muted); }
+.experience .comparison-bars span + span { background: var(--c-accent); }
+.experience .comparison-stat strong { color: var(--c-accent); }
+.experience[data-insight-view=comparison] #map-controls > .experience-select { display: flex; }
+.experience #comparison-window-control { display: none; }
+.experience[data-insight-view=maps] #comparison-window-control { display: none; }
+.experience .moment-list li:has(.compare-moment) { display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 6px; align-items: center; }
+.experience .compare-moment { width: 44px; height: 44px; color: var(--c-accent); }
+.experience .comparison .evidence-button, .experience .agent-inspector .evidence-button { min-height: 44px; }
+.experience .agent-inspector { border-top: var(--border-hairline); margin-top: 12px; }
+.experience .agent-inspector summary { font-weight: 600; padding: 12px 0; min-height: 44px; cursor: pointer; }
+.experience .inspection-source { color: var(--c-accent); font-size: 12px; font-weight: 700; }
+.experience .inspection-steps { padding: 0; margin: 16px 0; list-style: none; counter-reset: inspection; }
+.experience .inspection-steps li { position: relative; padding: 0 0 18px 30px; margin: 0; border-left: var(--border-hairline); overflow-wrap: anywhere; }
+.experience .inspection-steps li::before { counter-increment: inspection; content: counter(inspection); position: absolute; left: -10px; top: 0; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--c-accent-tint); color: var(--c-accent); font-size: 11px; }
+.experience .inspection-steps strong { display: block; font-size: 13px; }
+.experience .inspection-status { display: inline-block; margin: 6px 0; padding: 3px 6px; background: var(--c-surface-2); color: var(--c-ink-muted); border-radius: 4px; font-size: 12px; }
+.experience .inspection-steps p, .experience .inspection-steps code, .experience .inspection-safety p { font-size: 12px; line-height: 1.6; margin: 4px 0; }
+.experience .inspection-steps code { display: block; overflow-wrap: anywhere; }
+.experience .inspection-safety { margin-top: 16px; border-top: var(--border-hairline); }
+.experience .inspection-safety blockquote { font-size: 13px; margin: 10px 0; padding-left: 10px; border-left: 2px solid var(--c-error); }
+.experience .inspection-warning { color: var(--c-error); font-size: 12px; }
+.experience .inspection-reference { border-top: var(--border-hairline); margin-top: 16px; }
+.experience .inspection-reference time { font-size: 12px; overflow-wrap: anywhere; }
+.experience .inspection-reference dl { display: block; border: 0; border-top: var(--border-hairline); margin: 12px 0; padding-top: 8px; }
+.experience .inspection-reference dl > div { display: grid; grid-template-columns: 80px minmax(0,1fr); gap: 8px; padding: 4px 0; }
+.experience .inspection-reference :is(dt,dd) { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+@media (max-width:600px) { .experience .comparison-windows { grid-template-columns: minmax(0,1fr); } .experience .comparison-ledger > div { font-size: 12px; } }
 .experience .analytics-return { margin-bottom: 14px; }
 .experience .metric-values { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .experience .metric-values > div { display: block; border: 0; border-radius: 8px; padding: 16px; background: var(--c-surface); }

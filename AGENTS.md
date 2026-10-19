@@ -112,6 +112,13 @@ never immutable caching on unfingerprinted URLs; HTML pages and panels are gzipp
 tracked in `docs/SUBMISSION-READINESS.md`; none are certified by automated tests.
 Original provider/run evidence for the corner recording is pending; its manually
 declared metadata is not attestation (`docs/RECORDING-PROVENANCE.md`).
+The Inspector/comparison branch adds an inspected cue envelope, an isolated Go
+bad-claim check and equal 10/20/30-second same-team source-event windows, without
+changing v2 or the gate. An approved Oct 19 reference run retained actual response
+IDs and role outputs and reproduced the recording; it is labelled a reproduction,
+not recovered original provenance. Public model calls remain disabled. Alex
+confirmed Ved's team membership/prototype reuse permission and accepted the draft
+video; third-party attribution and final video upload remain team actions.
 Main releases reuse CI, test both containers and the desktop/mobile homepage,
 then publish SHA-tagged images and update the existing Azure apps. Separate
 main-only identities grant registry push and app-scoped deployment access.
@@ -122,6 +129,10 @@ meter. The server renders the first headline from the cached `/api/metrics` resu
 the team kits from team ids (`team_kit.go`); scripts only read and update them.
 The moment banner and shot result are rows of one lower third on the pitch; insight
 badges differ by icon and shape, not colour alone (`status-badge.ts`, decision 0027).
+Replay follow-up (decision 0029) unifies exact source-event inspection in
+Live, prepares bounded 1x action clips and separates recorded shot postroll from
+unchanged evidence windows. Scenario/clip completion and tracking-tail states
+offer replay/recap/scenario actions; no football or post-sequence motion is invented.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)

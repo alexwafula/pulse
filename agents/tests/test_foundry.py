@@ -49,6 +49,31 @@ class FoundryTests(unittest.TestCase):
         self.assertEqual(service.respond(self.request), insights(self.request))
         self.assertEqual(service.respond(self.request), insights(self.request))
         self.assertEqual(backend.calls, 1)
+
         self.request["persona"] = "ANALYST"
         self.assertEqual(service.respond(self.request), insights(self.request))
         self.assertEqual(backend.calls, 1)
+
+    def test_opt_in_observations_keep_only_returned_evidence(self):
+        expected = explain(self.request["factPack"])
+        class Response:
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self, limit):
+                return json.dumps({"id":"chatcmpl-test", "model":"gpt-4.1-mini-2025-04-14", "created":123,
+                                   "usage":{"prompt_tokens":15, "completion_tokens":30, "total_tokens":45},
+                                   "choices":[{"finish_reason":"stop", "message":{"content":json.dumps(expected)}}]}).encode()
+        observations = []
+        with patch("pulse_agents.foundry.build_opener") as opener:
+            opener.return_value.open.return_value = Response()
+            backend = FoundryBackend("https://pulse.openai.azure.com", "pulse-model", "private-key",
+                                     max_completion_tokens=512, observations=observations)
+            backend._complete("explainer", "Return JSON", {"factPack":self.request["factPack"]})
+            self.assertEqual(json.loads(opener.return_value.open.call_args.args[0].data)["max_completion_tokens"],512)
+        self.assertEqual(len(observations),1)
+        self.assertEqual(observations[0]["responseId"],"chatcmpl-test")
+        self.assertEqual(observations[0]["output"],expected)
+        self.assertNotIn("private-key",json.dumps(observations))
+        for budget in (0,2049):
+            with self.assertRaises(ValueError):
+                FoundryBackend("https://pulse.openai.azure.com","model","key",max_completion_tokens=budget)

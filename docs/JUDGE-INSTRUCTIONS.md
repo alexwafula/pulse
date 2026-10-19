@@ -31,6 +31,26 @@ Readiness-branch fixes are not live until the tested change is merged/deployed.
    the sequence end, **Recap** offers a deterministic source-event summary and
    text download. Rewind: future actions disappear from those views.
 
+## Inspector and comparison branch
+
+These additions are local to `feat/agent-inspector-comparison` until merged/deployed.
+For **corner**, seek to the end and expand **Agent Inspector** beneath the insight.
+Inspect the actual source fact, delivery outcome and independent Go gate. Open
+**Foundry reference run** for the separately captured Oct 19 three-role outputs,
+provider response IDs, token usage and observed durations. It is a reproduction,
+not a recovered trace of the original recording or fresh generation on this visit.
+**Safety test** contains a deliberately wrong injected claim; Show test result
+reveals the real Go rejection and checked fallback, not a model failure claim.
+
+For **Late siege**, seek to the end, choose **Insights -> What changed?**, and
+select **Aurora Vale** plus a 20-second window. Compare the earlier/recent counts,
+lane destinations and source actions. Replay either window on the existing pitch;
+Return to match restores the prior clock. The earlier replay stops one millisecond
+before the shared boundary to exclude the recent window's first action. Individual
+evidence buttons inspect their source event in Live. The comparison icon beside
+a detected moment opens that team's windows ending at detection. Rewinding before
+two full windows hides the comparison, not replacing missing data with invented values.
+
 ## Interpret the labels
 
 All teams, players and sequences are fictional. No real match footage is used.
@@ -39,8 +59,9 @@ event counts or independently established tactical truth. Heatmaps show
 tracking player-time, not touches. No goal/result is recorded; unavailable is
 not 0:0. Player focus is a view filter, not a new agent persona.
 
-Kiswahili/Hindi interface and templates are translation drafts pending native
-review. Those requests are deterministic and never labelled model-verified.
+Alex accepted the existing native-language/Swahili review. New Inspector/comparison
+technical copy has draft translations; it is not covered by that earlier review.
+Translated insight requests are deterministic and never labelled model-verified.
 Speech, SSE/live ingestion, broader agent wording and model-quality scores
 are not part of this demo. See [provenance](RECORDING-PROVENANCE.md).
 
