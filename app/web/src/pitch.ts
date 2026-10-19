@@ -96,7 +96,7 @@ const playbackStatus = required<HTMLElement>("#playback-status");
 const playbackHeading = required<HTMLElement>("#playback-heading");
 const playbackDetail = required<HTMLElement>("#playback-detail");
 const sequenceActions = required<HTMLElement>("#sequence-actions");
-// While a moment's clip plays, the experience shows its evidence trail under the pitch on Live
+// While an evidence clip (a moment's or the insight's) plays, the experience shows the trail under the pitch on Live
 // rather than far down the drawer (DIRECTION C4). /legacy has no slot and keeps it in place.
 const evidenceTrail = required<HTMLElement>("#evidence-trail");
 const evidenceTrailHome = evidenceTrail.parentElement!;
@@ -903,6 +903,8 @@ async function start(): Promise<void> {
       setClip(evidencePlaybackRange(replay, {startMs: cue.replayStartMs, endMs: cue.replayEndMs}, cue.eventIds));
       clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
       for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+      // Like a moment clip: the trail goes under the pitch.
+      placeEvidenceTrail(true);
       setDrawerTab("timeline", true, "live");
       render();
     });
