@@ -124,7 +124,8 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .lower-third .lower-third-row:not([hidden]) ~ .lower-third-row { border-top: 1px solid color-mix(in srgb, var(--c-on-accent) 16%, transparent); }
 .experience .lower-third-row > strong { margin: 0; color: var(--c-on-accent); font: 700 15px/20px var(--font-display); }
 .experience .lower-third-row > span { margin: 0; color: color-mix(in srgb, var(--c-on-accent) 78%, transparent); font: 400 13px/18px var(--font-ui); overflow-wrap: anywhere; }
-.experience .lower-third .estimate-chip { display: inline-block; padding: 0 var(--space-2); line-height: 18px; }
+/* Matches the hero chip; outranks the legacy `.moment-banner span` size and colour. */
+.experience .lower-third .estimate-chip { display: inline-block; padding: 0 var(--space-2); color: var(--c-estimate); font: 600 var(--text-xs) var(--font-ui); }
 /* On a phone the pitch is about 250px tall: each row runs title and detail on one line. */
 @media (max-width: 600px) {
   .experience .lower-third { left: var(--space-2); bottom: var(--space-2); max-width: calc(100% - 2 * var(--space-2)); }
