@@ -38,6 +38,10 @@ merged/deployed. See [ADR 0028](docs/decisions/0028-agent-inspector-and-window-c
 Run the new desktop/mobile checks against a local **recorded** setup:
 `node tests/integration/inspection-comparison-browser.mjs`.
 
+## Team
+
+Three registered members: Jefferson (pipeline), Alex (agents) and Ved (design). Ownership is in [AGENTS.md](AGENTS.md#11-ownership-and-handoffs). Ved designed the Matchlens prototype that the UI is based on ([ADR 0015](docs/decisions/0015-prototype-visual-system.md#fonts-and-provenance)).
+
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
 - HTMX: server-rendered interface updates

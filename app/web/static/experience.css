@@ -110,17 +110,66 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .pitch-stamp { color: var(--c-on-accent); font-size: 9px; max-width: calc(100% - 28px); left: 12px; bottom: 12px; }
 .experience .pitch-shell .icon-button { color: var(--c-on-accent); background: var(--c-overlay); border: 0; }
 .stadium-player-tag { position: absolute; transform: translate(-50%,-100%); max-width: 128px; padding: 4px 7px; border-left: 3px solid #ffe9a1; border-radius: 2px; background: var(--c-overlay); color: var(--c-on-accent); font-size: 10px; font-weight: 700; line-height: 1.3; pointer-events: none; text-align: center; overflow-wrap: anywhere; }
-.experience .moment-banner strong { color: var(--c-on-accent); }
-.experience .moment-banner span, .experience .action-result span { color: color-mix(in srgb, var(--c-on-accent) 78%, transparent); }
+/* Lower third (DIRECTION C2): one caption bar at the bottom of the pitch holding the active
+   moment and the latest shot result, each row with its own team's 3px rule. Row 1 of §3.3:
+   it rises 8px and fades in, and fades out over 160ms; lower-third.ts keeps the rows that
+   were showing drawn while it leaves (`[hidden]` is display:none !important). */
+.experience .lower-third { position: absolute; left: var(--space-3); bottom: var(--space-3); z-index: 4; display: flex; flex-direction: column; width: max-content; max-width: min(560px, calc(100% - 2 * var(--space-3))); overflow: hidden; border-radius: var(--radius-control); background: var(--c-overlay); color: var(--c-on-accent); pointer-events: none; transition: opacity var(--dur-2) var(--ease-out), translate var(--dur-2) var(--ease-out); }
+@starting-style { .experience .lower-third { opacity: 0; translate: 0 8px; } }
+.experience .lower-third[data-state=leaving] { opacity: 0; transition: opacity 160ms var(--ease-exit); }
+.experience .lower-third .lower-third-row { position: static; display: flex; flex-direction: column; gap: 2px; max-width: none; margin: 0; padding: var(--space-2) var(--space-3); border: 0; border-left: 3px solid var(--c-on-accent); border-radius: 0; background: none; box-shadow: none; backdrop-filter: none; }
+.experience .lower-third .lower-third-row[hidden][data-leaving] { display: flex !important; }
+.experience .lower-third .lower-third-row[data-team-kit=a] { border-left-color: var(--c-team-a); }
+.experience .lower-third .lower-third-row[data-team-kit=b] { border-left-color: var(--c-team-b); }
+.experience .lower-third .lower-third-row:not([hidden]) ~ .lower-third-row { border-top: 1px solid color-mix(in srgb, var(--c-on-accent) 16%, transparent); }
+.experience .lower-third-row > strong { margin: 0; color: var(--c-on-accent); font: 700 15px/20px var(--font-display); }
+.experience .lower-third-row > span { margin: 0; color: color-mix(in srgb, var(--c-on-accent) 78%, transparent); font: 400 13px/18px var(--font-ui); overflow-wrap: anywhere; }
+/* Matches the hero chip; outranks the legacy `.moment-banner span` size and colour. */
+.experience .lower-third .estimate-chip { display: inline-block; padding: 0 var(--space-2); color: var(--c-estimate); font: 600 var(--text-xs) var(--font-ui); }
+/* On a phone the pitch is about 250px tall: each row runs title and detail on one line. */
+@media (max-width: 600px) {
+  .experience .lower-third { left: var(--space-2); bottom: var(--space-2); max-width: calc(100% - 2 * var(--space-2)); }
+  .experience .lower-third .lower-third-row { flex-flow: row wrap; align-items: baseline; gap: 0 var(--space-2); padding: var(--space-1) var(--space-2); }
+}
+/* The stamp sits where the bar does; the hero states each team's attacking direction. */
+.experience .pitch-shell:has(> .lower-third:not([hidden])) .pitch-stamp { visibility: hidden; }
 .experience .transport { padding: 14px 0 4px; background: transparent; border: 0; flex-wrap: nowrap; }
 .experience #play-button { color: var(--c-on-accent); background: var(--c-accent); border: 0; box-shadow: none; }
 .experience #restart-button { color: var(--c-accent); background: var(--c-surface); border: 0; }
+/* Transport targets are 44 x 44 at every width. */
+.experience .transport-actions .icon-button, .experience .speed-control button { width: 44px; min-width: 44px; height: 44px; }
 .experience .now-playing { padding: 12px 14px; margin-top: 10px; background: var(--c-accent-tint); border: 0; border-radius: 6px; min-height: 56px; }
 .experience .now-label { color: var(--c-accent); }
 .experience .right-drawer { grid-column: 2; grid-row: 1; height: auto; max-height: none; min-width: 0; border: 0; background: transparent; border-radius: 0; box-shadow: none; padding: 0; }
 .experience .insight-panel { padding: 16px 0; background: transparent; border: 0; border-radius: 0; margin-bottom: 18px; box-shadow: none; }
 .experience .insight-panel p { font-size: 14px; line-height: 1.7; }
-.experience #insight-status { color: var(--c-accent); background: var(--c-accent-tint); border: 0; }
+/* Status badges (DIRECTION C3): icon and shape as well as colour. Verified is a tinted pill
+   with a check, Template an outlined pill with a document, Unavailable an error icon and
+   text, Waiting / No moment plain muted text. Row 2 of §3.3: on settling from Waiting the
+   badge fades in over 200ms, then the check draws over 320ms (status-badge.ts). */
+.experience #insight-status, .experience #pressure-status { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0; border: 0; border-radius: 0; background: none; color: var(--c-ink-muted); font: 700 var(--text-xs) var(--font-ui); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.experience .status-icon { display: block; flex: none; width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.experience #insight-status[data-status=verified] { padding: 2px var(--space-2); border-radius: var(--radius-pill); background: var(--c-verified-tint); color: var(--c-verified); }
+.experience :is(#insight-status, #pressure-status)[data-status=template] { padding: 1px calc(var(--space-2) - 1px); border: 1px solid currentColor; border-radius: var(--radius-pill); color: var(--c-template); }
+.experience #insight-status[data-status=unavailable] { color: var(--c-error); }
+.experience .status-badge.is-settling { animation: badge-fade var(--dur-2) var(--ease-out); }
+.experience .status-badge[data-status=verified].is-settling .status-icon path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: badge-draw var(--dur-3) var(--ease-out) var(--dur-2) forwards; }
+@keyframes badge-fade { from { opacity: 0; } }
+@keyframes badge-draw { to { stroke-dashoffset: 0; } }
+/* Row 5 of §3.3: a sign flip tints the headline once; no counting animation. */
+.experience .hero-index-headline.sign-flipped { animation: headline-tint var(--dur-2) var(--ease-out); }
+@keyframes headline-tint { from { background-color: var(--c-accent-tint); } }
+/* Reduced motion: the lower third fades without rising (opacity only, 120ms), badges swap at
+   once and the headline does not tint. tokens.css clamps every transition to 0.01ms here and
+   leaves the property at `all`, so the bar's fade is restated and the other motion-row
+   elements get no transitions at all. */
+@media (prefers-reduced-motion: reduce) {
+  .experience .lower-third { transition: opacity var(--dur-2) var(--ease-out) !important; }
+  @starting-style { .experience .lower-third { opacity: 0; translate: none; } }
+  .experience .lower-third[data-state=leaving] { transition: opacity var(--dur-2) var(--ease-exit) !important; }
+  .experience .lower-third *, .experience .status-badge, .experience .status-badge *, .experience .hero-index-headline { transition: none !important; }
+  .experience .status-badge.is-settling, .experience .status-badge[data-status].is-settling .status-icon path, .experience .hero-index-headline.sign-flipped { animation: none; stroke-dashoffset: 0; }
+}
 .experience .drawer-main { padding: 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
 .experience .drawer-tabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 4px; background: var(--c-surface); border-radius: 24px; margin-bottom: 14px; }
 .experience .drawer-tab { padding: 7px 10px; font-size: 11px; border-radius: 20px; color: var(--c-ink-muted); }
@@ -225,26 +274,27 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience[data-insight-view=comparison] #map-controls > .experience-select { display: flex; }
 .experience #comparison-window-control { display: none; }
 .experience[data-insight-view=maps] #comparison-window-control { display: none; }
-.experience .moment-list li:has(.compare-moment) { display: grid; grid-template-columns: minmax(0,1fr) 36px; gap: 6px; align-items: center; }
-.experience .compare-moment { width: 36px; height: 36px; color: var(--c-accent); }
+.experience .moment-list li:has(.compare-moment) { display: grid; grid-template-columns: minmax(0,1fr) 44px; gap: 6px; align-items: center; }
+.experience .compare-moment { width: 44px; height: 44px; color: var(--c-accent); }
+.experience .comparison .evidence-button, .experience .agent-inspector .evidence-button { min-height: 44px; }
 .experience .agent-inspector { border-top: var(--border-hairline); margin-top: 12px; }
-.experience .agent-inspector summary { font-weight: 600; padding: 12px 0; cursor: pointer; }
+.experience .agent-inspector summary { font-weight: 600; padding: 12px 0; min-height: 44px; cursor: pointer; }
 .experience .inspection-source { color: var(--c-accent); font-size: 12px; font-weight: 700; }
 .experience .inspection-steps { padding: 0; margin: 16px 0; list-style: none; counter-reset: inspection; }
 .experience .inspection-steps li { position: relative; padding: 0 0 18px 30px; margin: 0; border-left: var(--border-hairline); overflow-wrap: anywhere; }
 .experience .inspection-steps li::before { counter-increment: inspection; content: counter(inspection); position: absolute; left: -10px; top: 0; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--c-accent-tint); color: var(--c-accent); font-size: 11px; }
 .experience .inspection-steps strong { display: block; font-size: 13px; }
-.experience .inspection-status { display: inline-block; margin: 6px 0; padding: 3px 6px; background: var(--c-surface-2); color: var(--c-ink-muted); border-radius: 4px; font-size: 11px; }
+.experience .inspection-status { display: inline-block; margin: 6px 0; padding: 3px 6px; background: var(--c-surface-2); color: var(--c-ink-muted); border-radius: 4px; font-size: 12px; }
 .experience .inspection-steps p, .experience .inspection-steps code, .experience .inspection-safety p { font-size: 12px; line-height: 1.6; margin: 4px 0; }
 .experience .inspection-steps code { display: block; overflow-wrap: anywhere; }
 .experience .inspection-safety { margin-top: 16px; border-top: var(--border-hairline); }
 .experience .inspection-safety blockquote { font-size: 13px; margin: 10px 0; padding-left: 10px; border-left: 2px solid var(--c-error); }
 .experience .inspection-warning { color: var(--c-error); font-size: 12px; }
 .experience .inspection-reference { border-top: var(--border-hairline); margin-top: 16px; }
-.experience .inspection-reference time { font-size: 11px; overflow-wrap: anywhere; }
+.experience .inspection-reference time { font-size: 12px; overflow-wrap: anywhere; }
 .experience .inspection-reference dl { display: block; border: 0; border-top: var(--border-hairline); margin: 12px 0; padding-top: 8px; }
 .experience .inspection-reference dl > div { display: grid; grid-template-columns: 80px minmax(0,1fr); gap: 8px; padding: 4px 0; }
-.experience .inspection-reference :is(dt,dd) { margin: 0; font-size: 11px; overflow-wrap: anywhere; }
+.experience .inspection-reference :is(dt,dd) { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
 @media (max-width:600px) { .experience .comparison-windows { grid-template-columns: minmax(0,1fr); } .experience .comparison-ledger > div { font-size: 12px; } }
 .experience .analytics-return { margin-bottom: 14px; }
 .experience .metric-values { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
@@ -285,7 +335,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 #experience-watch-dock .pitch-column { padding: 0; }
 #experience-watch-dock .pitch-column > .section-heading, #experience-watch-dock .pitch-overlay-tools, #experience-watch-dock .now-playing, #experience-watch-dock .scene-tools { display: none; }
 #experience-watch-dock .pitch-shell { aspect-ratio: 1.65; }
-#experience-watch-dock .pitch-stamp, #experience-watch-dock .moment-banner, #experience-watch-dock .action-result, #experience-watch-dock .stadium-player-tag { display: none; }
+#experience-watch-dock .pitch-stamp, #experience-watch-dock .lower-third, #experience-watch-dock .stadium-player-tag { display: none; }
 .watch-dock-tools { position: absolute; z-index: 3; top: 8px; right: 8px; display: flex; gap: 4px; }
 .watch-dock-tools .icon-button { width: 27px; height: 27px; background: var(--c-overlay); color: var(--c-on-accent); border: 0; }
 @media (max-width: 1160px) {
@@ -362,7 +412,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience .pitch-overlay-tools .model-label { flex-basis: 100%; text-align: left; margin: 0; }
   .experience .transport { gap: 8px; }
   .experience .transport-actions { gap: 4px; }
-  .experience .speed-control button { padding: 0 5px; min-width: 29px; }
+  .experience .speed-control button { padding: 0 5px; }
   .experience .rail-card { padding: 14px; }
   .experience .rail-value { font-size: 19px; }
   .experience .story-summary { gap: 8px; }

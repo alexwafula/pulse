@@ -127,6 +127,8 @@ On Live, a hero states the API's `indexDelta` as one plain line (2 dp) with its 
 signed value (U+2212), team-order label and estimate chip; there is no score or share
 meter. The server renders the first headline from the cached `/api/metrics` result and
 the team kits from team ids (`team_kit.go`); scripts only read and update them.
+The moment banner and shot result are rows of one lower third on the pitch; insight
+badges differ by icon and shape, not colour alone (`status-badge.ts`, decision 0027).
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -152,7 +154,7 @@ Deterministic work (metrics, moment detection, cue building, validation) is **co
 
 - Structure lives in JSON Schema. **Business rules live in code in each language**, guarded by shared examples. A schema alone catches only part of the rules.
 - **No rule without an invalid example.** Adding or changing a rule means adding a valid and an invalid case in `contracts/examples/`, then making every language's tests pass.
-- Changing a contract: update the schema, the examples, `contracts/README.md`, and both Go and Python models in the same change. Bump `schemaVersion` for breaking changes. Tell the other engineer first.
+- Changing a contract: update the schema, the examples, `contracts/README.md`, and both Go and Python models in the same change. Bump `schemaVersion` for breaking changes. Tell the other engineers first.
 - Conventions: IDs are strings matching `[A-Za-z0-9_.:-]{1,64}`; timestamps are UTC ISO-8601 with milliseconds; pitch is 105 by 68 metres with origin bottom-left; scores and probabilities are 0 to 1; enums are `UPPER_SNAKE`.
 
 Rules from the broader contract draft (verify in `contracts/`; several below
@@ -251,6 +253,7 @@ Local checks:
 - Locales and model labels: `node tests/integration/locale-browser.mjs` (running local Go server; locale allowlist and storage, hi-IN catalog routing, Control vs Chaos `indexDelta` headline, canonical `model estimate, uncalibrated` label, translated insights never Verified)
 - Render loop: `node tests/integration/render-loop-browser.mjs` (running local Go server; counts WebGL draw frames while paused, playing and hidden)
 - Hero (D3a): `node --test tests/integration/index-headline.test.mjs` (headline wording) and `node tests/integration/hero-browser.mjs` (running local Go server; server-rendered team kits and headline present before scripts and unchanged by hydration, headline equals `/api/metrics`, mobile pitch within 360px, paused renderer switch draws 0 frames)
+- Lower third and badges (D3b): `node tests/integration/lower-third-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; one pitch overlay at 88:11 and the corner end, distinct badge names/icons/shapes and the exact Verified tooltip, 44px transport targets, motion rows with and without reduced motion, hero headline at start/88:11/end)
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
@@ -277,7 +280,7 @@ Ask a human first before:
 
 - Changing anything in `contracts/` or a Go/Python model that mirrors it.
 - Adding a dependency, changing CI, or creating or changing Azure resources that cost money.
-- Working in the other engineer's area or deleting fixtures and tests.
+- Working in another engineer's area or deleting fixtures and tests.
 
 Never:
 
@@ -286,8 +289,11 @@ Never:
 
 ## 11. Ownership and handoffs
 
-- **Pipeline engineer:** `app/`, `data/`, `infra/azure/`, web shell and overlay island, engine metrics, MCP tool server, cue gate, delivery.
-- **Agents engineer:** `agents/`, prompts, locales, `tests/evaluations/`, Speech integration, Foundry wiring and tracing.
+Three registered engineers: Jefferson, Alex and Ved.
+
+- **Pipeline engineer (Jefferson):** `app/`, `data/`, `infra/azure/`, web shell and overlay island, engine metrics, MCP tool server, cue gate, delivery.
+- **Agents engineer (Alex):** `agents/`, prompts, locales, `tests/evaluations/`, Speech integration, Foundry wiring and tracing.
+- **Design engineer (Ved):** the Matchlens prototype that is the visual basis of the UI (ADR 0015) and `docs/design/`. No code ownership: UI code changes go through the Pipeline engineer.
 - **Shared:** `contracts/`, `tests/integration/`, `docs/`, CI. Announce changes before merging.
 
 The two sides stub each other: the engine ships recorded fact packs, the agent service ships a template-only mode. Neither side blocks on the other.

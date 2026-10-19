@@ -8,6 +8,8 @@ import { closeDropdowns, initializeSelects, syncSelects } from "./selects";
 import { renderFactCheck } from "./fact-check";
 import { renderInspector, type Inspection } from "./agent-inspector";
 import { teamColour, teamKit } from "./team-colour";
+import { setBadge } from "./status-badge";
+import { mountLowerThird } from "./lower-third";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
@@ -81,6 +83,8 @@ const rendererStatus = required<HTMLElement>("#renderer-status");
 const actionResult = required<HTMLElement>("#action-result");
 const resultTitle = required<HTMLElement>("#result-title");
 const resultDetail = required<HTMLElement>("#result-detail");
+// /legacy keeps its two separately positioned overlays; the experience shows one caption bar.
+if (document.body.classList.contains("experience")) mountLowerThird(required<HTMLElement>("#lower-third"));
 const insightText = required<HTMLElement>("#insight-text");
 const insightStatus = required<HTMLElement>("#insight-status");
 const insightEvidence = required<HTMLElement>("#insight-evidence");
@@ -166,7 +170,9 @@ function renderInsight(): void {
   if (displayedCueID === id) return;
   displayedCueID = id;
   insightText.textContent = cue?.text ?? "Awaiting next moment";
-  insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
+  const verified = cue?.verification.status === "VERIFIED", recorded = verified && insightSource === "python-recorded";
+  if (!cue) setBadge(insightStatus, "waiting", "Waiting");
+  else setBadge(insightStatus, verified ? "verified" : "template", verified ? (recorded ? "Verified (recorded)" : "Verified") : "Template", recorded);
   insightEvidence.hidden = !cue;
   renderFactCheck(cue, insightSource, matchTime);
   renderInspector(cue, inspections.find(item => item.cueId === cue?.id));
@@ -186,13 +192,13 @@ async function loadInsights(): Promise<void> {
     cues = feed.cues;
     inspections = envelope.inspections;
     insightSource = response.headers.get("X-Pulse-Insight-Source") ?? "";
-    if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; insightStatus.textContent = "No moment"; }
+    if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; setBadge(insightStatus, "none", "No moment"); }
     else { displayedCueID = undefined; renderInsight(); }
   } catch (error: unknown) {
     if (request !== insightRequest) return;
     console.warn("Insight feed unavailable", error);
     insightText.textContent = "Insights unavailable";
-    insightStatus.textContent = "Unavailable";
+    setBadge(insightStatus, "unavailable", "Unavailable");
   }
 }
 let pitchRenderer: PitchRenderer | undefined;
@@ -417,6 +423,7 @@ function renderEvent(): void {
     if (event?.type === "SHOT") {
       resultTitle.textContent = event.outcome === "BLOCKED" ? "Shot blocked" : event.outcome === "INCOMPLETE" ? "Unsuccessful shot" : "Shot completed";
       resultDetail.textContent = `${playerName(event.actorId)} · ${teamName(event.teamId)} · ${matchTime(event.timeMs)}`;
+      actionResult.dataset.teamKit = teamKit(event.teamId, replay.match.teams.map((team) => team.id));
     }
     if (currentEventId) eventButtons.get(currentEventId)?.removeAttribute("aria-current");
     if (event) {

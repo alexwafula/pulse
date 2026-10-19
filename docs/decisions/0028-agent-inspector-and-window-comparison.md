@@ -2,6 +2,11 @@
 
 Date: 2026-10-19. Branch: `feat/agent-inspector-comparison`.
 
+Integrated main `5dfdae5` before handoff, retaining D3b's lower third, status
+badges, 44px transport targets, motion and the team's fuller permission record.
+The D3b browser fixtures now target the inspection envelope; their assertions
+and the unchanged `/api/insights` endpoint remain intact.
+
 Alex approved these two features, the existing prototype theme, and one small
 paid reference workflow. No production configuration or shared v2 contract changes.
 
