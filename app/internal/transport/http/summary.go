@@ -66,5 +66,6 @@ func replayPage(replay domain.Replay, graphs []graphSnapshot, attacks []metrics.
 	return pageData{Match: replay.Match, Graphs: graphs, Attacks: attacks, Recap: recap(replay), Scenario: scenario,
 		ScenarioName: name, TeamInitials: initials, TeamKits: teamKits(replay.Match.Teams), Summaries: summaryViews(replay, attacks),
 		TotalEvents: len(replay.Events), Window: clockText(replay.Match.StartMS) + " - " + clockText(replay.Match.EndMS),
-		StartClock: clockText(replay.Match.StartMS), EndClock: clockText(replay.Match.EndMS)}
+		StartClock: clockText(replay.Match.StartMS), EndClock: clockText(replay.Match.EndMS),
+		Focus: domain.DefaultFocus(replay), Active: activeTeams(replay)}
 }

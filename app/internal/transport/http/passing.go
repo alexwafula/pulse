@@ -19,10 +19,14 @@ type graphEdge struct {
 	EventIDs       []string
 }
 type graphTeam struct {
-	Name, Marker string
-	Total        int
-	Nodes        []graphNode
-	Edges        []graphEdge
+	ID, Name, Marker string
+	Total            int
+	Nodes            []graphNode
+	Edges            []graphEdge
+	// Busy lists the nodes with a completed pass sent or received; Idle counts
+	// the rest, which the experience's table shows as one line.
+	Busy []graphNode
+	Idle int
 }
 type graphSnapshot struct {
 	TimeMS int64
@@ -38,7 +42,7 @@ func passingViews(replay domain.Replay) ([]graphSnapshot, error) {
 	for si, snapshot := range series {
 		view := graphSnapshot{TimeMS: snapshot.TimeMS}
 		for ti, team := range snapshot.Teams {
-			graph := graphTeam{Name: team.Team.Name, Marker: fmt.Sprintf("graph-arrow-%d-%d", si, ti), Total: team.Total}
+			graph := graphTeam{ID: team.Team.ID, Name: team.Team.Name, Marker: fmt.Sprintf("graph-arrow-%d-%d", si, ti), Total: team.Total}
 			positions := make(map[string]graphNode)
 			for i, node := range team.Nodes {
 				a := 2*math.Pi*float64(i)/float64(len(team.Nodes)) - math.Pi/2
@@ -56,6 +60,7 @@ func passingViews(replay domain.Replay) ([]graphSnapshot, error) {
 				}
 				graph.Edges = append(graph.Edges, graphEdge{From: a.Name, To: b.Name, Path: path, Count: len(edge.EventIDs), Width: min(8, 2+len(edge.EventIDs)), EventIDs: edge.EventIDs})
 			}
+			graph.Busy, graph.Idle = idleNodes(graph.Nodes)
 			view.Teams = append(view.Teams, graph)
 		}
 		views = append(views, view)

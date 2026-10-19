@@ -481,3 +481,19 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience .evidence-range-marker.is-growing { animation: none; }
   .experience .evidence-trail-list .source-event-button, .experience .evidence-ticks summary { transition: background-color var(--dur-1) var(--ease-out) !important; }
 }
+/* C7 states (D4b): one line per state from the "state" partial. Kinds differ by icon shape
+   (circle-minus, loader-circle, circle-alert, triangle-alert) as well as colour, as the
+   status badges do (ADR 0027); the text carries the meaning and is the accessible name. */
+.experience .state-line { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-1) var(--space-2); margin: var(--space-2) 0; color: var(--c-ink-muted); font: 500 13px/1.45 var(--font-ui); }
+.experience .state-line .state-icon { flex: none; width: 16px; height: 16px; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.experience .state-line .state-text { flex: 1 1 0; min-width: 0; overflow-wrap: anywhere; }
+.experience .state-line[data-state=error] { color: var(--c-error); }
+.experience .state-line[data-state=no-tracking] { color: var(--c-ink); }
+.experience .state-line[data-state=loading] .state-icon { animation: state-spin 1s linear infinite; }
+.experience .state-detail { flex-basis: 100%; padding-left: calc(16px + var(--space-2)); color: var(--c-ink-muted); font-size: 12px; }
+.experience .state-detail summary { cursor: pointer; width: fit-content; }
+.experience .state-detail code { display: block; margin-top: var(--space-1); overflow-wrap: anywhere; font-size: 11px; }
+.experience .rail-state .state-line { margin: var(--space-1) 0 0; color: var(--c-ink); font-size: 15px; font-weight: 600; }
+.experience .panel-status .state-line { margin: 0; }
+@keyframes state-spin { to { rotate: 1turn; } }
+@media (prefers-reduced-motion: reduce) { .experience .state-line[data-state=loading] .state-icon { animation: none; } }

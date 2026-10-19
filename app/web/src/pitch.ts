@@ -349,6 +349,8 @@ const attackSnapshots = Array.from(document.querySelectorAll<HTMLElement>(".atta
 const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
+// The experience's drawer Recap pane shows the Recap section's pending state until the end.
+const recapPending = document.querySelector<HTMLElement>("#recap-pending");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
 let publishedClock = "";
 const presentation=createPresentation(render);
@@ -666,6 +668,7 @@ function render(): void {
   }
   attackClock.textContent = matchTime(clock);
   recapPanel.hidden = clock < replay.match.endMs;
+  if (recapPending) recapPending.hidden = !recapPanel.hidden;
   if (clock >= replay.match.endMs && !userSelectedTab && !momentClip) {
     setDrawerTab("recap");
   } else if (!userSelectedTab && evidenceCue) {

@@ -257,8 +257,18 @@ func TestAnalyticsHTMLIsClockBounded(t *testing.T) {
 		for _, at := range []int64{replay.Match.StartMS, replay.Match.EndMS} {
 			response := httptest.NewRecorder()
 			handler.ServeHTTP(response, httptest.NewRequest("GET", fmt.Sprintf("/experience/panel?panel=analytics&atMs=%d&map=%s", at, mode), nil))
-			if response.Code != 200 || !strings.Contains(response.Body.String(), `data-chart="Completed passes"`) || !strings.Contains(response.Body.String(), `class="pitch-map"`) {
-				t.Fatalf("analytics template failed: %d %s", response.Code, response.Body.String())
+			body := response.Body.String()
+			if response.Code != 200 {
+				t.Fatalf("analytics template failed: %d %s", response.Code, body)
+			}
+			// Before any action the charts and map collapse into state lines (C7);
+			// once actions exist they render in full.
+			drawn := strings.Contains(body, `data-chart="Completed passes"`) && strings.Contains(body, `class="pitch-map"`)
+			if at == replay.Match.EndMS && !drawn {
+				t.Fatalf("analytics at the end lacks its charts or map: %s", body)
+			}
+			if at == replay.Match.StartMS && (drawn || !strings.Contains(body, `data-i18n="No passes, shots or box entries yet"`) || !strings.Contains(body, `data-state="empty"`)) {
+				t.Fatalf("analytics at the start must collapse zero charts and maps: %s", body)
 			}
 			if at == replay.Match.StartMS && strings.Contains(response.Body.String(), "data-shot-event=") {
 				t.Fatal("future shot exposed in HTML")

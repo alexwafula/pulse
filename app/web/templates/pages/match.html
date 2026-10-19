@@ -182,14 +182,16 @@
 
         <div class="rail-card">
           <span class="rail-label">Pass Completion</span>
-          <strong class="rail-value" id="summary-passes">0 of 0</strong>
-          <div class="rail-mini-bar"><div id="summary-pass-fill" style="width: 0%;"></div></div>
+          <strong class="rail-value" id="summary-passes"{{if .Experience}} hidden{{end}}>0 of 0</strong>
+          {{if .Experience}}<div id="summary-passes-state" class="rail-state">{{template "state" (state "empty" "No passes yet")}}</div>{{end}}
+          <div class="rail-mini-bar"{{if .Experience}} hidden{{end}}><div id="summary-pass-fill" style="width: 0%;"></div></div>
         </div>
 
         <div class="rail-card">
           <span class="rail-label">Box Entries &rarr; Shots</span>
-          <strong class="rail-value" id="summary-attacks">0 entries / 0 shots</strong>
-          <span class="rail-sub" id="summary-conversion">N/A</span>
+          <strong class="rail-value" id="summary-attacks"{{if .Experience}} hidden{{end}}>0 entries / 0 shots</strong>
+          {{if .Experience}}<div id="summary-attacks-state" class="rail-state">{{template "state" (state "empty" "No box entries or shots yet")}}</div>{{end}}
+          <span class="rail-sub" id="summary-conversion"{{if .Experience}} hidden{{end}}>N/A</span>
         </div>
       {{if .Experience}}<div class="rail-card rail-share">{{template "share-bar"}}</div>{{end}}
       </aside>
@@ -393,11 +395,11 @@
                 <button type="button" data-open-recap>Recap</button>
               </div>
               <input type="hidden" name="mode" value="live">
-              <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}">#{{.Number}} {{.Name}}</option>{{end}}</select></label>
+              <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}"{{if eq .ID $.Focus.PlayerID}} selected{{end}}>#{{.Number}} {{.Name}}</option>{{end}}</select></label>
             </div>
             <div id="map-controls" class="experience-controls" hidden>
               <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-insight-view="comparison" aria-pressed="false"><i data-lucide="arrow-left-right"></i><span>What changed?</span></button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
-              <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></label>
+              <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}"{{if eq .ID $.Focus.TeamID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
               <div class="story-modes" role="group" aria-label="Pitch map">
                 <button type="button" data-map-mode="network" aria-pressed="false"><i data-lucide="network"></i><span>Pass network</span></button>
                 <button type="button" data-map-mode="occupancy" aria-pressed="true"><i data-lucide="map"></i><span>Heatmap</span></button>
@@ -427,7 +429,7 @@
         <div class="drawer-panes">
           <div id="pane-control" class="drawer-pane" data-pane="control" role="tabpanel" aria-labelledby="tab-control">
             <div class="section-heading"><h3>Control field</h3><time id="metrics-clock"></time></div>
-            <p id="metrics-state" class="model-label">Loading metrics</p>
+            {{if .Experience}}<div id="metrics-state" class="state-host">{{template "state" (state "loading" "Loading metrics")}}</div>{{else}}<p id="metrics-state" class="model-label">Loading metrics</p>{{end}}
             <dl class="metric-values">
               <div><dt>Entropy</dt><dd id="metric-entropy">N/A</dd></div>
               <div><dt title="Tracking-derived reach estimate, not a count of pressure events">Pressing estimate</dt><dd id="metric-pressing">N/A</dd></div>
@@ -438,8 +440,8 @@
             <h4>Control vs Chaos <span class="model-label">model estimate, uncalibrated</span></h4>
             <!-- Headline and team label come from /api/metrics: indexDelta of teams[0], i.e. its index minus teams[1]'s; never computed here. -->
             <dl class="metric-values control-index"><div class="metric-headline"><dt>Index difference <small id="metric-index-teams" data-no-translate hidden></small></dt><dd id="metric-index-delta">N/A</dd></div></dl>
-            <div class="section-heading"><h3>Detected moments</h3><span id="moment-count">0</span></div>
-            <p id="moments-state" class="model-label">Loading moments</p>
+            <div class="section-heading"><h3>Detected moments</h3><span id="moment-count"{{if .Experience}} hidden{{end}}>0</span></div>
+            {{if .Experience}}<div id="moments-state" class="state-host">{{template "state" (state "loading" "Loading moments")}}</div>{{else}}<p id="moments-state" class="model-label">Loading moments</p>{{end}}
             <ol id="moment-list" class="moment-list"></ol>
           </div>
           <!-- Pane 1: Event Timeline -->
@@ -466,6 +468,9 @@
               {{range .Graphs}}
               <div class="passing-snapshot" data-cutoff="{{.TimeMS}}" hidden>
                 {{range .Teams}}
+                {{if and $.Experience (not (index $.Active .ID))}}<div class="passing-team">{{template "state" (state "empty" "state.teamNone" "team" .Name)}}</div>
+                {{else if and $.Experience (not .Total)}}<div class="passing-team">{{template "state" (state "empty" "state.teamNoPassesYet" "team" .Name)}}</div>
+                {{else}}
                 <div class="passing-team">
                   <h4>{{.Name}} <span data-i18n="stats.passes" data-i18n-arg-count="{{.Total}}" data-i18n-term-pass="{{if eq .Total 1}}pass{{else}}passes{{end}}">{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
                   <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
@@ -476,8 +481,9 @@
                   </svg>
                   <table class="passing-table">
                     <thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead>
-                    <tbody>{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}</tbody>
+                    <tbody>{{if $.Experience}}{{range .Busy}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{else}}{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{end}}</tbody>
                   </table>
+                  {{if and $.Experience .Idle}}{{if eq .Idle 1}}{{template "state" (state "empty" "state.idlePlayer" "count" .Idle)}}{{else}}{{template "state" (state "empty" "state.idlePlayers" "count" .Idle)}}{{end}}{{end}}
                   <ul class="passing-links">
                     {{range .Edges}}
                     <li>
@@ -490,6 +496,7 @@
                     {{end}}
                   </ul>
                 </div>
+                {{end}}
                 {{end}}
               </div>
               {{end}}
@@ -506,9 +513,13 @@
               {{range .Attacks}}
               <div class="attack-snapshot" data-cutoff="{{.TimeMS}}" hidden>
                 {{range .Teams}}
+                {{if and $.Experience (not (index $.Active .Team.ID))}}{{template "state" (state "empty" "state.teamNone" "team" .Team.Name)}}
+                {{else if and $.Experience (not .TotalLanes) (not .BoxEntries) (not .Shots)}}{{template "state" (state "empty" "state.teamNoRoutesYet" "team" .Team.Name)}}
+                {{else}}
                 <h4>{{.Team.Name}}</h4>
                 <div class="lane-bars">
                   {{$total := .TotalLanes}}
+                  {{if and $.Experience (not $total)}}{{template "state" (state "empty" "No completed passes or carries yet")}}{{else}}
                   {{range .Lanes}}
                   <div class="lane-row">
                     <span>{{.Name}}</span>
@@ -516,12 +527,14 @@
                     <strong>{{.Count}}</strong>
                   </div>
                   {{end}}
+                  {{end}}
                 </div>
                 <dl class="attack-stats">
                   <div><dt>Box entries</dt><dd>{{.BoxEntries}}</dd></div>
                   <div><dt>Shots</dt><dd>{{.Shots}}</dd></div>
-                  <div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}<span data-i18n="stats.of" data-i18n-arg-count="{{.EntryShots}}" data-i18n-arg-total="{{.BoxEntries}}">{{.EntryShots}} of {{.BoxEntries}}</span>{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else}}N/A{{end}}</dd></div>
+                  <div><dt title="Completed pass/carry entries followed by a same-phase shot within 12 seconds, before another entry or opponent touch">Entry to shot</dt><dd>{{if .BoxEntries}}{{if lt .BoxEntries 5}}<span data-i18n="stats.of" data-i18n-arg-count="{{.EntryShots}}" data-i18n-arg-total="{{.BoxEntries}}">{{.EntryShots}} of {{.BoxEntries}}</span>{{else}}{{printf "%.0f" .Conversion}}%{{end}}{{else if $.Experience}}{{template "state" (state "empty" "No box entries yet")}}{{else}}N/A{{end}}</dd></div>
                 </dl>
+                {{end}}
                 {{end}}
               </div>
               {{end}}
@@ -530,6 +543,7 @@
 
           <!-- Pane 4: Sequence Recap -->
           <div id="pane-recap" class="drawer-pane" data-pane="recap" role="tabpanel" aria-labelledby="tab-recap">
+            {{if .Experience}}<div id="recap-pending">{{template "state" (state "empty" "Recap available at the end of the sequence.")}}</div>{{end}}
             <section id="recap-panel" class="recap-panel" aria-labelledby="recap-heading" hidden>
               <div class="section-heading">
                 <h3 id="recap-heading">Sequence recap</h3>
@@ -570,6 +584,7 @@
       </div>
       </aside>
     </div>
+    {{if .Experience}}<template id="state-templates">{{template "state" (state "loading" "Loading metrics")}}{{template "state" (state "error" "Metrics unavailable")}}{{template "state" (state "no-tracking" "Tracking metrics unavailable" "detail" "-")}}{{template "state" (state "empty" "None yet")}}</template>{{end}}
     <footer class="build-footer"><small id="build-label" data-build="{{.Build}}" data-no-translate>build {{.Build}}</small></footer>
   </main>
 </body>
