@@ -9,7 +9,9 @@ import (
 )
 
 // OpenPlayPacks counts completed passes in the 20 seconds before a phase's first
-// shot. Opponent events, phase changes, failed actions and set pieces break it.
+// shot. A team or phase change starts a new chain. An incomplete or blocked
+// action, a CORNER or a CLEARANCE disqualifies the rest of that phase: no pack
+// is built for its shot. CORNER is the only restart type in the v2 event enum.
 func OpenPlayPacks(replay domain.Replay) ([]domain.FactPack, error) {
 	if err := replay.Validate(); err != nil {
 		return nil, fmt.Errorf("validate replay: %w", err)
