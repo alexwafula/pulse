@@ -38,7 +38,7 @@ private; commit only a contributor-approved summary and reference/date.
 |---|---|
 | Rights holder / contribution | Ved, registered Pulse team member; Matchlens prototype made with claude.ai |
 | Permission wording and date | The team may derive the Pulse UI from the prototype, code and markup included; 2026-10-19 |
-| Third-party assets and attribution | jQuery (MIT) and the fonts, listed with licences in `THIRD-PARTY-NOTICES.md` (jQuery `:27`, Fonts `:43-49`) |
+| Third-party assets and attribution | Every entry in [`THIRD-PARTY-NOTICES.md`](../THIRD-PARTY-NOTICES.md), each with its licence text there. JavaScript and CSS (`:17-30`): three 0.186.1 (MIT); pixi.js 8.22.0 (MIT) with @pixi/colord 2.9.6 (MIT), earcut 3.2.4 (ISC), eventemitter3 5.0.4 (MIT), tiny-lru 11.4.7 (BSD-3-Clause), ismobilejs 1.1.1 (MIT) and parse-svg-path 0.2.0 (MIT); jquery 3.7.1 (MIT); select2 4.0.13 (MIT), which embeds almond 0.3.3 (MIT, `:32-34`); lucide 1.52.0 (ISC); htmx.org 2.0.11 (0BSD). Fonts (`:43-50`), all OFL-1.1: Outfit, Plus Jakarta Sans, Inter and Space Grotesk |
 | Team representative confirmation | Recorded by Jefferson (commit `fec91b5`, 2026-10-19) |
 | Approved public summary / evidence reference | Written confirmation held by the team outside the repo. This table and ADR 0015 are the public summary; Ved signed off on it (2026-10-19) |
 

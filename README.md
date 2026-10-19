@@ -24,6 +24,10 @@ The recording's provider/model metadata is declared, not independently attested.
 The [demo storyboard and local video](docs/DEMO-VIDEO.md) show only working,
 fictional replay with honest recorded/template labels.
 
+## Team
+
+Three registered members: Jefferson, Alex and Ved. Ved designed the Matchlens prototype that the UI is based on ([ADR 0015](docs/decisions/0015-prototype-visual-system.md#fonts-and-provenance)).
+
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
 - HTMX: server-rendered interface updates
