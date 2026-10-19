@@ -67,10 +67,16 @@ HTML panel selectors (not new shared v2 contracts):
 - `mode`: `live` (last five events), `catchup` (all elapsed events), `highlights`
   (elapsed SHOT/CORNER/CROSS), `player` (actor or named recipient involvement).
 - `persona`: `CASUAL` or `ANALYST`; analyst source logs add IDs, phase and coordinates.
-- `playerId`: a match player; defaults to the first metadata player. Only the
-  Player focus view filters by it. This is not the unimplemented SPOTLIGHT persona.
-- `teamId`: a match team; defaults to the first metadata team. Selects maps/lanes,
-  while the cumulative charts always compare both teams.
+- `playerId`: a match player; defaults to the default team's most involved player
+  (`domain.DefaultFocus`, ADR 0031). Only the Player focus view filters by it. This
+  is not the unimplemented SPOTLIGHT persona.
+- `teamId`: a match team; defaults to the team with the most passes, carries and shots
+  (ties keep API order; vale in every scenario). The page's selects start on the same
+  focus. Selects maps/lanes, while the cumulative charts always compare both teams.
+- Zero, loading, error and no-tracking states render through the `state` partial
+  (`experience.html`); scripts clone `<template id="state-templates">` with
+  `renderState()` in `state-line.ts`. Lines carry `data-state` and a catalog key in
+  `data-i18n`.
 - `map`: `occupancy`, `shots` or `network`. Shot dots use the event's `from` coordinates;
   each has a source-event evidence button. No xG, on-target or goal classification.
 - Passing-map nodes average each player's completed-pass origins/received
