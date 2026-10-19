@@ -30,10 +30,12 @@ the Evidence tab, which says "Evidence trail shown under the pitch". The insight
 still opens the Timeline tab with its events highlighted, as before. `clearEvidence()` moves the trail
 back. Moving the node, rather than rendering a copy, keeps one set of ids and the same
 listeners. The same pattern already moves the transport between Live and the watch
-dock. In the experience trail, the source-event list now comes before the model values, so its
-first row starts above the fold at 390×844. At 1440×900 the trail's top is in view, and
-its first row starts just below the fold, because ADR 0029's playback status sits between
-the trail and the pitch. The values label still sits
+dock. In the experience trail, the source-event list now comes before the model values, and ADR 0029's
+playback status stays between the pitch block and the trail. When a clip starts,
+`revealEvidenceTrail()` scrolls just enough that the first trail row is fully in view,
+but never so far that less than 80% of the pitch stays visible (`behavior: "auto"`
+under reduced motion). At 1440×900 that is 76px: the pitch is at 14–481px and the first
+row at 838–892px. At 390×844 no extra scroll is needed (row at 652–706px). The values label still sits
 directly before `#moment-values`. This reorder is not named in C4 or C6. It is
 a decision for review.
 

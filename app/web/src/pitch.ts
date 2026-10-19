@@ -109,6 +109,21 @@ function placeEvidenceTrail(underPitch: boolean): void {
   clipTrailSlot.hidden = !underPitch;
   evidenceMoved.hidden = !underPitch;
 }
+// Once a clip has started on Live, scroll just enough that the trail's first row is fully in
+// view, but never so far that less than 80% of the pitch stays visible.
+function revealEvidenceTrail(): void {
+  if (!clipTrailSlot || clipTrailSlot.hidden) return;
+  requestAnimationFrame(() => {
+    const row = clipTrailSlot.querySelector("#evidence-list > li")?.getBoundingClientRect();
+    const shell = required<HTMLElement>(".pitch-shell").getBoundingClientRect();
+    if (!row || clipTrailSlot.closest("#experience-watch-dock")) return;
+    const margin = 8;
+    const needed = row.bottom + margin - innerHeight;
+    const allowed = shell.top + shell.height * 0.2;
+    const by = Math.min(needed, allowed);
+    if (by > 0) window.scrollBy({ top: by, behavior: scrollBehavior() });
+  });
+}
 const pitchLoading = document.querySelector<HTMLElement>("#pitch-loading");
 const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
@@ -808,6 +823,7 @@ async function start(): Promise<void> {
         placeEvidenceTrail(true);
         setDrawerTab("evidence", true, "live");
         render();
+        revealEvidenceTrail();
       },
       inspectTime: (timeMs, eventId) => {
         inspectAt(timeMs, eventId);
@@ -907,6 +923,7 @@ async function start(): Promise<void> {
       placeEvidenceTrail(true);
       setDrawerTab("timeline", true, "live");
       render();
+      revealEvidenceTrail();
     });
     evidenceReturn.addEventListener("click", () => {
       stopDemo();
