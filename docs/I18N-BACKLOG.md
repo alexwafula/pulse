@@ -50,6 +50,20 @@ Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the
 
 Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
 
+## New keys: NEEDS TRANSLATION (D4b-2 drawer and passing network, 2026-10-19)
+
+Added with the passing-network fix. As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `No players with completed passes yet` | `No players with completed passes yet` (literal key; the drawer Passing pane's one line for a team with no completed pass sent or received, which replaces its graph, table and link list) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+Reconcile with D4b-1 (default team and empty states): if D4b-1 adds a shared empty-state key, use it here and remove this one.
+
+Removed with the Insights `.analytics-links` row, which no other view used: `Metric evidence` and `Route evidence` (all three locales). The drawer's old `No completed passes yet` line can no longer render, because a team with a node always has a link; its key stays because `locale-browser.mjs` lists it as a reviewed string.
+
+The passing-node `aria-label` counts in the summary below come from the 2026-10-16 scan. Players with no completed pass sent or received are no longer drawn, so the live count is lower.
+
 ## Summary
 
 | Pattern | Count |
