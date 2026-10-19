@@ -3,7 +3,8 @@
 // 1. Source events come first, in API order; metric ticks sit behind one keyboard-operable
 //    disclosure whose label count and range come from the API's tickTimesMs.
 // 2. While an evidence clip plays on Live (a moment's, or the insight's next to its Fact check),
-//    the trail sits under the pitch and the pitch stays in view.
+//    the trail sits under the pitch, its first row is fully in view and the pitch is at least
+//    80% visible; under reduced motion no scroll is smooth.
 // 3. Trail and timeline text reach 4.5:1; timeline team dots reach 3:1.
 // 4. Each timeline dot wears the server-rendered kit of its event's team id.
 // 5. The range marker grows over 320 ms and the active row tints over 120 ms; under reduced
@@ -145,44 +146,55 @@ const clips = [
   { name: "corner insight", scenario: "corner", start: playInsight, events: insightCue.eventIds },
 ];
 
-await check("while an evidence clip (moment or insight) plays the trail sits under the pitch and the pitch stays in view", async () => {
+// Page-side: where the pitch and the trail sit in the viewport while a clip plays.
+function clipLayout() {
+  const shell = document.querySelector(".pitch-shell").getBoundingClientRect();
+  const list = document.querySelector("#evidence-list");
+  const box = document.querySelector("#evidence-trail").getBoundingClientRect();
+  const row = list.querySelector("li").getBoundingClientRect();
+  const visible = Math.max(0, Math.min(shell.bottom, innerHeight) - Math.max(shell.top, 0)) * Math.max(0, Math.min(shell.right, innerWidth) - Math.max(shell.left, 0));
+  return {
+    playing: document.querySelector("#play-button").getAttribute("aria-label"),
+    ratio: +(visible / (shell.width * shell.height)).toFixed(3),
+    underPitch: Boolean(list.closest(".pitch-column")) && list.checkVisibility(),
+    shellTop: Math.round(shell.top), shellBottom: Math.round(shell.bottom),
+    gap: Math.round(box.top - shell.bottom),
+    rowTop: Math.round(row.top), rowBottom: Math.round(row.bottom),
+    innerHeight, scrollY: Math.round(scrollY),
+    events: [...list.querySelectorAll("[data-source-event]")].map(node => node.dataset.sourceEvent),
+  };
+}
+// Init script: record the behaviour of every scroll request.
+function recordScrolls() {
+  window.__scrolls = [];
+  const wrap = (owner, name) => { const original = owner[name]; owner[name] = function (...args) { const options = args[0]; window.__scrolls.push(`${name}:${options && typeof options === "object" ? options.behavior ?? "auto" : "auto"}`); return original.apply(this, args); }; };
+  wrap(Element.prototype, "scrollIntoView"); wrap(window, "scrollBy"); wrap(window, "scrollTo"); wrap(Element.prototype, "scrollBy"); wrap(Element.prototype, "scrollTo");
+}
+
+await check("while an evidence clip (moment or insight) plays the first trail row is fully in view and the pitch at least 80% visible", async () => {
   const rows = [];
-  for (const clip of clips) for (const [vpName, vp] of Object.entries(viewports)) {
-    const page = await browser.newPage(vp);
+  for (const reduced of [false, true]) for (const clip of clips) for (const [vpName, vp] of Object.entries(viewports)) {
+    const context = await browser.newContext({ ...vp, reducedMotion: reduced ? "reduce" : "no-preference" });
+    await context.addInitScript(recordScrolls);
+    const page = await context.newPage();
     await open(page, `scenario=${clip.scenario}`);
     await clip.start(page);
     await page.waitForFunction(() => document.querySelector("#play-button")?.getAttribute("aria-label") === "Pause");
-    await page.waitForTimeout(600);
-    const shown = await page.evaluate(() => {
-      const shell = document.querySelector(".pitch-shell").getBoundingClientRect();
-      const list = document.querySelector("#evidence-list");
-      const box = document.querySelector("#evidence-trail").getBoundingClientRect();
-      const firstRow = list.querySelector("li").getBoundingClientRect();
-      const visible = Math.max(0, Math.min(shell.bottom, innerHeight) - Math.max(shell.top, 0)) * Math.max(0, Math.min(shell.right, innerWidth) - Math.max(shell.left, 0));
-      return {
-        playing: document.querySelector("#play-button").getAttribute("aria-label"),
-        ratio: +(visible / (shell.width * shell.height)).toFixed(3),
-        underPitch: Boolean(list.closest(".pitch-column")) && list.checkVisibility(),
-        gap: Math.round(box.top - shell.bottom),
-        trailTop: Math.round(box.top),
-        firstRowTop: Math.round(firstRow.top),
-        innerHeight,
-        events: [...list.querySelectorAll("[data-source-event]")].map(node => node.dataset.sourceEvent),
-      };
-    });
-    const where = `${clip.name} ${vpName}`;
-    rows.push({ clip: clip.name, vp: vpName, ...shown, events: shown.events.join(" ") });
+    await page.waitForTimeout(800);
+    const shown = await page.evaluate(clipLayout);
+    const scrolls = await page.evaluate(() => window.__scrolls);
+    const where = `${clip.name} ${vpName}${reduced ? " reduced" : ""}`;
+    rows.push({ clip: clip.name, vp: vpName, reduced, ...shown, events: shown.events.join(" "), scrolls: scrolls.join(" ") });
     assert.deepEqual(shown.events, clip.events, `${where}: trail events`);
     assert.equal(shown.playing, "Pause", `${where}: the clip is not playing`);
-    assert.ok(shown.ratio >= 0.5, `${where}: pitch visible ratio ${shown.ratio}`);
     assert.ok(shown.underPitch, `${where}: the trail is not in the pitch column`);
-    assert.ok(shown.gap >= 0 && shown.gap <= 360, `${where}: the trail starts ${shown.gap}px below the pitch`);
-    // The trail starts on screen. Main's playback status (ADR 0029) sits between it and the
-    // pitch, so at 1440x900 its first row can start just below the fold.
-    assert.ok(shown.trailTop < shown.innerHeight, `${where}: the trail starts below the fold (${shown.trailTop}px)`);
+    assert.ok(shown.gap >= 0 && shown.gap <= 400, `${where}: the trail starts ${shown.gap}px below the pitch`);
+    assert.ok(shown.ratio >= 0.8, `${where}: pitch visible ratio ${shown.ratio}`);
+    assert.ok(shown.rowTop >= 0 && shown.rowBottom <= shown.innerHeight, `${where}: first trail row at ${shown.rowTop}-${shown.rowBottom}px, viewport ${shown.innerHeight}px`);
+    if (reduced) assert.ok(!scrolls.some(call => call.endsWith(":smooth")), `${where}: smooth scroll under reduced motion: ${scrolls.join(", ")}`);
     await press(page, "#evidence-return");
     assert.equal(await page.evaluate(() => Boolean(document.querySelector("#evidence-list").closest("#pane-evidence"))), true, `${where}: the trail does not return to the drawer`);
-    await page.close();
+    await context.close();
   }
   console.table(rows);
 });
