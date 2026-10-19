@@ -55,8 +55,8 @@
         <option value="calm-midfield" {{if eq .Scenario "calm-midfield"}}selected{{end}}>Calm midfield (11v11)</option>
       </select>
       {{if .Experience}}<button type="button" id="scenario-library-open" class="scenario-library-button" aria-haspopup="dialog"><i data-lucide="clapperboard"></i><span>Scenarios</span></button>{{end}}
-      <button type="button" id="share-button" class="icon-button workspace-tool" aria-label="Copy evidence link" title="Copy evidence link"><i data-lucide="copy"></i></button>
-      <button type="button" id="broadcast-toggle" class="icon-button workspace-tool" aria-label="Broadcast mode" title="Broadcast mode" aria-pressed="false"><i data-lucide="presentation"></i></button>
+      <button type="button" id="share-button" class="icon-button workspace-tool" {{if not .Experience}}hidden{{end}} aria-label="Copy evidence link" title="Copy evidence link"><i data-lucide="copy"></i></button>
+      <button type="button" id="broadcast-toggle" class="icon-button workspace-tool" {{if not .Experience}}hidden{{end}} aria-label="Broadcast mode" title="Broadcast mode" aria-pressed="false"><i data-lucide="presentation"></i></button>
       
       <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo" {{if .Experience}}hidden{{end}}>
         <i data-lucide="play"></i><span>Run demo</span>
