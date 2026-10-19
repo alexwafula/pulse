@@ -29,6 +29,7 @@ export function renderInspector(cue: Cue | undefined, inspection: Inspection | u
   content.dataset.cueId = cue.id;
   const recorded = inspection.source === "python-recorded";
   const verified = cue.verification.status === "VERIFIED";
+  const captured=inspection.reference?.kind==="captured-agent-run";
   const source = recorded ? "Recorded output" : verified ? "Agent output" : "Deterministic template";
   content.append(text("p", source, "inspection-source"));
   const delivery = text("p", "", "model-label");
@@ -44,24 +45,24 @@ export function renderInspector(cue: Cue | undefined, inspection: Inspection | u
     fact.append(code);
   }
   const packID = text("code", inspection.factPack.id); packID.dataset.noTranslate = ""; fact.append(packID);
-  step("Explainer", verified ? "Trace not retained" : "Not run", verified ? "Original Explainer output is unavailable." : "No model execution is claimed.");
+  step("Explainer", captured?"Captured output":verified ? "Trace not retained" : "Not run", captured?inspection.reference!.observations[0].output.text ?? "":verified ? "Original Explainer output is unavailable." : "No model execution is claimed.");
   step("Narrator", recorded ? "Stored output" : verified ? "Returned output" : "Template", inspection.response.draft.text);
-  step("Verifier", verified ? recorded ? "Stored decision" : "Returned decision" : "Not run", verified ? "Claim and evidence checks are retained; the original model execution trace is unavailable." : "Not model-verified");
+  step("Verifier", captured?"Captured decision":verified ? recorded ? "Stored decision" : "Returned decision" : "Not run", captured?"Captured role outputs and source references retained.":verified ? "Claim and evidence checks are retained; the original model execution trace is unavailable." : "Not model-verified");
   step("Go publication gate", inspection.gatePassed ? "Passed" : "Rejected", "Numbers, wording, audience and complete evidence checked again.");
   content.append(steps);
   if (inspection.remoteOutcome === "unavailable" || inspection.remoteOutcome === "rejected") {
     content.append(text("p", inspection.remoteOutcome === "rejected" ? "Python output rejected; Go template used." : "Python unavailable; Go template used.", "inspection-warning"));
   }
-  if (recorded) content.append(text("p", "No fresh model calls. Provider metadata for the original capture is unconfirmed.", "model-label"));
+  if (recorded) content.append(text("p", captured?"No fresh model calls. Captured provider IDs and role outputs retained.":"No fresh model calls. Provider metadata for the original capture is unconfirmed.", "model-label"));
   const evidence = document.createElement("div"); evidence.className = "story-evidence";
   for (const id of cue.eventIds) {
     const button = text("button", id, "evidence-button"); button.type = "button"; button.dataset.factSource = id; button.title = `${t("Evidence")} / ${id}`; evidence.append(button);
     button.addEventListener("click", () => document.dispatchEvent(new CustomEvent("pulse:map-inspect", {detail:{eventId:id}})));
   }
   content.append(evidence);
-  if (inspection.reference?.kind === "reproduction-not-original-capture") {
+  if (inspection.reference && ["reproduction-not-original-capture","captured-agent-run"].includes(inspection.reference.kind)) {
     const reference = document.createElement("details"); reference.className = "inspection-reference";
-    reference.append(text("summary", "Foundry reference run"), text("p", "New reproduction, not the original recording.", "model-label"));
+    reference.append(text("summary", captured?"Captured agent run":"Foundry reference run"), text("p", captured?"Original capture for this recorded output.":"New reproduction, not the original recording.", "model-label"));
     const when = text("time", inspection.reference.capturedAt); when.dateTime = inspection.reference.capturedAt; when.dataset.noTranslate = ""; reference.append(when);
     for (const observed of inspection.reference.observations) {
       const record = document.createElement("dl");

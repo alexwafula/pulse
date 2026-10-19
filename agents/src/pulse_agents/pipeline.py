@@ -2,6 +2,7 @@
 
 import math
 from .locales.templates import TEMPLATE_TEXTS
+from .patterns import pattern_text
 
 from .contracts import (Claim, FactPack, InsightRequest, InsightResponse,
                         NarrationDraft, VerificationResult, SCHEMA_VERSION,
@@ -49,20 +50,14 @@ def validate_request(request: InsightRequest) -> None:
 
 
 def explain(pack: FactPack) -> Claim:
-    if len(pack["facts"]) != 1:
-        raise ValueError("Publishing currently supports one computed corner fact only")
-    facts = [fact for fact in pack["facts"] if fact["metric"] == "set_piece_shots"]
-    if len(facts) != 1:
-        raise ValueError("Exactly one corner-shot fact is required")
-    fact = facts[0]
-    if type(fact["value"]) not in (int, float) or fact["value"] != 1 or fact["unit"] != "shots" or len(fact["eventIds"]) != 2:
-        raise ValueError("Unsupported corner-shot fact")
-    return {"id": "claim-" + fact["id"], "text": "The corner produced 1 shot.",
+    text = pattern_text(pack, "en-GB", "CASUAL")
+    fact = pack["facts"][0]
+    return {"id": "claim-" + fact["id"], "text": text,
             "factIds": [fact["id"]], "eventIds": list(fact["eventIds"])}
 
 
 def narrate(request: InsightRequest, claim: Claim) -> NarrationDraft:
-    text = TEMPLATE_TEXTS[request["locale"]][request["persona"]]
+    text = pattern_text(request["factPack"], request["locale"], request["persona"])
     return {"schemaVersion": SCHEMA_VERSION, "id": "draft-" + request["factPack"]["id"],
             "factPackId": request["factPack"]["id"], "locale": request["locale"],
             "persona": request["persona"], "text": text,

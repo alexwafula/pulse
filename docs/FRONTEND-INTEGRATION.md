@@ -247,7 +247,29 @@ and ball height remain recorded positions; only limbs and ball rotation are
 cosmetic. A name tag identifies the latest source event's actor, not a claimed
 possessor. No synthetic ball arcs, kicks or goals are inferred by the renderer.
 
-## Meeting walkthrough and checks
+## Evidence sharing and broadcast preview
+
+`#share-button` snapshots controller-owned time and selection rather than reading
+rounded clock text. Links carry `share=1`, scenario/match/replay fingerprint,
+integer `atMs`, explicit locale/persona/view/camera/control, optional event/cue/
+moment/window bounds and the saved return position. They restore paused after
+validating the actual fixture/feeds. Generic links retain the main section;
+individual Story/Insights filter values are not serialized. Selected evidence
+opens Live. Invalid/stale/conflicting selections show `#shared-position-error`.
+No credentials or new shared-contract fields appear in links. Clipboard denial
+opens a selectable URL dialog. `evidence-link.ts` owns encoding/decoding only;
+`pitch.ts` still owns the clock and source resolution.
+
+`broadcast.ts` manages presentation/fullscreen/focus and displays controller-fed
+captions. `pulse:show-live` asks navigation to reveal the mounted pitch before
+entering; `pulse:presentation` reports `{active:boolean}` for rate/layout updates.
+Native fullscreen needs a user gesture; URL restore uses viewport presentation
+without requesting it. The mounted renderer/transport are reused. Only the
+single match clock times cues, expiry, rewind and pressure templates. A mixed
+cue feed reports `X-Pulse-Insight-Source: mixed`; Inspector supplies each cue's
+individual source, so clients must not label all cues from the aggregate header.
+
+## Walkthrough and checks
 
 1. Open late-siege in 3D, pause, select Broadcast/Tactical/Follow ball.
 2. Switch to PixiJS 2D, then return to 3D; all positions use the same clock.

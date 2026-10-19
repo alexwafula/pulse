@@ -51,7 +51,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 // scenarioHandler serves one replay with tracking as its metrics cache, which
 // the page and the metrics API share.
 func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL string, tracking *metricsAPI) (http.Handler, error) {
-	packs, err := facts.CornerPacks(replay)
+	packs, err := facts.PatternPacks(replay)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +113,9 @@ func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL st
 		w.Header().Set("Cache-Control", "no-store")
 		json.NewEncoder(w).Encode(packs)
 	})
-	reference := loadAgentReference(webDir)
+	references := loadAgentReferences(webDir)
 	mux.HandleFunc("/api/insights", insightHandler(replay, packs, agentsURL, false, nil))
-	mux.HandleFunc("/api/agent-inspection", insightHandler(replay, packs, agentsURL, true, reference))
+	mux.HandleFunc("/api/agent-inspection", insightHandler(replay, packs, agentsURL, true, references...))
 	mux.HandleFunc("/api/replay", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)

@@ -58,7 +58,27 @@ generation or cryptographic proof of which model produced it. The documented
 October 13 live workflow and the recording's self-declared metadata are not a
 substitute for the original sanitized transport/run evidence.
 
-## Close the provenance gap
+## New open-play recording (Oct 19)
+
+`agents/recordings/open-play-casual.en-GB.json` is a separate newly captured
+English CASUAL output for the Go-computed Late siege rebound. The fact is one
+completed pass before its phase's first shot, with ordered evidence `evt-25`,
+`evt-26`, `evt-27`; no causal claim or goal is asserted. Its original provider
+IDs, timestamps, model metadata, role outputs and usage are retained in
+`agents/inspections/open-play-casual.en-GB.json` (`kind: captured-agent-run`).
+Unlike the corner reference above, this is the original capture for its own
+recording. It does not recover or alter the old corner provenance.
+
+Python accepted the workflow on the first attempt in exactly three calls. Go
+independently matched every source fact and accepted the recorded response and
+its retained role outputs. Usage: **1,726 input / 326 output tokens**; estimated
+token charge **USD 0.001212** using the Oct 19 rates above, not an invoice. No
+new resources or runtime model-call allowance were configured. The explicit
+manual capture script has a persistent attempt marker and a four-call/512-token
+output cap. Tests and the app do not invoke it. One successful capture is not a
+general model-accuracy claim or cryptographic provider attestation.
+
+## Historical corner follow-up
 
 The workflow operator should supply a sanitized provider response/trace with
 UTC time, deployment/model metadata actually returned or observed, and a run

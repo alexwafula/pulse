@@ -1,0 +1,23 @@
+{
+  "request": {
+    "schemaVersion": "2.0.0",
+    "factPack": {
+      "schemaVersion": "2.0.0", "id": "pack-open-demo", "matchId": "match-open-demo", "period": 1,
+      "windowStartMs": 1000, "windowEndMs": 8000,
+      "facts": [{"id":"fact-open-demo","metric":"open_play_passes_before_shot","value":2,"unit":"passes","teamId":"vale","timeStartMs":1000,"timeEndMs":8000,"eventIds":["pass-01","carry-01","pass-02","shot-01"],"attributes":{"phaseId":"phase-open-demo"}}]
+    },
+    "locale":"en-GB", "persona":"CASUAL"
+  },
+  "templates": {
+    "en-GB":{"CASUAL":"2 completed passes came before the first shot in this open-play window.","ANALYST":"Open-play window: 2 completed passes before its first shot."},
+    "sw-KE":{"CASUAL":"Pasi 2 zilizokamilika zilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.","ANALYST":"Kipindi cha mchezo wazi: pasi 2 zilizokamilika kabla ya shuti lake la kwanza."},
+    "hi-IN":{"CASUAL":"इस खुले खेल की अवधि में पहले शॉट से पहले 2 सफल पास दर्ज हुए।","ANALYST":"खुले खेल की अवधि: पहले शॉट से पहले 2 सफल पास।"}
+  },
+  "invalid": [
+    {"field":"value","value":0}, {"field":"value","value":99}, {"field":"value","value":1.5}, {"field":"value","value":true},
+    {"field":"metric","value":"invented_metric"}, {"field":"unit","value":"shots"},
+    {"field":"eventIds","value":["pass-01","shot-01"]},
+    {"field":"attributes","value":{}}, {"field":"attributes","value":{"phaseId":"phase-open-demo","untrusted":true}},
+    {"field":"timeEndMs","value":30000}
+  ]
+}

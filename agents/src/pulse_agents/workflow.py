@@ -8,8 +8,8 @@ from typing import Protocol, cast
 
 from .contracts import (Claim, InsightRequest, InsightResponse, NarrationDraft,
                         VerificationResult, validate_draft)
-from .pipeline import insights
-from .publication import (PUBLICATION_REASON, approved_wordings, validate_publishable_draft,
+from .pipeline import insights, explain
+from .publication import (publication_reason, approved_wordings, validate_publishable_draft,
                           validate_publishable_verification)
 
 PROMPTS = Path(__file__).parent / "prompts"
@@ -51,18 +51,16 @@ async def run_agents(request: InsightRequest, backend: AgentBackend,
 
     try:
         explanation = cast(Claim, await call("explainer", {"factPack": request["factPack"]}))
-        # This first scenario has one supported claim; do not allow an invented
-        # explanation to become the narrator's source material.
-        expected_claim = template["draft"]["claims"][0]
-        expected_casual = {**expected_claim, "text": "The corner produced 1 shot."}
+        # Each supported pattern has one claim; reject invented source material.
+        expected_casual = explain(request["factPack"])
         if explanation != expected_casual:
-            raise ValueError("Explainer differs from the supported corner-shot claim")
+            raise ValueError("Explainer differs from the computed source-backed claim")
         for attempts in (1, 2):
             try:
                 candidate = cast(NarrationDraft, await call("narrator", {
                     "request": request, "explanation": explanation,
                     "rejectionReasons": list(reasons),
-                    "approvedWordings": list(approved_wordings(request["persona"])) if publish else [template["draft"]["text"]],
+                    "approvedWordings": list(approved_wordings(request["persona"], request["factPack"])) if publish else [template["draft"]["text"]],
                 }))
                 validate_draft(candidate, request["factPack"])
                 validate_publishable_draft(request, candidate)
@@ -75,7 +73,7 @@ async def run_agents(request: InsightRequest, backend: AgentBackend,
                 # Verifier prose is diagnostic, not an additional publishable claim.
                 verification = deepcopy(verification)
                 for item in verification["claims"]:
-                    item["reason"] = PUBLICATION_REASON
+                    item["reason"] = publication_reason(request["factPack"])
                 response: InsightResponse = {"schemaVersion": template["schemaVersion"],
                                              "draft": candidate, "verification": verification}
                 return ShadowRun(response if publish else template, candidate, True, attempts, tuple(reasons))

@@ -39,7 +39,7 @@ func validateResponse(pack domain.FactPack, response domain.InsightResponse, loc
 		return fmt.Errorf("cue gate: only verified claims or the trusted fallback may publish")
 	}
 	allowed := false
-	for _, text := range ApprovedWordings(persona) {
+	for _, text := range ApprovedPackWordings(pack, persona) {
 		if response.Draft.Text == text {
 			allowed = true
 		}
@@ -57,7 +57,7 @@ func validateResponse(pack domain.FactPack, response domain.InsightResponse, loc
 	}
 	for _, result := range response.Verification.Claims {
 		if !reflect.DeepEqual(result.EventIDs, pack.Facts[0].EventIDs) ||
-			result.Reason != PublicationReason {
+			result.Reason != PublicationReasonFor(pack) {
 			return fmt.Errorf("cue gate: verifier omitted evidence or supplied an invalid reason")
 		}
 	}

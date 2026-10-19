@@ -1,6 +1,6 @@
 export {};
 
-import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } from "lucide";
+import { createIcons, createElement, Play, Pause, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers, Copy, Presentation, X } from "lucide";
 import type { PitchRenderer, SceneState, RenderPlayer } from "./renderers/types";
 import { createAnalytics, type Moment } from "./analytics";
 import { locale, localize, observeLocalization, supportedLocale, t } from "./i18n";
@@ -11,6 +11,8 @@ import { teamColour, teamKit } from "./team-colour";
 import { setBadge } from "./status-badge";
 import { mountLowerThird } from "./lower-third";
 import { actionPlaybackRange, advancePlayback, evidencePlaybackRange, trackingFrameIndex, type PlaybackRange } from "./playback";
+import { evidenceURL, readEvidenceLink, replayKey, type EvidenceLink, type LinkSelection } from "./evidence-link";
+import { createPresentation } from "./broadcast";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
@@ -161,7 +163,10 @@ function setDrawerTab(tabId: string, isUser = false, section?: "live"): void {
 
 const localePicker = required<HTMLSelectElement>("#locale");
 const scenarioPicker = required<HTMLSelectElement>("#scenario");
-const preferences = new URL(location.href).searchParams;
+const requestedURL = new URL(location.href);
+const preferences = requestedURL.searchParams;
+let replayFingerprint="";
+let sharedLink:EvidenceLink|undefined;
 function savedPreference(key: string): string | null {
   try { return localStorage.getItem(`pulse:${key}`); } catch { return null; }
 }
@@ -169,6 +174,7 @@ function savedPreference(key: string): string | null {
 // saveAudience() overwrites a stale stored value with the locale actually used.
 localePicker.value = [preferences.get("locale"), savedPreference("locale")].find(supportedLocale) ?? "en-GB";
 persona = (preferences.get("persona") ?? savedPreference("persona")) === "ANALYST" ? "ANALYST" : "CASUAL";
+let audienceInitialized=false;
 function saveAudience(): void {
   document.body.dataset.locale = localePicker.value;
   document.body.dataset.persona = persona;
@@ -176,7 +182,9 @@ function saveAudience(): void {
   for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-persona]")) button.setAttribute("aria-pressed", String(button.dataset.persona === persona));
   const url = new URL(location.href);
   for (const [key, value, fallback] of [["locale", localePicker.value, "en-GB"], ["persona", persona, "CASUAL"]]) {
-    if (value === fallback) url.searchParams.delete(key); else url.searchParams.set(key, value);
+    if (!preferences.has("share") || audienceInitialized) {
+      if (value === fallback && !preferences.has("share")) url.searchParams.delete(key); else url.searchParams.set(key, value);
+    }
     try { localStorage.setItem(`pulse:${key}`, value); } catch { /* Storage can be disabled in private contexts. */ }
   }
   history.replaceState(null, "", url);
@@ -186,6 +194,7 @@ function saveAudience(): void {
   if (build) build.textContent = t("build.label", { sha: build.dataset.build || "unknown" });
 }
 saveAudience();
+audienceInitialized=true;
 observeLocalization();
 initializeSelects();
 function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenarioPicker.value)}`; }
@@ -237,12 +246,14 @@ function renderInsight(): void {
   if (displayedCueID === id) return;
   displayedCueID = id;
   insightText.textContent = cue?.text ?? "Awaiting next moment";
-  const verified = cue?.verification.status === "VERIFIED", recorded = verified && insightSource === "python-recorded";
+  const inspection=inspections.find(item=>item.cueId===cue?.id);
+  const source=inspection?.source ?? insightSource;
+  const verified = cue?.verification.status === "VERIFIED", recorded = verified && source === "python-recorded";
   if (!cue) setBadge(insightStatus, "waiting", "Waiting");
   else setBadge(insightStatus, verified ? "verified" : "template", verified ? (recorded ? "Verified (recorded)" : "Verified") : "Template", recorded);
   insightEvidence.hidden = !cue;
-  renderFactCheck(cue, insightSource, matchTime);
-  renderInspector(cue, inspections.find(item => item.cueId === cue?.id));
+  renderFactCheck(cue, source, matchTime);
+  renderInspector(cue, inspection);
   if (cue) insightWindow.textContent = t("insight.window", { start: matchTime(cue.replayStartMs), end: matchTime(cue.replayEndMs), count: cue.eventIds.length, events: t(cue.eventIds.length === 1 ? "event" : "events") });
 }
 
@@ -340,6 +351,83 @@ let activeAttackSnapshot: HTMLElement | undefined;
 const recapPanel = required<HTMLElement>("#recap-panel");
 const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
 let publishedClock = "";
+const presentation=createPresentation(render);
+let presentationSpeed:number|undefined;
+document.addEventListener("pulse:presentation",event=>{
+  const active=(event as CustomEvent<{active:boolean}>).detail.active;
+  if(active){presentationSpeed=speed;speed=1;}
+  else if(presentationSpeed!==undefined){speed=presentationSpeed;presentationSpeed=undefined;}
+  previousFrameTime=0;
+  for(const button of speedButtons) button.setAttribute("aria-pressed",String(Number(button.dataset.speed)===(clipRange?1:speed)));
+});
+
+function shareCurrentEvidence():void {
+  if (!replay || !replayFingerprint) return;
+  let selection:LinkSelection|undefined;
+  if(inspectedAction) selection={eventId:inspectedAction.id};
+  else if(evidenceCue) selection={cueId:evidenceCue.id};
+  else if(momentClip) selection={momentType:momentClip.type,momentAt:momentClip.timeMs,teamId:momentClip.teamId};
+  else if(clipRange) selection={startMs:clipRange.startMs,endMs:clipRange.endMs};
+  const state:EvidenceLink={scenario:scenarioPicker.value,matchId:replay.match.id,replayKey:replayFingerprint,timeMs:Math.floor(clock),
+    locale:locale(),persona,view:document.querySelector<HTMLElement>(".pitch-shell")?.dataset.renderer ?? "svg",
+    camera:document.querySelector<HTMLSelectElement>("#camera-mode")?.value ?? "broadcast",control:required<HTMLInputElement>("#control-toggle").checked,
+    broadcast:presentation.active(),section:document.body.dataset.section ?? "live",selection,returnMs:selection?Math.floor(returnClock):undefined};
+  void presentation.copy(evidenceURL(location.href,state));
+}
+
+function restoreSharedEvidence(link:EvidenceLink):void {
+  clearEvidence(); playing=false; clock=link.timeMs; returnClock=link.returnMs ?? link.timeMs;
+  const selection=link.selection;
+  if(selection) {
+    if("eventId" in selection) {
+      const event=replay.events.find(item=>item.id===selection.eventId)!;
+      const range=actionPlaybackRange(replay,event);
+      if(clock<range.startMs || clock>range.endMs) throw new Error("Shared evidence unavailable");
+      inspectedAction=event;setClip(range);eventButtons.get(event.id)?.classList.add("evidence-event");
+    } else if("cueId" in selection) {
+      const cue=cues.find(item=>item.id===selection.cueId);
+      if(!cue) throw new Error("Shared evidence unavailable");
+      const range=evidencePlaybackRange(replay,{startMs:cue.replayStartMs,endMs:cue.replayEndMs},cue.eventIds);
+      if(clock<range.startMs || clock>range.endMs) throw new Error("Shared evidence unavailable");
+      evidenceCue=cue;setClip(range);for(const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+    } else if("momentType" in selection) {
+      const moment=analytics?.findMoment(selection.momentType,selection.momentAt,selection.teamId);
+      if(!moment) throw new Error("Shared evidence unavailable");
+      const original={startMs:Math.max(replay.match.startMs,moment.windowStartMs),endMs:moment.windowEndMs};
+      const range=moment.type==="SET_PIECE_SHOT"?evidencePlaybackRange(replay,original,moment.reasons):original;
+      if(clock<range.startMs || clock>range.endMs) throw new Error("Shared evidence unavailable");
+      momentClip=moment;setClip(range);for(const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
+    } else setClip(selection);
+    // Like a clicked moment or insight clip, a shared one shows the trail under the pitch.
+    if(momentClip || evidenceCue) placeEvidenceTrail(true);
+    setDrawerTab(momentClip?"evidence":"timeline",true,"live");
+  }
+  const control=required<HTMLInputElement>("#control-toggle");
+  if(link.control && control.disabled) throw new Error("Shared evidence unavailable");
+  control.checked=link.control;
+  const camera=document.querySelector<HTMLSelectElement>("#camera-mode");if(camera){camera.value=link.camera;syncSelects();}
+  pitchRenderer?.setCamera?.(link.camera as "broadcast"|"tactical"|"follow");
+  if(link.broadcast) presentation.enter();
+  render();
+  if(momentClip || evidenceCue) revealEvidenceTrail();
+}
+
+function renderBroadcast():void {
+  const cue=evidenceCue ?? [...cues].reverse().find(item=>clock>=item.startMs && clock<=item.endMs);
+  if(cue && clock>=cue.startMs && clock<=Math.min(cue.endMs,cue.startMs+12000)) {
+    const verified=cue.verification.status==="VERIFIED",recorded=(inspections.find(item=>item.cueId===cue.id)?.source ?? insightSource)==="python-recorded";
+    presentation.render(matchTime(clock),{key:cue.id,text:cue.text,status:verified?"verified":"template",label:verified?recorded?"Verified (recorded)":"Verified":"Template",recorded:verified&&recorded,evidence:()=>evidenceButton.click()});
+    return;
+  }
+  const pressure=required<HTMLElement>("#pressure-insight"),at=Number(pressure.dataset.endMs);
+  if(!pressure.hidden && Number.isFinite(at) && clock>=at && clock<at+10000) {
+    presentation.render(matchTime(clock),{key:`pressure-${at}`,text:required<HTMLElement>("#pressure-text").textContent ?? "",status:"template",label:"Template",estimate:true,evidence:()=>required<HTMLButtonElement>("#pressure-evidence").click()});
+    return;
+  }
+  const event=[...replay.events].reverse().find(item=>item.timeMs<=clock);
+  const text=clock>=replay.match.endMs?t("Sequence complete"):event?.type==="SHOT" && clock<event.timeMs+6000?eventSentence(event):"";
+  presentation.render(matchTime(clock),text?{key:clock>=replay.match.endMs?"complete":event!.id,text,status:"none",label:""}:undefined);
+}
 
 function pitchPoint(point: Point): Point {
   return {
@@ -562,6 +650,7 @@ function render(): void {
   renderInsight();
   const cue = evidenceCue ?? [...cues].reverse().find(item => clock >= item.startMs && clock <= item.endMs);
   sceneState.control = analytics?.render(clock, cue, momentClip, evidenceCue !== undefined || momentClip !== undefined);
+  renderBroadcast();
   const snapshot = [...passingSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
   if (snapshot !== activePassingSnapshot) {
     if (activePassingSnapshot) activePassingSnapshot.hidden = true;
@@ -774,6 +863,10 @@ async function start(): Promise<void> {
     const finalAction = replay.events[replay.events.length - 1];
     finalActionRange = finalAction ? actionPlaybackRange(replay, finalAction) : undefined;
     clock = replay.match.startMs;
+    try {replayFingerprint=await replayKey(replay);}
+    catch {const share=required<HTMLButtonElement>("#share-button");share.disabled=true;share.title=t("Evidence sharing unavailable");required<HTMLButtonElement>("#broadcast-copy").disabled=true;}
+    try {sharedLink=readEvidenceLink(requestedURL,replay,replayFingerprint,scenarioPicker.value);if(sharedLink) clock=sharedLink.timeMs;}
+    catch {required<HTMLElement>("#shared-position-error").hidden=false;}
     eventCount.textContent = t("stats.actions", {count:replay.events.length});
     startLabel.textContent = matchTime(replay.match.startMs);
     endLabel.textContent = matchTime(replay.match.endMs);
@@ -866,7 +959,9 @@ async function start(): Promise<void> {
         inspectAt(NaN, id);
       });
     }
-    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } });
+    createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers, Copy, Presentation, X } });
+    required<HTMLButtonElement>("#share-button").addEventListener("click",shareCurrentEvidence);
+    required<HTMLButtonElement>("#broadcast-copy").addEventListener("click",shareCurrentEvidence);
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("[data-recap-evidence]"))) {
       const event = replay.events.find((item) => item.id === button.dataset.recapEvidence);
       if (event) {
@@ -951,7 +1046,7 @@ async function start(): Promise<void> {
       if (!document.hidden && (playing || drawPending)) wake();
     });
     fullscreen.addEventListener("click", () => {
-      const shell = required<HTMLElement>(".pitch-shell");
+      const shell = required<HTMLElement>(presentation.active()?".pitch-column":".pitch-shell");
       const operation = document.fullscreenElement ? document.exitFullscreen() : shell.requestFullscreen();
       void operation.catch(() => {
         rendererStatus.textContent = "Fullscreen is unavailable in this browser.";
@@ -1004,17 +1099,23 @@ async function start(): Promise<void> {
     const scenarios = required<HTMLButtonElement>("#sequence-scenarios");
     scenarios.hidden = !document.body.classList.contains("experience");
     scenarios.addEventListener("click", () => document.querySelector<HTMLButtonElement>("#scenario-library-open")?.click());
-    playing = true;
+    playing = !preferences.has("share");
     render();
-    const preferredView = new URLSearchParams(location.search).get("view") ?? "three";
+    const preferredView = sharedLink?.view ?? preferences.get("view") ?? "three";
     await switchView(["three", "pixi", "svg"].includes(preferredView) ? preferredView : "three");
     if (pitchLoading) pitchLoading.hidden = true;
     wake();
-    if (preferences.get("demo") === "1") {
+    if(preferences.has("share")) {
+      await Promise.all([loadInsights(),analytics.load()]);
+      if(sharedLink) {
+        try {restoreSharedEvidence(sharedLink);}
+        catch {clearEvidence();clock=replay.match.startMs;playing=false;required<HTMLElement>("#shared-position-error").hidden=false;render();}
+      }
+    } else if (preferences.get("demo") === "1") {
       const url = new URL(location.href); url.searchParams.delete("demo"); history.replaceState(null, "", url);
       void startDemo();
     } else void loadInsights();
-    void analytics.load();
+    if(!preferences.has("share")) void analytics.load();
   } catch (error: unknown) {
     if (pitchLoading) pitchLoading.hidden = true;
     if (pitchError) {

@@ -55,8 +55,8 @@ The corner-to-first-shot builder, conservative independently checking Go cue gat
 Python template HTTP service and browser Evidence replay now work locally.
 Go-calculated passing snapshots and pass evidence are rendered below the pitch.
 Python has file prompts and a tested bounded three-role workflow. Default HTTP
-mode is template-only; opt-in `foundry` can publish only approved corner-shot
-wording after independent Python/Go checks. `foundry-shadow` still publishes
+mode is template-only; opt-in `foundry` can publish only approved event-backed
+pattern wording after independent Python/Go checks. `foundry-shadow` still publishes
 templates. Recorded publishing tests are not evidence of live model quality.
 Three authored local scenarios plus seeded 11v11 late-siege/calm-midfield replays,
 attacking-route metrics, persona controls and
@@ -133,6 +133,13 @@ Replay follow-up (decision 0029) unifies exact source-event inspection in
 Live, prepares bounded 1x action clips and separates recorded shot postroll from
 unchanged evidence windows. Scenario/clip completion and tracking-tail states
 offer replay/recap/scenario actions; no football or post-sequence motion is invented.
+Local priority 3-5 work (decision 0031) adds a second narrow agent-supported metric,
+open-play completed passes before a phase's first shot (20-second maximum), with
+Go source recomputation and shared Go/Python positive/negative examples. Its
+three-call original Foundry capture retains role outputs/IDs; recorded/default
+model caps stay unchanged. Share links validate replay fingerprints and restore
+paused evidence/audience/rendering. Broadcast uses the existing pitch/clock with
+timed provenance-labelled captions. No new dependencies, services or CI changes.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -192,9 +199,9 @@ event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE/hi-IN templates:
 ## 7. Pulse runtime agents
 
 Current set: **Explainer, Narrator, Verifier**, run by a thin async workflow with
-an opt-in Foundry REST backend. The publishing path is constrained to the recorded
-corner-shot fact, tested with fake backends and one approved live workflow, not
-broad live-model evaluations. Microsoft Agent
+an opt-in Foundry REST backend. The publishing path is constrained to corner-shot
+and open-play pass-count facts, tested with fake backends and bounded approved
+captures, not broad live-model evaluations. Microsoft Agent
 Framework, Recap, and additional personas remain future work.
 
 ### 7.1 Rules for every Pulse agent

@@ -72,6 +72,25 @@ No v1 compatibility adapter is provided.
 
 ## First computed insight
 
+### Additional open-play count
+
+`open_play_passes_before_shot` uses the existing v2 FactPack fields, not a new
+wire shape. It counts completed PASS actions within the 20 seconds before a
+phase's first SHOT. The team and phase must stay uninterrupted; failed actions,
+CORNER and CLEARANCE disqualify that segment. A phase's later shots do not create
+another pack. One to 32 passes are supported. Window start is its first counted
+pass; window end is the shot's start. Ordered evidence contains every source
+action from that pass through the shot, including carries. `unit` is `passes`
+and `attributes` contains only `phaseId`. This is a count, not evidence of causal
+tactical effectiveness, shot quality or a goal. Go recomputes the whole pack
+before accepting any cue. The independent Python boundary checks the narrow
+fact/wording/evidence policy and cannot replace that source replay check.
+
+`open-play-pattern.json` supplies positive locale/persona templates and invalid
+fact mutations for both languages. It is an authored example, not model output.
+Only English can use the three-role model path; new translations remain drafts.
+Corner behavior and all v2 schemas/models stay unchanged.
+
 `app/internal/facts.CornerPacks` computes one first-shot fact per qualifying
 corner: same team/phase, completed corner, no intervening opponent event or
 new corner, maximum 12 seconds. The sample's blocked shot counts as an attempt.

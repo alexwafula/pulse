@@ -1,5 +1,6 @@
 .env
 agents/inspections/.capture-attempted
+agents/inspections/.open-play-capture-attempted
 .env.*
 !.env.example
 *.pem

@@ -51,7 +51,25 @@ evidence buttons inspect their source event in Live. The comparison icon beside
 a detected moment opens that team's windows ending at detection. Rewinding before
 two full windows hides the comparison, not replacing missing data with invented values.
 
-## Interpret the labels
+## Local priorities 3-5 preview
+
+On `feat/patterns-sharing-broadcast` only, until merge/deployment:
+
+1. Open Late siege, seek to the end in English/Casual and inspect the open-play
+   pass-count explanation. Fact check cites the pass, carry and shot. Inspector
+   shows **Captured agent run** with its original three role records. A stored
+   VERIFIED response is still labelled **Verified (recorded)**, not fresh AI.
+2. Inspect an action or replay a moment, pause, and use **Copy evidence link**.
+   Open it in another browser: same scenario, precise paused position, source
+   selection, locale, persona, renderer and camera. A changed/stale replay
+   displays an error, never a silently substituted action.
+3. Select **Broadcast mode** (presentation icon). The same pitch fills the
+   viewport; source explanations enter/expire on match time with their status.
+   It starts at 1x for reading. Play/pause, replay, evidence and sharing still
+   work; Escape/Exit returns to the workspace. No streaming integration or
+   broadcast hardware is claimed.
+
+## Label meanings
 
 All teams, players and sequences are fictional. No real match footage is used.
 Tracking metrics are **model estimate, uncalibrated**: they are not possession,
