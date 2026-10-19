@@ -431,3 +431,53 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 }
 .dashboard-link[hidden] { display: none; }
 .experience .metric-values > .metric-headline { grid-column: 1 / -1; }
+
+/* D4a: evidence trail (C4) and event timeline (C6) as rails, plus motion row 3 of §3.3. */
+.experience .clip-trail-slot { margin-top: var(--space-4); padding: var(--space-4); background: var(--c-surface); border-radius: var(--radius-card); box-shadow: var(--elev-1); }
+#experience-watch-dock .clip-trail-slot { display: none; }
+.experience .evidence-trail-list { display: flex; flex-direction: column; gap: 0; margin: var(--space-2) 0 0; }
+.experience .evidence-trail-list > .evidence-card { position: relative; margin: 0; padding: 0 0 0 var(--space-6); background: none; border: 0; border-radius: 0; }
+/* The rail and one node per row; the line stops at the first and last node. */
+.experience .evidence-trail-list > .evidence-card::before { content: ""; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: var(--c-rule); }
+.experience .evidence-trail-list > .evidence-card:first-child::before { top: 18px; }
+.experience .evidence-trail-list > .evidence-card:last-child::before { bottom: calc(100% - 18px); }
+.experience .evidence-trail-list > .evidence-card:only-child::before { display: none; }
+.experience .evidence-trail-list > .evidence-card::after { content: ""; position: absolute; left: 3px; top: 13px; width: 10px; height: 10px; box-sizing: border-box; border: 2px solid var(--c-accent); border-radius: 50%; background: var(--c-surface); }
+.experience .evidence-trail-list > .evidence-ticks::after { border-style: dashed; }
+.experience .evidence-trail-list .source-event-button { display: grid; grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "id time ." "desc desc desc"; align-items: center; gap: 2px var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-control); background: transparent; color: var(--c-ink); transition: background-color var(--dur-1) var(--ease-out); }
+.experience .evidence-trail-list .source-event-button:hover { background: var(--c-surface-2); }
+.experience .evidence-trail-list .evidence-id { grid-area: id; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--c-accent-tint); color: var(--c-accent); font: 600 var(--text-xs) var(--font-ui); font-variant-numeric: tabular-nums; }
+.experience .evidence-trail-list .evidence-time { grid-area: time; margin: 0; color: var(--c-ink-muted); font: 600 var(--text-xs) var(--font-ui); font-variant-numeric: tabular-nums; }
+.experience .evidence-trail-list .evidence-desc { grid-area: desc; margin: 0; color: var(--c-ink-muted); font: 400 var(--text-sm) var(--font-ui); overflow-wrap: anywhere; }
+.experience .evidence-ticks summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); color: var(--c-ink); font: 600 var(--text-sm) var(--font-ui); font-variant-numeric: tabular-nums; cursor: pointer; list-style: none; transition: background-color var(--dur-1) var(--ease-out); }
+.experience .evidence-ticks summary::-webkit-details-marker { display: none; }
+.experience .evidence-ticks summary::before { content: ""; width: 0; height: 0; border-block: 5px solid transparent; border-inline-start: 6px solid var(--c-ink-muted); }
+.experience .evidence-ticks details[open] > summary::before { rotate: 90deg; }
+.experience .evidence-ticks summary:hover { background: var(--c-surface-2); }
+.experience .evidence-ticks summary:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; }
+.experience .evidence-tick-list { margin: 0; padding: 0 0 0 var(--space-3); list-style: none; }
+.experience .evidence-tick-list > .evidence-card { margin: 0; padding: 0; background: none; border: 0; }
+/* The row the clock last passed; the colour change is the only motion here. */
+.experience .evidence-trail-list [data-active] { background: var(--c-accent-tint); }
+.experience .evidence-range-marker { background: color-mix(in srgb, var(--c-accent) 24%, transparent); border: 1px solid var(--c-accent); border-radius: var(--radius-pill); }
+.experience .evidence-range-marker.is-growing { animation: evidence-marker-grow var(--dur-3) var(--ease-in-out); }
+@keyframes evidence-marker-grow { from { width: 0; } }
+/* Timeline: fixed tabular time column, a team dot on a rail, then the copy. */
+.experience .event-list { gap: 0; }
+.experience .event-list button { position: relative; grid-template-columns: 44px 10px minmax(0, 1fr); gap: var(--space-2); padding: 10px 12px; background: var(--c-surface); }
+.experience .event-list button::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(12px + 44px + var(--space-2) + 4px); width: 2px; background: var(--c-rule); }
+.experience .event-list li:first-child button::before { top: 14px; }
+.experience .event-list li:last-child button::before { bottom: calc(100% - 14px); }
+.experience .event-list .event-time { color: var(--c-ink-muted); font: 700 var(--text-xs) var(--font-ui); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.experience .event-team-dot { position: relative; z-index: 1; width: 10px; height: 10px; margin-top: 4px; border-radius: 50%; }
+.experience .event-team-dot[data-team-kit=a] { background: var(--c-team-a); }
+.experience .event-team-dot[data-team-kit=b] { background: var(--c-team-b); }
+.experience .event-copy > strong { display: block; color: var(--c-ink); font: 600 var(--text-sm) var(--font-ui); }
+.experience .event-copy > span { display: block; color: var(--c-ink-muted); font: 400 var(--text-sm) var(--font-ui); }
+/* Reduced motion: the marker is full width at once and the row tint stays as a 120 ms colour
+   fade. tokens.css clamps every transition to 0.01ms, so the fade is restated here. */
+@media (prefers-reduced-motion: reduce) {
+  .experience .evidence-range-marker { transition: none !important; }
+  .experience .evidence-range-marker.is-growing { animation: none; }
+  .experience .evidence-trail-list .source-event-button, .experience .evidence-ticks summary { transition: background-color var(--dur-1) var(--ease-out) !important; }
+}

@@ -127,6 +127,13 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   let field: ControlField | undefined;
   let lastField: ControlField | undefined;
   let evidenceKey = "";
+  // The experience draws the trail as a rail: source events as rows, metric ticks behind one
+  // disclosure (DIRECTION C4). /legacy keeps one card per entry.
+  const evidenceRail = document.body.classList.contains("experience");
+  let trailRows: { timeMs: number; nodes: HTMLElement[] }[] = [];
+  let activeTrail: HTMLElement[] = [];
+  let rangeKey = "";
+  let growRun = 0;
   const rows: { moment: Moment; row: HTMLLIElement; button: HTMLButtonElement }[] = [];
   const cells: SVGRectElement[] = [];
   // The legacy view keeps its original overlay palette; the experience uses each team's own colour.
@@ -291,8 +298,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     void Promise.allSettled(headline.getAnimations().map((animation) => animation.finished)).then(() => { if (run === tintRun) headline.classList.remove("sign-flipped"); });
   }
 
-  function renderEvidence(cue: Cue | undefined, selected: Moment | undefined): void {
-    const key = `${locale()}:${selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none"}`;
+  function renderEvidence(cue: Cue | undefined, selected: Moment | undefined, clip: boolean): void {
+    const key = `${locale()}:${clip}:${selected ? `${selected.type}:${selected.teamId}:${selected.timeMs}` : cue?.id ?? "none"}`;
     if (key === evidenceKey) return;
     evidenceKey = key;
     const modelValues = Object.entries(selected?.values ?? {});
@@ -312,16 +319,41 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         return event ? [{ timeMs: event.timeMs, id: event.id, title: hooks.eventSentence(event) }] : [];
       });
     if (selected?.type === "SUSTAINED_PRESSURE") entries.push(...selected.tickTimesMs.map(timeMs => ({ timeMs, id: "", title: t("evidence.tickAt", { clock: hooks.matchTime(timeMs) }) })));
+    trailRows = []; activeTrail = [];
+    const tickRows: HTMLLIElement[] = [];
+    const ticksSummary = document.createElement("summary");
     for (const entry of entries) {
-      const row = document.createElement("li"), button = document.createElement("button"), title = document.createElement("strong"), description = document.createElement("span");
+      const row = document.createElement("li"), button = document.createElement("button");
       row.className = "evidence-card"; button.type = "button"; button.className = "source-event-button";
       if (entry.id) button.dataset.sourceEvent = entry.id;
       else button.dataset.sourceTick = String(entry.timeMs);
       button.setAttribute("aria-label", entry.id ? `Inspect ${entry.id} at ${hooks.matchTime(entry.timeMs)}` : entry.title);
-      title.textContent = `${entry.id || t("Tick")} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
-      button.append(createElement(ListVideo, { width: 16, height: 16, "aria-hidden": "true" }), title, description);
+      if (evidenceRail) {
+        const span = (className: string, text: string) => { const node = document.createElement("span"); node.className = className; node.textContent = text; return node; };
+        button.append(span("evidence-id", entry.id || t("Tick")), span("evidence-time", hooks.matchTime(entry.timeMs)), span("evidence-desc", entry.title));
+      } else {
+        const title = document.createElement("strong"), description = document.createElement("span");
+        title.textContent = `${entry.id || t("Tick")} / ${hooks.matchTime(entry.timeMs)}`; description.textContent = entry.title;
+        button.append(createElement(ListVideo, { width: 16, height: 16, "aria-hidden": "true" }), title, description);
+      }
       button.addEventListener("click", () => hooks.inspectTime(entry.timeMs, entry.id || undefined));
-      row.append(button); evidenceList.append(row);
+      row.append(button);
+      if (evidenceRail && !entry.id) tickRows.push(row);
+      else evidenceList.append(row);
+      if (evidenceRail) trailRows.push({ timeMs: entry.timeMs, nodes: entry.id ? [button] : [button, ticksSummary] });
+    }
+    // The ticks stay in the DOM (every [data-source-tick] node) and collapse into one row whose
+    // count and range are the API's tickTimesMs.
+    if (tickRows.length) {
+      const group = document.createElement("li"), details = document.createElement("details"), label = document.createElement("span"), chip = document.createElement("span"), list = document.createElement("ol");
+      const times = selected?.tickTimesMs ?? [];
+      group.className = "evidence-card evidence-ticks"; label.className = "evidence-ticks-label"; chip.className = "estimate-chip"; list.className = "evidence-tick-list";
+      label.textContent = times.length === 1
+        ? t("evidence.tickOne", { count: 1, clock: hooks.matchTime(times[0]) })
+        : t("evidence.ticks", { count: times.length, start: hooks.matchTime(times[0]), end: hooks.matchTime(times[times.length - 1]) });
+      chip.textContent = t("model estimate, uncalibrated");
+      ticksSummary.append(label, chip); list.append(...tickRows); details.append(ticksSummary, list); group.append(details);
+      evidenceList.append(group);
     }
     const start = selected?.windowStartMs ?? cue?.replayStartMs;
     const end = selected?.windowEndMs ?? cue?.replayEndMs;
@@ -332,12 +364,37 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       rangeMarker.style.left = `${(lo - replay.match.startMs) / duration * 100}%`;
       rangeMarker.style.width = `${(hi - lo) / duration * 100}%`;
       rangeMarker.title = `${hooks.matchTime(lo)} - ${hooks.matchTime(hi)}`;
-    }
+      // Only a starting clip grows the marker; an active cue just shows its range.
+      const range = clip ? `${lo}:${hi}` : "";
+      if (evidenceRail && range && range !== rangeKey) growMarker();
+      rangeKey = range;
+    } else rangeKey = "";
+  }
+
+  // Row 3 of DIRECTION §3.3: the marker grows from the clip start over 320 ms. CSS drops the
+  // animation under reduced motion; the class goes when it ends, so a re-render does not replay it.
+  function growMarker(): void {
+    rangeMarker.classList.remove("is-growing");
+    void rangeMarker.offsetWidth;
+    rangeMarker.classList.add("is-growing");
+    const run = ++growRun;
+    void Promise.allSettled(rangeMarker.getAnimations().map((animation) => animation.finished)).then(() => { if (run === growRun) rangeMarker.classList.remove("is-growing"); });
+  }
+
+  // The latest trail row the clock has passed is tinted; a tick also tints its collapsed row.
+  function markTrail(clock: number): void {
+    let latest: { timeMs: number; nodes: HTMLElement[] } | undefined;
+    for (const row of trailRows) if (row.timeMs <= clock && (!latest || row.timeMs >= latest.timeMs)) latest = row;
+    const next = latest?.nodes ?? [];
+    if (next.length === activeTrail.length && next.every((node, i) => node === activeTrail[i])) return;
+    for (const node of activeTrail) delete node.dataset.active;
+    for (const node of next) node.dataset.active = "true";
+    activeTrail = next;
   }
 
   return {
     async load(): Promise<void> { await Promise.all([loadMetrics(), loadMoments()]); },
-    render(clock: number, cue: Cue | undefined, selected: Moment | undefined): ControlField | undefined {
+    render(clock: number, cue: Cue | undefined, selected: Moment | undefined, clip = false): ControlField | undefined {
       renderSummary(clock);
       const control = renderMetrics(clock);
       let count = 0;
@@ -382,7 +439,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
           write("#pressure-window", `${hooks.matchTime(narration.startMs)} - ${hooks.matchTime(narration.endMs)} / ${narration.eventIds.join(", ")}`);
         }
       }
-      renderEvidence(cue, selected);
+      renderEvidence(cue, selected, clip);
+      markTrail(clock);
       return control;
     },
   };

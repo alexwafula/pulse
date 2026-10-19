@@ -96,6 +96,34 @@ const playbackStatus = required<HTMLElement>("#playback-status");
 const playbackHeading = required<HTMLElement>("#playback-heading");
 const playbackDetail = required<HTMLElement>("#playback-detail");
 const sequenceActions = required<HTMLElement>("#sequence-actions");
+// While an evidence clip (a moment's or the insight's) plays, the experience shows the trail under the pitch on Live
+// rather than far down the drawer (DIRECTION C4). /legacy has no slot and keeps it in place.
+const evidenceTrail = required<HTMLElement>("#evidence-trail");
+const evidenceTrailHome = evidenceTrail.parentElement!;
+const clipTrailSlot = document.querySelector<HTMLElement>("#clip-trail-slot");
+const evidenceMoved = document.querySelector<HTMLElement>("#evidence-moved");
+function placeEvidenceTrail(underPitch: boolean): void {
+  if (!clipTrailSlot || !evidenceMoved) return;
+  if (underPitch) clipTrailSlot.append(evidenceTrail);
+  else evidenceTrailHome.append(evidenceTrail);
+  clipTrailSlot.hidden = !underPitch;
+  evidenceMoved.hidden = !underPitch;
+}
+// Once a clip has started on Live, scroll just enough that the trail's first row is fully in
+// view, but never so far that less than 80% of the pitch stays visible.
+function revealEvidenceTrail(): void {
+  if (!clipTrailSlot || clipTrailSlot.hidden) return;
+  requestAnimationFrame(() => {
+    const row = clipTrailSlot.querySelector("#evidence-list > li")?.getBoundingClientRect();
+    const shell = required<HTMLElement>(".pitch-shell").getBoundingClientRect();
+    if (!row || clipTrailSlot.closest("#experience-watch-dock")) return;
+    const margin = 8;
+    const needed = row.bottom + margin - innerHeight;
+    const allowed = shell.top + shell.height * 0.2;
+    const by = Math.min(needed, allowed);
+    if (by > 0) window.scrollBy({ top: by, behavior: scrollBehavior() });
+  });
+}
 const pitchLoading = document.querySelector<HTMLElement>("#pitch-loading");
 const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
@@ -169,6 +197,7 @@ function clearEvidence(): void {
   inspectedAction = undefined;
   previousFrameTime = 0;
   evidenceReturn.hidden = true;
+  placeEvidenceTrail(false);
   for (const button of speedButtons) { button.disabled = false; button.setAttribute("aria-pressed", String(Number(button.dataset.speed) === speed)); }
   for (const button of eventButtons.values()) button.classList.remove("evidence-event");
 }
@@ -368,6 +397,9 @@ function createPlayers(): void {
 }
 
 function createTimeline(): void {
+  // The experience's timeline is a rail with one dot per row in the team's server-rendered kit (DIRECTION C6).
+  const teamDots = document.body.classList.contains("experience");
+  const teamIds = replay.match.teams.map((team) => team.id);
   for (const event of replay.events) {
     const item = document.createElement("li");
     const button = document.createElement("button");
@@ -383,7 +415,16 @@ function createTimeline(): void {
     const description = document.createElement("span");
     description.textContent = eventSentence(event);
     copy.append(type, description);
-    button.append(time, copy);
+    button.append(time);
+    if (teamDots) {
+      const dot = document.createElement("span");
+      dot.className = "event-team-dot";
+      dot.dataset.teamId = event.teamId;
+      dot.dataset.teamKit = teamKit(event.teamId, teamIds);
+      dot.setAttribute("aria-hidden", "true");
+      button.append(dot);
+    }
+    button.append(copy);
     button.addEventListener("click", () => {
       inspectAt(event.timeMs, event.id);
     });
@@ -520,7 +561,7 @@ function render(): void {
   renderEvent();
   renderInsight();
   const cue = evidenceCue ?? [...cues].reverse().find(item => clock >= item.startMs && clock <= item.endMs);
-  sceneState.control = analytics?.render(clock, cue, momentClip);
+  sceneState.control = analytics?.render(clock, cue, momentClip, evidenceCue !== undefined || momentClip !== undefined);
   const snapshot = [...passingSnapshots].reverse().find((item) => Number(item.dataset.cutoff) <= clock);
   if (snapshot !== activePassingSnapshot) {
     if (activePassingSnapshot) activePassingSnapshot.hidden = true;
@@ -779,8 +820,10 @@ async function start(): Promise<void> {
         playing = true; previousFrameTime = 0;
         for (const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
         evidenceReturn.hidden = false;
+        placeEvidenceTrail(true);
         setDrawerTab("evidence", true, "live");
         render();
+        revealEvidenceTrail();
       },
       inspectTime: (timeMs, eventId) => {
         inspectAt(timeMs, eventId);
@@ -876,8 +919,11 @@ async function start(): Promise<void> {
       setClip(evidencePlaybackRange(replay, {startMs: cue.replayStartMs, endMs: cue.replayEndMs}, cue.eventIds));
       clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
       for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+      // Like a moment clip: the trail goes under the pitch.
+      placeEvidenceTrail(true);
       setDrawerTab("timeline", true, "live");
       render();
+      revealEvidenceTrail();
     });
     evidenceReturn.addEventListener("click", () => {
       stopDemo();

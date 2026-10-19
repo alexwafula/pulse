@@ -6,6 +6,7 @@
 // 3. Play, restart and speed buttons are at least 44x44 at desktop and mobile widths.
 // 4. Motion rows 1, 2 and 5 animate; under reduced motion only short opacity/colour fades remain.
 // 5. The hero headline still equals /api/metrics at start, 88:11 and end of late-siege.
+// 6. The Evidence trail's model-values label and tick row use the hero's estimate chip (D4a).
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { chromium } from "playwright-core";
@@ -105,6 +106,40 @@ await check("the lower third absorbs the shot result: one overlay at 88:11 and a
       assert.ok(shown.moment?.title, `${where}: the corner moment shares the bar`);
     }
     await context.close();
+  }
+  console.table(rows);
+});
+
+// #41 chip styling, extended in D4a: the label above a moment's model values in the Evidence
+// trail is the same canonical chip as the hero's and the tick row's.
+await check("the model-values label and the tick row use the hero's estimate chip", async () => {
+  const rows = [];
+  for (const [vpName, vp] of Object.entries(viewports)) {
+    const page = await browser.newPage(vp);
+    await open(page, "scenario=late-siege");
+    await seek(page, 1000);
+    await press(page, "#tab-control");
+    await press(page, '#moment-list [data-moment-type="SUSTAINED_PRESSURE"]');
+    await page.waitForFunction(() => document.querySelector("#moment-values-label")?.checkVisibility());
+    await pause(page);
+    const shown = await page.evaluate(() => {
+      const style = node => node && node.checkVisibility() ? (s => ({ text: node.textContent.trim(), color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight }))(getComputedStyle(node)) : null;
+      return {
+        values: style(document.querySelector("#moment-values-label .estimate-chip")),
+        ticks: style(document.querySelector("#evidence-list summary .estimate-chip")),
+        hero: style(document.querySelector("#hero-index-chip:not([hidden])")),
+        labelText: document.querySelector("#moment-values-label").textContent.trim(),
+      };
+    });
+    rows.push({ vp: vpName, values: shown.values && `${shown.values.color} ${shown.values.fontSize} ${shown.values.fontWeight}`, ticks: shown.ticks && `${shown.ticks.color} ${shown.ticks.fontSize} ${shown.ticks.fontWeight}`, hero: shown.hero && `${shown.hero.color} ${shown.hero.fontSize} ${shown.hero.fontWeight}` });
+    assert.equal(shown.labelText, MODEL_LABEL, `${vpName}: label text`);
+    assert.ok(shown.hero, `${vpName}: hero chip not shown`);
+    assert.ok(shown.values, `${vpName}: the model-values label is not an estimate chip`);
+    assert.equal(shown.values.text, MODEL_LABEL, `${vpName}: model-values chip text`);
+    const { text: _v, ...valuesStyle } = shown.values, { text: _h, ...heroStyle } = shown.hero, { text: _t, ...ticksStyle } = shown.ticks ?? {};
+    assert.deepEqual(valuesStyle, heroStyle, `${vpName}: the model-values chip differs from the hero's`);
+    assert.deepEqual(ticksStyle, heroStyle, `${vpName}: the tick-row chip differs from the hero's`);
+    await page.close();
   }
   console.table(rows);
 });

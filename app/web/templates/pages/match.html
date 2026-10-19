@@ -327,6 +327,7 @@
             <button type="button" id="sequence-scenarios" class="secondary-button"><i data-lucide="layers"></i><span>Scenarios</span></button>
           </div>
         </section>
+        {{if .Experience}}<section id="clip-trail-slot" class="clip-trail-slot" aria-label="Evidence trail" hidden></section>{{end}}
       </section>
 
       <!-- RIGHT DRAWER: Tabbed Intelligence replacing the long scroll -->
@@ -541,13 +542,19 @@
 
           <!-- Pane 5: Evidence Trail Inspector -->
           <div id="pane-evidence" class="drawer-pane" data-pane="evidence" role="tabpanel" aria-labelledby="tab-evidence">
-            <div class="section-heading">
-              <h3>Evidence trail</h3>
-              <span class="evidence-counter" id="evidence-kind">No selection</span>
+            {{if .Experience}}<p id="evidence-moved" class="model-label" hidden>Evidence trail shown under the pitch</p>{{end}}
+            <!-- While a moment's clip plays, pitch.ts moves this trail under the pitch on Live (DIRECTION C4). -->
+            <div id="evidence-trail" class="evidence-trail">
+              <div class="section-heading">
+                <h3>Evidence trail</h3>
+                <span class="evidence-counter" id="evidence-kind">No selection</span>
+              </div>
+              <p id="evidence-state" class="model-label">No evidence selected</p>
+              <!-- The experience lists the evidence before the model values, so the rows stay in view under the pitch; /legacy keeps its order. -->
+              {{if .Experience}}<ol id="evidence-list" class="evidence-trail-list"></ol>{{end}}
+              <p id="moment-values-label" class="model-label" hidden>{{if .Experience}}<span class="estimate-chip">model estimate, uncalibrated</span>{{else}}model estimate, uncalibrated{{end}}</p><dl id="moment-values" class="metric-values" hidden></dl>
+              {{if not .Experience}}<ol id="evidence-list" class="evidence-trail-list"></ol>{{end}}
             </div>
-            <p id="evidence-state" class="model-label">No evidence selected</p>
-            <p id="moment-values-label" class="model-label" hidden>model estimate, uncalibrated</p><dl id="moment-values" class="metric-values" hidden></dl>
-            <ol id="evidence-list" class="evidence-trail-list"></ol>
           </div>
         </div>
       </div>
