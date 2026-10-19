@@ -1,4 +1,4 @@
-# 0028: Evidence trail and event timeline as rails
+# 0030: Evidence trail and event timeline as rails
 
 Date: 2026-10-19
 Status: Implemented on review branch (D4a, `design/evidence-trail-d4a`); teammate review pending
@@ -20,17 +20,20 @@ Metric ticks collapse into one row, a native `<details>`/`<summary>`. The summar
 or read the ticks are unchanged. CONTROL_SWING trails are ticks only: its context
 events are never shown as evidence.
 
-**Trail under the pitch during a clip.** When a moment's evidence clip starts
-(`playMoment`, from the Control tab or the pressure panel's Evidence button), `pitch.ts`
-moves `#evidence-trail` into `#clip-trail-slot` at the foot of `.pitch-column`. The slot
-comes after the transport, the Return button and "On the pitch". The Evidence tab still
-opens and says "Evidence trail shown under the pitch". `clearEvidence()` moves the trail
+**Trail under the pitch during a clip.** When an evidence clip starts, `pitch.ts`
+moves `#evidence-trail` into `#clip-trail-slot` at the foot of `.pitch-column`. That covers
+a moment's clip (`playMoment`, from the Control tab or the pressure panel's Evidence
+button) and the insight's clip (`#evidence-button`, next to the Fact check, the
+judge-path trigger of §3.3 row 3). Both keep Live and the pitch in view. The slot
+comes after the transport, the Return button, "On the pitch" and the playback status (ADR 0029). A moment clip still opens
+the Evidence tab, which says "Evidence trail shown under the pitch". The insight clip
+still opens the Timeline tab with its events highlighted, as before. `clearEvidence()` moves the trail
 back. Moving the node, rather than rendering a copy, keeps one set of ids and the same
 listeners. The same pattern already moves the transport between Live and the watch
 dock. In the experience trail, the source-event list now comes before the model values, so its
 first row starts above the fold at 1440×900 and 390×844. The values label still sits
-directly before `#moment-values`. A cue's evidence clip (the insight's Evidence button)
-still highlights its events in the timeline, as before.
+directly before `#moment-values`. This reorder is not named in C4 or C6. It is
+a decision for review.
 
 **Event timeline (DIRECTION C6).** Each timeline row has a fixed 44px tabular time
 column, a 10px team dot on a vertical rail, then the copy. The description is 13px in
@@ -58,7 +61,7 @@ team dots.
 
 - `tests/integration/evidence-trail-browser.mjs` covers order, the single disclosure,
   the API-derived label (including a routed single-tick feed), keyboard toggling, pitch
-  visibility during the clip at both viewports, contrast, dot kit colours in late-siege
+  visibility during the moment and insight clips at both viewports, contrast, dot kit colours in late-siege
   and corner, and motion with and without reduced motion.
 - New i18n keys: `evidence.ticks`, `evidence.tickOne` and `Evidence trail shown under the
   pitch` (sw-KE and hi-IN NEEDS TRANSLATION, `docs/I18N-BACKLOG.md`).
