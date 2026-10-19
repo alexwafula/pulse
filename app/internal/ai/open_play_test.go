@@ -103,6 +103,10 @@ func TestOpenPlayTemplateCountAgreement(t *testing.T) {
 		{single, "sw-KE", "ANALYST", "Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza."},
 		{plural, "sw-KE", "CASUAL", "Pasi 2 zilizokamilika zilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi."},
 		{plural, "sw-KE", "ANALYST", "Kipindi cha mchezo wazi: pasi 2 zilizokamilika kabla ya shuti lake la kwanza."},
+		{single, "hi-IN", "CASUAL", "इस खुले खेल की अवधि में पहले शॉट से पहले 1 सफल पास दर्ज हुआ।"},
+		{single, "hi-IN", "ANALYST", "खुले खेल की अवधि: पहले शॉट से पहले 1 सफल पास।"},
+		{plural, "hi-IN", "CASUAL", "इस खुले खेल की अवधि में पहले शॉट से पहले 2 सफल पास दर्ज हुए।"},
+		{plural, "hi-IN", "ANALYST", "खुले खेल की अवधि: पहले शॉट से पहले 2 सफल पास।"},
 	} {
 		got, err := openPlayTemplate(tc.pack, tc.locale, tc.persona)
 		if err != nil || got != tc.want {

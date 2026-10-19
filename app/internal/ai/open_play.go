@@ -36,15 +36,16 @@ func openPlayTemplate(pack domain.FactPack, locale, persona string) (string, err
 		fact.TimeStartMS != pack.WindowStartMS || fact.TimeEndMS != pack.WindowEndMS || pack.WindowEndMS-pack.WindowStartMS > 20000 {
 		return "", fmt.Errorf("unsupported open-play pass fact")
 	}
-	// Swahili agreement follows the count: "pasi 1 iliyokamilika ilitangulia", "pasi 2 zilizokamilika zilitangulia".
-	noun, swCompleted, swPreceded := "passes", "zilizokamilika", "zilitangulia"
+	// Swahili and Hindi agreement follows the count: "pasi 1 iliyokamilika ilitangulia", "pasi 2 zilizokamilika
+	// zilitangulia"; "1 सफल पास दर्ज हुआ", "2 सफल पास दर्ज हुए".
+	noun, swCompleted, swPreceded, hiRecorded := "passes", "zilizokamilika", "zilitangulia", "हुए"
 	if count == 1 {
-		noun, swCompleted, swPreceded = "pass", "iliyokamilika", "ilitangulia"
+		noun, swCompleted, swPreceded, hiRecorded = "pass", "iliyokamilika", "ilitangulia", "हुआ"
 	}
 	texts := map[string]map[string]string{
 		"en-GB": {"CASUAL": fmt.Sprintf("%d completed %s came before the first shot in this open-play window.", count, noun), "ANALYST": fmt.Sprintf("Open-play window: %d completed %s before its first shot.", count, noun)},
 		"sw-KE": {"CASUAL": fmt.Sprintf("Pasi %d %s %s shuti la kwanza katika kipindi hiki cha mchezo wazi.", count, swCompleted, swPreceded), "ANALYST": fmt.Sprintf("Kipindi cha mchezo wazi: pasi %d %s kabla ya shuti lake la kwanza.", count, swCompleted)},
-		"hi-IN": {"CASUAL": fmt.Sprintf("इस खुले खेल की अवधि में पहले शॉट से पहले %d सफल पास दर्ज हुए।", count), "ANALYST": fmt.Sprintf("खुले खेल की अवधि: पहले शॉट से पहले %d सफल पास।", count)},
+		"hi-IN": {"CASUAL": fmt.Sprintf("इस खुले खेल की अवधि में पहले शॉट से पहले %d सफल पास दर्ज %s।", count, hiRecorded), "ANALYST": fmt.Sprintf("खुले खेल की अवधि: पहले शॉट से पहले %d सफल पास।", count)},
 	}
 	text, ok := texts[locale][persona]
 	if !ok {

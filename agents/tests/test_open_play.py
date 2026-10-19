@@ -30,7 +30,7 @@ class OpenPlayTests(unittest.IsolatedAsyncioTestCase):
             with self.subTest(case=case), self.assertRaises((ValueError, TypeError)):
                 insights(request)
 
-    def test_sw_ke_count_agreement_and_unchanged_en_gb(self):
+    def test_count_agreement_and_unchanged_en_gb(self):
         single = deepcopy(self.request["factPack"])
         single["facts"][0]["value"] = 1
         cases = {
@@ -38,12 +38,15 @@ class OpenPlayTests(unittest.IsolatedAsyncioTestCase):
             ("en-GB", "ANALYST"): "Open-play window: 1 completed pass before its first shot.",
             ("sw-KE", "CASUAL"): "Pasi 1 iliyokamilika ilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.",
             ("sw-KE", "ANALYST"): "Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza.",
+            ("hi-IN", "CASUAL"): "इस खुले खेल की अवधि में पहले शॉट से पहले 1 सफल पास दर्ज हुआ।",
+            ("hi-IN", "ANALYST"): "खुले खेल की अवधि: पहले शॉट से पहले 1 सफल पास।",
         }
         for (locale, persona), text in cases.items():
             with self.subTest(locale=locale, persona=persona):
                 self.assertEqual(pattern_text(single, locale, persona), text)
-        for persona, text in self.sample["templates"]["sw-KE"].items():
-            self.assertEqual(pattern_text(self.request["factPack"], "sw-KE", persona), text)
+        for locale in ("sw-KE", "hi-IN"):
+            for persona, text in self.sample["templates"][locale].items():
+                self.assertEqual(pattern_text(self.request["factPack"], locale, persona), text)
 
     def test_publication_reason_requires_exactly_one_open_play_fact(self):
         pack = self.request["factPack"]

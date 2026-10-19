@@ -72,7 +72,15 @@ The open-play pass-count insight (ADR 0031) is a template in Go (`app/internal/a
 | ANALYST | 1 | `Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
 | ANALYST | 2 or more | `Kipindi cha mchezo wazi: pasi {count} zilizokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
 
-The hi-IN CASUAL sentence uses the plural verb `दर्ज हुए` for every count, including 1, which shows in late-siege. It was not changed here; a Hindi reviewer should decide whether count 1 needs `दर्ज हुआ`.
+## Open-play insight templates: NEEDS HUMAN REVIEW (hi-IN, 2026-10-20)
+
+The hi-IN CASUAL verb now agrees with the count: `दर्ज हुआ` when the count is 1 (late-siege), `दर्ज हुए` otherwise. ANALYST has no verb and is unchanged. Both forms are drafts written without a native speaker and need review. en-GB is unchanged.
+
+| Persona | Count | hi-IN | Status |
+|---|---|---|---|
+| CASUAL | 1 | `इस खुले खेल की अवधि में पहले शॉट से पहले 1 सफल पास दर्ज हुआ।` | NEEDS HUMAN REVIEW |
+| CASUAL | 2 or more | `इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज हुए।` | NEEDS HUMAN REVIEW |
+| ANALYST | any | `खुले खेल की अवधि: पहले शॉट से पहले {count} सफल पास।` | NEEDS HUMAN REVIEW |
 
 ## Summary
 

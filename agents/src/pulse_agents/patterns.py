@@ -24,14 +24,15 @@ def pattern_text(pack: FactPack, locale: str, persona: str) -> str:
         raise ValueError("Unsupported open-play pass fact")
     count = int(count)
     noun = "pass" if count == 1 else "passes"
-    # Swahili agreement follows the count, as in Go's openPlayTemplate.
+    # Swahili and Hindi agreement follows the count, as in Go's openPlayTemplate.
     sw_completed, sw_preceded = ("iliyokamilika", "ilitangulia") if count == 1 else ("zilizokamilika", "zilitangulia")
+    hi_recorded = "हुआ" if count == 1 else "हुए"
     texts = {
         "en-GB": {"CASUAL": f"{count} completed {noun} came before the first shot in this open-play window.",
                   "ANALYST": f"Open-play window: {count} completed {noun} before its first shot."},
         "sw-KE": {"CASUAL": f"Pasi {count} {sw_completed} {sw_preceded} shuti la kwanza katika kipindi hiki cha mchezo wazi.",
                   "ANALYST": f"Kipindi cha mchezo wazi: pasi {count} {sw_completed} kabla ya shuti lake la kwanza."},
-        "hi-IN": {"CASUAL": f"इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज हुए।",
+        "hi-IN": {"CASUAL": f"इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज {hi_recorded}।",
                   "ANALYST": f"खुले खेल की अवधि: पहले शॉट से पहले {count} सफल पास।"},
     }
     return texts[locale][persona]
