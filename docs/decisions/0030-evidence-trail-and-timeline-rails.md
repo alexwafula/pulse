@@ -31,7 +31,9 @@ still opens the Timeline tab with its events highlighted, as before. `clearEvide
 back. Moving the node, rather than rendering a copy, keeps one set of ids and the same
 listeners. The same pattern already moves the transport between Live and the watch
 dock. In the experience trail, the source-event list now comes before the model values, so its
-first row starts above the fold at 1440×900 and 390×844. The values label still sits
+first row starts above the fold at 390×844. At 1440×900 the trail's top is in view, and
+its first row starts just below the fold, because ADR 0029's playback status sits between
+the trail and the pitch. The values label still sits
 directly before `#moment-values`. This reorder is not named in C4 or C6. It is
 a decision for review.
 
