@@ -28,6 +28,16 @@ These keys were added with the hero. Their sw-KE and hi-IN values are the Englis
 
 Keep `{team}` and `{value}`. The sentence must stay a plain comparison of two model numbers: no "winning", "ahead" or "likely".
 
+## New keys: NEEDS TRANSLATION (D3b badges, 2026-10-19)
+
+Added with the status badges. As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `content-checked recording` | `content-checked recording` (literal key; the `title` tooltip on the "Verified (recorded)" badge) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+The tooltip describes what was checked, a recording. A translation must not name a model or say that a model verified anything.
+
 ## Summary
 
 | Pattern | Count |

@@ -269,11 +269,14 @@
           </svg>
           
           <div id="pitch-stamp" class="pitch-stamp">{{(index .Match.Teams 0).Name}} ATTACKING {{(index .Match.Teams 0).AttackingDirection}}</div>
-          <div id="moment-banner" class="moment-banner" role="status" hidden><strong id="moment-banner-title"></strong><span id="moment-banner-detail"></span></div>
-          
-          <div id="action-result" class="action-result" role="status" hidden>
-            <strong id="result-title"></strong>
-            <span id="result-detail"></span>
+          <!-- Lower third (DIRECTION C2): one caption bar holding the active moment and the
+               latest shot result. /legacy keeps both rows in their original positions. -->
+          <div id="lower-third" class="lower-third"{{if .Experience}} hidden{{end}}>
+            <div id="moment-banner" class="moment-banner lower-third-row" role="status" hidden><strong id="moment-banner-title"></strong><span id="moment-banner-detail"></span></div>
+            <div id="action-result" class="action-result lower-third-row" role="status" hidden>
+              <strong id="result-title"></strong>
+              <span id="result-detail"></span>
+            </div>
           </div>
           
           <div class="scene-tools">
@@ -322,8 +325,8 @@
       <aside class="events-panel right-drawer" aria-labelledby="drawer-heading">
         <h2 id="drawer-heading" class="sr-only">Tactical Intelligence Drawer</h2>
         
-        <section id="pressure-insight" class="pressure-insight" aria-labelledby="pressure-heading" data-source="deterministic-moment-template" hidden>
-          <div class="section-heading"><h2 id="pressure-heading">Sustained pressure</h2><span>Template</span></div>
+        <section id="pressure-insight" class="pressure-insight" aria-labelledby="pressure-heading" data-source="deterministic-moment-template" data-status="template" hidden>
+          <div class="section-heading"><h2 id="pressure-heading">Sustained pressure</h2><span id="pressure-status" class="status-badge" role="status" aria-label="Template" data-status="template"><svg class="status-icon" data-icon="file-text" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8"/><path d="M16 17H8"/></svg>Template</span></div>
           <p id="pressure-text" aria-live="polite"></p>
           <p class="model-label">model estimate, uncalibrated</p>
           <small>Not model-verified</small>
@@ -335,7 +338,7 @@
         <section class="insight-panel" aria-labelledby="insight-heading">
           <div class="section-heading">
             <h2 id="insight-heading">Match insight</h2>
-            <span id="insight-status">Waiting</span>
+            <span id="insight-status" class="status-badge" role="status" aria-label="Waiting" data-status="waiting">Waiting</span>
           </div>
           <p id="insight-text" aria-live="polite">Awaiting next moment</p>
           <div id="insight-evidence" hidden>

@@ -4,6 +4,7 @@ import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
 import { pressureNarration } from "./moment-narration";
 import { indexHeadline } from "./index-headline";
+import { teamKit } from "./team-colour";
 
 // indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
 type TeamTick = { finalThird: number; indexDelta: number | null };
@@ -105,9 +106,13 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   // The experience hero (absent on /legacy) restates the same tick's indexDelta.
   const hero = document.querySelector<HTMLElement>(".match-hero");
   let heroKey = "";
+  // Sign of the last headline delta, so a flip can tint the headline once (DIRECTION §3.3, row 5).
+  let heroSign = 0;
+  let tintRun = 0;
   // The server painted the start tick; keep it until /api/metrics settles.
   let metricsSettled = false;
   const banner = element("#moment-banner");
+  let bannerKey = "";
   const rangeMarker = element("#evidence-range-marker");
   const pressurePanel = element("#pressure-insight");
   const pressureEvidence = element<HTMLButtonElement>("#pressure-evidence");
@@ -252,14 +257,29 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     const key = `${locale()}:${metrics?.supported ?? "failed"}:${tick?.timeMs ?? "none"}`;
     if (key === heroKey) return;
     heroKey = key;
-    const result = indexHeadline(tick && metrics ? tick.teams[metrics.teams[0]].indexDelta : null, metrics?.teams ?? ["", ""], teamName, locale(), metrics?.supported ?? true);
+    const delta = tick && metrics ? tick.teams[metrics.teams[0]].indexDelta : null;
+    const result = indexHeadline(delta, metrics?.teams ?? ["", ""], teamName, locale(), metrics?.supported ?? true);
     write("#hero-index-headline", t(result.headline.key, result.headline.values));
+    const sign = Math.sign(delta ?? 0);
+    if (sign && heroSign && sign !== heroSign) tintHeadline();
+    if (sign) heroSign = sign;
     write("#hero-index-delta", result.signed);
     element("#hero-index-delta").hidden = !result.label;
     hero.dataset.index = result.label ? "value" : "none";
     const teams = element("#hero-index-teams"), chip = element("#hero-index-chip");
     teams.textContent = result.label; teams.hidden = !result.label;
     chip.textContent = t(result.chip); chip.hidden = !result.chip;
+  }
+
+  // A 200 ms background tint on the headline only; no counting animation. CSS drops it
+  // under reduced motion. The class goes when it ends, so re-showing Live does not replay it.
+  function tintHeadline(): void {
+    const headline = element("#hero-index-headline");
+    headline.classList.remove("sign-flipped");
+    void headline.offsetWidth;
+    headline.classList.add("sign-flipped");
+    const run = ++tintRun;
+    void Promise.allSettled(headline.getAnimations().map((animation) => animation.finished)).then(() => { if (run === tintRun) headline.classList.remove("sign-flipped"); });
   }
 
   function renderEvidence(cue: Cue | undefined, selected: Moment | undefined): void {
@@ -321,10 +341,20 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       if (momentsLoaded) momentsState.textContent = count ? "" : moments.length ? "No moments yet" : "No moments detected";
       const active = selected ?? [...moments].reverse().find(moment => clock >= moment.timeMs && clock < moment.timeMs + 3500);
       banner.hidden = !active;
-      if (active) {
+      const nextBannerKey = active ? `${locale()}:${active.type}:${active.teamId}:${active.timeMs}` : "";
+      if (active && nextBannerKey !== bannerKey) {
         write("#moment-banner-title", momentName(active));
-        write("#moment-banner-detail", `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}${active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE" ? ` / ${t("model estimate, uncalibrated")}` : ""}`);
+        const detail = element("#moment-banner-detail");
+        detail.textContent = `${teamName(active.teamId)} / ${hooks.matchTime(active.timeMs)}`;
+        if (active.evidenceKind === "tick" || active.type === "SUSTAINED_PRESSURE") {
+          const chip = document.createElement("span");
+          chip.className = "estimate-chip";
+          chip.textContent = t("model estimate, uncalibrated");
+          detail.append(" / ", chip);
+        }
+        banner.dataset.teamKit = teamKit(active.teamId, replay.match.teams.map(team => team.id));
       }
+      bannerKey = nextBannerKey;
       const pressure = selected ?? [...moments].reverse().find(moment => moment.type === "SUSTAINED_PRESSURE" && clock >= moment.timeMs && clock < moment.timeMs + 10000);
       const narration = pressure && pressureNarration(pressure, replay, document.body.dataset.persona ?? "CASUAL");
       pressurePanel.hidden = !narration;

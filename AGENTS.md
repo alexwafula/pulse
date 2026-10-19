@@ -120,6 +120,8 @@ On Live, a hero states the API's `indexDelta` as one plain line (2 dp) with its 
 signed value (U+2212), team-order label and estimate chip; there is no score or share
 meter. The server renders the first headline from the cached `/api/metrics` result and
 the team kits from team ids (`team_kit.go`); scripts only read and update them.
+The moment banner and shot result are rows of one lower third on the pitch; insight
+badges differ by icon and shape, not colour alone (`status-badge.ts`, decision 0027).
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -244,6 +246,7 @@ Local checks:
 - Locales and model labels: `node tests/integration/locale-browser.mjs` (running local Go server; locale allowlist and storage, hi-IN catalog routing, Control vs Chaos `indexDelta` headline, canonical `model estimate, uncalibrated` label, translated insights never Verified)
 - Render loop: `node tests/integration/render-loop-browser.mjs` (running local Go server; counts WebGL draw frames while paused, playing and hidden)
 - Hero (D3a): `node --test tests/integration/index-headline.test.mjs` (headline wording) and `node tests/integration/hero-browser.mjs` (running local Go server; server-rendered team kits and headline present before scripts and unchanged by hydration, headline equals `/api/metrics`, mobile pitch within 360px, paused renderer switch draws 0 frames)
+- Lower third and badges (D3b): `node tests/integration/lower-third-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; one pitch overlay at 88:11 and the corner end, distinct badge names/icons/shapes and the exact Verified tooltip, 44px transport targets, motion rows with and without reduced motion, hero headline at start/88:11/end)
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.

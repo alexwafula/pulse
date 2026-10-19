@@ -72,7 +72,8 @@
     "evidence.moment":"{moment} / {team}", "Source events & metric ticks":"Matukio ya chanzo na sampuli za vipimo",
     "pressure.casual":"{team} ilikamilisha matukio {count} katika theluthi ya mwisho katika kipindi hiki. Modeli ya tracking ilionyesha shinikizo endelevu.",
     "pressure.analyst":"{team}: matukio {count} yaliyokamilika katika theluthi ya mwisho kuanzia {start} hadi {end}; udhibiti uliokadiriwa na modeli wakati wa ugunduzi: {control}.",
-    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score unavailable":"Score unavailable"
+    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score unavailable":"Score unavailable",
+    "content-checked recording":"content-checked recording"
   },
   "hi-IN": {
     "build.label":"build {sha}", "Scenarios":"परिदृश्य", "Synthetic replays":"काल्पनिक रीप्ले", "Close scenarios":"परिदृश्य बंद करें", "Search scenarios":"परिदृश्य खोजें", "Scenario type":"परिदृश्य का प्रकार", "All":"सभी", "Short sequences":"छोटे क्रम", "Short sequence":"छोटा क्रम", "Loading replays":"रीप्ले लोड हो रहे हैं", "No matching scenarios":"कोई मेल खाता परिदृश्य नहीं", "players":"खिलाड़ी", "actions":"घटनाएं", "Guided demo":"निर्देशित डेमो",
@@ -118,6 +119,7 @@
     "evidence.moment":"{moment} / {team}", "Source events & metric ticks":"स्रोत घटनाएँ और मेट्रिक नमूने",
     "pressure.casual":"{team} ने इस अवधि में अंतिम तिहाई में {count} क्रियाएँ पूरी कीं। ट्रैकिंग मॉडल ने लगातार दबाव का संकेत दिया।",
     "pressure.analyst":"{team}: {start} से {end} तक अंतिम तिहाई में {count} पूरी हुई क्रियाएँ; पहचान के समय मॉडल-अनुमानित अंतिम तिहाई नियंत्रण: {control}।",
-    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score unavailable":"Score unavailable"
+    "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher", "Score unavailable":"Score unavailable",
+    "content-checked recording":"content-checked recording"
   }
 }

@@ -1801,6 +1801,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex="0"]:
 .moment-banner { position: absolute; top: 12px; left: 12px; max-width: calc(100% - 110px); padding: 8px 10px; background: rgba(9,14,12,.9); border-left: 2px solid var(--accent-lime); border-radius: 3px; pointer-events: none; display: flex; flex-direction: column; gap: 3px; }
 .moment-banner strong { font-size: 13px; }
 .moment-banner span { font-size: 10px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* The lower third groups the moment and shot-result rows; /legacy keeps each row where it was. */
+.lower-third { display: contents; }
+.status-icon { display: none; }
 #control-layer[hidden] { display: none; }
 .evidence-range-marker { right: auto; pointer-events: none; }
 .clip-controls { min-height: 0; }
