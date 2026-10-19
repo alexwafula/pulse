@@ -161,11 +161,16 @@ try {
       await pause(page);
       for (const at of [500, 1000]) {
         await seek(page, at);
-        for (const tab of ["timeline", "passing", "control", "routes", "recap", "evidence"]) {
+        // Experience pages have no drawer Recap tab (D4b-2): their Recap is the sidebar section, scanned below.
+        for (const tab of ["timeline", "passing", "control", "routes", "evidence"]) {
           await page.locator(`#tab-${tab}`).click();
           await scan(page, names, `${scenario}:${tab}`);
         }
       }
+      await page.locator('.experience-navigation [data-section="recap"]').click();
+      await page.locator('.story-content[data-panel="recap"] li').first().waitFor();
+      await scan(page, names, `${scenario}:recap-section`);
+      await page.locator('.experience-navigation [data-section="live"]').click();
       for (const type of ["CONTROL_SWING", "SET_PIECE_SHOT"]) {
         const moment = page.locator(`#moment-list button[data-moment-type="${type}"]`).first();
         if (!await moment.count()) continue;
@@ -177,6 +182,14 @@ try {
         await pause(page);
       }
       await page.close();
+      // /legacy keeps the drawer Recap pane, so its text is scanned there.
+      const legacy = await openPage(`/legacy?scenario=${scenario}&locale=hi-IN`);
+      await pause(legacy);
+      await seek(legacy, 1000);
+      await legacy.locator("#tab-recap").click();
+      await legacy.locator("#recap-panel li").first().waitFor();
+      await scan(legacy, names, `${scenario}:legacy-recap`);
+      await legacy.close();
     }
     const found = [...leaks].map(([text, where]) => `${text} (${where})`);
     assert.deepEqual(found, [], `hardcoded visible strings in hi-IN:\n${found.join("\n")}`);

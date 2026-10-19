@@ -162,10 +162,10 @@ function selectSection(next: Section, changePane = true): void {
   history.replaceState(null, "", url);
 }
 
-function openAnalysis(pane: string, dispatch = true): void {
+function openAnalysis(pane: string): void {
   insightView = pane;
   selectSection("insights", false);
-  if (dispatch) document.dispatchEvent(new CustomEvent("pulse:select-pane", { detail: { pane } }));
+  document.dispatchEvent(new CustomEvent("pulse:select-pane", { detail: { pane } }));
 }
 
 for (const button of navigation) button.addEventListener("click", () => selectSection(button.dataset.section as Section));
@@ -212,13 +212,13 @@ document.addEventListener("htmx:beforeSwap", event => {
   const detail = (event as CustomEvent<{target:HTMLElement; shouldSwap:boolean}>).detail;
   if (detail.target === content && dropdownOpen()) detail.shouldSwap = false;
 });
+// Only callers that ask for Live (clips, inspection) change the section; a drawer tab never does.
 document.addEventListener("pulse:pane-selected", (event) => {
   const { pane, section } = (event as CustomEvent<{ pane: string; section?: "live" }>).detail;
   if (section === "live") {
     selectSection("live", false);
     pitch.scrollIntoView({block: "nearest"});
-  } else if (pane === "evidence") openAnalysis(pane, false);
-  else if (document.body.dataset.section === "insights" && content.hidden) {
+  } else if (document.body.dataset.section === "insights" && content.hidden) {
     insightView = pane;
     updateInsightView();
   }
@@ -237,7 +237,7 @@ content.addEventListener("click", (event) => {
     selectSection("live");
     document.dispatchEvent(new CustomEvent("pulse:inspect", { detail: { eventId: button.dataset.inspectEvent } }));
   } else if (button?.hasAttribute("data-download-recap")) {
-    document.querySelector<HTMLButtonElement>("#download-recap")!.click();
+    document.dispatchEvent(new CustomEvent("pulse:download-recap"));
   } else if (button?.dataset.analysisPane) {
     openAnalysis(button.dataset.analysisPane);
   }

@@ -197,10 +197,13 @@ remains available for comparison navigation without forcing Live. Metric-tick
 evidence opens Live at the exact tick without inventing a source event.
 Manual scrubbing pauses and clears the clip. `pulse:clock` publishes
 on clock-second/event/play-state changes, with exact paused seek time. Pane
-options: `timeline`, `passing`, `control`, `routes`, `recap`, `evidence`.
-`pulse:pane-selected` reports `{ pane, section? }`. A detector-moment replay sets
-`section: "live"` so its Evidence inspector does not send viewers into Insights.
-Ordinary pane selection retains its existing navigation. This DOM bridge is presentation-only,
+options on experience pages: `timeline`, `passing`, `control`, `routes`, `evidence`;
+`/legacy` also has `recap`. Experience pages show Recap only in the sidebar Recap
+section, and its Download dispatches `pulse:download-recap`.
+`pulse:pane-selected` reports `{ pane, section? }`. A detector-moment replay and the
+insight's Evidence clip set `section: "live"` and select the Evidence tab, so the
+trail does not send viewers into Insights. Selecting a drawer tab never changes the
+section or `?section=` (decision 0031). This DOM bridge is presentation-only,
 not a new shared football contract or streaming API.
 
 Visual playback bounds are separate from fact windows. Corner/SET_PIECE_SHOT

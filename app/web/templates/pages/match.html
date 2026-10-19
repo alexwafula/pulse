@@ -421,7 +421,8 @@
           <button type="button" role="tab" id="tab-passing" class="drawer-tab" data-tab="passing" aria-selected="false" aria-controls="pane-passing">Passing</button>
           <button type="button" role="tab" id="tab-control" class="drawer-tab" data-tab="control" aria-selected="false" aria-controls="pane-control">Control</button>
           <button type="button" role="tab" id="tab-routes" class="drawer-tab" data-tab="routes" aria-selected="false" aria-controls="pane-routes">Routes</button>
-          <button type="button" role="tab" id="tab-recap" class="drawer-tab" data-tab="recap" aria-selected="false" aria-controls="pane-recap">Recap</button>
+          <!-- Experience pages open Recap in its sidebar section; only /legacy keeps the drawer tab. -->
+          {{if not .Experience}}<button type="button" role="tab" id="tab-recap" class="drawer-tab" data-tab="recap" aria-selected="false" aria-controls="pane-recap">Recap</button>{{end}}
           <button type="button" role="tab" id="tab-evidence" class="drawer-tab" data-tab="evidence" aria-selected="false" aria-controls="pane-evidence">Evidence</button>
         </div>
 
@@ -541,9 +542,9 @@
             </section>
           </div>
 
-          <!-- Pane 4: Sequence Recap -->
+          <!-- Pane 4: Sequence Recap (/legacy only) -->
+          {{if not .Experience}}
           <div id="pane-recap" class="drawer-pane" data-pane="recap" role="tabpanel" aria-labelledby="tab-recap">
-            {{if .Experience}}<div id="recap-pending">{{template "state" (state "empty" "Recap available at the end of the sequence.")}}</div>{{end}}
             <section id="recap-panel" class="recap-panel" aria-labelledby="recap-heading" hidden>
               <div class="section-heading">
                 <h3 id="recap-heading">Sequence recap</h3>
@@ -563,6 +564,7 @@
               </ol>
             </section>
           </div>
+          {{end}}
 
           <!-- Pane 5: Evidence Trail Inspector -->
           <div id="pane-evidence" class="drawer-pane" data-pane="evidence" role="tabpanel" aria-labelledby="tab-evidence">

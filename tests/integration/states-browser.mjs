@@ -164,15 +164,17 @@ try {
     assert.ok(rows.length > 0 && rows.every(([, sent, received]) => sent !== "0" || received !== "0"), "zero rows must collapse");
     const idle = await page.locator('.passing-snapshot:not([hidden]) [data-i18n^="state.idlePlayer"]').textContent();
     assert.equal(idle, `${11 - rows.length} players with no passes`);
-    // Drawer Recap before the end: the Recap section's state, with height.
+    // Recap before the end: experience pages have no drawer Recap pane (D4b-2), so the
+    // sidebar Recap section shows its state, with height, then the recap at the end.
     await seek(page, 500); await page.waitForTimeout(100);
-    await press(page, '.drawer-tab[data-tab="recap"]');
-    assert.equal(await page.locator("#recap-pending .state-text").textContent(), "Recap available at the end of the sequence.");
-    assert.ok(await page.locator("#recap-pending .state-line").isVisible(), "recap pane must show its state");
-    assert.ok((await page.locator("#pane-recap").boundingBox()).height > 0, "recap pane must not be 0 px high");
-    await seek(page, 1000); await page.waitForTimeout(100);
-    assert.equal(await page.locator("#recap-pending").isVisible(), false);
-    assert.ok(await page.locator("#recap-panel").isVisible());
+    await section(page, "recap"); await settled(page);
+    const pending = page.locator('.story-content[data-panel="recap"] [data-i18n="Recap available at the end of the sequence."]');
+    assert.equal(await pending.textContent(), "Recap available at the end of the sequence.");
+    assert.ok(await pending.isVisible(), "the Recap section must show its state");
+    assert.ok((await page.locator('.story-content[data-panel="recap"]').boundingBox()).height > 0, "the Recap section must not be 0 px high");
+    await seek(page, 1000); await settled(page);
+    assert.equal(await pending.count(), 0);
+    assert.ok(await page.locator('.story-content[data-panel="recap"] .story-log li').first().isVisible());
     // Insights comparison at the end: the 10 s windows hold no vale action (last at +45.3 s).
     await section(page, "insights");
     await press(page, '[data-insight-view="comparison"]'); await settled(page);
@@ -335,7 +337,7 @@ try {
     await page.waitForFunction(() => document.body.dataset.broadcast === "true");
     await seek(page, 1000); await page.waitForTimeout(200);
     assert.equal(await page.locator("#metrics-label").getAttribute("data-i18n"), "state.trackingGap");
-    assert.equal(await page.locator("#recap-pending").isVisible(), false, "recap state hides at the end");
+    assert.equal(await page.locator('[data-i18n="Recap available at the end of the sequence."]').evaluateAll(nodes => nodes.filter(node => node.checkVisibility()).length), 0, "recap state hides at the end");
     await press(page, "#broadcast-exit");
     await page.waitForFunction(() => document.body.dataset.broadcast !== "true");
     await page.close();

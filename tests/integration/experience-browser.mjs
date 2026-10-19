@@ -154,7 +154,8 @@ async function storyAndMaps(page, replay, mobile) {
   assert.equal(await page.locator("#match-clock").textContent(), clock(shots[0].timeMs));
   assert.equal(await page.locator("#play-button").getAttribute("aria-label"), "Play");
   await section(page, "insights");
-  await page.getByRole("button", { name: "Passing network", exact: true }).click();
+  // The map's Passing network link is gone (D4b-2); the Passing detail chip opens the same pane.
+  await page.getByRole("button", { name: "Passing detail", exact: true }).click();
   assert.ok(await page.locator("#pane-passing").isVisible());
   await page.getByRole("button", { name: "Charts & maps", exact: true }).click();
   await page.waitForFunction(() => document.querySelector("#experience-panel")?.hidden === false);
