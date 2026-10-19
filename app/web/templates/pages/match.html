@@ -319,6 +319,14 @@
           <span class="now-label">On the pitch</span>
           <span id="current-action">Loading replay…</span>
         </div>
+        <section id="playback-status" class="playback-status" aria-labelledby="playback-heading" hidden>
+          <div role="status"><h3 id="playback-heading"></h3><p id="playback-detail"></p></div>
+          <div id="sequence-actions" class="sequence-actions" hidden>
+            <button type="button" id="sequence-restart" class="secondary-button"><i data-lucide="rotate-ccw"></i><span>Replay sequence</span></button>
+            <button type="button" id="sequence-recap" class="secondary-button"><i data-lucide="list-video"></i><span>View recap</span></button>
+            <button type="button" id="sequence-scenarios" class="secondary-button"><i data-lucide="layers"></i><span>Scenarios</span></button>
+          </div>
+        </section>
       </section>
 
       <!-- RIGHT DRAWER: Tabbed Intelligence replacing the long scroll -->

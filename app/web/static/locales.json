@@ -1,5 +1,6 @@
 {
   "en-GB": {
+    "playback.window":"{start} - {end} · 1×", "playback.postroll":"Recorded movement continues to {end}", "playback.trackingTail":"Tracking continues to {end}",
     "inspection.delivery":"Delivery + Go checks: {ms} ms (not model-generation latency)",
     "build.label":"build {sha}", "stats.window":"Both teams • {start} - {end}", "stats.eventMeta":"{count} actions • {length}m × {width}m", "team.stamp":"{team} ATTACKING {direction}", "team.direction":"{team} • Attacking {direction}",
     "stats.of":"{count} of {total}", "stats.attacks":"{entries} {entry} / {shots} {shot}", "stats.converted":"{count} of {total} converted", "stats.passes":"{count} completed {pass}", "stats.actions":"{count} actions",
@@ -30,6 +31,8 @@
     "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher"
   },
   "sw-KE": {
+    "playback.window":"{start} - {end} · 1×", "playback.postroll":"Mwendo uliorekodiwa unaendelea hadi {end}", "playback.trackingTail":"Ufuatiliaji unaendelea hadi {end}",
+    "Evidence replay":"Marudio ya ushahidi", "Evidence replay complete":"Marudio ya ushahidi yamekamilika", "Sequence complete":"Mfululizo umekamilika", "All actions recorded":"Matukio yote yamerekodiwa", "No actions recorded":"Hakuna matukio yaliyorekodiwa", "Replay sequence":"Rudia mfululizo", "View recap":"Angalia muhtasari",
     "inspection.delivery":"Uwasilishaji na ukaguzi wa Go: {ms} ms (si muda wa modeli kuzalisha maandishi)",
     "Show test result":"Onyesha matokeo ya jaribio",
     "Agent Inspector":"Ukaguzi wa mawakala", "What changed?":"Nini kimebadilika?", "Compare windows":"Linganisha vipindi", "Window":"Kipindi", "10 seconds":"Sekunde 10", "20 seconds":"Sekunde 20", "30 seconds":"Sekunde 30",
@@ -86,6 +89,8 @@
     "content-checked recording":"content-checked recording"
   },
   "hi-IN": {
+    "playback.window":"{start} - {end} · 1×", "playback.postroll":"रिकॉर्ड की गई गति {end} तक जारी रहती है", "playback.trackingTail":"ट्रैकिंग {end} तक जारी रहती है",
+    "Evidence replay":"साक्ष्य रीप्ले", "Evidence replay complete":"साक्ष्य रीप्ले पूरा हुआ", "Sequence complete":"क्रम पूरा हुआ", "All actions recorded":"सभी घटनाएँ दर्ज हो गई हैं", "No actions recorded":"कोई घटना दर्ज नहीं है", "Replay sequence":"क्रम फिर चलाएँ", "View recap":"सारांश देखें",
     "inspection.delivery":"डिलीवरी और Go जाँच: {ms} ms (मॉडल जनरेशन का समय नहीं)",
     "Show test result":"परीक्षण परिणाम दिखाएँ",
     "Agent Inspector":"एजेंट निरीक्षण", "What changed?":"क्या बदला?", "Compare windows":"अवधियों की तुलना करें", "Window":"अवधि", "10 seconds":"10 सेकंड", "20 seconds":"20 सेकंड", "30 seconds":"30 सेकंड",

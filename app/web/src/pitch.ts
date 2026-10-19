@@ -10,6 +10,7 @@ import { renderInspector, type Inspection } from "./agent-inspector";
 import { teamColour, teamKit } from "./team-colour";
 import { setBadge } from "./status-badge";
 import { mountLowerThird } from "./lower-third";
+import { actionPlaybackRange, advancePlayback, evidencePlaybackRange, trackingFrameIndex, type PlaybackRange } from "./playback";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
@@ -91,6 +92,10 @@ const insightEvidence = required<HTMLElement>("#insight-evidence");
 const insightWindow = required<HTMLElement>("#insight-window");
 const evidenceButton = required<HTMLButtonElement>("#evidence-button");
 const evidenceReturn = required<HTMLButtonElement>("#evidence-return");
+const playbackStatus = required<HTMLElement>("#playback-status");
+const playbackHeading = required<HTMLElement>("#playback-heading");
+const playbackDetail = required<HTMLElement>("#playback-detail");
+const sequenceActions = required<HTMLElement>("#sequence-actions");
 const pitchLoading = document.querySelector<HTMLElement>("#pitch-loading");
 const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
@@ -100,7 +105,9 @@ let inspections: Inspection[] = [];
 let insightSource = "";
 let evidenceCue: Cue | undefined;
 let momentClip: Moment | undefined;
-let comparisonClip: {startMs: number; endMs: number} | undefined;
+let clipRange: PlaybackRange | undefined;
+let inspectedAction: Event | undefined;
+let finalActionRange: PlaybackRange | undefined;
 let analytics: ReturnType<typeof createAnalytics> | undefined;
 let returnClock = 0;
 let displayedCueID: string | undefined;
@@ -158,10 +165,41 @@ function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenari
 function clearEvidence(): void {
   evidenceCue = undefined;
   momentClip = undefined;
-  comparisonClip = undefined;
+  clipRange = undefined;
+  inspectedAction = undefined;
+  previousFrameTime = 0;
   evidenceReturn.hidden = true;
   for (const button of speedButtons) { button.disabled = false; button.setAttribute("aria-pressed", String(Number(button.dataset.speed) === speed)); }
   for (const button of eventButtons.values()) button.classList.remove("evidence-event");
+}
+
+function setClip(range: PlaybackRange): void {
+  clipRange = range;
+  previousFrameTime = 0;
+  evidenceReturn.hidden = false;
+  for (const button of speedButtons) {
+    button.disabled = true;
+    button.setAttribute("aria-pressed", String(button.dataset.speed === "1"));
+  }
+}
+
+function inspectAt(timeMs: number, eventId?: string, showLive = true): void {
+  const action = eventId ? replay.events.find(event => event.id === eventId) : undefined;
+  if (eventId && !action) return;
+  const at = action?.timeMs ?? timeMs;
+  if (!Number.isFinite(at) || at < replay.match.startMs || at > replay.match.endMs) return;
+  stopDemo();
+  if (!clipRange) returnClock = clock;
+  clearEvidence();
+  playing = false;
+  clock = at;
+  if (action) {
+    inspectedAction = action;
+    setClip(actionPlaybackRange(replay, action));
+    eventButtons.get(action.id)?.classList.add("evidence-event");
+  }
+  setDrawerTab(action ? "timeline" : "control", true, showLive ? "live" : undefined);
+  render();
 }
 
 function renderInsight(): void {
@@ -347,10 +385,7 @@ function createTimeline(): void {
     copy.append(type, description);
     button.append(time, copy);
     button.addEventListener("click", () => {
-      clearEvidence();
-      playing = false;
-      clock = event.timeMs;
-      render();
+      inspectAt(event.timeMs, event.id);
     });
     item.append(button);
     eventList.append(item);
@@ -380,8 +415,7 @@ function interpolate(a: number, b: number, fraction: number): number {
 
 function renderPositions(): void {
   const frames = replay.tracking;
-  let index = 0;
-  while (index + 1 < frames.length && frames[index + 1].timeMs <= clock) index++;
+  const index = trackingFrameIndex(frames, clock);
   const first = frames[index];
   const second = frames[Math.min(index + 1, frames.length - 1)];
   const duration = second.timeMs - first.timeMs;
@@ -447,9 +481,38 @@ function renderEvent(): void {
     }
     currentEventId = nextID;
   }
-  eventPathLayer.style.display = event && clock - event.timeMs < 6500 ? "" : "none";
-  sceneState.path = event && clock - event.timeMs < 6500 ? { from: event.from, to: event.to } : undefined;
-  sceneState.selectedPlayer = event && clock - event.timeMs < 6500 ? event.actorId : undefined;
+  const focused = event && (clock - event.timeMs < 6500 || event === inspectedAction);
+  eventPathLayer.style.display = focused ? "" : "none";
+  sceneState.path = focused ? { from: event.from, to: event.to } : undefined;
+  sceneState.selectedPlayer = focused ? event.actorId : undefined;
+}
+
+function renderPlaybackStatus(): void {
+  const complete = !clipRange && clock >= replay.match.endMs;
+  const tail = !clipRange && !complete && finalActionRange && clock >= finalActionRange.endMs + 1500;
+  playbackStatus.hidden = !clipRange && !complete && !tail;
+  const state = clipRange ? clock >= clipRange.endMs ? "clip-complete" : playing ? "clip-playing" : "action-ready" : complete ? "sequence-complete" : tail ? "tracking-tail" : "match";
+  playbackStatus.dataset.state = state;
+  sequenceActions.hidden = Boolean(clipRange) || (!complete && !tail);
+  let heading = "", detail = "";
+  if (clipRange) {
+    heading = state === "clip-complete" ? t("Evidence replay complete") : inspectedAction ? t("Selected action") : t("Evidence replay");
+    detail = `${inspectedAction ? `${eventSentence(inspectedAction)} · ${inspectedAction.id} · ` : ""}${t("playback.window", {start: matchTime(clipRange.startMs), end: matchTime(clipRange.endMs)})}`;
+    const factEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs;
+    if (factEnd !== undefined && clipRange.endMs > factEnd) detail += ` · ${t("playback.postroll", {end: matchTime(clipRange.endMs)})}`;
+  } else if (complete || tail) {
+    heading = t(complete ? "Sequence complete" : "All actions recorded");
+    const last = replay.events[replay.events.length - 1];
+    detail = last ? `${eventSentence(last)} · ${matchTime(last.timeMs)}` : t("No actions recorded");
+    if (last?.type === "SHOT" && last.outcome === "COMPLETE") detail += ` · ${t("Completed shot; no goal outcome recorded")}`;
+    if (tail) detail += ` · ${t("playback.trackingTail", {end: matchTime(replay.match.endMs)})}`;
+  }
+  if (playbackHeading.textContent !== heading) playbackHeading.textContent = heading;
+  if (playbackDetail.textContent !== detail) playbackDetail.textContent = detail;
+  const shell = required<HTMLElement>(".pitch-shell");
+  shell.dataset.timeMs = String(clock);
+  shell.dataset.eventId = currentEventId ?? "";
+  shell.dataset.playbackState = playing ? "playing" : state;
 }
 
 function render(): void {
@@ -480,7 +543,7 @@ function render(): void {
   }
   clockDisplay.textContent = matchTime(clock);
   seek.value = String(Math.round(((clock - replay.match.startMs) / (replay.match.endMs - replay.match.startMs)) * 1000));
-  const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs;
+  const clipEnd = clipRange?.endMs;
   const nextPlayLabel = playing ? "Pause" : clipEnd !== undefined && clock >= clipEnd ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
   if (playLabel !== nextPlayLabel) {
     playLabel = nextPlayLabel;
@@ -488,6 +551,7 @@ function render(): void {
     playButton.setAttribute("aria-label", t(playLabel));
     playButton.title = t(playLabel);
   }
+  renderPlaybackStatus();
   paint();
   if (playing) wake();
   const publication = `${playing ? Math.floor(clock / 1000) : clock}:${playing}:${currentEventId}`;
@@ -500,9 +564,15 @@ function render(): void {
 // Draw on demand: the scene changes only through render(), resizes and camera
 // input, so a paused, hidden or off-screen pitch costs no frames.
 function paint(): void {
-  if (!pitchRenderer) return;
+  if (!pitchRenderer) { drawPending = false; return; }
   drawPending = true;
-  if (document.hidden || !pitchVisible) return;
+  if (document.hidden) return;
+  // Navigation can remount the pitch before IntersectionObserver catches up.
+  if (!pitchVisible) {
+    const bounds = canvasHost.getBoundingClientRect();
+    if (canvasHost.hidden || bounds.width === 0 || bounds.height === 0 || bounds.bottom <= 0 || bounds.top >= innerHeight) return;
+    pitchVisible = true;
+  }
   drawPending = false;
   pitchRenderer.update(sceneState);
   // A true result means the orbit camera is still easing after input.
@@ -523,8 +593,8 @@ function animate(time: number): void {
   if (document.hidden) return;
   if (playing) {
     if (previousFrameTime) {
-      const end = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs ?? replay.match.endMs;
-      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue || momentClip || comparisonClip ? 1 : speed));
+      const end = clipRange?.endMs ?? replay.match.endMs;
+      clock = advancePlayback(clock, time - previousFrameTime, clipRange ? 1 : speed, end);
       if (clock >= end) playing = false;
       render();
     }
@@ -599,10 +669,7 @@ async function startDemo(): Promise<void> {
       if (!evidenceCue) returnClock = clock;
       clearEvidence();
       evidenceCue = momentCue;
-      for (const button of speedButtons) {
-        button.disabled = true;
-        button.setAttribute("aria-pressed", String(button.dataset.speed === "1"));
-      }
+      setClip(evidencePlaybackRange(replay, {startMs: momentCue.replayStartMs, endMs: momentCue.replayEndMs}, momentCue.eventIds));
       clock = momentCue.replayStartMs;
       playing = true;
       previousFrameTime = 0;
@@ -610,7 +677,7 @@ async function startDemo(): Promise<void> {
       for (const id of momentCue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
       render();
 
-      while (clock < momentCue.replayEndMs && playing && !signal.aborted) {
+      while (clock < clipRange!.endMs && playing && !signal.aborted) {
         await waitMs(100);
       }
       if (signal.aborted) return;
@@ -663,6 +730,8 @@ async function start(): Promise<void> {
     for (const frame of replay.tracking) {
       framePlayers.set(frame.timeMs, new Map(frame.players.map((player) => [player.playerId, player])));
     }
+    const finalAction = replay.events[replay.events.length - 1];
+    finalActionRange = finalAction ? actionPlaybackRange(replay, finalAction) : undefined;
     clock = replay.match.startMs;
     eventCount.textContent = t("stats.actions", {count:replay.events.length});
     startLabel.textContent = matchTime(replay.match.startMs);
@@ -678,21 +747,16 @@ async function start(): Promise<void> {
       const detail = (event as CustomEvent<{startMs:number;endMs:number}>).detail;
       if (!detail || !Number.isSafeInteger(detail.startMs) || !Number.isSafeInteger(detail.endMs) || detail.startMs < replay.match.startMs || detail.endMs > clock || detail.endMs <= detail.startMs) return;
       stopDemo();
-      if (!evidenceCue && !momentClip && !comparisonClip) returnClock = clock;
-      clearEvidence(); comparisonClip = detail;
+      if (!clipRange) returnClock = clock;
+      clearEvidence();
+      setClip(detail);
       clock = detail.startMs; playing = true; previousFrameTime = 0;
-      for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
-      evidenceReturn.hidden = false;
       setDrawerTab("timeline", true, "live"); render();
     });
     document.addEventListener("pulse:inspect", (event) => {
       const detail = (event as CustomEvent<{ eventId?: string; timeMs?: number }>).detail;
-      const action = replay.events.find(item => item.id === detail?.eventId);
-      const at = action?.timeMs ?? detail?.timeMs;
-      if (typeof at !== "number" || !Number.isFinite(at) || at < replay.match.startMs || at > replay.match.endMs) return;
-      stopDemo(); clearEvidence(); playing = false; clock = at;
-      if (action) eventButtons.get(action.id)?.classList.add("evidence-event");
-      setDrawerTab("timeline", true); render();
+      if (!detail) return;
+      inspectAt(detail.timeMs ?? NaN, detail.eventId, Boolean(detail.eventId));
     });
     document.addEventListener("pulse:select-pane", (event) => {
       const pane = (event as CustomEvent<{ pane?: string }>).detail?.pane;
@@ -706,22 +770,20 @@ async function start(): Promise<void> {
       repaint: render, matchTime, eventSentence,
       playMoment: (moment) => {
         stopDemo();
-        if (!evidenceCue && !momentClip) returnClock = clock;
+        if (!clipRange) returnClock = clock;
         clearEvidence();
         momentClip = moment;
+        const range = {startMs: Math.max(replay.match.startMs, moment.windowStartMs), endMs: moment.windowEndMs};
+        setClip(moment.type === "SET_PIECE_SHOT" ? evidencePlaybackRange(replay, range, moment.reasons) : range);
         clock = Math.max(replay.match.startMs, moment.windowStartMs);
         playing = true; previousFrameTime = 0;
-        for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
         for (const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
         evidenceReturn.hidden = false;
         setDrawerTab("evidence", true, "live");
         render();
       },
       inspectTime: (timeMs, eventId) => {
-        stopDemo(); clearEvidence(); playing = false; clock = timeMs;
-        if (eventId) eventButtons.get(eventId)?.classList.add("evidence-event");
-        setDrawerTab(eventId ? "timeline" : "control", true);
-        render();
+        inspectAt(timeMs, eventId);
       },
     });
     drawerTabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".drawer-tab"));
@@ -745,7 +807,7 @@ async function start(): Promise<void> {
       stopDemo();
       const url = new URL(location.href); url.searchParams.set("scenario", scenarioPicker.value); location.assign(url);
     });
-    document.addEventListener("pulse:library-open", () => { stopDemo(); playing = false; render(); });
+    document.addEventListener("pulse:library-open", () => { stopDemo(); playing = false; previousFrameTime = 0; render(); });
     document.querySelector("#fact-check")!.addEventListener("click", event => {
       const id = (event.target as Element).closest<HTMLButtonElement>("[data-fact-source]")?.dataset.factSource;
       if (id) eventButtons.get(id)?.click();
@@ -758,11 +820,7 @@ async function start(): Promise<void> {
         button.setAttribute("aria-label", `Show events at ${matchTime(event.timeMs)}`);
       }
       button.addEventListener("click", () => {
-        stopDemo();
-        setDrawerTab("timeline");
-        eventButtons.get(id)?.click();
-        eventButtons.get(id)?.classList.add("evidence-event");
-        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: scrollBehavior(), block: "center" });
+        inspectAt(NaN, id);
       });
     }
     createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } });
@@ -774,10 +832,7 @@ async function start(): Promise<void> {
         button.setAttribute("aria-label", `Show events at ${matchTime(event.timeMs)}`);
       }
       button.addEventListener("click", () => {
-        stopDemo();
-        setDrawerTab("timeline");
-        eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
-        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: scrollBehavior(), block: "center" });
+        inspectAt(NaN, button.dataset.recapEvidence ?? "");
       });
     }
     required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {
@@ -814,15 +869,14 @@ async function start(): Promise<void> {
     document.dispatchEvent(new CustomEvent("pulse:audience", { detail: { persona, locale: locale() } }));
     evidenceButton.addEventListener("click", () => {
       stopDemo();
-      setDrawerTab("timeline");
       const cue = evidenceCue ?? [...cues].reverse().find((item) => clock >= item.startMs && clock <= item.endMs);
       if (!cue) return;
-      if (!evidenceCue && !momentClip) returnClock = clock;
+      if (!clipRange) returnClock = clock;
       clearEvidence(); evidenceCue = cue;
-      for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
+      setClip(evidencePlaybackRange(replay, {startMs: cue.replayStartMs, endMs: cue.replayEndMs}, cue.eventIds));
       clock = cue.replayStartMs; playing = true; previousFrameTime = 0;
-      evidenceReturn.hidden = false;
       for (const id of cue.eventIds) eventButtons.get(id)?.classList.add("evidence-event");
+      setDrawerTab("timeline", true, "live");
       render();
     });
     evidenceReturn.addEventListener("click", () => {
@@ -861,17 +915,18 @@ async function start(): Promise<void> {
 
     playButton.addEventListener("click", () => {
       stopDemo();
-      const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs;
-      if (clipEnd !== undefined && clock >= clipEnd) clock = Math.max(replay.match.startMs, evidenceCue?.replayStartMs ?? momentClip?.windowStartMs ?? comparisonClip!.startMs);
+      const clipEnd = clipRange?.endMs;
+      if (clipEnd !== undefined && clock >= clipEnd) clock = clipRange!.startMs;
       else if (clock >= replay.match.endMs) clock = replay.match.startMs;
       playing = !playing;
+      previousFrameTime = 0;
       render();
     });
     restartButton.addEventListener("click", () => {
       stopDemo();
       clearEvidence();
       userSelectedTab = null;
-      setDrawerTab("timeline");
+      setDrawerTab("timeline", true, "live");
       clock = replay.match.startMs;
       playing = true;
       render();
@@ -879,6 +934,7 @@ async function start(): Promise<void> {
     seek.addEventListener("input", () => {
       stopDemo();
       clearEvidence();
+      playing = false;
       clock = replay.match.startMs + (Number(seek.value) / 1000) * (replay.match.endMs - replay.match.startMs);
       render();
     });
@@ -886,12 +942,22 @@ async function start(): Promise<void> {
       button.addEventListener("click", () => {
         stopDemo();
         speed = Number(button.dataset.speed);
+        previousFrameTime = 0;
         for (const option of speedButtons) option.setAttribute("aria-pressed", String(option === button));
       });
     }
     runDemoButton?.addEventListener("click", () => {
       void (demoRunning ? stopDemo() : startDemo());
     });
+    required<HTMLButtonElement>("#sequence-restart").addEventListener("click", () => restartButton.click());
+    required<HTMLButtonElement>("#sequence-recap").addEventListener("click", () => {
+      stopDemo(); clearEvidence(); playing = false; clock = replay.match.endMs; render();
+      if (document.body.classList.contains("experience")) document.dispatchEvent(new CustomEvent("pulse:open-recap"));
+      else { setDrawerTab("recap", true); recapPanel.scrollIntoView({behavior: scrollBehavior(), block: "start"}); }
+    });
+    const scenarios = required<HTMLButtonElement>("#sequence-scenarios");
+    scenarios.hidden = !document.body.classList.contains("experience");
+    scenarios.addEventListener("click", () => document.querySelector<HTMLButtonElement>("#scenario-library-open")?.click());
     playing = true;
     render();
     const preferredView = new URLSearchParams(location.search).get("view") ?? "three";

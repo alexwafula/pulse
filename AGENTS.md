@@ -129,6 +129,10 @@ meter. The server renders the first headline from the cached `/api/metrics` resu
 the team kits from team ids (`team_kit.go`); scripts only read and update them.
 The moment banner and shot result are rows of one lower third on the pitch; insight
 badges differ by icon and shape, not colour alone (`status-badge.ts`, decision 0027).
+Replay follow-up (decision 0029) unifies exact source-event inspection in
+Live, prepares bounded 1x action clips and separates recorded shot postroll from
+unchanged evidence windows. Scenario/clip completion and tracking-tail states
+offer replay/recap/scenario actions; no football or post-sequence motion is invented.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)

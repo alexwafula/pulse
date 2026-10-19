@@ -80,6 +80,7 @@ library.addEventListener("click", event => {
   link.href = url.href;
 });
 document.addEventListener("pulse:demo-complete", () => selectSection("recap"));
+document.addEventListener("pulse:open-recap", () => selectSection("recap"));
 
 function graphics(): void {
   disposeGraphics?.();

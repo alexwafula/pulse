@@ -24,19 +24,27 @@ The recording's provider/model metadata is declared, not independently attested.
 The [demo storyboard and local video](docs/DEMO-VIDEO.md) show only working,
 fictional replay with honest recorded/template labels.
 
-### Inspector/comparison branch preview
+### Agent Inspector and comparison
 
-`feat/agent-inspector-comparison` adds **Agent Inspector** beneath a displayed
+**Agent Inspector** appears beneath a displayed
 corner insight and **Insights -> What changed?** for equal, same-team 10/20/30-second
 windows. Inspector exposes actual delivered artifacts and Go checks, plus a clearly
 labelled injected-claim test. Its Oct 19 Foundry reference is a new three-role
 reproduction with retained provider IDs, not an original trace or fresh generation
 on each page visit. Comparison counts/pitch paths come from replay source actions,
-with event evidence and bounded window replay. These features are local until
-merged/deployed. See [ADR 0028](docs/decisions/0028-agent-inspector-and-window-comparison.md).
+with event evidence and bounded window replay. Alex approved merging these features
+on Oct 19; the main release workflow determines when they reach Azure.
+See [ADR 0028](docs/decisions/0028-agent-inspector-and-window-comparison.md).
+
+Source-event evidence opens Live at the exact action timestamp and prepares a
+bounded 1x replay. Corner evidence finishes the recorded shot movement without
+changing its fact window. Tracking-only tails and completed sequences offer
+replay, recap and scenario controls. Sparse authored tracking remains unchanged.
+See [ADR 0029](docs/decisions/0029-evidence-replay-alignment-and-completion.md).
 
 Run the new desktop/mobile checks against a local **recorded** setup:
 `node tests/integration/inspection-comparison-browser.mjs`.
+Replay alignment and ending checks: `node tests/integration/replay-browser.mjs`.
 
 ## Team
 

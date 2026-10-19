@@ -25,8 +25,11 @@ inspection, a clearly labelled injected test, a new three-call Foundry reference
 run with retained role evidence, and equal clock-bound source-event comparisons.
 No v2, production-mode or default model-cap change. The old original trace remains
 unavailable; the new reproduction is separate. ADR 0028 records scope and tests.
-These additions are local until reviewed and deployed. Older dated audits below
-remain historical snapshots, not the current submission checklist.
+Alex approved merging these additions and the replay-alignment follow-up (ADR
+0029) on Oct 19. Deployment is verified separately through the main release
+workflow and `/version`; local checks are not proof of an Azure release.
+Older dated audits below remain historical snapshots, not the current submission
+checklist.
 
 Statuses below were checked on **Sat Oct 17** against `4aa3813` and re-checked on **Sun Oct 18** against `main` at `08eafa9` (#32, after #30). That commit is the one live on Azure: `GET /version` returned `"sha":"08eafa9c…","ref":"main"` on Oct 18.
 

@@ -183,13 +183,30 @@ document.dispatchEvent(new CustomEvent("pulse:camera", {
 }));
 ```
 
-`pulse:inspect` pauses at a validated source event/time. `pulse:clock` publishes
+`pulse:inspect` with an `eventId` opens Live and pauses at that exact source event,
+highlighting it and preparing a bounded 1x action replay. Play runs the action;
+Return to match restores the saved clock. An event ID wins over a supplied time;
+an unknown ID is ignored, not replaced by a different action. Time-only inspection
+remains available for comparison navigation without forcing Live. Metric-tick
+evidence opens Live at the exact tick without inventing a source event.
+Manual scrubbing pauses and clears the clip. `pulse:clock` publishes
 on clock-second/event/play-state changes, with exact paused seek time. Pane
 options: `timeline`, `passing`, `control`, `routes`, `recap`, `evidence`.
 `pulse:pane-selected` reports `{ pane, section? }`. A detector-moment replay sets
 `section: "live"` so its Evidence inspector does not send viewers into Insights.
 Ordinary pane selection retains its existing navigation. This DOM bridge is presentation-only,
 not a new shared football contract or streaming API.
+
+Visual playback bounds are separate from fact windows. Corner/SET_PIECE_SHOT
+clips finish their last cited action's recorded ball movement, explicitly labelled
+when it extends beyond the unchanged evidence window. Pressure, tick and
+comparison clips retain their original bounds. No ball flight is re-simulated.
+The pitch shell exposes `data-time-ms`, `data-event-id` and `data-playback-state`
+for exact presentation inspection; use `pulse:clock` for panel synchronization.
+`#playback-status` distinguishes action selection, clip completion, tracking-only
+tails and sequence completion. End controls restart the sequence, explicitly seek
+to match end for Recap, or open the existing scenario library. No second timer or
+automatic fabricated continuation is created. See decision 0029.
 
 | Contributor area | Files |
 |---|---|
