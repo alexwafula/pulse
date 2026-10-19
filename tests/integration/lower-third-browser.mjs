@@ -61,6 +61,9 @@ function overlays() {
     moment: row(document.querySelector("#moment-banner")),
     result: row(document.querySelector("#action-result")),
     chip: [...(bar?.querySelectorAll(".estimate-chip") ?? [])].filter(node => node.checkVisibility()).map(node => node.textContent),
+    // The bar's chip must look like the hero's: same colour, size and weight.
+    chipStyle: [...(bar?.querySelectorAll(".estimate-chip") ?? [])].filter(node => node.checkVisibility()).map(node => { const s = getComputedStyle(node); return { color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight }; })[0] ?? null,
+    heroChipStyle: (node => node && { color: getComputedStyle(node).color, fontSize: getComputedStyle(node).fontSize, fontWeight: getComputedStyle(node).fontWeight })(document.querySelector("#hero-index-chip:not([hidden])")),
   };
 }
 
@@ -78,7 +81,7 @@ await check("the lower third absorbs the shot result: one overlay at 88:11 and a
     await page.waitForTimeout(400);
     const shown = await page.evaluate(overlays);
     const where = `${vpName}/${scenario}/${view}@${at}`;
-    rows.push({ where, captions: shown.captions.join(" | "), moment: shown.moment?.title, result: shown.result?.title, chip: shown.chip.join(), size: `${shown.title}/${shown.detail}` });
+    rows.push({ where, captions: shown.captions.join(" | "), moment: shown.moment?.title, result: shown.result?.title, chip: shown.chip.join(), chipStyle: shown.chipStyle && `${shown.chipStyle.color} ${shown.chipStyle.fontSize} ${shown.chipStyle.fontWeight}`, size: `${shown.title}/${shown.detail}` });
     assert.equal(shown.bars, 1, `${where}: lower-third elements`);
     assert.ok(shown.insideShell, `${where}: the lower third is not on the pitch`);
     assert.deepEqual(shown.orphans, [], `${where}: shot result or moment markup outside the lower third`);
@@ -91,6 +94,8 @@ await check("the lower third absorbs the shot result: one overlay at 88:11 and a
       assert.equal(shown.moment?.title, "Sustained pressure", `${where}: moment title`);
       assert.ok(shown.moment.detail.endsWith(` / ${MODEL_LABEL}`), `${where}: moment detail "${shown.moment.detail}"`);
       assert.deepEqual(shown.chip, [MODEL_LABEL], `${where}: the estimate chip`);
+      assert.ok(shown.heroChipStyle, `${where}: hero chip not shown`);
+      assert.deepEqual(shown.chipStyle, shown.heroChipStyle, `${where}: the bar's estimate chip differs from the hero's`);
       assert.deepEqual([shown.moment.rule, shown.moment.colour], ["3px", kit[pressure.teamId]], `${where}: moment rule`);
       assert.equal(shown.result, null, `${where}: no shot at 88:11`);
     } else {
