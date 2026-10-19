@@ -552,7 +552,7 @@
               <p id="evidence-state" class="model-label">No evidence selected</p>
               <!-- The experience lists the evidence before the model values, so the rows stay in view under the pitch; /legacy keeps its order. -->
               {{if .Experience}}<ol id="evidence-list" class="evidence-trail-list"></ol>{{end}}
-              <p id="moment-values-label" class="model-label" hidden>model estimate, uncalibrated</p><dl id="moment-values" class="metric-values" hidden></dl>
+              <p id="moment-values-label" class="model-label" hidden>{{if .Experience}}<span class="estimate-chip">model estimate, uncalibrated</span>{{else}}model estimate, uncalibrated{{end}}</p><dl id="moment-values" class="metric-values" hidden></dl>
               {{if not .Experience}}<ol id="evidence-list" class="evidence-trail-list"></ol>{{end}}
             </div>
           </div>

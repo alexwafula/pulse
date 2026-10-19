@@ -36,8 +36,9 @@ playback status stays between the pitch block and the trail. When a clip starts,
 but never so far that less than 80% of the pitch stays visible (`behavior: "auto"`
 under reduced motion). At 1440×900 that is 76px: the pitch is at 14–481px and the first
 row at 838–892px. At 390×844 no extra scroll is needed (row at 652–706px). The values label still sits
-directly before `#moment-values`. This reorder is not named in C4 or C6. It is
-a decision for review.
+directly before `#moment-values`. This reorder is not named in C4 or C6; Jefferson accepted it on
+19 Oct. The label above the model values is the same canonical `.estimate-chip` as the hero
+and the tick row (`/legacy` keeps plain text).
 
 **Event timeline (DIRECTION C6).** Each timeline row has a fixed 44px tabular time
 column, a 10px team dot on a vertical rail, then the copy. The description is 13px in
