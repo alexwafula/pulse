@@ -63,13 +63,15 @@ export function renderInspector(cue: Cue | undefined, inspection: Inspection | u
   if (inspection.reference && ["reproduction-not-original-capture","captured-agent-run"].includes(inspection.reference.kind)) {
     const reference = document.createElement("details"); reference.className = "inspection-reference";
     reference.append(text("summary", captured?"Captured agent run":"Foundry reference run"), text("p", captured?"Original capture for this recorded output.":"New reproduction, not the original recording.", "model-label"));
+    // A named model's Verifier output is advice; it must never read as that model having verified the claim.
+    reference.append(text("p", "Role outputs are advisory. Go recomputes every fact and decides publication.", "model-label"));
     const when = text("time", inspection.reference.capturedAt); when.dateTime = inspection.reference.capturedAt; when.dataset.noTranslate = ""; reference.append(when);
     for (const observed of inspection.reference.observations) {
       const record = document.createElement("dl");
       const pair = (label: string, value: string): void => { const row = document.createElement("div"); row.append(text("dt", label), text("dd", value)); record.append(row); };
       pair("Role", {explainer:t("Explainer"),narrator:t("Narrator"),verifier:t("Verifier")}[observed.role] ?? observed.role);
       pair("Response ID", observed.responseId); pair("Model", observed.model);
-      pair("Output", observed.output.text ?? observed.output.status ?? "");
+      pair(observed.role === "verifier" ? "Advisory verdict" : "Output", observed.output.text ?? observed.output.status ?? "");
       pair("Tokens", `${observed.usage.prompt_tokens} / ${observed.usage.completion_tokens}`);
       pair("Duration", `${observed.durationMs} ms`);
       reference.append(record);

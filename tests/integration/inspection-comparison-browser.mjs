@@ -12,6 +12,14 @@ async function seek(page,value) {
   await page.locator("#seek").evaluate((input,v) => { input.value=String(v); input.dispatchEvent(new Event("input",{bubbles:true})); },value);
 }
 async function pause(page) { if (await page.locator("#play-button").getAttribute("aria-label") === "Pause") await page.locator("#play-button").click(); }
+// A model's Verifier record must never read as that model having verified the claim: Go's recomputation decides.
+async function assertAdvisoryRoles(reference, label) {
+  assert.ok((await reference.textContent()).includes("Role outputs are advisory. Go recomputes every fact and decides publication."), `${label}: advisory note`);
+  const verifier = reference.locator("dl").filter({hasText:"Verifier"});
+  assert.equal(await verifier.count(),1,`${label}: one Verifier record`);
+  const terms = await verifier.locator("dt").allTextContents();
+  assert.ok(terms.includes("Advisory verdict") && !terms.includes("Output"),`${label}: Verifier record terms ${terms}`);
+}
 try {
   for (const width of [1440,390,320]) {
     const context = await browser.newContext({viewport:{width,height:1000}});
@@ -28,6 +36,7 @@ try {
     await reference.locator("summary").click();
     assert.equal(await reference.locator("dl").count(),3);
     assert.ok((await reference.textContent()).includes("not the original recording"));
+    await assertAdvisoryRoles(reference,"corner reference run");
     await page.locator(".inspection-safety > summary").click();
     await page.getByRole("button",{name:"Show test result",exact:true}).click();
     assert.equal(await page.locator(".inspection-safety-result").textContent(),"Rejected by Go gate. Safe template passed.");
@@ -40,6 +49,11 @@ try {
     await seek(page,0);
     assert.equal(await page.locator("#agent-inspector").isVisible(),false,"rewind hides future insight inspection");
     await page.goto(`${base}/?scenario=late-siege&view=three`,{waitUntil:"networkidle"}); await pause(page); await seek(page,1000);
+    await page.locator("#agent-inspector > summary").click();
+    const captured = page.locator(".inspection-reference");
+    await captured.locator("summary").click();
+    assert.ok((await captured.textContent()).includes("Original capture for this recorded output."));
+    await assertAdvisoryRoles(captured,"late-siege captured run");
     const replay = await (await page.request.get(`${base}/api/replay?scenario=late-siege`)).json();
     await page.locator('.experience-navigation [data-section="insights"]').click();
     await page.locator('[data-insight-view="comparison"]').click();

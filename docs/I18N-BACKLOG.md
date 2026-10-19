@@ -50,6 +50,17 @@ Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the
 
 Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
 
+## New keys: NEEDS TRANSLATION (Agent Inspector advisory labels, 2026-10-19)
+
+Added so a named model's role output never reads as that model having verified a claim. As above, the sw-KE and hi-IN values are the English text.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `Role outputs are advisory. Go recomputes every fact and decides publication.` | literal key; note under the Inspector's reference run | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Advisory verdict` | literal key; the Verifier record's term for its output | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+A translation must keep the model's output advisory and say that Go, not the model, decides publication.
+
 ## Open-play insight templates: NEEDS HUMAN REVIEW (sw-KE, 2026-10-19)
 
 The open-play pass-count insight (ADR 0031) is a template in Go (`app/internal/ai/open_play.go`) and Python (`agents/src/pulse_agents/patterns.py`), not a catalog key. Its sw-KE text now agrees with the count: singular when the count is 1, plural otherwise. Both forms are drafts written without a native speaker and need review. The en-GB sentences are unchanged, because the recorded capture is bound to them.
