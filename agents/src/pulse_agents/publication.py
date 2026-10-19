@@ -10,7 +10,7 @@ PUBLICATION_REASON = "Supported by the computed corner-shot fact."
 
 
 def publication_reason(pack: FactPack) -> str:
-    if pack["facts"][0]["metric"] == "open_play_passes_before_shot":
+    if len(pack["facts"]) == 1 and pack["facts"][0]["metric"] == "open_play_passes_before_shot":
         return "Supported by the computed open-play pass-count fact."
     return PUBLICATION_REASON
 

@@ -77,3 +77,49 @@ func TestOpenPlayIndependentCueGate(t *testing.T) {
 		t.Fatal("forged count passed independent replay check")
 	}
 }
+
+func TestOpenPlayTemplateCountAgreement(t *testing.T) {
+	r, err := simulator.Load("../../../data/scenarios/late-siege.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	packs, _ := facts.OpenPlayPacks(r)
+	single := packs[0]
+	if single.Facts[0].Value != 1 {
+		t.Fatalf("late-siege open-play count changed: %v", single.Facts[0].Value)
+	}
+	plural := single
+	plural.Facts = []domain.Fact{single.Facts[0]}
+	plural.Facts[0].Value = 2
+	for _, tc := range []struct {
+		pack            domain.FactPack
+		locale, persona string
+		want            string
+	}{
+		// en-GB must stay byte-identical: the recorded capture is bound to it.
+		{single, "en-GB", "CASUAL", "1 completed pass came before the first shot in this open-play window."},
+		{single, "en-GB", "ANALYST", "Open-play window: 1 completed pass before its first shot."},
+		{single, "sw-KE", "CASUAL", "Pasi 1 iliyokamilika ilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi."},
+		{single, "sw-KE", "ANALYST", "Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza."},
+		{plural, "sw-KE", "CASUAL", "Pasi 2 zilizokamilika zilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi."},
+		{plural, "sw-KE", "ANALYST", "Kipindi cha mchezo wazi: pasi 2 zilizokamilika kabla ya shuti lake la kwanza."},
+	} {
+		got, err := openPlayTemplate(tc.pack, tc.locale, tc.persona)
+		if err != nil || got != tc.want {
+			t.Errorf("%v %s/%s = %q, %v; want %q", tc.pack.Facts[0].Value, tc.locale, tc.persona, got, err, tc.want)
+		}
+	}
+}
+
+func TestOpenPlayTemplateRejectsUnknownAudience(t *testing.T) {
+	r, err := simulator.Load("../../../data/scenarios/late-siege.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	packs, _ := facts.OpenPlayPacks(r)
+	for _, tc := range []struct{ locale, persona string }{{"fr-FR", "CASUAL"}, {"en-GB", "NEWCOMER"}, {"", ""}} {
+		if text, err := openPlayTemplate(packs[0], tc.locale, tc.persona); err == nil || text != "" {
+			t.Errorf("%s/%s = %q, %v; want an error", tc.locale, tc.persona, text, err)
+		}
+	}
+}

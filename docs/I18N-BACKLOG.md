@@ -50,6 +50,19 @@ Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the
 
 Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
 
+## Open-play insight templates: NEEDS HUMAN REVIEW (sw-KE, 2026-10-19)
+
+The open-play pass-count insight (ADR 0031) is a template in Go (`app/internal/ai/open_play.go`) and Python (`agents/src/pulse_agents/patterns.py`), not a catalog key. Its sw-KE text now agrees with the count: singular when the count is 1, plural otherwise. Both forms are drafts written without a native speaker and need review. The en-GB sentences are unchanged, because the recorded capture is bound to them.
+
+| Persona | Count | sw-KE | Status |
+|---|---|---|---|
+| CASUAL | 1 | `Pasi 1 iliyokamilika ilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.` | NEEDS HUMAN REVIEW |
+| CASUAL | 2 or more | `Pasi {count} zilizokamilika zilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.` | NEEDS HUMAN REVIEW |
+| ANALYST | 1 | `Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
+| ANALYST | 2 or more | `Kipindi cha mchezo wazi: pasi {count} zilizokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
+
+The hi-IN CASUAL sentence uses the plural verb `दर्ज हुए` for every count, including 1, which shows in late-siege. It was not changed here; a Hindi reviewer should decide whether count 1 needs `दर्ज हुआ`.
+
 ## Summary
 
 | Pattern | Count |
