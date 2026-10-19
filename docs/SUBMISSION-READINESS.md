@@ -13,9 +13,9 @@ Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on mai
 | Python ingress | Current hosting retained by Alex's decision; token auth works, network isolation unresolved/deferred (`INGRESS-REVIEW-2026-10-18.md`) |
 | Windows Python tests | Path comparison normalized without changing the model-cap checks; all 34 tests pass locally |
 | Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
-| Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |
-| Recording provenance | Content bound; original provider response/trace **pending**; see audit |
-| Prototype contributor permission | **UNCONFIRMED; blocks submission** |
+| Video | Alex accepted the existing 87.40-second draft on Oct 19; final public upload pending. Refresh after feature freeze if the new features are included |
+| Recording provenance | Original capture trace unavailable; a new approved three-call reference run with retained provider IDs reproduces it exactly. See audit; never describe it as recovered original evidence |
+| Prototype contributor permission | Alex confirmed on Oct 19 that Ved is a teammate and the team has permission to reuse the prototype. This records the representative's confirmation, not an independent rights audit |
 | Project licence | Team decision pending; do not choose a licence for someone else's work |
 
 ## Prototype reuse confirmation
@@ -34,11 +34,11 @@ private; commit only a contributor-approved summary and reference/date.
 
 | Confirmation field | Value |
 |---|---|
-| Rights holder / contribution | Pending |
-| Permission wording and date | Pending |
+| Rights holder / contribution | Ved / supplied UI prototype, reported by Alex |
+| Permission wording and date | Alex, Oct 19: Ved is in the team and permission to use the prototype is confirmed |
 | Third-party assets and attribution | Pending; also review `THIRD-PARTY-NOTICES.md` |
-| Team representative confirmation | Pending |
-| Approved public summary / evidence reference | Pending |
+| Team representative confirmation | Alex confirmed team membership and reuse permission in the project conversation on Oct 19 |
+| Approved public summary / evidence reference | This dated summary of Alex's confirmation; no private correspondence copied |
 
 Do not tick this from verbal assumptions, an AI-generated statement or a repo
 invite. If permission cannot be confirmed, remove/replace the affected work
@@ -46,8 +46,8 @@ before submission. No legal compliance certification is made here.
 
 ## Final release checklist
 
-1. Retain the language-review confirmation in `LOCALE-REVIEW.md`, get contributor confirmation above and
-   original recording evidence or appropriately narrowed provider claims.
+1. Retain the language-review and contributor confirmations, review third-party
+   assets/attribution and keep original-versus-reference recording claims distinct.
 2. Review/merge the tested branch. Let main's existing CI/image workflow deploy.
    Check `/version` matches that main SHA and rerun the judge instructions.
 3. Watch the complete video; verify duration, readable captions, correct labels,

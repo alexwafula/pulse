@@ -1,0 +1,232 @@
+{
+  "version": "pulse-agent-reference-v1",
+  "kind": "reproduction-not-original-capture",
+  "capturedAt": "2026-10-19T06:11:49.052668+00:00",
+  "deployment": "pulse-insights",
+  "request": {
+    "schemaVersion": "2.0.0",
+    "factPack": {
+      "schemaVersion": "2.0.0",
+      "id": "pack-corner-a17ddcca8e6cba9b",
+      "matchId": "match-vale-bastion-01",
+      "period": 1,
+      "windowStartMs": 1672000,
+      "windowEndMs": 1678000,
+      "facts": [
+        {
+          "id": "fact-corner-a17ddcca8e6cba9b",
+          "metric": "set_piece_shots",
+          "value": 1,
+          "unit": "shots",
+          "teamId": "vale",
+          "timeStartMs": 1672000,
+          "timeEndMs": 1678000,
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ]
+        }
+      ]
+    },
+    "locale": "en-GB",
+    "persona": "CASUAL"
+  },
+  "response": {
+    "schemaVersion": "2.0.0",
+    "draft": {
+      "schemaVersion": "2.0.0",
+      "id": "draft-pack-corner-a17ddcca8e6cba9b",
+      "factPackId": "pack-corner-a17ddcca8e6cba9b",
+      "locale": "en-GB",
+      "persona": "CASUAL",
+      "text": "The corner produced 1 shot.",
+      "claims": [
+        {
+          "id": "claim-fact-corner-a17ddcca8e6cba9b",
+          "text": "The corner produced 1 shot.",
+          "factIds": [
+            "fact-corner-a17ddcca8e6cba9b"
+          ],
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ]
+        }
+      ]
+    },
+    "verification": {
+      "schemaVersion": "2.0.0",
+      "draftId": "draft-pack-corner-a17ddcca8e6cba9b",
+      "status": "VERIFIED",
+      "claimsChecked": 1,
+      "claimsPassed": 1,
+      "claims": [
+        {
+          "claimId": "claim-fact-corner-a17ddcca8e6cba9b",
+          "supported": true,
+          "eventIds": [
+            "evt-06",
+            "evt-07"
+          ],
+          "reason": "Supported by the computed corner-shot fact."
+        }
+      ]
+    }
+  },
+  "accepted": true,
+  "narratorAttempts": 1,
+  "modelCalls": 3,
+  "observations": [
+    {
+      "role": "explainer",
+      "responseId": "chatcmpl-Eaaswiyx7F3AOTRUCLZw5hfUZ75B4",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792390302,
+      "observedAt": "2026-10-19T06:11:42.767157+00:00",
+      "durationMs": 2268,
+      "usage": {
+        "completion_tokens": 60,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 7,
+          "engine_ttft_ms": 28,
+          "engine_ttlt_ms": 479,
+          "pre_inference_ms": 120,
+          "service_tbt_ms": 8,
+          "service_ttft_ms": 757,
+          "service_ttlt_ms": 1231,
+          "user_visible_ttft_ms": 636
+        },
+        "prompt_tokens": 353,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 413
+      },
+      "output": {
+        "id": "claim-fact-corner-a17ddcca8e6cba9b",
+        "text": "The corner produced 1 shot.",
+        "factIds": [
+          "fact-corner-a17ddcca8e6cba9b"
+        ],
+        "eventIds": [
+          "evt-06",
+          "evt-07"
+        ]
+      }
+    },
+    {
+      "role": "narrator",
+      "responseId": "chatcmpl-EaasyTxZ9sAF1auznBULjVWenE9or",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792390304,
+      "observedAt": "2026-10-19T06:11:45.326328+00:00",
+      "durationMs": 2556,
+      "usage": {
+        "completion_tokens": 130,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 11,
+          "engine_ttft_ms": 42,
+          "engine_ttlt_ms": 1506,
+          "pre_inference_ms": 89,
+          "service_tbt_ms": 11,
+          "service_ttft_ms": 530,
+          "service_ttlt_ms": 1989,
+          "user_visible_ttft_ms": 441
+        },
+        "prompt_tokens": 560,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 690
+      },
+      "output": {
+        "schemaVersion": "2.0.0",
+        "id": "draft-pack-corner-a17ddcca8e6cba9b",
+        "factPackId": "pack-corner-a17ddcca8e6cba9b",
+        "locale": "en-GB",
+        "persona": "CASUAL",
+        "text": "The corner produced 1 shot.",
+        "claims": [
+          {
+            "id": "claim-fact-corner-a17ddcca8e6cba9b",
+            "text": "The corner produced 1 shot.",
+            "factIds": [
+              "fact-corner-a17ddcca8e6cba9b"
+            ],
+            "eventIds": [
+              "evt-06",
+              "evt-07"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "role": "verifier",
+      "responseId": "chatcmpl-Eaat1G5n0S20FpbQULyXawtliiuDW",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792390307,
+      "observedAt": "2026-10-19T06:11:49.047036+00:00",
+      "durationMs": 3708,
+      "usage": {
+        "completion_tokens": 104,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 16,
+          "engine_ttft_ms": 44,
+          "engine_ttlt_ms": 1688,
+          "pre_inference_ms": 91,
+          "service_tbt_ms": 16,
+          "service_ttft_ms": 1078,
+          "service_ttlt_ms": 2706,
+          "user_visible_ttft_ms": 988
+        },
+        "prompt_tokens": 611,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 715
+      },
+      "output": {
+        "schemaVersion": "2.0.0",
+        "draftId": "draft-pack-corner-a17ddcca8e6cba9b",
+        "status": "VERIFIED",
+        "claimsChecked": 1,
+        "claimsPassed": 1,
+        "claims": [
+          {
+            "claimId": "claim-fact-corner-a17ddcca8e6cba9b",
+            "supported": true,
+            "eventIds": [
+              "evt-06",
+              "evt-07"
+            ],
+            "reason": "The fact states exactly 1 shot from the corner, matching claim and event IDs."
+          }
+        ]
+      }
+    }
+  ],
+  "requestHash": "d2e5f4b22e06918a29b46ba30775972d199efc30a994595841e446900ed5fc75",
+  "matchesRecording": true
+}

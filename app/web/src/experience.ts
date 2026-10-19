@@ -1,4 +1,4 @@
-import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play } from "lucide";
+import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play, ArrowLeftRight } from "lucide";
 import { paintExperienceGraphics } from "./experience-graphics";
 import { t } from "./i18n";
 const dropdownOpen = (): boolean => document.querySelector(".select2-container--open .select2-dropdown") !== null;
@@ -33,7 +33,7 @@ const watchDock = document.querySelector<HTMLElement>("#experience-watch-dock")!
 const watchButton = document.querySelector<HTMLButtonElement>("#watch-toggle")!;
 let disposeGraphics: (() => void) | undefined;
 
-const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play } });
+const icons = (): void => createIcons({ icons: { Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play, ArrowLeftRight } });
 icons();
 
 const library = document.querySelector<HTMLElement>("#scenario-library")!;
@@ -135,7 +135,7 @@ function refresh(): void {
 function selectSection(next: Section, changePane = true): void {
   document.body.dataset.section = next;
   if (next === "insights" && changePane) insightView = "charts";
-  const details = next === "insights" && insightView !== "charts" && insightView !== "maps";
+  const details = next === "insights" && !["charts", "maps", "comparison"].includes(insightView);
   panel.hidden = next === "live";
   content.hidden = details;
   document.querySelector<HTMLElement>(".drawer-main")!.hidden = next !== "live" && !details;
@@ -148,7 +148,7 @@ function selectSection(next: Section, changePane = true): void {
     else button.removeAttribute("aria-current");
   }
   if (!panel.hidden) {
-    panelInput.value = next === "insights" ? "analytics" : next;
+    panelInput.value = next === "insights" ? insightView === "comparison" ? "comparison" : "analytics" : next;
     refresh();
   } else if (changePane) {
     document.dispatchEvent(new CustomEvent("pulse:select-pane", { detail: { pane: next === "insights" ? "control" : "timeline" } }));
@@ -227,7 +227,10 @@ document.querySelector<HTMLSelectElement>("#camera-mode")!.addEventListener("cha
 // Delegation also covers buttons arriving in HTMX fragments.
 content.addEventListener("click", (event) => {
   const button = (event.target as Element).closest<HTMLButtonElement>("button");
-  if (button?.dataset.inspectEvent) {
+  if (button?.dataset.compareStart) {
+    selectSection("live", false);
+    document.dispatchEvent(new CustomEvent("pulse:replay-window", {detail:{startMs:Number(button.dataset.compareStart), endMs:Number(button.dataset.compareEnd)}}));
+  } else if (button?.dataset.inspectEvent) {
     selectSection("live");
     document.dispatchEvent(new CustomEvent("pulse:inspect", { detail: { eventId: button.dataset.inspectEvent } }));
   } else if (button?.hasAttribute("data-download-recap")) {
@@ -263,6 +266,16 @@ document.addEventListener("htmx:afterSwap", (event) => {
 document.addEventListener("pulse:map-inspect", (event) => {
   selectSection("live");
   document.dispatchEvent(new CustomEvent("pulse:inspect", { detail: (event as CustomEvent<{ eventId: string }>).detail }));
+});
+
+document.addEventListener("pulse:compare-moment", event => {
+  const detail = (event as CustomEvent<{timeMs: number; teamId: string}>).detail;
+  const team = form.elements.namedItem("teamId") as HTMLSelectElement;
+  team.value = detail.teamId;
+  team.dispatchEvent(new CustomEvent("pulse:selection", {bubbles:true}));
+  document.dispatchEvent(new CustomEvent("pulse:inspect", {detail:{timeMs:detail.timeMs}}));
+  insightView = "comparison";
+  selectSection("insights", false);
 });
 graphics();
 const initialSection = new URL(location.href).searchParams.get("section");

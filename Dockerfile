@@ -18,6 +18,7 @@ COPY --from=build /pulse /pulse
 COPY app/web/templates ./app/web/templates
 COPY app/web/static ./app/web/static
 COPY data ./data
+COPY agents/inspections/*.json ./agents/inspections/
 EXPOSE 8080
 ENTRYPOINT ["/pulse"]
 CMD ["-addr", "0.0.0.0:8080"]

@@ -65,17 +65,17 @@ try {
       await page.goto(`${base}/healthz`);
       await page.evaluate(value => { localStorage.clear(); if (value !== null) localStorage.setItem("pulse:locale", value); }, stored);
       const requested = [];
-      const insightsRequest = page.waitForRequest(request => new URL(request.url()).pathname === "/api/insights", { timeout: 30000 });
+      const insightsRequest = page.waitForRequest(request => new URL(request.url()).pathname === "/api/agent-inspection", { timeout: 30000 });
       page.on("request", request => {
         const url = new URL(request.url());
-        if (url.searchParams.has("locale") && (url.pathname === "/api/insights" || url.pathname === "/experience/panel")) requested.push(`${url.pathname}=${url.searchParams.get("locale")}`);
+        if (url.searchParams.has("locale") && (url.pathname === "/api/agent-inspection" || url.pathname === "/experience/panel")) requested.push(`${url.pathname}=${url.searchParams.get("locale")}`);
       });
       await page.goto(`${base}/${query}`, { waitUntil: "networkidle" });
       await insightsRequest;
       await page.waitForLoadState("networkidle");
       const result = {
         requested: [...new Set(requested.map(entry => entry.split("=")[1]))],
-        insights: requested.some(entry => entry.startsWith("/api/insights=")),
+        insights: requested.some(entry => entry.startsWith("/api/agent-inspection=")),
         stored: await page.evaluate(() => localStorage.getItem("pulse:locale")),
         selected: await page.locator("#locale").inputValue(),
         body: await page.locator("body").getAttribute("data-locale"),
@@ -98,7 +98,7 @@ try {
     for (const { stored, query, expected } of cases) {
       const result = await firstLoad(stored, query);
       const name = `stored=${JSON.stringify(stored)} query=${query ?? ""}`;
-      assert.ok(result.insights, `${name}: no /api/insights request`);
+      assert.ok(result.insights, `${name}: no /api/agent-inspection request`);
       assert.deepEqual(result.requested, [expected], `${name}: requested ${result.requested}`);
       assert.equal(result.selected, expected, `${name}: selected`);
       assert.equal(result.body, expected, `${name}: body locale`);

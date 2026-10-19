@@ -3,6 +3,9 @@
 The reproducible capture uses the actual local UI with English captions, no
 voice synthesis, music, real football footage or provider-console mockups.
 It is a **draft pending human approval**, not an uploaded final submission.
+Alex accepted this existing draft on Oct 19. Public upload remains pending;
+the Inspector/comparison additions require a refreshed capture if shown in the
+final submission, rather than implying the old video already contains them.
 The caption band is outside the app. The script refuses non-loopback URLs,
 checks Python is in recorded mode and requires the checked corner recording.
 

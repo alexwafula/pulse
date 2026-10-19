@@ -24,6 +24,20 @@ The recording's provider/model metadata is declared, not independently attested.
 The [demo storyboard and local video](docs/DEMO-VIDEO.md) show only working,
 fictional replay with honest recorded/template labels.
 
+### Inspector/comparison branch preview
+
+`feat/agent-inspector-comparison` adds **Agent Inspector** beneath a displayed
+corner insight and **Insights -> What changed?** for equal, same-team 10/20/30-second
+windows. Inspector exposes actual delivered artifacts and Go checks, plus a clearly
+labelled injected-claim test. Its Oct 19 Foundry reference is a new three-role
+reproduction with retained provider IDs, not an original trace or fresh generation
+on each page visit. Comparison counts/pitch paths come from replay source actions,
+with event evidence and bounded window replay. These features are local until
+merged/deployed. See [ADR 0028](docs/decisions/0028-agent-inspector-and-window-comparison.md).
+
+Run the new desktop/mobile checks against a local **recorded** setup:
+`node tests/integration/inspection-comparison-browser.mjs`.
+
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
 - HTMX: server-rendered interface updates

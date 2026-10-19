@@ -1,4 +1,4 @@
-import { createElement, ListVideo } from "lucide";
+import { createElement, ListVideo, ArrowLeftRight } from "lucide";
 import { locale, t } from "./i18n";
 import type { Replay, Cue } from "./pitch";
 import type { ControlField } from "./renderers/types";
@@ -179,7 +179,16 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         const detail = document.createElement("span"); detail.textContent = `${hooks.matchTime(moment.timeMs)} / ${teamName(moment.teamId)}`;
         button.append(createElement(ListVideo, { width: 16, height: 16, "aria-hidden": "true" }), title, detail);
         button.addEventListener("click", () => hooks.playMoment(moment));
-        row.append(button); row.hidden = true; momentList.append(row); rows.push({ moment, row, button });
+        row.append(button);
+        if (document.body.classList.contains("experience")) {
+          const compare = document.createElement("button");
+          compare.type = "button"; compare.className = "icon-button compare-moment";
+          compare.title = t("Compare windows"); compare.setAttribute("aria-label", t("Compare windows"));
+          compare.append(createElement(ArrowLeftRight, {width:16, height:16, "aria-hidden":"true"}));
+          compare.addEventListener("click", () => document.dispatchEvent(new CustomEvent("pulse:compare-moment", {detail:{timeMs:moment.timeMs, teamId:moment.teamId}})));
+          row.append(compare);
+        }
+        row.hidden = true; momentList.append(row); rows.push({ moment, row, button });
       }
     } catch (error: unknown) {
       momentsState.textContent = "Moments unavailable";

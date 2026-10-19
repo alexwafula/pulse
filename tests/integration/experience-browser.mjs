@@ -317,7 +317,7 @@ try {
   const verifiedFeed = structuredClone(analyst);
   verifiedFeed.cues[0].text = "The corner-to-shot window contains 1 shot.";
   verifiedFeed.cues[0].verification.status = "VERIFIED";
-  await cuePage.route("**/api/insights?**", route => route.fulfill({ contentType: "application/json", body: JSON.stringify(verifiedFeed) }));
+  await cuePage.route("**/api/agent-inspection?**", route => route.fulfill({ contentType: "application/json", body: JSON.stringify({version:"pulse-inspection-v1", feed:verifiedFeed, inspections:[]}) }));
   await cuePage.reload({waitUntil:"networkidle"});
   await pause(cuePage); await seek(cuePage,1000);
   await cuePage.waitForFunction(() => document.querySelector("#insight-status")?.textContent === "Verified");

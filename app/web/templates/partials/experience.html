@@ -1,6 +1,6 @@
 {{define "experience-panel"}}
 <div class="story-content" data-time-ms="{{.TimeMS}}" data-panel="{{.View}}" data-story-mode="{{.Mode}}" data-persona="{{.Persona}}" data-locale="{{.Locale}}" data-map-mode="{{.MapMode}}">
-  <div class="section-heading"><h3>{{if eq .View "recap"}}Sequence recap{{else if eq .View "analytics"}}Match patterns{{else if eq .Mode "catchup"}}Story so far{{else if eq .Mode "highlights"}}Chances &amp; deliveries{{else if .Focus}}{{.Focus.Name}}{{else}}Match story{{end}}</h3><time>{{.Clock}}</time></div>
+  <div class="section-heading"><h3>{{if eq .View "recap"}}Sequence recap{{else if eq .View "comparison"}}What changed?{{else if eq .View "analytics"}}Match patterns{{else if eq .Mode "catchup"}}Story so far{{else if eq .Mode "highlights"}}Chances &amp; deliveries{{else if .Focus}}{{.Focus.Name}}{{else}}Match story{{end}}</h3><time>{{.Clock}}</time></div>
   {{if eq .View "recap"}}
     {{if .Complete}}
       <span class="story-source">Source-event summary</span>
@@ -9,6 +9,8 @@
     {{else}}<p class="story-empty">Recap available at the end of the sequence.</p>{{end}}
   {{else if eq .View "analytics"}}
     {{template "experience-analytics" .}}
+  {{else if eq .View "comparison"}}
+    {{template "experience-comparison" .Comparison}}
   {{else}}
     <span class="story-source">Source events</span>
     {{if .Focus}}
@@ -20,6 +22,38 @@
     <ol class="story-log">{{range .Actions}}<li data-story-event="{{.ID}}"><div class="story-meta"><time>{{.Clock}}</time><span>{{.Kind}} &middot; {{.Team}}</span></div><p>{{.Text}}</p>{{if $analyst}}<p class="story-details">{{.ID}} &middot; {{.Phase}}<br>{{.Coordinates}}</p>{{end}}<div class="story-action"><span>{{.Outcome}}</span><button type="button" data-inspect-event="{{.ID}}" class="evidence-button" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></div></li>{{else}}<li class="story-empty">No matching actions at this time.</li>{{end}}</ol>
   {{end}}
 </div>
+{{end}}
+
+{{define "experience-comparison"}}
+<section class="comparison" data-comparison-team="{{.Team.ID}}" data-team-index="{{.TeamIndex}}" data-available="{{.Available}}">
+  <div class="comparison-heading"><strong>{{.Team.Name}}</strong><span class="story-source">Source-event comparison</span></div>
+  {{if .Available}}
+  <div class="comparison-windows">
+    {{template "comparison-window" .Before}}{{template "comparison-window" .After}}
+  </div>
+  <div class="comparison-ledger" role="table" aria-label="Earlier and recent window statistics">
+    <div role="row" class="comparison-labels"><span role="columnheader">Metric</span><span role="columnheader">Earlier</span><span role="columnheader">Recent</span><span role="columnheader">Change</span></div>
+    {{range .Rows}}<div role="row" class="comparison-stat" data-metric="{{.Name}}" data-before="{{.Before}}" data-after="{{.After}}">
+      <span role="rowheader">{{.Name}}</span><span role="cell">{{.Before}}</span><span role="cell">{{.After}}</span><strong role="cell">{{.Delta}}</strong>
+      <div class="comparison-bars" aria-hidden="true"><span style="width: {{.BeforeWidth}}%"></span><span style="width: {{.AfterWidth}}%"></span></div>
+    </div>{{end}}
+  </div>
+  <p class="model-label">Equal windows, same team. Observed changes, not a claim of tactical cause.</p>
+  <p class="model-label">Lanes count completed pass/carry destinations relative to attacking direction. The shared boundary belongs to the recent window.</p>
+  {{else}}<p class="story-empty">Two complete windows are not available yet.</p>{{end}}
+</section>
+{{end}}
+
+{{define "comparison-window"}}
+<figure class="comparison-window" data-start-ms="{{.StartMS}}" data-end-ms="{{.EndMS}}">
+  <figcaption><strong>{{.Label}}</strong><time>{{.StartClock}} - {{.EndClock}}</time></figcaption>
+  <svg viewBox="-2 -2 109 72" class="pitch-map" role="img" aria-label="Source actions from {{.StartClock}} to {{.EndClock}}">
+    {{template "mini-pitch"}}
+    <g class="comparison-paths">{{range .Paths}}<g data-comparison-event="{{.ID}}" data-kind="{{.Kind}}"><path d="M {{.X1}} {{.Y1}} L {{.X2}} {{.Y2}}"></path><circle cx="{{.X1}}" cy="{{.Y1}}" r="1"></circle><circle class="comparison-destination" cx="{{.X2}}" cy="{{.Y2}}" r=".7"></circle><title>{{.ID}} / {{.Kind}}</title></g>{{end}}</g>
+  </svg>
+  <button type="button" class="evidence-button" data-compare-start="{{.StartMS}}" data-compare-end="{{.ReplayEndMS}}"><i data-lucide="play"></i><span>Replay window</span></button>
+  <div class="story-evidence">{{range .EventIDs}}<button type="button" class="evidence-button" data-inspect-event="{{.}}" title="Inspect {{.}}"><i data-lucide="list-video"></i><span data-no-translate>{{.}}</span></button>{{else}}<span class="story-source">No matching actions in this window.</span>{{end}}</div>
+</figure>
 {{end}}
 
 {{define "mini-pitch"}}

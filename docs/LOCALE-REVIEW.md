@@ -1,5 +1,9 @@
 # Native language review
 
+Oct 19 feature follow-up: Inspector/comparison labels and technical explanations
+have new Swahili/Hindi drafts with matching interpolation keys. Alex's acceptance
+below applies to the previously reviewed copy, not these newly added strings.
+
 Status: **TEAM ACCEPTANCE RECORDED**. On October 18 Alex confirmed that the
 native-language/Swahili review was good, reported no issues and requested no
 translation corrections. This records the user's acceptance, not an assistant's

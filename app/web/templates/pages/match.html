@@ -350,6 +350,12 @@
             <ul id="fact-check-claims"></ul>
             <small id="fact-check-policy"></small>
           </details>
+          {{if .Experience}}
+          <details id="agent-inspector" class="fact-check agent-inspector" hidden>
+            <summary>Agent Inspector</summary>
+            <div id="agent-inspector-content"></div>
+          </details>
+          {{end}}
         </section>
 
         {{if .Experience}}
@@ -368,7 +374,7 @@
               <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}">#{{.Number}} {{.Name}}</option>{{end}}</select></label>
             </div>
             <div id="map-controls" class="experience-controls" hidden>
-              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
+              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-insight-view="comparison" aria-pressed="false"><i data-lucide="arrow-left-right"></i><span>What changed?</span></button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
               <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></label>
               <div class="story-modes" role="group" aria-label="Pitch map">
                 <button type="button" data-map-mode="network" aria-pressed="false"><i data-lucide="network"></i><span>Pass network</span></button>
@@ -376,6 +382,7 @@
                 <button type="button" data-map-mode="shots" aria-pressed="false"><i data-lucide="crosshair"></i><span>Shots</span></button>
               </div>
               <input type="hidden" name="map" value="occupancy">
+              <label id="comparison-window-control" class="experience-select">Window <select name="windowMs" aria-label="Comparison window"><option value="10000">10 seconds</option><option value="20000">20 seconds</option><option value="30000">30 seconds</option></select></label>
             </div>
           </form>
           <div class="panel-status"><span id="panel-status" role="status"></span><button type="button" id="panel-retry" class="icon-button" title="Retry panel" aria-label="Retry panel" hidden><i data-lucide="rotate-ccw"></i></button></div>

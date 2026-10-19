@@ -6,6 +6,7 @@ import { createAnalytics, type Moment } from "./analytics";
 import { locale, localize, observeLocalization, supportedLocale, t } from "./i18n";
 import { closeDropdowns, initializeSelects, syncSelects } from "./selects";
 import { renderFactCheck } from "./fact-check";
+import { renderInspector, type Inspection } from "./agent-inspector";
 import { teamColour, teamKit } from "./team-colour";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
@@ -91,9 +92,11 @@ const pitchError = document.querySelector<HTMLElement>("#pitch-error");
 const retryButton = document.querySelector<HTMLButtonElement>("#pitch-retry");
 const runDemoButton = document.querySelector<HTMLButtonElement>("#run-demo-button");
 let cues: Cue[] = [];
+let inspections: Inspection[] = [];
 let insightSource = "";
 let evidenceCue: Cue | undefined;
 let momentClip: Moment | undefined;
+let comparisonClip: {startMs: number; endMs: number} | undefined;
 let analytics: ReturnType<typeof createAnalytics> | undefined;
 let returnClock = 0;
 let displayedCueID: string | undefined;
@@ -151,6 +154,7 @@ function scenarioQuery(): string { return `scenario=${encodeURIComponent(scenari
 function clearEvidence(): void {
   evidenceCue = undefined;
   momentClip = undefined;
+  comparisonClip = undefined;
   evidenceReturn.hidden = true;
   for (const button of speedButtons) { button.disabled = false; button.setAttribute("aria-pressed", String(Number(button.dataset.speed) === speed)); }
   for (const button of eventButtons.values()) button.classList.remove("evidence-event");
@@ -165,18 +169,22 @@ function renderInsight(): void {
   insightStatus.textContent = cue ? (cue.verification.status === "VERIFIED" ? (insightSource === "python-recorded" ? "Verified (recorded)" : "Verified") : "Template") : "Waiting";
   insightEvidence.hidden = !cue;
   renderFactCheck(cue, insightSource, matchTime);
+  renderInspector(cue, inspections.find(item => item.cueId === cue?.id));
   if (cue) insightWindow.textContent = t("insight.window", { start: matchTime(cue.replayStartMs), end: matchTime(cue.replayEndMs), count: cue.eventIds.length, events: t(cue.eventIds.length === 1 ? "event" : "events") });
 }
 
 async function loadInsights(): Promise<void> {
   const request = ++insightRequest;
   try {
-    const response = await fetch(`/api/insights?${scenarioQuery()}&persona=${persona}&locale=${localePicker.value}`, { cache: "no-store" });
+    const response = await fetch(`/api/agent-inspection?${scenarioQuery()}&persona=${persona}&locale=${localePicker.value}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Insight request failed: ${response.status}`);
-    const feed = await response.json() as CueFeed;
+    const envelope = await response.json() as {version:string; feed:CueFeed; inspections:Inspection[]};
+    if (envelope.version !== "pulse-inspection-v1" || !Array.isArray(envelope.inspections)) throw new Error("Unsupported inspection feed");
+    const feed = envelope.feed;
     if (request !== insightRequest) return;
     if (feed.schemaVersion !== "2.0.0" || !Array.isArray(feed.cues)) throw new Error("Unsupported cue feed");
     cues = feed.cues;
+    inspections = envelope.inspections;
     insightSource = response.headers.get("X-Pulse-Insight-Source") ?? "";
     if (!cues.length) { insightText.textContent = "No corner-shot moment in this sequence"; insightStatus.textContent = "No moment"; }
     else { displayedCueID = undefined; renderInsight(); }
@@ -465,7 +473,7 @@ function render(): void {
   }
   clockDisplay.textContent = matchTime(clock);
   seek.value = String(Math.round(((clock - replay.match.startMs) / (replay.match.endMs - replay.match.startMs)) * 1000));
-  const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs;
+  const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs;
   const nextPlayLabel = playing ? "Pause" : clipEnd !== undefined && clock >= clipEnd ? "Replay evidence" : clock >= replay.match.endMs ? "Replay" : "Play";
   if (playLabel !== nextPlayLabel) {
     playLabel = nextPlayLabel;
@@ -508,8 +516,8 @@ function animate(time: number): void {
   if (document.hidden) return;
   if (playing) {
     if (previousFrameTime) {
-      const end = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? replay.match.endMs;
-      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue || momentClip ? 1 : speed));
+      const end = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs ?? replay.match.endMs;
+      clock = Math.min(end, clock + Math.min(time - previousFrameTime, 250) * (evidenceCue || momentClip || comparisonClip ? 1 : speed));
       if (clock >= end) playing = false;
       render();
     }
@@ -659,6 +667,17 @@ async function start(): Promise<void> {
     }
     createPlayers();
     createTimeline();
+    document.addEventListener("pulse:replay-window", event => {
+      const detail = (event as CustomEvent<{startMs:number;endMs:number}>).detail;
+      if (!detail || !Number.isSafeInteger(detail.startMs) || !Number.isSafeInteger(detail.endMs) || detail.startMs < replay.match.startMs || detail.endMs > clock || detail.endMs <= detail.startMs) return;
+      stopDemo();
+      if (!evidenceCue && !momentClip && !comparisonClip) returnClock = clock;
+      clearEvidence(); comparisonClip = detail;
+      clock = detail.startMs; playing = true; previousFrameTime = 0;
+      for (const button of speedButtons) { button.disabled = true; button.setAttribute("aria-pressed", String(button.dataset.speed === "1")); }
+      evidenceReturn.hidden = false;
+      setDrawerTab("timeline", true, "live"); render();
+    });
     document.addEventListener("pulse:inspect", (event) => {
       const detail = (event as CustomEvent<{ eventId?: string; timeMs?: number }>).detail;
       const action = replay.events.find(item => item.id === detail?.eventId);
@@ -778,7 +797,7 @@ async function start(): Promise<void> {
         if (currentEventId) eventButtons.get(currentEventId)?.removeAttribute("aria-current");
         currentEventId = null; playLabel = "";
         refreshReplayText();
-        cues = []; displayedCueID = undefined; render(); void loadInsights();
+        cues = []; inspections = []; displayedCueID = undefined; render(); void loadInsights();
         document.dispatchEvent(new CustomEvent("pulse:audience", { detail: { persona, locale: locale() } }));
     }
     for (const button of Array.from(document.querySelectorAll<HTMLButtonElement>("button[data-persona]"))) {
@@ -835,8 +854,8 @@ async function start(): Promise<void> {
 
     playButton.addEventListener("click", () => {
       stopDemo();
-      const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs;
-      if (clipEnd !== undefined && clock >= clipEnd) clock = Math.max(replay.match.startMs, evidenceCue?.replayStartMs ?? momentClip!.windowStartMs);
+      const clipEnd = evidenceCue?.replayEndMs ?? momentClip?.windowEndMs ?? comparisonClip?.endMs;
+      if (clipEnd !== undefined && clock >= clipEnd) clock = Math.max(replay.match.startMs, evidenceCue?.replayStartMs ?? momentClip?.windowStartMs ?? comparisonClip!.startMs);
       else if (clock >= replay.match.endMs) clock = replay.match.startMs;
       playing = !playing;
       render();

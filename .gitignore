@@ -1,4 +1,5 @@
 .env
+agents/inspections/.capture-attempted
 .env.*
 !.env.example
 *.pem
