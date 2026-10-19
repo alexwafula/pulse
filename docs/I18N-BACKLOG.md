@@ -38,6 +38,18 @@ Added with the status badges. As above, the sw-KE and hi-IN values are the Engli
 
 The tooltip describes what was checked, a recording. A translation must not name a model or say that a model verified anything.
 
+## New keys: NEEDS TRANSLATION (D4a evidence trail, 2026-10-19)
+
+Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `evidence.ticks` | `{count} metric ticks {start}–{end}` (plural; for example "6 metric ticks 88:09–88:11") | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `evidence.tickOne` | `{count} metric tick {clock}` (singular, used only when `count` is 1; for example "1 metric tick 88:22") | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Evidence trail shown under the pitch` | `Evidence trail shown under the pitch` (literal key; the Evidence tab's note while a clip plays) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
+
 ## Summary
 
 | Pattern | Count |
