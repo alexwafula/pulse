@@ -38,9 +38,9 @@ private; commit only a contributor-approved summary and reference/date.
 |---|---|
 | Rights holder / contribution | Ved, registered Pulse team member; Matchlens prototype made with claude.ai |
 | Permission wording and date | The team may derive the Pulse UI from the prototype, code and markup included; 2026-10-19 |
-| Third-party assets and attribution | Pending; also review `THIRD-PARTY-NOTICES.md` |
+| Third-party assets and attribution | jQuery (MIT) and the fonts, listed with licences in `THIRD-PARTY-NOTICES.md` (jQuery `:27`, Fonts `:43-49`) |
 | Team representative confirmation | Recorded by Jefferson (commit `fec91b5`, 2026-10-19) |
-| Approved public summary / evidence reference | Written confirmation held by the team outside the repo. This table and ADR 0015 are the public summary; Ved's sign-off on that wording is not recorded here |
+| Approved public summary / evidence reference | Written confirmation held by the team outside the repo. This table and ADR 0015 are the public summary; Ved signed off on it (2026-10-19) |
 
 Do not tick this from verbal assumptions, an AI-generated statement or a repo
 invite. If permission cannot be confirmed, remove/replace the affected work
