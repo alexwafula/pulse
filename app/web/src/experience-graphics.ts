@@ -3,6 +3,8 @@ import { createElement, ListVideo } from "lucide";
 type Graphic = { canvas: HTMLCanvasElement; context: CanvasRenderingContext2D; svg: SVGSVGElement; host: HTMLElement };
 const number = (element: Element, attribute: string): number => Number(element.getAttribute(attribute));
 const mapSelections = new Map<string, string>();
+/** A colour role from tokens.css; the team slots already point at each team's own colour. */
+const token = (name: string): string => getComputedStyle(document.body).getPropertyValue(name).trim();
 
 function field(ctx: CanvasRenderingContext2D): void {
   ctx.fillStyle = "#2e7a53"; ctx.fillRect(-2, -2, 109, 72);
@@ -46,7 +48,7 @@ function drawMap({context: ctx, svg, host}: Graphic): void {
     }
     for (const node of svg.querySelectorAll<SVGGElement>(".network-node")) {
       const x = number(node,"data-x"), y = number(node,"data-y"), radius = number(node,"data-radius");
-      ctx.fillStyle = host.dataset.teamIndex === "1" ? "#3a7fd5" : "#d9485f";
+      ctx.fillStyle = token(host.dataset.teamIndex === "1" ? "--team-away" : "--team-home");
       ctx.strokeStyle = "#fff"; ctx.lineWidth = .35;
       ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#fff"; ctx.font = `700 ${radius*.95}px Outfit, sans-serif`;
@@ -65,11 +67,11 @@ function drawMap({context: ctx, svg, host}: Graphic): void {
 
 function drawChart({context: ctx, svg, host}: Graphic): void {
   ctx.clearRect(0,0,280,100);
-  ctx.strokeStyle = "#e0e4e8"; ctx.lineWidth = 1;
+  ctx.strokeStyle = token("--c-rule"); ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(14,88); ctx.lineTo(266,88); ctx.moveTo(14,16); ctx.lineTo(266,16); ctx.stroke();
-  ctx.font = "9px 'Plus Jakarta Sans', sans-serif"; ctx.fillStyle = "#66748a";
+  ctx.font = "9px 'Plus Jakarta Sans', sans-serif"; ctx.fillStyle = token("--c-ink-muted");
   ctx.fillText(svg.querySelector("text")!.textContent!,0,20); ctx.fillText("0",0,91);
-  for (const [team,color] of [["home","#d9485f"],["away","#3a7fd5"]]) {
+  for (const [team,color] of [["home",token("--team-home")],["away",token("--team-away")]]) {
     ctx.fillStyle = color; ctx.globalAlpha = .12;
     ctx.fill(new Path2D(svg.querySelector(`.chart-${team}-area`)!.getAttribute("d")!));
     ctx.globalAlpha = 1; ctx.strokeStyle = color; ctx.lineWidth = 2;

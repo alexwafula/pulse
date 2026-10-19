@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCharacterFactory, poseCharacter } from "./characters";
-import type { CameraMode, ControlField, PitchRenderer, RenderPlayer, SceneState } from "./types";
+import { kitColours, type CameraMode, type ControlField, type PitchRenderer, type RenderPlayer, type SceneState } from "./types";
 
 export function createStadium(host: HTMLElement, players: RenderPlayer[]): PitchRenderer {
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x142c21);
@@ -11,7 +11,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   host.append(renderer.domElement);
   renderer.domElement.setAttribute("role","img");
   renderer.domElement.setAttribute("aria-label","Football stadium with articulated players and a textured ball");
-  renderer.domElement.dataset.presentation = "stadium";
+  Object.assign(renderer.domElement.dataset, { presentation: "stadium", teamColours: kitColours(players) });
   const camera = new THREE.PerspectiveCamera(34,1,.5,600);
   const controls = new OrbitControls(camera,renderer.domElement);
   controls.enableDamping = true; controls.enablePan = false;
@@ -92,6 +92,8 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     }));
   }
   const createCharacter = createCharacterFactory(textures);
+  const sideColour = (home: boolean): string => players.find(player => player.home === home)?.colour || (home ? "#f47761" : "#48bed3");
+  const controlColours = [sideColour(true), sideColour(false)];
   const characters = new Map(players.map(player => { const character = createCharacter(player); scene.add(character.root); return [player.id,character]; }));
   const ballCanvas = document.createElement("canvas"); ballCanvas.width = 256; ballCanvas.height = 128;
   const bc = ballCanvas.getContext("2d")!; bc.fillStyle = "#f5f5ef"; bc.fillRect(0,0,256,128);
@@ -166,7 +168,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
               cell.rotation.x = -Math.PI/2; cell.position.set((col+.5)*105/grid.cols-52.5,.03,34-(row+.5)*68/grid.rows); field.add(cell); cells.push(cell);
             }
           }
-          cells.forEach((cell,index) => { const value = grid.values[index]; cell.material.color.setHex((value >= .5) === grid.homeTeamGrid ? 0xf47761 : 0x48bed3); cell.material.opacity = Math.abs(value-.5)*.55; });
+          cells.forEach((cell,index) => { const value = grid.values[index]; cell.material.color.set((value >= .5) === grid.homeTeamGrid ? controlColours[0] : controlColours[1]); cell.material.opacity = Math.abs(value-.5)*.55; });
         }
         lastControl = next.control;
       }

@@ -8,6 +8,7 @@ Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on mai
 | Shot-map/canvas, Live moment navigation | Implemented; desktop/mobile regression passes |
 | Pressure narration and both evidence types | Deterministic UI template; not model-verified; no contract change |
 | Static gzip and conditional caching | Implemented and unit-tested; verify headers again after deployment |
+| HTML page/panel gzip | Implemented and unit-tested; verify `Content-Encoding` on the deployed URL after release |
 | Native-language review | Alex confirmed native-language/Swahili review was good on Oct 18; no corrections requested. Reviewer/scope details are recorded honestly in `LOCALE-REVIEW.md` |
 | Python ingress | Current hosting retained by Alex's decision; token auth works, network isolation unresolved/deferred (`INGRESS-REVIEW-2026-10-18.md`) |
 | Windows Python tests | Path comparison normalized without changing the model-cap checks; all 34 tests pass locally |

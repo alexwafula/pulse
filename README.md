@@ -281,10 +281,13 @@ index is not a validated football measure, and the generator's formation
 limitations still apply. These data-only overlays do not publish new AI cues
 or add tick-derived facts to the v2 agent contract.
 
-JSON replay, insight and fact-pack responses support negotiated gzip. Cached
-metrics/moments already support gzip and ETags; they are not compressed twice.
+JSON replay, insight and fact-pack responses and the HTML pages (`/`,
+`/experience`, `/legacy`, `/scenarios`, `/experience/panel`) support negotiated
+gzip. Cached metrics/moments already support gzip and ETags; they are not
+compressed twice.
 Streaming transport is still pending. See [decision 0011](docs/decisions/0011-replay-backed-analytics.md)
-for scope and the local compression benchmark.
+for scope and the local compression benchmark, and [decision 0025](docs/decisions/0025-gzip-html.md)
+for HTML.
 
 ## Language and control review
 

@@ -25,18 +25,18 @@ func (w *bufferedResponse) Write(body []byte) (int, error) {
 	return w.body.Write(body)
 }
 
-// Only these bounded JSON responses are buffered. Cached metrics encode
-// themselves; static assets and future streaming endpoints are left alone.
-func gzipJSON(next http.Handler) http.Handler {
+// Only these bounded JSON and HTML responses are buffered. Cached metrics
+// encode themselves; static assets and future streaming endpoints are left alone.
+func gzipResponses(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/api/replay", "/api/insights", "/api/fact-packs":
+		case "/api/replay", "/api/insights", "/api/fact-packs", "/", "/experience", "/legacy", "/experience/panel", "/scenarios":
 		default:
 			next.ServeHTTP(w, r)
 			return
 		}
 		w.Header().Add("Vary", "Accept-Encoding")
-		if r.Method != http.MethodGet || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
+		if (r.Method != http.MethodGet && r.Method != http.MethodHead) || !acceptsGzip(r.Header.Get("Accept-Encoding")) {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -50,7 +50,8 @@ func gzipJSON(next http.Handler) http.Handler {
 			status = http.StatusOK
 		}
 		body := buffer.body.Bytes()
-		if status == http.StatusOK && len(body) > 0 && strings.HasPrefix(buffer.header.Get("Content-Type"), "application/json") && buffer.header.Get("Content-Encoding") == "" {
+		contentType := buffer.header.Get("Content-Type")
+		if status == http.StatusOK && len(body) > 0 && (strings.HasPrefix(contentType, "application/json") || strings.HasPrefix(contentType, "text/html")) && buffer.header.Get("Content-Encoding") == "" {
 			var compressed bytes.Buffer
 			writer, err := gzip.NewWriterLevel(&compressed, gzip.BestSpeed)
 			if err != nil {

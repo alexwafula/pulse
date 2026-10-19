@@ -141,9 +141,7 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 
 func experiencePanelHandler(page *template.Template, replay domain.Replay, view pageData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !allowGetHead(w, r) {
 			return
 		}
 		kind := r.URL.Query().Get("panel")

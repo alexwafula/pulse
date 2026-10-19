@@ -23,6 +23,8 @@ type pageData struct {
 	Scenario     string
 	ScenarioName string
 	TeamInitials []string
+	TeamKits     []string
+	Hero         heroView
 	Summaries    []summarySnapshot
 	TotalEvents  int
 	Window       string
@@ -45,6 +47,12 @@ func NewHandlerWithAgents(replay domain.Replay, webDir, agentsURL string) (http.
 // newScenarioHandler serves one replay. scenario is the demo router's ID and
 // is echoed by /api/metrics and /api/moments.
 func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL string) (http.Handler, error) {
+	return scenarioHandler(scenario, replay, webDir, agentsURL, newMetricsAPI(scenario, replay))
+}
+
+// scenarioHandler serves one replay with tracking as its metrics cache, which
+// the page and the metrics API share.
+func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL string, tracking *metricsAPI) (http.Handler, error) {
 	packs, err := facts.CornerPacks(replay)
 	if err != nil {
 		return nil, err
@@ -80,7 +88,6 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()
-	tracking := newMetricsAPI(scenario, replay)
 	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
 	mux.HandleFunc("/api/moments", tracking.serveMoments)
 	mux.HandleFunc("/experience/panel", experiencePanelHandler(page, replay, view))
@@ -176,9 +183,7 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 	})
 	mux.HandleFunc("/version", serveVersion)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !allowGetHead(w, r) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -189,18 +194,33 @@ func newScenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL
 			http.NotFound(w, r)
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !allowGetHead(w, r) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if r.URL.Path != "/legacy" {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
 		data := view
 		data.Experience = r.URL.Path != "/legacy"
+		if data.Experience {
+			data.Hero = heroFor(tracking, view.catalog, requestLocale(r))
+		}
 		data.Build = buildinfo.Current().ShortSHA
 		if err := page.Execute(w, data); err != nil {
 			return
 		}
 	})
-	return withBuild(gzipJSON(mux)), nil
+	return withBuild(gzipResponses(mux)), nil
+}
+
+// allowGetHead admits GET and HEAD. HEAD runs the GET path unchanged and
+// net/http drops the body, so the headers always match.
+func allowGetHead(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method == http.MethodGet || r.Method == http.MethodHead {
+		return true
+	}
+	w.Header().Set("Allow", "GET, HEAD")
+	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+	return false
 }

@@ -6,6 +6,9 @@ import { createAnalytics, type Moment } from "./analytics";
 import { locale, localize, observeLocalization, supportedLocale, t } from "./i18n";
 import { closeDropdowns, initializeSelects, syncSelects } from "./selects";
 import { renderFactCheck } from "./fact-check";
+import { teamColour, teamKit } from "./team-colour";
+
+const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
 type ThreeModule = typeof import("./renderers/three");
 type PixiModule = typeof import("./renderers/pixi");
@@ -200,8 +203,10 @@ async function switchView(view: string): Promise<void> {
   svgPitch.style.display = view === "svg" ? "" : "none";
   rendererStatus.hidden = true;
   try {
+    const teamIds = replay.match.teams.map((team) => team.id);
     const players: RenderPlayer[] = replay.match.players.map((player) => ({
-      ...player, home: player.teamId === replay.match.teams[0].id,
+      ...player, home: player.teamId === teamIds[0],
+      kit: teamKit(player.teamId, teamIds), colour: teamColour(player.teamId, teamIds),
     }));
     if (view === "three") {
       const { createThree } = (await import("./three-renderer.js" as string)) as unknown as ThreeModule;
@@ -616,7 +621,7 @@ async function startDemo(): Promise<void> {
     clock = replay.match.endMs;
     render();
     if (document.body.classList.contains("experience")) document.dispatchEvent(new CustomEvent("pulse:demo-complete"));
-    else recapPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    else recapPanel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   } catch (_e) {
     // Aborted or cancelled
   } finally {
@@ -731,7 +736,7 @@ async function start(): Promise<void> {
         setDrawerTab("timeline");
         eventButtons.get(id)?.click();
         eventButtons.get(id)?.classList.add("evidence-event");
-        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       });
     }
     createIcons({ icons: { Play, RotateCcw, Maximize, Scan, Camera, ListVideo, Undo2, Download, Layers } });
@@ -746,7 +751,7 @@ async function start(): Promise<void> {
         stopDemo();
         setDrawerTab("timeline");
         eventButtons.get(button.dataset.recapEvidence ?? "")?.click();
-        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: "smooth", block: "center" });
+        required<HTMLElement>(".pitch-shell").scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       });
     }
     required<HTMLButtonElement>("#download-recap").addEventListener("click", () => {

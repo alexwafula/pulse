@@ -42,6 +42,7 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 	if err != nil {
 		return nil, err
 	}
+	library = gzipResponses(library)
 	assets := http.StripPrefix("/static/", staticAssets(filepath.Join(webDir, "static")))
 	return withBuild(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/static/") {
