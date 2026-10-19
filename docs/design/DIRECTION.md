@@ -1,3 +1,18 @@
+> **Status, 19 Oct 2026.** Amended against origin/main `fd2cd3539250589982aee67253252f6c37ae2ebf` (`fd2cd35`, merge of #39). The direction below is the agreed spec and is kept as written. Amendments are marked **Status** or **Superseded**, and superseded text is struck through rather than deleted.
+>
+> Visual reference: Matchlens prototype by Ved (registered Pulse team member), made with claude.ai; permission to derive the UI granted; prototype kept outside the repo; see ADRs 0012, 0013 and 0015 (`docs/decisions/0012-experience-integration-preview.md`, `0013-port-on-field-presentation.md`, `0015-prototype-visual-system.md`). The repo record has not caught up yet: `docs/SUBMISSION-READINESS.md:18` still lists the contributor permission as "UNCONFIRMED; blocks submission".
+>
+> | PR | Status | Source |
+> |---|---|---|
+> | D2a | **Done**: #36, merge `1276f61` | `gh pr view 36`: "feat(web): semantic light tokens and team colour by identity (D2a)", MERGED 2026-10-18 |
+> | D2b | **Deferred** until after judging | Team decision, 19 Oct. `experience.css:5` still forces `color-scheme: light`; ADR 0025:12-13 "No dark values yet" |
+> | D3a | **Done**: #38, merge `1a9c473` | `gh pr view 38`: "feat(web): D3a hero with API index headline and server-rendered team kits", MERGED 2026-10-18 |
+> | D3b | **Next** | No PR yet: `gh pr list --state all` has no D3b entry |
+> | D4a | **Next**, after D3b | No branch or PR yet (`gh pr list --state all`) |
+> | D4b | **Next**, after D3b | No branch or PR yet (`gh pr list --state all`) |
+>
+> #37 ("fix(web): answer HEAD on HTML and health routes", merge `fcf275a`) is not a D-series PR. D3a was based on it (#38 body: "based on `main` at `fcf275a` (#37)").
+
 # Pulse match experience: design direction (18 Oct 2026)
 
 **Scope.** This was a read-only audit. No tracked file was edited and nothing was committed or pushed. The UI is `/` at **origin/main `57dc69c`**, served from a `git archive` export on `127.0.0.1:18180`. The Python service ran in `recorded` mode on `:18190` and made no model calls. The visual reference is `~/src/matchlens-reference/index.html`, opened from disk; we take its visual language only. Screenshots are in `shots/`. `metrics-*.json` holds per-state measurements: contrast, targets, type, radii, shadows and transitions. `scripts/` holds the capture code.
@@ -121,6 +136,7 @@ A calm, evidence-first broadcast companion. **One** strong number per screen: th
 +  --c-ink: #1c2838; --c-ink-muted: #4f5d72;
 +  --c-accent: #24536a; --c-on-accent: #ffffff; --c-accent-tint: #e4eef3;
 +  --c-team-a: #b8374d; --c-team-b: #2e68b3;   /* = match.teams[0] / [1]; replaces --team-aurora/--team-bastion */
++  /* Superseded (19 Oct): kit a/b now follows the team id, not teams[0]/[1]. See "On team colour" below. */
 +  --c-team-a-tint: #f7e3e7; --c-team-b-tint: #e3ecf8;
 +  --c-verified: #1e6b48; --c-verified-tint: #e3f1ea;
 +  --c-template: #5c6675; --c-template-tint: #eef0f2;
@@ -133,6 +149,7 @@ A calm, evidence-first broadcast companion. **One** strong number per screen: th
 +  --c-accent-tint:#1d3140; --c-team-a:#ef7d90; --c-team-b:#6aa5ee; --c-verified:#5cc293; --c-estimate:#e8b45a; --c-error:#f08a76;
 +  --elev-1: 0 1px 2px rgba(0,0,0,.4); --elev-2: 0 8px 26px rgba(0,0,0,.35); } }
 +:root[data-theme="dark"] .experience { /* same values as the media block */ }
++/* Superseded (19 Oct): the dark block above is deferred with D2b until after judging. D2a (#36) shipped the light roles only. */
  @media (prefers-reduced-motion: reduce) {
 -  :root { --motion-fast: 0ms; --motion-base: 0ms; --motion-slow: 0ms; }
 +  :root, .experience { --motion-fast: 0ms; --motion-base: 0ms; --motion-slow: 0ms; --dur-2: 120ms; --dur-3: 120ms; }
@@ -162,19 +179,28 @@ The reduced-motion rule also needs a JS change: `pitch.ts` must pass `behavior: 
 | Dark | verified / surface | 7.41 |
 | Dark | estimate / surface | 8.58 |
 
-**On team colour.** Renaming to `--c-team-a`/`-b` makes the positional rule honest and fixes the token-name swap. It does **not** keep Aurora Vale the same colour across scenarios. That needs a per-team colour in match metadata, which is a contract change: ask the other engineer first, and keep it outside D2–D4.
+**On team colour.** ~~Renaming to `--c-team-a`/`-b` makes the positional rule honest and fixes the token-name swap. It does **not** keep Aurora Vale the same colour across scenarios. That needs a per-team colour in match metadata, which is a contract change: ask the other engineer first, and keep it outside D2–D4.~~
+
+> **Superseded (19 Oct).** Team colour follows the team id, with no contract change. `app/internal/transport/http/team_kit.go:9-16` maps `vale` to kit a and `bastion` to kit b. An unknown id takes the kit its opponent does not wear. The server renders the kits on first paint (ADR 0026; #38), and `team-colour.ts` only reads them (ADR 0025). Checked by `tests/integration/tokens-browser.mjs` and `team_kit_test.go`.
 
 ### 3.2 Component changes on the judge path
 
-| # | Component | Before | Change | Files | Risk | Size |
-|---|---|---|---|---|---|---|
-| C1 | **Match header / hero** | `desktop-02`, `mobile-02` | Replace the "Live" h1 and team strip with a hero card (`--elev-2`, `--radius-stage`): team names with their swatches, clock, "Score not recorded" as a 12px label (no "– : –" glyph), and the **API index difference as the headline** (`--text-num`, sign plus "Bastion City − Aurora Vale", estimate chip). Mobile: persona and language move into one 44px row, and the pitch starts within the first 360px. | `match.html` (strip, header), `experience.css`, `analytics.ts` (write the existing `indexDelta` to a second node) | Two copies of one value must update from the same tick. A diverging bar would read as a meter, so **number only**. | M |
-| C2 | **Moment banner → lower third** | `desktop-04b`, `*-12-banner-*` | One caption bar at the bottom of the pitch (`--c-overlay`, 3px team-colour rule, 15/13px). It **absorbs `.action-result`**, so only one overlay shows. Estimate chip stays inline. | `pitch.css:1796-1798`, `experience.css` (banner rules), `analytics.ts:277-278`, `pitch.ts` (action result) | Covers the bottom touchline in the Three.js camera, so check all 3 renderers | S |
-| C3 | **Verified / Template badge** | `desktop-06b`, `desktop-07`, `desktop-08` | `data-status` on `#insight-status` and `#pressure-insight`: Verified = green tint + check icon. "(recorded)" is a suffix in the same style. Template = neutral outline + document icon. Waiting / No moment = plain muted text, no pill. Unavailable = error icon + text. | `pitch.ts:161,177,183`, `analytics.ts` (pressure panel), `match.html:326` and pressure section, `pitch.css:1000-1010` | Test selectors read the text, so keep the text unchanged | S |
-| C4 | **Evidence trail** | `desktop-05b`, `mobile-05b` | Timeline rail (prototype `.card` timeline): source events as rows (ID chip, tabular time, ≥4.5:1 description). Metric ticks collapse into one row, "6 metric ticks 88:09–88:11, model estimate, uncalibrated", which expands on demand. During the clip, show the trail directly under the pitch on Live, not 900px down the right column. | `analytics.ts` (`renderEvidence`), `pitch.css:1424-1470`, `experience.css`, `match.html:513-520` | `analytics-browser.mjs` counts `[data-source-tick]`, so keep the nodes and collapse them visually | M |
-| C5 | **Drawer tabs** | `desktop-05a` (wraps), `mobile-05b` | Single-row segmented control, 44px tall, horizontal scroll with an edge fade. No wrapping at 1440 in any locale. The heading truncates with a title attribute. | `experience.css` (`.drawer-tabs`, `.drawer-tab`), `pitch.css:1062-1095,1804` | Arrow-key tab behaviour (`analytics-browser` tests) must keep working | S |
-| C6 | **Event timeline** | `desktop-02` right column | Rail with a team dot per row, a fixed tabular time column, 13px description at `--c-ink-muted` 6.0:1, and the selected row in accent tint (as now). | `experience.css` (`.event-button`), `pitch.css` | Low | S |
-| C7 | **Loading / error / no-tracking / zero moments** | `*-09a`, `*-09b`, `*-10`, `*-08` | Light panel on the pitch area with a skeleton pitch outline. The renderer switch is disabled until the replay loads, so SVG no longer shows as pressed. Error: "Replay unavailable. Check your connection and retry." with the raw reason in `<details>`. No-tracking: one empty-state card, "Tracking-based metrics need 5 Hz tracking; this replay has none", replacing six N/A tiles (raw reason in `<details>`). Zero moments: an empty card with the `moments-state` text at 13px. | `pitch.css:1472-1520`, `match.html:213-220`, `pitch.ts:183,609`, `analytics.ts:123-124` | Tests assert the "N/A" values and the "Tracking metrics unavailable" label, so keep them in the DOM | M |
+| # | Component | Before | Change | Files | Risk | Size | Status (19 Oct) |
+|---|---|---|---|---|---|---|---|
+| C1 | **Match header / hero** | `desktop-02`, `mobile-02` | Replace the "Live" h1 and team strip with a hero card (`--elev-2`, `--radius-stage`): team names with their swatches, clock, ~~"Score not recorded"~~ **Superseded: "Score unavailable" (note 2)** as a 12px label (no "– : –" glyph), and ~~the **API index difference as the headline** (`--text-num`, sign plus "Bastion City − Aurora Vale", estimate chip)~~ **Superseded: a sentence headline plus the exact signed value with U+2212, the team-order label and the estimate chip (note 1)**. Mobile: ~~persona and language move into one 44px row~~ **Superseded: two 44px rows (note 3)**, and the pitch starts within the first 360px. | `match.html` (strip, header), `experience.css`, `analytics.ts` (write the existing `indexDelta` to a second node) | Two copies of one value must update from the same tick. A diverging bar would read as a meter, so **number only**. | M | **Done** in D3a: #38, merge `1a9c473`. Desktop header targets are still 28px (#38 body, "Known limits"). The header mini score still shows "– : –" (`match.html:136`). |
+| C2 | **Moment banner → lower third** | `desktop-04b`, `*-12-banner-*` | One caption bar at the bottom of the pitch (`--c-overlay`, 3px team-colour rule, 15/13px). It **absorbs `.action-result`**, so only one overlay shows. Estimate chip stays inline. | `pitch.css:1796-1798`, `experience.css` (banner rules), `analytics.ts:277-278`, `pitch.ts` (action result) | Covers the bottom touchline in the Three.js camera, so check all 3 renderers | S | **Next** (D3b; no PR yet) |
+| C3 | **Verified / Template badge** | `desktop-06b`, `desktop-07`, `desktop-08` | `data-status` on `#insight-status` and `#pressure-insight`: Verified = green tint + check icon. "(recorded)" is a suffix in the same style. Template = neutral outline + document icon. Waiting / No moment = plain muted text, no pill. Unavailable = error icon + text. | `pitch.ts:161,177,183`, `analytics.ts` (pressure panel), `match.html:326` and pressure section, `pitch.css:1000-1010` | Test selectors read the text, so keep the text unchanged | S | **Next** (D3b; no PR yet) |
+| C4 | **Evidence trail** | `desktop-05b`, `mobile-05b` | Timeline rail (prototype `.card` timeline): source events as rows (ID chip, tabular time, ≥4.5:1 description). Metric ticks collapse into one row, "6 metric ticks 88:09–88:11, model estimate, uncalibrated", which expands on demand. During the clip, show the trail directly under the pitch on Live, not 900px down the right column. | `analytics.ts` (`renderEvidence`), `pitch.css:1424-1470`, `experience.css`, `match.html:513-520` | `analytics-browser.mjs` counts `[data-source-tick]`, so keep the nodes and collapse them visually | M | **Next** (D4a, after D3b) |
+| C5 | **Drawer tabs** | `desktop-05a` (wraps), `mobile-05b` | Single-row segmented control, 44px tall, horizontal scroll with an edge fade. No wrapping at 1440 in any locale. The heading truncates with a title attribute. | `experience.css` (`.drawer-tabs`, `.drawer-tab`), `pitch.css:1062-1095,1804` | Arrow-key tab behaviour (`analytics-browser` tests) must keep working | S | **Next** (D4b, after D3b) |
+| C6 | **Event timeline** | `desktop-02` right column | Rail with a team dot per row, a fixed tabular time column, 13px description at `--c-ink-muted` 6.0:1, and the selected row in accent tint (as now). | `experience.css` (`.event-button`), `pitch.css` | Low | S | **Next** (D4a, after D3b) |
+| C7 | **Loading / error / no-tracking / zero moments** | `*-09a`, `*-09b`, `*-10`, `*-08` | Light panel on the pitch area with a skeleton pitch outline. The renderer switch is disabled until the replay loads, so SVG no longer shows as pressed. Error: "Replay unavailable. Check your connection and retry." with the raw reason in `<details>`. No-tracking: one empty-state card, ~~"Tracking-based metrics need 5 Hz tracking; this replay has none"~~ **Superseded: the copy must state the real reason, a gap in the tracking (note 4)**, replacing six N/A tiles (raw reason in `<details>`). Zero moments: an empty card with the `moments-state` text at 13px. | `pitch.css:1472-1520`, `match.html:213-220`, `pitch.ts:183,609`, `analytics.ts:123-124` | Tests assert the "N/A" values and the "Tracking metrics unavailable" label, so keep them in the DOM | M | **Next** (D4b, after D3b) |
+
+**Superseded, 19 Oct (sources):**
+
+1. **Headline.** The hero shows the sentence "`<team>`'s control index is N higher" (N at 2 dp), or "Neither team's control index is higher" when N rounds to 0.00. Below it are the exact API value with `+` or U+2212, at least 4 dp (`index_headline.go:56-68`, `index-headline.ts:21,31`), the label `teams[0] − teams[1]` in API order, and the chip "model estimate, uncalibrated". Sources: ADR 0026, #38. Tests: `index_headline_test.go`, `index-headline.test.mjs`, `hero-browser.mjs`.
+2. **"Score unavailable".** This was "Score not recorded". It reuses the glossary term in `docs/LOCALE-REVIEW.md:58` and matches the existing `aria-label`, which `summary_test.go:57` asserts. The hero renders it at `match.html:103`. Sources: ADR 0026, #38.
+3. **Mobile header.** It uses two 44px rows: brand and Scenarios, then audience and language (`controls.css:85-91`; ADR 0026:67). Checked by `hero-browser.mjs:262`.
+4. **No-tracking copy.** "This replay has none" is wrong. Corner has tracking, but `/api/metrics` returns `trackingMetrics: "unsupported"` because of 8000 ms frame gaps (`docs/metrics.md:25,383`; reason string at `app/internal/metrics/compute.go:95`). The copy must say the tracking has a gap. It must not say the tracking is absent.
 
 ### 3.3 Motion moments
 
@@ -182,7 +208,7 @@ The reduced-motion rule also needs a JS change: `pitch.ts` must pass `behavior: 
 |---|---|---|---|
 | Moment becomes active (`#moment-banner` unhidden) | Lower third rises 8px and fades in; exits by fading | in `--dur-2` `--ease-out`; out 160ms `--ease-exit` | Opacity only, 120ms |
 | Insight status settles (Waiting → Verified or Template) | Badge cross-fade, then the check icon stroke draws | 200ms + 320ms `--ease-out` | Instant swap |
-| Evidence clip starts (`Replay evidence`) | `#evidence-range-marker` grows from the clip start to its width; the active trail row tints as the clock passes it | 320ms `--ease-in-out`; tint 120ms | Marker appears at full width; tint stays |
+| Evidence clip starts (`Replay evidence`) **Superseded: moved from D3b to D4a (C4)** | `#evidence-range-marker` grows from the clip start to its width; the active trail row tints as the clock passes it | 320ms `--ease-in-out`; tint 120ms | Marker appears at full width; tint stays |
 | Moment selected while the pitch is off-screen | Scroll to `.pitch-shell` | Browser smooth scroll | `behavior:"auto"` (JS fix above) |
 | Index difference sign flips (API tick) | 200ms background tint on the headline only. **No counting animation.** | `--dur-2` | None |
 
@@ -191,40 +217,46 @@ The reduced-motion rule also needs a JS change: `pitch.ts` must pass `behavior: 
 - **No new dependencies or CDN assets:** met. CSS and TS only, using the self-hosted Outfit and Plus Jakarta. `'Noto Sans Devanagari'` is a local-font fallback name and is never fetched.
 - **Every number comes from the API:** C1 reuses `tick.teams[teams[0]].indexDelta`, the same source as `#metric-index-delta`. C4's "6 metric ticks" is `tickTimesMs.length`.
 - **Canonical label:** the estimate chip text is exactly "model estimate, uncalibrated".
-- **No prediction-like visuals:** watch C1. A two-colour diverging bar or a team gradient (as in the prototype hero) would read as a win meter, so the proposal is **number only**. The prototype's red pulsing "LIVE" is dropped.
+- **No prediction-like visuals:** watch C1. A two-colour diverging bar or a team gradient (as in the prototype hero) would read as a win meter, so the proposal is ~~**number only**~~ **Superseded: a sentence plus the exact signed value, label and chip, still with no bar, gradient or meter (note 1 under 3.2; #38 body: "The hero markup contains no share track, fill, gradient or meter element")**. The prototype's red pulsing "LIVE" is dropped.
 - **sw-KE / hi-IN:** C5 removes tab wrapping. The hi-IN line height on Devanagari should be checked; it uses a system font. No layout depends on string width.
 - **Three renderers:** C2 and C7 are DOM overlays on `.pitch-shell`. The banner box is identical across renderers today (`*-12-banner-*`).
-- **Dark mode:** activating it means removing `html:has(body.experience){color-scheme:light}` (`experience.css:4`). Pitch turf and stadium colours are renderer-owned and unchanged. That is why it gets its own PR (D2b).
+- **Dark mode:** activating it means removing `html:has(body.experience){color-scheme:light}` (`experience.css:4`). Pitch turf and stadium colours are renderer-owned and unchanged. That is why it gets its own PR (D2b). **Superseded: deferred until after judging. The rule is now at `experience.css:5`.**
 
 ## 4. PR plan (each about half a day)
 
 Every PR needs before/after screenshots at **1440×900 and 390×844**, in **SVG, Three.js and PixiJS**, for **en-GB, sw-KE and hi-IN**. It must pass `./scripts/check.sh`, `homepage-`, `experience-`, `analytics-`, `controls-` and `library-browser.mjs`. It must not regress: the canonical label wherever it appears now, "Verified (recorded)" text, evt-03/04/05 evidence, 22 players, the Return to match button, no horizontal scroll, and focus rings on 39 of 39 tab stops.
 
-1. **D2a: semantic tokens, light.** Add the `.experience` layer. Replace the 144 hex values in `experience.css` with roles, rename the team tokens, and override `--font-tabular`.
-   - *Accept:* `experience.css` has 0 hex outside the turf and heat colours.
+1. **D2a: semantic tokens, light.** **Status: Done**, #36, merge `1276f61`. Add the `.experience` layer. Replace the 144 hex values in `experience.css` with roles, rename the team tokens, and override `--font-tabular`.
+   - *Accept:* `experience.css` has 0 hex outside the turf and heat colours. **Status:** 13 remain, 11 of them turf, heat and map colours. The other two are the `html` background (outside `.experience` scope) and the renderer-owned player-tag `#ffe9a1` (#36 body).
    - *Accept:* all eight failing pairs from section 2 measure ≥4.5:1 (muted 6.02, team 5.12/5.05).
    - *Accept:* Inter is no longer loaded on `/`.
    - *Accept:* `/legacy` is pixel-identical.
-2. **D2b: dark roles.** Dark values, `data-theme`, and removal of the forced `color-scheme`.
+2. **D2b: dark roles.** ~~Planned~~ **Superseded: Deferred until after judging** (team decision, 19 Oct; `experience.css:5` still forces light). Dark values, `data-theme`, and removal of the forced `color-scheme`.
    - *Accept:* the pairs in 3.1 measure as stated in both themes.
    - *Accept:* the turf, kits and lower third are unchanged in all three renderers.
-3. **D3a: hero and first impression (C1).**
+3. **D3a: hero and first impression (C1).** **Status: Done**, #38, merge `1a9c473`. All four accepts are checked by `tests/integration/hero-browser.mjs:235-262` (#38 body: hero 6/6).
    - *Accept:* the index difference headline is the largest number above the fold, and its value equals `/api/metrics` at 3 fixed seek points.
    - *Accept:* the mobile pitch top is ≤360px.
-   - *Accept:* header targets are ≥44px.
+   - *Accept:* header targets are ≥44px. **Status:** on mobile only. Desktop targets are still 28px (#38 body, "Known limits").
    - *Accept:* calm-midfield shows −0.4287 with "Bastion City − Aurora Vale" at the end.
-4. **D3b: lower third, badges and transport targets (C2, C3).**
+4. **D3b: lower third, badges and transport targets (C2, C3).** **Status: Next.** No PR yet (`gh pr list --state all`).
    - *Accept:* one overlay shows on the pitch at 88:11 and on the corner end state.
    - *Accept:* the badge variants differ in icon and colour, and the text is unchanged.
    - *Accept:* the play, restart and speed buttons are ≥44px.
-   - *Accept:* the motion rows in 3.3 hold with and without reduced motion.
-5. **D4a: Evidence trail and timeline (C4, C6).**
+   - *Accept:* the motion rows in 3.3 hold with and without reduced motion. **Superseded:** row 3 (evidence clip) moves to D4a. D3b covers rows 1, 2, 4 and 5.
+5. **D4a: Evidence trail and timeline (C4, C6).** **Status: Next**, after D3b. It also takes motion row 3 from 3.3.
    - *Accept:* evt-03/04/05 are first, in order, and the 6 ticks sit behind one disclosure.
    - *Accept:* `[data-source-tick]` still counts 6.
    - *Accept:* the pitch is visible while the clip plays at both viewports.
    - *Accept:* the description contrast is ≥4.5:1.
-6. **D4b: states and drawer tabs (C5, C7).**
+6. **D4b: states and drawer tabs (C5, C7).** **Status: Next**, after D3b. The C7 no-tracking copy follows note 4 under 3.2.
    - *Accept:* loading, error (block `/api/replay`), no-tracking (corner) and zero moments (calm) each show one panel in light tokens.
    - *Accept:* the renderer switch is not pressed before data arrives.
    - *Accept:* tabs fit on one row at 1440 in all three locales, and every tab is 44px tall on mobile.
    - *Accept:* the existing N/A and label assertions still pass.
+
+## Appendix: measurement provenance (added 19 Oct)
+
+- Every measurement in sections 1 and 2 was taken on origin/main `57dc69c`. The Scope and Caveats above say so; a first pass on `1b2c8b9` was superseded.
+- The screenshots (`shots/`, `superseded-1b2c8b9/`), the `metrics-*.json` files and the capture `scripts/` are **not in the repo**. They stay with the design-direction review artifacts outside it. Paths in this document such as `desktop-02` or `scripts/probe3.json` point to those artifacts, not to repo files.
+- Later line references in sections 2 and 3 (for example `experience.css:4`, `pitch.ts:590`) also describe `57dc69c`. Code has moved since then: the color-scheme rule is now `experience.css:5`, and #36 records the `scrollIntoView` calls at `pitch.ts:619,734,749`.
