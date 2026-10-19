@@ -2,7 +2,8 @@
 // against a running Go server (PULSE_URL).
 // 1. Source events come first, in API order; metric ticks sit behind one keyboard-operable
 //    disclosure whose label count and range come from the API's tickTimesMs.
-// 2. While an evidence clip plays on Live, the trail sits under the pitch and the pitch stays in view.
+// 2. While an evidence clip plays on Live (a moment's, or the insight's next to its Fact check),
+//    the trail sits under the pitch and the pitch stays in view.
 // 3. Trail and timeline text reach 4.5:1; timeline team dots reach 3:1.
 // 4. Each timeline dot wears the server-rendered kit of its event's team id.
 // 5. The range marker grows over 320 ms and the active row tints over 120 ms; under reduced
@@ -131,12 +132,25 @@ await check("the tick disclosure toggles with Enter and Space", async () => {
   await page.close();
 });
 
-await check("while the evidence clip plays the trail sits under the pitch and the pitch stays in view", async () => {
+// Starts the corner insight's Evidence clip (next to its Fact check), the judge-path trigger of §3.3 row 3.
+async function playInsight(page) {
+  await seek(page, 1000);
+  await page.waitForFunction(() => document.querySelector("#insight-evidence")?.hidden === false, null, { timeout: 15000 });
+  await press(page, "#evidence-button");
+  await page.waitForFunction(() => !document.querySelector("#evidence-return")?.hidden);
+}
+const insightCue = (await (await fetch(`${base}/api/insights?scenario=corner&persona=CASUAL&locale=en-GB`)).json()).cues[0];
+const clips = [
+  { name: "pressure moment", scenario: "late-siege", start: page => playMoment(page, pressure), events: pressure.reasons },
+  { name: "corner insight", scenario: "corner", start: playInsight, events: insightCue.eventIds },
+];
+
+await check("while an evidence clip (moment or insight) plays the trail sits under the pitch and the pitch stays in view", async () => {
   const rows = [];
-  for (const [vpName, vp] of Object.entries(viewports)) {
+  for (const clip of clips) for (const [vpName, vp] of Object.entries(viewports)) {
     const page = await browser.newPage(vp);
-    await open(page, "scenario=late-siege");
-    await playMoment(page, pressure);
+    await open(page, `scenario=${clip.scenario}`);
+    await clip.start(page);
     await page.waitForFunction(() => document.querySelector("#play-button")?.getAttribute("aria-label") === "Pause");
     await page.waitForTimeout(600);
     const shown = await page.evaluate(() => {
@@ -153,16 +167,19 @@ await check("while the evidence clip plays the trail sits under the pitch and th
         trailTop: Math.round(box.top),
         firstRowTop: Math.round(firstRow.top),
         innerHeight,
+        events: [...list.querySelectorAll("[data-source-event]")].map(node => node.dataset.sourceEvent),
       };
     });
-    rows.push({ vp: vpName, ...shown });
-    assert.equal(shown.playing, "Pause", `${vpName}: the clip is not playing`);
-    assert.ok(shown.ratio >= 0.5, `${vpName}: pitch visible ratio ${shown.ratio}`);
-    assert.ok(shown.underPitch, `${vpName}: the trail is not in the pitch column`);
-    assert.ok(shown.gap >= 0 && shown.gap <= 360, `${vpName}: the trail starts ${shown.gap}px below the pitch`);
-    assert.ok(shown.firstRowTop < shown.innerHeight, `${vpName}: the first trail row starts below the fold (${shown.firstRowTop}px)`);
+    const where = `${clip.name} ${vpName}`;
+    rows.push({ clip: clip.name, vp: vpName, ...shown, events: shown.events.join(" ") });
+    assert.deepEqual(shown.events, clip.events, `${where}: trail events`);
+    assert.equal(shown.playing, "Pause", `${where}: the clip is not playing`);
+    assert.ok(shown.ratio >= 0.5, `${where}: pitch visible ratio ${shown.ratio}`);
+    assert.ok(shown.underPitch, `${where}: the trail is not in the pitch column`);
+    assert.ok(shown.gap >= 0 && shown.gap <= 360, `${where}: the trail starts ${shown.gap}px below the pitch`);
+    assert.ok(shown.firstRowTop < shown.innerHeight, `${where}: the first trail row starts below the fold (${shown.firstRowTop}px)`);
     await press(page, "#evidence-return");
-    assert.equal(await page.evaluate(() => Boolean(document.querySelector("#evidence-list").closest("#pane-evidence"))), true, `${vpName}: the trail does not return to the drawer`);
+    assert.equal(await page.evaluate(() => Boolean(document.querySelector("#evidence-list").closest("#pane-evidence"))), true, `${where}: the trail does not return to the drawer`);
     await page.close();
   }
   console.table(rows);
