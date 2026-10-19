@@ -2,7 +2,7 @@
 // 1. Drawer passing network, every scenario x both teams, mid replay and end, desktop and mobile:
 //    no label overlaps another label or any node circle, labels stay inside the SVG, and the nodes
 //    are exactly the players with a completed pass sent or received by the snapshot cutoff (the
-//    Insights pitch-map rule). A team with no such player shows one plain line and no graph.
+//    Insights pitch-map rule). A team with no such player shows one D4b-1 state line and no graph.
 // 2. On experience pages the tabs are Timeline, Passing, Control, Routes, Evidence; arrow keys wrap;
 //    no tab click or arrow key changes body[data-section] or ?section=, on Live or in Insights.
 // 3. The insight card's Evidence button opens the D4a trail: Evidence tab, Live, trail under the pitch.
@@ -43,9 +43,9 @@ function networkLayout() {
   const snapshot = document.querySelector(".passing-snapshot:not([hidden])");
   return { cutoff: Number(snapshot.dataset.cutoff), teams: [...snapshot.querySelectorAll(".passing-team")].map(team => {
     const svg = team.querySelector("svg.passing-graph");
-    const name = team.querySelector("h4").firstChild.textContent.trim();
-    const empty = [...team.querySelectorAll(".passing-team-empty")].map(node => node.textContent.trim());
-    if (!svg) return { name, empty, ids: [], problems: [], svg: false, tables: team.querySelectorAll("table").length };
+    // A team without nodes shows only a C7 state line (D4b-1), naming the team.
+    const empty = [...team.querySelectorAll(".state-line .state-text")].filter(node => !node.dataset.i18n.startsWith("state.idlePlayer")).map(node => ({ key: node.dataset.i18n, team: node.dataset.i18nArgTeam ?? node.dataset.i18nArgName }));
+    if (!svg) return { empty, ids: [], problems: [], svg: false, tables: team.querySelectorAll("table").length };
     const box = svg.getBoundingClientRect();
     // Circle boxes include half the computed stroke, scaled like the SVG.
     const scale = box.width / svg.viewBox.baseVal.width;
@@ -62,7 +62,7 @@ function networkLayout() {
         if (a !== b && a.id < b.id && hit(a.l, b.l)) problems.push(`${a.label} label over label ${b.label}`);
       }
     }
-    return { name, empty, ids: nodes.map(node => node.id).sort(), problems, svg: true, width: Math.round(box.width), height: Math.round(box.height) };
+    return { empty, ids: nodes.map(node => node.id).sort(), problems, svg: true, width: Math.round(box.width), height: Math.round(box.height) };
   }) };
 }
 
@@ -79,7 +79,8 @@ await check("drawer passing network: no label overlaps a label or a circle, and 
         await press(page, "#tab-passing");
         const shown = await page.evaluate(networkLayout);
         for (const [index, team] of shown.teams.entries()) {
-          const teamId = replay.match.teams[index].id;
+          const { id: teamId, name: teamName } = replay.match.teams[index];
+          team.name = teamName;
           const involved = new Set(replay.events.filter(event => event.timeMs <= shown.cutoff && event.teamId === teamId && event.type === "PASS" && event.outcome === "COMPLETE").flatMap(event => [event.actorId, event.recipientId]));
           const expected = [...involved].sort();
           const label = `${scenario} ${vpName} seek ${at} ${team.name}`;
@@ -88,7 +89,8 @@ await check("drawer passing network: no label overlaps a label or a circle, and 
           assert.deepEqual(team.problems, [], `${label}: overlaps`);
           if (expected.length === 0) {
             assert.equal(team.svg, false, `${label}: an empty team draws a graph`);
-            assert.deepEqual(team.empty, ["No players with completed passes yet"], `${label}: empty state`);
+            assert.equal(team.empty.length, 1, `${label}: empty state lines ${JSON.stringify(team.empty)}`);
+            assert.ok(["state.noneInSequence", "state.teamNoPassesYet"].includes(team.empty[0].key) && team.empty[0].team === teamName, `${label}: empty state ${JSON.stringify(team.empty)}`);
             assert.equal(team.tables, 0, `${label}: an empty team draws a table`);
           } else assert.deepEqual(team.empty, [], `${label}: empty state shown with nodes`);
           // Same players as the Insights pitch-map network at this clock.

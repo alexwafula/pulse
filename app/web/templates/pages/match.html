@@ -474,15 +474,19 @@
                 {{else}}
                 <div class="passing-team">
                   <h4>{{.Name}} <span data-i18n="stats.passes" data-i18n-arg-count="{{.Total}}" data-i18n-term-pass="{{if eq .Total 1}}pass{{else}}passes{{end}}">{{.Total}} completed {{if eq .Total 1}}pass{{else}}passes{{end}}</span></h4>
-                  <svg viewBox="0 0 280 220" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
+                  {{if .Nodes}}
+                  <!-- passing.go sizes the viewBox to the node count and places each label radially outside its circle.
+                       Experience pages show C7 states for teams without passes above; /legacy keeps its table and line. -->
+                  <svg viewBox="0 0 {{.Width}} {{.Height}}" width="{{.Width}}" height="{{.Height}}" class="passing-graph" role="img" aria-label="{{.Name}} directed passing network">
                     <defs><marker id="{{.Marker}}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>
                     {{$marker := .Marker}}
                     {{range .Edges}}<path d="{{.Path}}" fill="none" stroke="currentColor" stroke-width="{{.Width}}" marker-end="url(#{{$marker}})"><title>{{.From}} to {{.To}}: {{.Count}} completed passes</title></path>{{end}}
-                    {{range .Nodes}}<g transform="translate({{.X}} {{.Y}})" class="passing-node" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} {{if eq .Sent 1}}pass{{else}}passes{{end}} sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle r="18"></circle><text text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text text-anchor="middle" y="28" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
+                    {{range .Nodes}}<g class="passing-node" data-player-id="{{.ID}}" tabindex="0" role="img" aria-label="{{.Name}} (number {{.Number}}): {{.Sent}} {{if eq .Sent 1}}pass{{else}}passes{{end}} sent, {{.Received}} received"><title>{{.Name}} (#{{.Number}}): {{.Sent}} sent, {{.Received}} received</title><circle cx="{{.X}}" cy="{{.Y}}" r="18"></circle><text x="{{.X}}" y="{{.Y}}" text-anchor="middle" dy="5" class="node-number">{{.Number}}</text><text x="{{.LabelX}}" y="{{.LabelY}}" text-anchor="{{.Anchor}}" dominant-baseline="central" class="node-name">#{{.Number}} {{.Name}}</text></g>{{end}}
                   </svg>
+                  {{end}}
                   <table class="passing-table">
                     <thead><tr><th>Player</th><th>Sent</th><th>Received</th></tr></thead>
-                    <tbody>{{if $.Experience}}{{range .Busy}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{else}}{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{end}}</tbody>
+                    <tbody>{{if $.Experience}}{{range .Nodes}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{else}}{{range .Roster}}<tr><td>{{.Name}}</td><td>{{.Sent}}</td><td>{{.Received}}</td></tr>{{end}}{{end}}</tbody>
                   </table>
                   {{if and $.Experience .Idle}}{{if eq .Idle 1}}{{template "state" (state "empty" "state.idlePlayer" "count" .Idle)}}{{else}}{{template "state" (state "empty" "state.idlePlayers" "count" .Idle)}}{{end}}{{end}}
                   <ul class="passing-links">
