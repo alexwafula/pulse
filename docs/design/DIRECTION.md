@@ -1,6 +1,6 @@
 > **Status, 19 Oct 2026.** Amended against origin/main `fd2cd3539250589982aee67253252f6c37ae2ebf` (`fd2cd35`, merge of #39). The direction below is the agreed spec and is kept as written. Amendments are marked **Status** or **Superseded**, and superseded text is struck through rather than deleted.
 >
-> Visual reference: Matchlens prototype by Ved (registered Pulse team member), made with claude.ai; permission to derive the UI granted; prototype kept outside the repo; see ADRs 0012, 0013 and 0015 (`docs/decisions/0012-experience-integration-preview.md`, `0013-port-on-field-presentation.md`, `0015-prototype-visual-system.md`). The repo record has not caught up yet: `docs/SUBMISSION-READINESS.md:18` still lists the contributor permission as "UNCONFIRMED; blocks submission".
+> Visual reference: Matchlens prototype by Ved (registered Pulse team member), made with claude.ai; permission to derive the UI granted; prototype kept outside the repo; see ADRs 0012, 0013 and 0015 (`docs/decisions/0012-experience-integration-preview.md`, `0013-port-on-field-presentation.md`, `0015-prototype-visual-system.md`). Ved confirmed this on 2026-10-19, code and markup included. The team holds the written confirmation outside the repo. ADR 0015 ("Fonts and provenance") is the provenance record, and `docs/SUBMISSION-READINESS.md:18` says "Ved confirmed".
 >
 > | PR | Status | Source |
 > |---|---|---|
@@ -227,7 +227,10 @@ The reduced-motion rule also needs a JS change: `pitch.ts` must pass `behavior: 
 Every PR needs before/after screenshots at **1440×900 and 390×844**, in **SVG, Three.js and PixiJS**, for **en-GB, sw-KE and hi-IN**. It must pass `./scripts/check.sh`, `homepage-`, `experience-`, `analytics-`, `controls-` and `library-browser.mjs`. It must not regress: the canonical label wherever it appears now, "Verified (recorded)" text, evt-03/04/05 evidence, 22 players, the Return to match button, no horizontal scroll, and focus rings on 39 of 39 tab stops.
 
 1. **D2a: semantic tokens, light.** **Status: Done**, #36, merge `1276f61`. Add the `.experience` layer. Replace the 144 hex values in `experience.css` with roles, rename the team tokens, and override `--font-tabular`.
-   - *Accept:* `experience.css` has 0 hex outside the turf and heat colours. **Status:** 13 remain, 11 of them turf, heat and map colours. The other two are the `html` background (outside `.experience` scope) and the renderer-owned player-tag `#ffe9a1` (#36 body).
+   - *Accept:* `experience.css` has 0 hex outside the turf and heat colours. **Status: not met as worded.** 13 hex values remain in `app/web/static/experience.css` (at `fd2cd35`):
+     - Turf or heat, which the accept excludes (6): `:185` `#2e7a53` map background; `:186` `#2e7a53` turf; `:187` `#e4f0e9` pitch lines; `:188` `#ffd60a` heat cells; `:197` `#2e7a53` and `#ffd60a` heat scale.
+     - Marks drawn on the turf map (5): `:189` `#ffd60a` and `#fff` shot points; `:190` `#fff` network lines; `:191` `#fff` node stroke; `:192` `#fff` node label. #36 counts these with the turf, but the accept names only turf and heat, so they are a gap unless the accept is widened.
+     - Real gaps (2): `:5` `#f2f3f5` `html` background (the same value as `--c-canvas`, but `html` sits outside `.experience` scope); `:112` `#ffe9a1` player tag (matches the Three.js selected-player ring; #36 body).
    - *Accept:* all eight failing pairs from section 2 measure ≥4.5:1 (muted 6.02, team 5.12/5.05).
    - *Accept:* Inter is no longer loaded on `/`.
    - *Accept:* `/legacy` is pixel-identical.

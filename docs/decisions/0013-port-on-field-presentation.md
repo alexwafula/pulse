@@ -2,6 +2,7 @@
 
 Date: 2026-10-12
 Status: Implemented on `feat/experience-integration`; not merged into main.
+Provenance: the prototype's author, tool and reuse permission are recorded in [ADR 0015](0015-prototype-visual-system.md#fonts-and-provenance).
 
 ## Context
 

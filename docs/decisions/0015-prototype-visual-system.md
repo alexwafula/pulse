@@ -2,6 +2,7 @@
 
 Date: 2026-10-13
 Status: Implemented on `feat/experience-integration`; not merged into main.
+Amended: 2026-10-19 (prototype provenance confirmed; see "Fonts and provenance").
 
 ## Context
 
@@ -43,8 +44,16 @@ Original fonts are downloaded unmodified and served locally, with each OFL file:
 [Outfit](https://github.com/google/fonts/tree/main/ofl/outfit) and
 [Plus Jakarta Sans](https://github.com/google/fonts/tree/main/ofl/plusjakartasans).
 No Google Fonts/CDN requests occur at runtime. The supplied HTML remains outside
-the repo and its simulator/host integrations are not copied. Contributor reuse
-permissions still need confirming before submission, as recorded in ADR 0014.
+the repo and its simulator/host integrations are not copied. ~~Contributor reuse
+permissions still need confirming before submission, as recorded in ADR 0014.~~
+
+This ADR is the provenance record for the prototype:
+
+- **Who:** Ved, a registered Pulse team member, made the Matchlens prototype.
+- **Tool:** claude.ai.
+- **Scope:** Ved permits the team to derive the Pulse UI from the prototype, code and markup included.
+- **Date:** confirmed on 2026-10-19.
+- **Evidence:** the team holds Ved's written confirmation outside the repo. `docs/SUBMISSION-READINESS.md` records it.
 
 ## Checks
 

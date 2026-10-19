@@ -11,7 +11,8 @@ recaps and personalized analyst/casual/player experiences. Charts/maps are our
 interpretation of its explainable-statistics objective, not an organizer approval.
 Sections 3, 4.3, 4.6 and 4.11 require a team of at most four, newly created work
 after registration opened September 29, and appropriate ownership/permissions.
-Confirm the contributor's rights and permission before submission. Sections
+Confirm the contributor's rights and permission before submission (for the Matchlens
+prototype, confirmed on 2026-10-19; see [ADR 0015](0015-prototype-visual-system.md#fonts-and-provenance)). Sections
 4.3-4.7 require a functioning, synthetic-data project and public submission repo.
 Eligibility still depends on all rules; a compatible feature is not a compliant
 entry by itself.

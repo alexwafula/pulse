@@ -1,6 +1,6 @@
 # Submission readiness and human sign-offs
 
-Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on main
+Updated 2026-10-19 (prototype provenance); 2026-10-18 otherwise. Readiness implementation: `fix/demo-readiness`, based on main
 `7a1e154`. Local changes are not a claim of deployment or submission.
 
 | Deliverable | State / next action |
@@ -25,6 +25,8 @@ Reference: Matchlens HTML prototype. The reference hash supplied by Jefferson is
 (551,931 bytes; original outside this repo). This identifies the supplied
 reference, not permission or authorship evidence.
 
+Provenance record: [ADR 0015](decisions/0015-prototype-visual-system.md#fonts-and-provenance).
+
 Ask the actual rights holder to confirm in writing: contributor name, original
 work and creation date, which files/assets they own, authority to contribute,
 permission for modification, public GitHub distribution and hackathon/demo
@@ -34,11 +36,11 @@ private; commit only a contributor-approved summary and reference/date.
 
 | Confirmation field | Value |
 |---|---|
-| Rights holder / contribution | Pending |
-| Permission wording and date | Pending |
+| Rights holder / contribution | Ved, registered Pulse team member; Matchlens prototype made with claude.ai |
+| Permission wording and date | The team may derive the Pulse UI from the prototype, code and markup included; 2026-10-19 |
 | Third-party assets and attribution | Pending; also review `THIRD-PARTY-NOTICES.md` |
-| Team representative confirmation | Pending |
-| Approved public summary / evidence reference | Pending |
+| Team representative confirmation | Recorded by Jefferson (commit `fec91b5`, 2026-10-19) |
+| Approved public summary / evidence reference | Written confirmation held by the team outside the repo. This table and ADR 0015 are the public summary; Ved's sign-off on that wording is not recorded here |
 
 Do not tick this from verbal assumptions, an AI-generated statement or a repo
 invite. If permission cannot be confirmed, remove/replace the affected work
@@ -46,7 +48,7 @@ before submission. No legal compliance certification is made here.
 
 ## Final release checklist
 
-1. Retain the language-review confirmation in `LOCALE-REVIEW.md`, get contributor confirmation above and
+1. Retain the language-review confirmation in `LOCALE-REVIEW.md`, contributor confirmation is recorded above (2026-10-19); get
    original recording evidence or appropriately narrowed provider claims.
 2. Review/merge the tested branch. Let main's existing CI/image workflow deploy.
    Check `/version` matches that main SHA and rerun the judge instructions.
