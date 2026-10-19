@@ -110,7 +110,7 @@ PR numbers checked with `gh pr list` on Oct 18. The only open PR is #31 (this do
 | A6 | Hide the Legacy link | DONE: the link carries `hidden` (`match.html:30`) and `/legacy` still serves; `TestPageCopy` passes; live `/` on Oct 18 served the link with `hidden` | #32 (merged Oct 18) |
 | B | Clicking a moment stays in Live | LOCAL DONE: explicit Live navigation, mounted pitch retained, persona changes preserve detector clips | `fix/demo-readiness`, not deployed |
 | E | `SUSTAINED_PRESSURE` deterministic template narration (template only, never VERIFIED) | LOCAL DONE: Go-backed count/estimate, source actions and ticks, validation/expiry tests; no v2 cue or gate change | `fix/demo-readiness`, not deployed |
-| G | `sw-KE` and `hi-IN` translation review, including the #32 keys and pressure text | PARTIAL: missing translations drafted; all 252 translated keys/placeholders checked. Native-speaker sign-off still pending (`docs/LOCALE-REVIEW.md`) | `fix/demo-readiness` |
+| G | `sw-KE` and `hi-IN` translation review, including the #32 keys and pressure text | TEAM ACCEPTANCE RECORDED: Alex confirmed native-language/Swahili review with no issues; individual reviewers and separate Hindi scope were not named. Technical checks cover all 252 translated keys/placeholders (`docs/LOCALE-REVIEW.md`) | Follow-up on `fix/agent-ingress-isolation` |
 | H | gzip and `Cache-Control` for static assets | LOCAL DONE: gzip, representation-specific ETags, GET/HEAD/304/ranges and must-revalidate. Production headers must be rechecked after release | `fix/demo-readiness`, not deployed |
 
 ### Oct 18 local readiness verification
@@ -124,10 +124,23 @@ Windows Python baseline is 33 pass / 1 failure: the model-cap inventory test
 compares backslash paths to slash keys; agent-owner approval is needed for the
 one-line `.as_posix()` test fix. Cap behavior remains zero-default and unchanged.
 
+Oct 18 follow-up: Alex authorized that test fix; the inventory now uses
+`path.relative_to(ROOT).as_posix()`. All 34 Python tests pass on Windows, with
+unchanged assertions and runtime cap policy. Alex also confirmed the
+native-language/Swahili review was good with no corrections requested; individual
+reviewer/scope details are in `docs/LOCALE-REVIEW.md`.
+
+Ingress was retested through stable API `2026-07-01`: internal ingress is stored,
+but public Python health still returns 200; unauthenticated insights return 401
+and Go receives `python-recorded`. Alex explicitly chose to keep hosting and
+defer migration. This is authenticated access, not verified private networking.
+See `docs/INGRESS-REVIEW-2026-10-18.md`. No new resources, model calls or CI changes.
+
 Judge instructions, project-page copy, provenance audit and submission sign-offs
 are in `docs/`. An actual captioned local demo draft was captured (87.40 seconds);
-public upload, final human watch-through, permissions and native approval remain
-open. The demo stays recorded, no paid model calls/resources were used or changed.
+Public upload, final human watch-through and permissions remain open; language
+acceptance is recorded above. The demo stays recorded; no new paid model calls
+or resources were introduced by the readiness work.
 See ADR 0023 and `docs/SUBMISSION-READINESS.md`.
 
 ---

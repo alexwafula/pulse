@@ -8,7 +8,9 @@ Updated 2026-10-18. Readiness implementation: `fix/demo-readiness`, based on mai
 | Shot-map/canvas, Live moment navigation | Implemented; desktop/mobile regression passes |
 | Pressure narration and both evidence types | Deterministic UI template; not model-verified; no contract change |
 | Static gzip and conditional caching | Implemented and unit-tested; verify headers again after deployment |
-| Native-language review | Drafts and key/placeholder checks complete; human approval **pending** |
+| Native-language review | Alex confirmed native-language/Swahili review was good on Oct 18; no corrections requested. Reviewer/scope details are recorded honestly in `LOCALE-REVIEW.md` |
+| Python ingress | Current hosting retained by Alex's decision; token auth works, network isolation unresolved/deferred (`INGRESS-REVIEW-2026-10-18.md`) |
+| Windows Python tests | Path comparison normalized without changing the model-cap checks; all 34 tests pass locally |
 | Judge instructions and project description | Updated; clean-browser check against final deployed SHA still required |
 | Video | Actual 87.40-second captioned local draft captured; final human watch-through, permissions and public upload pending |
 | Recording provenance | Content bound; original provider response/trace **pending**; see audit |
@@ -43,7 +45,7 @@ before submission. No legal compliance certification is made here.
 
 ## Final release checklist
 
-1. Get native reviews in `LOCALE-REVIEW.md`, contributor confirmation above and
+1. Retain the language-review confirmation in `LOCALE-REVIEW.md`, get contributor confirmation above and
    original recording evidence or appropriately narrowed provider claims.
 2. Review/merge the tested branch. Let main's existing CI/image workflow deploy.
    Check `/version` matches that main SHA and rerun the judge instructions.

@@ -111,6 +111,9 @@ browser experience suite.
   directly even after reapplying internal ingress. Authentication is enforced
   and tested; do not claim network isolation until this discrepancy is resolved.
   Health probes intentionally remain unauthenticated. See decision 0019.
+  The [Oct 18 follow-up](INGRESS-REVIEW-2026-10-18.md) retested the current API;
+  Alex explicitly chose to retain hosting and defer migration. This item is
+  deferred, not fixed by the successful authentication check.
 - Azure CLI console logs failed with a missing `eventStreamEndpoint` field.
   Direct Log Analytics queries subsequently confirmed ingestion for both apps;
   the CLI stream limitation is separate from ingestion.

@@ -1,7 +1,10 @@
 # Native language review
 
-Status: **PENDING HUMAN REVIEW**. Automated parity/evidence tests do not certify
-linguistic accuracy. No native-speaker approval has been recorded.
+Status: **TEAM ACCEPTANCE RECORDED**. On October 18 Alex confirmed that the
+native-language/Swahili review was good, reported no issues and requested no
+translation corrections. This records the user's acceptance, not an assistant's
+linguistic certification. Individual native reviewers and a separate Hindi
+review scope were not named; do not invent those details.
 
 Oct 18 local readiness branch: all 252 interface keys exist in each translated
 locale, with matching English placeholder sets (literal English keys fall back
@@ -18,9 +21,9 @@ Review sources:
 
 | Locale | Interface | Template insight | Reviewer/date |
 |---|---|---|---|
-| English (`en-GB`) | Teammate review pending | Existing bounded wording; technical tests pass | Pending |
-| Kiswahili (`sw-KE`) | Translation draft | Translation draft | Native reviewer needed |
-| Hindi (`hi-IN`) | Translation draft | Translation draft | Native reviewer needed |
+| English (`en-GB`) | No corrections requested | Existing bounded wording; technical tests pass | Alex's team acceptance, 2026-10-18 |
+| Kiswahili (`sw-KE`) | Accepted per reported review | Accepted per reported review | Alex confirmed review, 2026-10-18; individual reviewer not named |
+| Hindi (`hi-IN`) | No corrections requested | No corrections requested; model publication stays off | Separate reviewer/scope not specified in the confirmation |
 
 ## Review procedure
 

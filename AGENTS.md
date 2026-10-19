@@ -209,7 +209,7 @@ Failure handling: Verifier rejects -> Narrator retries once with the rejection r
 
 ### 7.4 Locales
 
-- Interface/template locales: `en-GB`, `sw-KE`, `hi-IN`. Kiswahili/Hindi are deterministic translation drafts pending native-speaker review; model-backed publication remains English-only and translated requests make no model calls.
+- Interface/template locales: `en-GB`, `sw-KE`, `hi-IN`. Alex confirmed native-language/Swahili review with no issues on Oct 18; individual reviewers and separate Hindi review scope are not named (`docs/LOCALE-REVIEW.md`). Model-backed publication remains English-only and translated requests make no model calls.
 - If a football term has no established term in the glossary, keep the English term. Never invent terms.
 - Swahili output is reviewed by a native speaker before the demo.
 
