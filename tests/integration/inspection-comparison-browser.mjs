@@ -59,9 +59,16 @@ try {
     await page.locator('[data-insight-view="comparison"]').click();
     await page.locator('select[name="teamId"]').evaluate((select,id)=>{select.value=id;select.dispatchEvent(new Event("change",{bubbles:true}));}, replay.match.teams.find(team=>team.id==="vale").id);
     await page.locator('.comparison[data-available="true"]').waitFor();
+    // At the end the 10 s windows hold no vale action (its last is at +45.3 s): one line,
+    // not 0 -> 0 rows over two empty pitches (ADR 0031). 20 s windows hold actions.
+    await page.locator('.comparison[data-comparison-team="vale"] [data-i18n="state.windowNone"]').waitFor();
+    assert.equal(await page.locator(".comparison-window, .comparison-stat").count(), 0);
+    const windowSelect = page.locator('select[name="windowMs"]');
+    await windowSelect.evaluate(select=>{select.value="20000";select.dispatchEvent(new Event("change",{bubbles:true}));});
+    await page.waitForFunction(() => document.querySelectorAll('.comparison-window').length === 2);
     const windows = await page.locator(".comparison-window").evaluateAll(items => items.map(item => ({start:Number(item.dataset.startMs),end:Number(item.dataset.endMs),ids:[...item.querySelectorAll("[data-comparison-event]")].map(e => e.dataset.comparisonEvent)})));
     assert.equal(windows.length,2);
-    assert.equal(windows[0].end-windows[0].start,10000); assert.equal(windows[1].end-windows[1].start,10000);
+    assert.equal(windows[0].end-windows[0].start,20000); assert.equal(windows[1].end-windows[1].start,20000);
     assert.equal(windows[0].end,windows[1].start); assert.equal(windows[1].end,replay.match.endMs);
     assert.equal(new Set(windows.flatMap(w => w.ids)).size, windows.flatMap(w => w.ids).length);
     const team = await page.locator('.comparison').getAttribute('data-comparison-team');
@@ -71,7 +78,6 @@ try {
       assert.equal(stats.find(r=>r.name==="Completed passes")[i===0?"before":"after"],events.filter(e=>e.type==="PASS"&&e.outcome==="COMPLETE").length);
       assert.equal(stats.find(r=>r.name==="Shot attempts")[i===0?"before":"after"],events.filter(e=>e.type==="SHOT").length);
     }
-    const windowSelect = page.locator('select[name="windowMs"]');
     assert.ok((await windowSelect.getAttribute('class')).includes('select2-hidden-accessible'));
     await windowSelect.evaluate(select=>{select.value="20000";select.dispatchEvent(new Event("change",{bubbles:true}));});
     await page.waitForFunction(() => {const w=document.querySelector('.comparison-window');return w && Number(w.dataset.endMs)-Number(w.dataset.startMs)===20000;});
@@ -79,6 +85,8 @@ try {
     await page.screenshot({path:path.join(output,`comparison-${width}.png`),fullPage:true});
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+1),`horizontal overflow at ${width}`);
     if (width===1440) {
+      // Mid-sequence (+40 s), where both 10 s windows hold vale actions.
+      await seek(page,500);
       await windowSelect.evaluate(select=>{select.value="10000";select.dispatchEvent(new Event("change",{bubbles:true}));});
       await page.waitForFunction(() => {const w=document.querySelector('.comparison-window');return w && Number(w.dataset.endMs)-Number(w.dataset.startMs)===10000;});
       const end = Number(await page.locator('[data-compare-end]').first().getAttribute('data-compare-end'));
