@@ -203,7 +203,7 @@ section, and its Download dispatches `pulse:download-recap`.
 `pulse:pane-selected` reports `{ pane, section? }`. A detector-moment replay and the
 insight's Evidence clip set `section: "live"` and select the Evidence tab, so the
 trail does not send viewers into Insights. Selecting a drawer tab never changes the
-section or `?section=` (decision 0031). This DOM bridge is presentation-only,
+section or `?section=` (decision 0033). This DOM bridge is presentation-only,
 not a new shared football contract or streaming API.
 
 Visual playback bounds are separate from fact windows. Corner/SET_PIECE_SHOT

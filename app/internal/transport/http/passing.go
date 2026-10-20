@@ -20,6 +20,9 @@ const (
 	labelPadding   = 3.0
 	graphMargin    = 8.0
 	edgeRoom       = 32.0 // the least gap between two circles, so an edge and its arrowhead show
+	// maxGraphWidth fits the narrowest drawer (358px at 390px wide, 350px at
+	// 1440px), so the graph is drawn unscaled.
+	maxGraphWidth = 340.0
 )
 
 type graphNode struct {
@@ -38,12 +41,13 @@ type graphTeam struct {
 	ID, Name, Marker string
 	Total            int
 	Width, Height    int
-	Nodes            []graphNode
-	Edges            []graphEdge
-	// Busy lists the nodes with a completed pass sent or received; Idle counts
-	// the rest, which the experience's table shows as one line.
-	Busy []graphNode
-	Idle int
+	// Nodes are the players with a completed pass sent or received, laid out
+	// for the graph; Roster keeps every player for /legacy's table and Idle
+	// counts the rest, which the experience's table shows as one line.
+	Nodes  []graphNode
+	Roster []graphNode
+	Edges  []graphEdge
+	Idle   int
 }
 type graphSnapshot struct {
 	TimeMS int64
@@ -74,10 +78,9 @@ func passingViews(replay domain.Replay) ([]graphSnapshot, error) {
 		for ti, team := range snapshot.Teams {
 			graph := graphTeam{ID: team.Team.ID, Name: team.Team.Name, Marker: fmt.Sprintf("graph-arrow-%d-%d", si, ti), Total: team.Total}
 			for _, node := range team.Nodes {
-				if node.Sent+node.Received > 0 {
-					graph.Nodes = append(graph.Nodes, graphNode{ID: node.Player.ID, Name: node.Player.Name, Number: node.Player.Number, Sent: node.Sent, Received: node.Received})
-				}
+				graph.Roster = append(graph.Roster, graphNode{ID: node.Player.ID, Name: node.Player.Name, Number: node.Player.Number, Sent: node.Sent, Received: node.Received})
 			}
+			graph.Nodes, graph.Idle = idleNodes(graph.Roster)
 			graph.Width, graph.Height = layoutRing(graph.Nodes)
 			positions := make(map[string]graphNode, len(graph.Nodes))
 			for _, node := range graph.Nodes {
@@ -93,7 +96,6 @@ func passingViews(replay domain.Replay) ([]graphSnapshot, error) {
 				}
 				graph.Edges = append(graph.Edges, graphEdge{From: a.Name, To: b.Name, Path: path, Count: len(edge.EventIDs), Width: min(8, 2+len(edge.EventIDs)), EventIDs: edge.EventIDs})
 			}
-			graph.Busy, graph.Idle = graph.Nodes, len(team.Nodes)-len(graph.Nodes)
 			view.Teams = append(view.Teams, graph)
 		}
 		views = append(views, view)
@@ -105,39 +107,43 @@ func nodeLabel(node graphNode) string { return fmt.Sprintf("#%d %s", node.Number
 
 // layoutRing places the nodes clockwise from the top on the smallest ring whose
 // labels, set radially outside their circles, clear every other label and circle.
+// Past maxGraphWidth the ring stops widening and grows taller instead, so the
+// drawer shows the graph at its own size and the labels keep their 13px.
 // It writes positions in place and returns the viewBox size that fits them all.
 func layoutRing(nodes []graphNode) (int, int) {
 	if len(nodes) == 0 {
 		return 0, 0
 	}
 	var circles, labels []box
-	// A ring of 2000 units is far beyond any roster; the cap only guards the loop.
+	var bounds box
+	width := func() float64 { return bounds.right - bounds.left + 2*graphMargin }
+	// Radii of 2000 units are far beyond any roster; the caps only guard the loops.
+	// 1. A ring, while it fits the width.
+	fits, rx := false, -1.0
 	for ring := 0.0; ring < 2000; ring += 2 {
-		circles, labels = circles[:0], labels[:0]
-		for i := range nodes {
-			angle := 2*math.Pi*float64(i)/float64(len(nodes)) - math.Pi/2
-			if len(nodes) == 1 {
-				angle = math.Pi / 2 // a lone node keeps its label below
-			}
-			node := &nodes[i]
-			node.X, node.Y = ring*math.Cos(angle), ring*math.Sin(angle)
-			r := nodeRadius + nodeStroke/2
-			circle := box{node.X - r, node.Y - r, node.X + r, node.Y + r}
-			reach := r + labelGap
-			label := placeLabel(node, angle, reach)
-			for label.overlaps(circle) {
-				reach++
-				label = placeLabel(node, angle, reach)
-			}
-			circles, labels = append(circles, circle), append(labels, label)
+		circles, labels, bounds = placeRing(nodes, ring, 0, circles[:0], labels[:0])
+		if width() > maxGraphWidth {
+			break
 		}
-		if ringClear(circles, labels) {
+		rx = ring
+		if fits = ringClear(circles, labels); fits {
 			break
 		}
 	}
-	bounds := box{math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)}
-	for _, b := range append(circles, labels...) {
-		bounds = box{math.Min(bounds.left, b.left), math.Min(bounds.top, b.top), math.Max(bounds.right, b.right), math.Max(bounds.bottom, b.bottom)}
+	// 2. Then the widest ring that fitted, stretched into a taller stadium.
+	// Labels on the straight sides point straight out, so rx may have to shrink.
+	for h := 2.0; rx >= 0 && !fits && h < 2000; h += 2 {
+		circles, labels, bounds = placeRing(nodes, rx, h, circles[:0], labels[:0])
+		for width() > maxGraphWidth && rx > 0 {
+			rx = math.Max(0, rx-2)
+			circles, labels, bounds = placeRing(nodes, rx, h, circles[:0], labels[:0])
+		}
+		fits = width() <= maxGraphWidth && ringClear(circles, labels)
+	}
+	// 3. Names too long for the width at any height keep the plain ring.
+	for ring := 0.0; !fits && ring < 2000; ring += 2 {
+		circles, labels, bounds = placeRing(nodes, ring, 0, circles[:0], labels[:0])
+		fits = ringClear(circles, labels)
 	}
 	dx, dy := graphMargin-bounds.left, graphMargin-bounds.top
 	for i := range nodes {
@@ -145,6 +151,62 @@ func layoutRing(nodes []graphNode) (int, int) {
 		nodes[i].LabelX, nodes[i].LabelY = round2(nodes[i].LabelX+dx), round2(nodes[i].LabelY+dy)
 	}
 	return int(math.Ceil(bounds.right - bounds.left + 2*graphMargin)), int(math.Ceil(bounds.bottom - bounds.top + 2*graphMargin))
+}
+
+// placeRing puts the nodes clockwise from the top at equal arc lengths on a
+// stadium: two semicircles of radius rx joined by straight sides of length 2h.
+// With h = 0 it is a circle; a taller stadium spreads the nodes down its sides.
+// Each label is pushed out along the outward normal until it clears its own
+// circle. It returns the circle and label boxes and their bounds.
+func placeRing(nodes []graphNode, rx, h float64, circles, labels []box) ([]box, []box, box) {
+	bounds := box{math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)}
+	for i := range nodes {
+		node := &nodes[i]
+		var angle float64
+		node.X, node.Y, angle = stadiumPoint(rx, h, float64(i)/float64(len(nodes)))
+		if len(nodes) == 1 {
+			node.X, node.Y, angle = 0, 0, math.Pi/2 // a lone node keeps its label below
+		}
+		r := nodeRadius + nodeStroke/2
+		circle := box{node.X - r, node.Y - r, node.X + r, node.Y + r}
+		reach := r + labelGap
+		label := placeLabel(node, angle, reach)
+		for label.overlaps(circle) {
+			reach++
+			label = placeLabel(node, angle, reach)
+		}
+		circles, labels = append(circles, circle), append(labels, label)
+		for _, b := range []box{circle, label} {
+			bounds = box{math.Min(bounds.left, b.left), math.Min(bounds.top, b.top), math.Max(bounds.right, b.right), math.Max(bounds.bottom, b.bottom)}
+		}
+	}
+	return circles, labels, bounds
+}
+
+// stadiumPoint returns the point a fraction f of the way round the stadium,
+// clockwise from the top centre, and the angle of its outward normal.
+func stadiumPoint(rx, h, f float64) (x, y, angle float64) {
+	quarter, side := math.Pi/2*rx, 2*h
+	s := f * (4*quarter + 2*side)
+	arc := func(cx, cy, from, length float64) (float64, float64, float64) {
+		a := from
+		if rx > 0 {
+			a += length / rx
+		}
+		return cx + rx*math.Cos(a), cy + rx*math.Sin(a), a
+	}
+	switch {
+	case s < quarter: // top cap, right half
+		return arc(0, -h, -math.Pi/2, s)
+	case s < quarter+side: // right side, downwards
+		return rx, -h + (s - quarter), 0
+	case s < 3*quarter+side: // bottom cap
+		return arc(0, h, 0, s-quarter-side)
+	case s < 3*quarter+2*side: // left side, upwards
+		return -rx, h - (s - 3*quarter - side), math.Pi
+	default: // top cap, left half
+		return arc(0, -h, math.Pi, s-3*quarter-2*side)
+	}
 }
 
 // placeLabel sets the node's label point at distance reach along angle and returns

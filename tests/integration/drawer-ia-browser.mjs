@@ -2,7 +2,8 @@
 // 1. Drawer passing network, every scenario x both teams, mid replay and end, desktop and mobile:
 //    no label overlaps another label or any node circle, labels stay inside the SVG, and the nodes
 //    are exactly the players with a completed pass sent or received by the snapshot cutoff (the
-//    Insights pitch-map rule). A team with no such player shows one plain line and no graph.
+//    Insights pitch-map rule). Labels render at 12px or more. A team with no such player shows
+//    one D4b-1 state line and no graph.
 // 2. On experience pages the tabs are Timeline, Passing, Control, Routes, Evidence; arrow keys wrap;
 //    no tab click or arrow key changes body[data-section] or ?section=, on Live or in Insights.
 // 3. The insight card's Evidence button opens the D4a trail: Evidence tab, Live, trail under the pitch.
@@ -10,6 +11,9 @@
 //    section, whose Download still saves the recap. /legacy keeps its Recap tab and pane.
 // 5. .analytics-links is gone; the [data-analysis-pane] chips and the Story Recap chip remain.
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { chromium } from "playwright-core";
 
 const base = process.env.PULSE_URL ?? "http://127.0.0.1:8080";
@@ -43,10 +47,9 @@ function networkLayout() {
   const snapshot = document.querySelector(".passing-snapshot:not([hidden])");
   return { cutoff: Number(snapshot.dataset.cutoff), teams: [...snapshot.querySelectorAll(".passing-team")].map(team => {
     const svg = team.querySelector("svg.passing-graph");
-    const id = team.dataset.teamId;
-    const name = team.querySelector("h4")?.firstChild.textContent.trim() ?? id;
-    const empty = [...team.querySelectorAll(".state-text")].map(node => node.textContent.trim());
-    if (!svg) return { name, empty, ids: [], problems: [], svg: false, tables: team.querySelectorAll("table").length };
+    // A team without nodes shows only a C7 state line (D4b-1), naming the team.
+    const empty = [...team.querySelectorAll(".state-line .state-text")].filter(node => !node.dataset.i18n.startsWith("state.idlePlayer")).map(node => ({ key: node.dataset.i18n, team: node.dataset.i18nArgTeam ?? node.dataset.i18nArgName }));
+    if (!svg) return { empty, ids: [], problems: [], svg: false, tables: team.querySelectorAll("table").length };
     const box = svg.getBoundingClientRect();
     // Circle boxes include half the computed stroke, scaled like the SVG.
     const scale = box.width / svg.viewBox.baseVal.width;
@@ -63,7 +66,9 @@ function networkLayout() {
         if (a !== b && a.id < b.id && hit(a.l, b.l)) problems.push(`${a.label} label over label ${b.label}`);
       }
     }
-    return { name, empty, ids: nodes.map(node => node.id).sort(), problems, svg: true, width: Math.round(box.width), height: Math.round(box.height) };
+    // The rendered label size: its font size times the SVG's scale.
+    const labelPx = +(parseFloat(getComputedStyle(svg.querySelector(".node-name")).fontSize) * scale).toFixed(2);
+    return { empty, ids: nodes.map(node => node.id).sort(), problems, svg: true, labelPx, width: Math.round(box.width), height: Math.round(box.height) };
   }) };
 }
 
@@ -81,18 +86,21 @@ await check("drawer passing network: no label overlaps a label or a circle, and 
         const shown = await page.evaluate(networkLayout);
         for (const [index, team] of shown.teams.entries()) {
           const { id: teamId, name: teamName } = replay.match.teams[index];
+          team.name = teamName;
           const involved = new Set(replay.events.filter(event => event.timeMs <= shown.cutoff && event.teamId === teamId && event.type === "PASS" && event.outcome === "COMPLETE").flatMap(event => [event.actorId, event.recipientId]));
           const expected = [...involved].sort();
           const label = `${scenario} ${vpName} seek ${at} ${team.name}`;
-          rows.push({ scenario, vp: vpName, at, team: team.name, nodes: team.ids.length, size: team.svg ? `${team.width}x${team.height}` : "empty", problems: team.problems.length });
+          rows.push({ scenario, vp: vpName, at, team: team.name, nodes: team.ids.length, size: team.svg ? `${team.width}x${team.height}` : "empty", labelPx: team.labelPx ?? "", problems: team.problems.length });
           assert.deepEqual(team.ids, expected, `${label}: nodes`);
           assert.deepEqual(team.problems, [], `${label}: overlaps`);
+          // The graph grows taller rather than wider, so labels are never scaled below 12px.
+          if (team.svg) assert.ok(team.labelPx >= 12, `${label}: labels render at ${team.labelPx}px`);
           if (expected.length === 0) {
             assert.equal(team.svg, false, `${label}: an empty team draws a graph`);
-            const active = replay.events.some(event => event.teamId === teamId && ["PASS", "CARRY", "SHOT"].includes(event.type));
-            assert.deepEqual(team.empty, [active ? `${teamName}: no completed passes yet` : `${teamName} has no passes, carries or shots in this sequence`], `${label}: shared empty state`);
+            assert.equal(team.empty.length, 1, `${label}: empty state lines ${JSON.stringify(team.empty)}`);
+            assert.ok(["state.noneInSequence", "state.teamNoPassesYet"].includes(team.empty[0].key) && team.empty[0].team === teamName, `${label}: empty state ${JSON.stringify(team.empty)}`);
             assert.equal(team.tables, 0, `${label}: an empty team draws a table`);
-          } else assert.ok(team.empty.every(text => /^\d+ players? with no passes$/.test(text)), `${label}: only idle-player summary may accompany nodes`);
+          } else assert.deepEqual(team.empty, [], `${label}: empty state shown with nodes`);
           // Same players as the Insights pitch-map network at this clock.
           const panel = await (await fetch(`${base}/experience/panel?scenario=${scenario}&panel=analytics&map=network&teamId=${teamId}&atMs=${shown.cutoff}`)).text();
           const insights = [...panel.matchAll(/class="network-node" data-player-id="([^"]+)"/g)].map(match => match[1]).sort();
@@ -168,18 +176,30 @@ await check("every Recap entry opens the sidebar Recap section, and its Download
     await page.waitForSelector('.story-content[data-panel="recap"] li');
     assert.deepEqual(await where(page), { section: "recap", query: "recap" }, `${label}: section`);
   };
-  const context = await browser.newContext({ ...viewports.desktop, acceptDownloads: true });
-  // Downloaded files read back empty in this headless setup (also on /legacy), so keep the blob's text.
-  await context.addInitScript(() => { const original = URL.createObjectURL; URL.createObjectURL = blob => { blob.text().then(text => { window.__recap = text; }); return original(blob); }; });
+  // Chromium saves the download into a known directory (CDP Browser.setDownloadBehavior) and the test
+  // reads the file. The directory sits under $HOME, not os.tmpdir(): a snap-packaged Chromium has a
+  // private /tmp, so files it writes there are not visible to Node (PULSE_DOWNLOAD_DIR overrides).
+  const downloads = fs.mkdtempSync(path.join(process.env.PULSE_DOWNLOAD_DIR ?? os.homedir(), "pulse-d4b-download-"));
+  const context = await browser.newContext(viewports.desktop);
   const page = await context.newPage();
+  const { targetInfo } = await (await context.newCDPSession(page)).send("Target.getTargetInfo");
+  const cdp = await browser.newBrowserCDPSession();
+  await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: downloads, eventsEnabled: true, browserContextId: targetInfo.browserContextId });
   await open(page, "/", "scenario=corner");
   await seek(page, 1000);
   await press(page, '.experience-navigation [data-section="recap"]');
   await recapShown(page, "sidebar");
-  const download = page.waitForEvent("download");
+  const finished = new Promise(resolve => cdp.on("Browser.downloadProgress", event => { if (event.state !== "inProgress") resolve(event); }));
   await press(page, "[data-download-recap]");
-  assert.equal((await download).suggestedFilename(), "pulse-sequence-recap.txt");
-  const text = await page.waitForFunction(() => window.__recap).then(handle => handle.jsonValue());
+  const progress = await finished;
+  assert.equal(progress.state, "completed", `download ${progress.state}`);
+  assert.equal(path.basename(progress.filePath), "pulse-sequence-recap.txt");
+  const text = fs.readFileSync(progress.filePath, "utf8");
+  const downloadRoot = fs.realpathSync(process.env.PULSE_DOWNLOAD_DIR ?? os.homedir());
+  const resolvedDownloads = fs.realpathSync(downloads);
+  assert.equal(path.dirname(resolvedDownloads), downloadRoot, "cleanup stays in the chosen download root");
+  assert.ok(path.basename(resolvedDownloads).startsWith("pulse-d4b-download-"));
+  fs.rmSync(resolvedDownloads, { recursive: true, force: true });
   const lines = await page.locator('.story-content[data-panel="recap"] li p').allTextContents();
   assert.ok(lines.length > 0 && lines.every(line => text.includes(line)), "download does not carry the Recap section's lines");
 

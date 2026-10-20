@@ -35,7 +35,7 @@ func TestPassingViewsShowOnlyPlayersWithCompletedPasses(t *testing.T) {
 						roster++
 					}
 				}
-				if len(team.Busy)+team.Idle != roster || !reflect.DeepEqual(team.Busy, team.Nodes) {
+				if len(team.Roster) != roster || len(team.Nodes)+team.Idle != roster {
 					t.Fatalf("%s at %d: active graph nodes and idle summary must cover the roster", fixture, view.TimeMS)
 				}
 				// The Insights pitch-map network is the reference rule for which players appear.
@@ -86,29 +86,40 @@ func TestLayoutRingKeepsLabelsClearForEveryNodeCount(t *testing.T) {
 			if !ringClear(circles, labels) {
 				t.Fatalf("%s x%d: labels overlap", name, count)
 			}
+			// Roster-length names keep the graph within the drawer, so it is drawn unscaled.
+			if len(name) <= 5 && float64(width) > maxGraphWidth+1 {
+				t.Fatalf("%s x%d: %dpx is wider than %v", name, count, width, maxGraphWidth)
+			}
 		}
 	}
 }
 
-func TestPassingTemplateRendersEmptyTeamsAsOneLine(t *testing.T) {
+func TestPassingTemplateDrawsNoEmptyGraph(t *testing.T) {
 	replay, err := simulator.Load("../../../../data/samples/first-sequence.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	views, _ := passingViews(replay)
 	last := views[len(views)-1]
-	if len(last.Teams[1].Nodes) != 0 || len(last.Teams[0].Nodes) != 3 {
-		t.Fatalf("corner end: want 3 Aurora Vale nodes and no Bastion City nodes, got %d and %d", len(last.Teams[0].Nodes), len(last.Teams[1].Nodes))
+	if len(last.Teams[1].Nodes) != 0 || len(last.Teams[0].Nodes) != 3 || len(last.Teams[1].Roster) != 4 || last.Teams[0].Idle != 1 {
+		t.Fatalf("corner end: want 3 Aurora Vale nodes (1 idle) and no Bastion City nodes from a roster of 4, got %+v", last.Teams)
 	}
 	handler, err := NewHandler(replay, "../../../web")
 	if err != nil {
 		t.Fatal(err)
 	}
-	body := get(t, handler, "/legacy", nil).Body.String()
-	if got := strings.Count(body, `class="passing-team-empty"`); got < 1 {
-		t.Fatalf("empty passing teams render %d empty lines", got)
-	}
-	if strings.Contains(body, `viewBox="0 0 280 220"`) {
-		t.Fatal("the drawer passing graph still uses the fixed 280x220 viewBox")
+	for _, path := range []string{"/", "/legacy"} {
+		body := get(t, handler, path, nil).Body.String()
+		if strings.Contains(body, `viewBox="0 0 280 220"`) || strings.Contains(body, `viewBox="0 0 0 0"`) {
+			t.Fatalf("%s: a fixed or empty passing viewBox is still drawn", path)
+		}
+		// Experience pages show the shared C7 state for a team without passes; /legacy keeps its line.
+		want := `data-i18n="state.noneInSequence" data-i18n-arg-name="Bastion City"`
+		if path == "/legacy" {
+			want = `<li class="passing-empty">No completed passes yet</li>`
+		}
+		if !strings.Contains(body, want) {
+			t.Fatalf("%s: missing %s", path, want)
+		}
 	}
 }

@@ -187,7 +187,6 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .passing-node .node-number { fill: var(--c-on-accent); }
 /* Labels sit outside the circles on the light canvas, so they take the ink colour. */
 .experience .passing-node .node-name { fill: var(--c-ink); }
-.experience .passing-team-empty { margin: 8px 0 0; font-size: 13px; color: var(--c-ink-muted); }
 .experience .panel-status { min-height: 24px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--c-ink-muted); }
 .experience #panel-retry { background: var(--c-surface); color: var(--c-accent); border: 0; width: 28px; height: 28px; }
 .experience .experience-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-bottom: 18px; }

@@ -130,6 +130,15 @@ retains the existing `No completed passes yet` line. `Metric evidence` and
 
 The passing-node `aria-label` counts in the summary below come from the 2026-10-16 scan. Players with no completed pass sent or received are no longer drawn, so the live count is lower.
 
+## D4b-2 drawer and passing network (2026-10-20): no new keys
+
+The drawer Passing pane uses the D4b-1 states above for a team with nothing to draw: `state.noneInSequence` when the team has no pass, carry or shot in the sequence, and `state.teamNoPassesYet` when it has none yet. Its idle-player line (`state.idlePlayer`/`state.idlePlayers`) is unchanged. `/legacy` keeps `No completed passes yet`.
+
+Removed with the Insights `.analytics-links` row, which no other view used: `Metric evidence` and `Route evidence` (sw-KE and hi-IN; en-GB had no entries).
+
+The passing-node `aria-label` counts in the summary below come from the 2026-10-16 scan. The drawer graph now draws only players with a completed pass sent or received, so the live count is lower.
+
+
 ## Summary
 
 | Pattern | Count |
