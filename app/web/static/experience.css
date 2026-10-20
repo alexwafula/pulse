@@ -493,3 +493,9 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .panel-status .state-line { margin: 0; }
 @keyframes state-spin { to { rotate: 1turn; } }
 @media (prefers-reduced-motion: reduce) { .experience .state-line[data-state=loading] .state-icon { animation: none; } }
+/* Mobile pass-count card: its title stays visible above the two counts and the card fits them. */
+@media (max-width: 860px) {
+  .experience .rail-share { min-height: 0; }
+  .experience .rail-share .share-labels { flex-wrap: wrap; row-gap: var(--space-1); }
+  .experience .rail-share .share-title { display: block; order: -1; flex-basis: 100%; font-size: 12px; }
+}
