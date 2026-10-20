@@ -276,6 +276,7 @@ Local checks:
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Insight selection (ADR 0031): `node tests/integration/insight-selection-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; corner/central/exchange keep main's corner cue, late-siege shows nothing at 88:40, the corner at 88:44 and the open-play insight from 88:46)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
+- Pre-freeze polish: `node tests/integration/polish-browser.mjs` (running local Go server; no header score chip and stable header positions across sections, header icon buttons styled like Scenarios, no enum capitals in direction/outcome/Story/Pitch maps text in all locales, balanced hero headline at 390, labelled mobile pass card, 44px drawer tabs, inline SVG icon, What changed? tab without icon, sw-KE camera select, uncut Story lists)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 
 ## 9. Code conventions
