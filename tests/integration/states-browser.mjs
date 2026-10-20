@@ -306,6 +306,52 @@ try {
     await context.close();
   });
 
+  // PR #44 interactions: share links, broadcast and insight selection with the default focus and states.
+  await check("shared links, broadcast and insight selection keep the default focus and states", async () => {
+    const context = await browser.newContext(viewports.desktop);
+    await context.grantPermissions(["clipboard-read", "clipboard-write"], { origin: base });
+    // A link shared from Insights at the start restores Insights on vale with collapsed charts.
+    let page = await open(context, "/?scenario=late-siege&view=svg");
+    await section(page, "insights");
+    await press(page, "#share-button");
+    const link = await page.locator("#share-link-value").inputValue().catch(() => "");
+    const shared = link || await page.evaluate(() => navigator.clipboard.readText());
+    assert.match(shared, /[?&]share=1/, "share link");
+    assert.match(shared, /[?&]section=insights/, "share link keeps the section");
+    await page.close();
+    page = await context.newPage();
+    page.on("pageerror", error => errors.push(error.message));
+    await page.goto(shared, { waitUntil: "networkidle" });
+    await settled(page);
+    assert.equal(await page.locator("body").getAttribute("data-section"), "insights");
+    assert.equal(await page.locator('select[name="teamId"]').inputValue(), "vale");
+    assert.equal(await page.locator(".experience-map").getAttribute("data-analytics-team"), "vale");
+    assert.equal(await page.locator('.story-content [data-i18n="No passes, shots or box entries yet"]').count(), 1);
+    await page.close();
+    // Broadcast on a sparse-tracking replay: the gap line stays the Live label; no errors.
+    page = await open(context, "/?scenario=corner&view=svg");
+    await page.waitForFunction(() => document.querySelector("#metrics-label")?.dataset.i18n === "state.trackingGap");
+    await press(page, "#broadcast-toggle");
+    await page.waitForFunction(() => document.body.dataset.broadcast === "true");
+    await seek(page, 1000); await page.waitForTimeout(200);
+    assert.equal(await page.locator("#metrics-label").getAttribute("data-i18n"), "state.trackingGap");
+    assert.equal(await page.locator("#recap-pending").isVisible(), false, "recap state hides at the end");
+    await press(page, "#broadcast-exit");
+    await page.waitForFunction(() => document.body.dataset.broadcast !== "true");
+    await page.close();
+    // Insight selection at 88:46 on late-siege (open-play insight): moment and rail states stay consistent.
+    page = await open(context, "/?scenario=late-siege&view=svg");
+    const { replay } = data["late-siege"];
+    await seek(page, Math.ceil((replay.match.startMs + 46000 - replay.match.startMs) / (replay.match.endMs - replay.match.startMs) * 1000));
+    await page.waitForTimeout(300);
+    assert.equal(await page.locator("#summary-passes").isVisible(), true, "passes exist by 88:46");
+    assert.equal(await page.locator("#summary-passes-state").isVisible(), false);
+    assert.equal(await page.locator("#moments-state .state-line").count(), 0, "visible moments clear the empty state");
+    assert.ok(Number(await page.locator("#moment-count").textContent()) > 0);
+    await page.close();
+    await context.close();
+  });
+
   await check("/legacy keeps its original text and has no state lines", async () => {
     const context = await browser.newContext(viewports.desktop);
     const page = await open(context, "/legacy?scenario=late-siege&view=svg");
