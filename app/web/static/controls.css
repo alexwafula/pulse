@@ -21,7 +21,8 @@ select.select2-hidden-accessible { display: none !important; min-width: 0 !impor
 .experience .workspace-tool, .experience #scenario-library-close { border: 1px solid #d6dde3; background: #fff; color: #2c5e77; border-radius: 6px; cursor: pointer; }
 .audience-controls { flex-shrink: 0; }
 .camera-options { min-width: 0; }
-.camera-options > .select2-container { width: 156px !important; }
+/* Sized to the chosen option, so longer translations ("Mwonekano wa matangazo") are not cut. */
+.camera-options > .select2-container { width: auto !important; min-width: 156px; max-width: 100%; }
 .experience-select > .select2-container { flex: 1; min-width: 0; }
 .map-inspector .select2-container { width: 100% !important; }
 html[lang=hi] body { --font-ui: 'Nirmala UI', 'Noto Sans Devanagari', sans-serif; --font-display: 'Nirmala UI', 'Noto Sans Devanagari', sans-serif; }
