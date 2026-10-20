@@ -499,3 +499,10 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience .rail-share .share-labels { flex-wrap: wrap; row-gap: var(--space-1); }
   .experience .rail-share .share-title { display: block; order: -1; flex-basis: 100%; font-size: 12px; }
 }
+/* Narrow screens: the five drawer tabs share one row as 44px targets with 13px labels.
+   Below 375px they wrap to a second row rather than cut a label. */
+@media (max-width: 480px) {
+  .experience .drawer-tabs { flex-wrap: nowrap; }
+  .experience .drawer-tab { flex: 1 1 auto; min-height: 44px; padding: 0 4px; font-size: 13px; }
+}
+@media (max-width: 374px) { .experience .drawer-tabs { flex-wrap: wrap; } }
