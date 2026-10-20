@@ -60,7 +60,7 @@ try {
     await page.locator('select[name="teamId"]').evaluate((select,id)=>{select.value=id;select.dispatchEvent(new Event("change",{bubbles:true}));}, replay.match.teams.find(team=>team.id==="vale").id);
     await page.locator('.comparison[data-available="true"]').waitFor();
     // At the end the 10 s windows hold no vale action (its last is at +45.3 s): one line,
-    // not 0 -> 0 rows over two empty pitches (ADR 0031). 20 s windows hold actions.
+    // not 0 -> 0 rows over two empty pitches (ADR 0032). 20 s windows hold actions.
     await page.locator('.comparison[data-comparison-team="vale"] [data-i18n="state.windowNone"]').waitFor();
     assert.equal(await page.locator(".comparison-window, .comparison-stat").count(), 0);
     const windowSelect = page.locator('select[name="windowMs"]');

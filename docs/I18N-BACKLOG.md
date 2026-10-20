@@ -14,7 +14,7 @@ Visible text beyond the review's 30: a stricter scan also selects Control-swing 
 |---|---|---|
 | `frame gap of 8000 ms at 1628000; 5 Hz tracking (200 ms) is required` (and other `reason` values) | `#metrics-state` in the Control pane, for replays without supported tracking | It is the raw `reason` field from `/api/metrics`. Metric data is not translated, and translating it needs reason codes from the API. |
 
-Since D4b-1 (ADR 0031) the experience shows a keyed line instead (`state.trackingGap`, or `state.trackingUnsupported` for other reasons) and keeps the raw `reason` inside a closed `<details>`, marked `data-no-translate`. `/legacy` still shows the raw reason.
+Since D4b-1 (ADR 0032) the experience shows a keyed line instead (`state.trackingGap`, or `state.trackingUnsupported` for other reasons) and keeps the raw `reason` inside a closed `<details>`, marked `data-no-translate`. `/legacy` still shows the raw reason.
 
 Routing these needs format keys with placeholders (player, clock, event ID, counts) rather than one key per string.
 
@@ -86,7 +86,7 @@ The hi-IN CASUAL verb now agrees with the count: `दर्ज हुआ` when t
 
 ## New keys: NEEDS TRANSLATION (D4b-1 states, 2026-10-19)
 
-Added with the default focus and C7 states (ADR 0031). As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+Added with the default focus and C7 states (ADR 0032). As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|

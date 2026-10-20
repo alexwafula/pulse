@@ -31,7 +31,7 @@ func TestStateLineUsesCatalogKeysAndRejectsUnknownInput(t *testing.T) {
 	if line, _ := catalog.state(stateEmpty, "state.idlePlayers", "count", 9); line.Text != "9 players with no passes" || fmt.Sprint(line.Args) != "[{count 9}]" {
 		t.Fatalf("counts render as text: %+v", line)
 	}
-	// One key names a team or a player that has no pass, carry or shot (ADR 0031).
+	// One key names a team or a player that has no pass, carry or shot (ADR 0032).
 	if line, _ := catalog.state(stateEmpty, "state.noneInSequence", "name", "Dax"); line.Text != "Dax has no passes, carries or shots in this sequence" {
 		t.Fatalf("merged key: %+v", line)
 	}

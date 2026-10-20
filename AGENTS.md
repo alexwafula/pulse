@@ -141,7 +141,7 @@ model caps stay unchanged. Share links validate replay fingerprints and restore
 paused evidence/audience/rendering. Broadcast uses the existing pitch/clock with
 timed provenance-labelled captions. No new dependencies, services or CI changes.
 Views open on `domain.DefaultFocus` (most passes/carries/shots; vale everywhere), not
-`Teams[0]`. Zero, loading, error and no-tracking states share one partial (ADR 0031):
+`Teams[0]`. Zero, loading, error and no-tracking states share one partial (ADR 0032):
 zero tables, lanes, maps and windows collapse into one line, sparse tracking names its
 gap with the raw reason in `<details>`, and `/legacy` is unchanged.
 

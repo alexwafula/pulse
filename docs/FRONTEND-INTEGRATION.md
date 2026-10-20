@@ -68,7 +68,7 @@ HTML panel selectors (not new shared v2 contracts):
   (elapsed SHOT/CORNER/CROSS), `player` (actor or named recipient involvement).
 - `persona`: `CASUAL` or `ANALYST`; analyst source logs add IDs, phase and coordinates.
 - `playerId`: a match player; defaults to the default team's most involved player
-  (`domain.DefaultFocus`, ADR 0031). Only the Player focus view filters by it. This
+  (`domain.DefaultFocus`, ADR 0032). Only the Player focus view filters by it. This
   is not the unimplemented SPOTLIGHT persona.
 - `teamId`: a match team; defaults to the team with the most passes, carries and shots
   (ties keep API order; vale in every scenario). The page's selects start on the same

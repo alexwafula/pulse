@@ -2,7 +2,7 @@ import { t } from "./i18n";
 
 // C7 states drawn by scripts. The markup is the server's "state" partial: match.html
 // holds one copy per kind in <template id="state-templates">, so the icon, shape and
-// structure match the server-rendered lines exactly (ADR 0031); states-browser.mjs
+// structure match the server-rendered lines exactly (ADR 0032); states-browser.mjs
 // compares these lines with app/testdata/states/state-lines.json. Arguments are written
 // in the caller's order, as the Go partial writes them.
 export type StateKind = "loading" | "error" | "no-tracking" | "empty";
