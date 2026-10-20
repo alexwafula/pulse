@@ -48,9 +48,11 @@ try {
   assert.equal(await page.locator("#fact-check-facts").textContent(),cue.factIds.join(", "));
   if(cue.verification.status==="VERIFIED") assert.equal(await page.locator("#fact-check-counts").textContent(),`${cue.verification.claimsPassed} / ${cue.verification.claimsChecked}`);
   else assert.equal(await page.locator("#fact-check-counts").textContent(),"Not model-verified");
-  assert.deepEqual(await page.locator("[data-fact-source]").evaluateAll(items=>items.map(item=>item.dataset.factSource)),cue.eventIds);
+  const factSources=page.locator("#fact-check [data-fact-source]");
+  assert.deepEqual(await factSources.evaluateAll(items=>items.map(item=>item.dataset.factSource)),cue.eventIds);
+  assert.deepEqual(await page.locator("#agent-inspector [data-fact-source]").evaluateAll(items=>items.map(item=>item.dataset.factSource)),cue.eventIds,"Inspector keeps its own complete evidence links");
   await page.screenshot({path:path.join(output,`fact-check-${width}.png`),fullPage:true});
-  await page.locator("[data-fact-source]").first().click();
+  await factSources.first().click();
   const replay=await (await page.request.get(`${base}/api/replay?scenario=corner`)).json();
   const event=replay.events.find(event=>event.id===cue.eventIds[0]);
   const eventClock=`${String(Math.floor(event.timeMs/60000)).padStart(2,"0")}:${String(Math.floor(event.timeMs/1000)%60).padStart(2,"0")}`;

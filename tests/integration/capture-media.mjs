@@ -21,7 +21,11 @@ try {
   await page.screenshot({ path: path.join(output, "pulse-overview.png") });
   await page.locator(".passing-panel").screenshot({ path: path.join(output, "pulse-analytics.png") });
   await page.locator(".attack-panel").screenshot({ path: path.join(output, "pulse-tactics.png") });
-  await page.locator("#recap-panel").screenshot({ path: path.join(output, "pulse-recap.png") });
+  // "/" shows Recap in its sidebar section, not a drawer pane (D4b-2).
+  await page.locator('.experience-navigation [data-section="recap"]').click();
+  await page.locator('.story-content[data-panel="recap"] li').first().waitFor();
+  await page.locator('.story-content[data-panel="recap"]').screenshot({ path: path.join(output, "pulse-recap.png") });
+  await page.locator('.experience-navigation [data-section="live"]').click();
   await page.locator("#evidence-button").click();
   await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page.evaluate(() => scrollTo(0, 0));

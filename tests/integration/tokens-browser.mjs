@@ -130,7 +130,12 @@ await check("reduced motion never requests smooth scrolling", async () => {
   await context.addInitScript(() => { const original = Element.prototype.scrollIntoView; window.scrollCalls = []; Element.prototype.scrollIntoView = function (options) { window.scrollCalls.push(typeof options === "object" ? options.behavior ?? "auto" : "auto"); return original.call(this, options); }; });
   const page = await open(context, "/?scenario=late-siege&view=svg", "svg");
   await seek(page, 1000);
-  for (const selector of ["#tab-passing","[data-pass-evidence]","#tab-recap","[data-recap-evidence]"]) await press(page, selector);
+  for (const selector of ["#tab-passing","[data-pass-evidence]"]) await press(page, selector);
+  // "/" has no drawer Recap tab (D4b-2); its Recap evidence lives in the sidebar Recap section.
+  await seek(page, 1000);
+  await press(page, '.experience-navigation [data-section="recap"]');
+  await page.waitForSelector('.story-content[data-panel="recap"] [data-inspect-event]');
+  await press(page, '.story-content[data-panel="recap"] [data-inspect-event]');
   const calls = await page.evaluate(() => window.scrollCalls);
   assert.ok(calls.length > 0, "selecting evidence must scroll the pitch into view");
   assert.ok(!calls.includes("smooth"), `scrollIntoView behaviours: ${calls.join(", ")}`);

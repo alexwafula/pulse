@@ -67,6 +67,8 @@ try {
   const trailUnderPitch=target=>target.locator('#clip-trail-slot:not([hidden]) #evidence-trail').count();
   assert.equal(await trailUnderPitch(page),1,'clicked insight clip puts the trail under the pitch');
   assert.equal(await trailUnderPitch(other),1,'shared insight clip puts the trail under the pitch');
+  assert.equal(await page.locator('#tab-evidence').getAttribute('aria-selected'),'true','clicked insight selects Evidence');
+  assert.equal(await other.locator('#tab-evidence').getAttribute('aria-selected'),'true','shared insight selects the same Evidence tab');
   assert.equal(new URL(cueURL).searchParams.get('cue'),open.cueId);
   console.log('ok second recorded agent pattern, actual trace and cue replay link');
 
