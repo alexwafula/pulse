@@ -74,6 +74,10 @@ func TestLayoutRingKeepsLabelsClearForEveryNodeCount(t *testing.T) {
 			if !ringClear(circles, labels) {
 				t.Fatalf("%s x%d: labels overlap", name, count)
 			}
+			// Roster-length names keep the graph within the drawer, so it is drawn unscaled.
+			if len(name) <= 5 && float64(width) > maxGraphWidth+1 {
+				t.Fatalf("%s x%d: %dpx is wider than %v", name, count, width, maxGraphWidth)
+			}
 		}
 	}
 }
