@@ -3,6 +3,7 @@ package transporthttp
 import (
 	"fmt"
 	"html/template"
+	"regexp"
 
 	"github.com/alexwafula/pulse/app/internal/domain"
 	"github.com/alexwafula/pulse/app/internal/engine/metrics"
@@ -10,14 +11,17 @@ import (
 
 // stateLine is one C7 state (loading, error, no tracking or nothing to show)
 // rendered by the "state" partial. Key names the catalog entry, Text is its
-// en-GB rendering and the fixed arguments feed data-i18n-arg-* so the page
-// localizer can re-render it. Detail holds raw data, such as an API reason,
-// that is shown untranslated inside <details>.
+// en-GB rendering and Args, in the caller's order, become data-i18n-arg-* so
+// the page localizer can re-render it; state-line.ts writes them in the same
+// order. Detail holds raw data, such as an API reason, shown untranslated
+// inside <details>.
 type stateLine struct {
-	Kind, Key, Text                 string
-	Team, Player, Count, Start, End string
-	Detail                          string
+	Kind, Key, Text string
+	Args            []stateArg
+	Detail          string
 }
+
+type stateArg struct{ Name, Value string }
 
 // State kinds. Each has its own icon and shape (status-badge rules, ADR 0027).
 const (
@@ -27,9 +31,13 @@ const (
 	stateEmpty      = "empty"
 )
 
+// stateArgName is a catalog placeholder name: lower-case letters only, which is
+// also what html/template accepts inside an attribute name.
+var stateArgName = regexp.MustCompile(`^[a-z]+$`)
+
 // state builds a line for the "state" partial: kind, a catalog key and
-// name/value pairs (team, player, count, start, end or detail). Text is the
-// key's en-GB rendering; the page localizer re-renders it from data-i18n.
+// name/value pairs; "detail" is the raw <details> text and every other name is
+// a placeholder in the key. Text is the key's en-GB rendering.
 func (catalog uiCatalog) state(kind, key string, pairs ...any) (stateLine, error) {
 	if len(pairs)%2 != 0 {
 		return stateLine{}, fmt.Errorf("state %s: odd name/value pairs", key)
@@ -38,18 +46,18 @@ func (catalog uiCatalog) state(kind, key string, pairs ...any) (stateLine, error
 		return stateLine{}, fmt.Errorf("state %s: unknown kind %q", key, kind)
 	}
 	line := stateLine{Kind: kind, Key: key}
-	fields := map[string]*string{"team": &line.Team, "player": &line.Player, "count": &line.Count,
-		"start": &line.Start, "end": &line.End, "detail": &line.Detail}
 	values := make(map[string]string)
 	for i := 0; i < len(pairs); i += 2 {
 		name, _ := pairs[i].(string)
-		field, ok := fields[name]
-		if !ok {
-			return stateLine{}, fmt.Errorf("state %s: unknown argument %v", key, pairs[i])
-		}
-		*field = fmt.Sprint(pairs[i+1])
-		if name != "detail" {
-			values[name] = *field
+		value := fmt.Sprint(pairs[i+1])
+		switch {
+		case name == "detail":
+			line.Detail = value
+		case stateArgName.MatchString(name) && values[name] == "":
+			line.Args = append(line.Args, stateArg{name, value})
+			values[name] = value
+		default:
+			return stateLine{}, fmt.Errorf("state %s: bad argument %v", key, pairs[i])
 		}
 	}
 	line.Text = catalog.text("en-GB", key, values)

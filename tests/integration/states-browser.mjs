@@ -9,7 +9,10 @@
 //    is never empty before the end.
 // 5. Loading and error states use the shared partial: own icon, text as the name.
 // 6. /legacy is unchanged: no state lines.
+// 7. Every line the scripts draw equals the Go partial's rendering of the same case
+//    (app/testdata/states/state-lines.json) after the browser's HTML serialization.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { chromium } from "playwright-core";
 
 const base = process.env.PULSE_URL ?? "http://127.0.0.1:8080";
@@ -19,6 +22,7 @@ const viewports = { desktop: { viewport: { width: 1440, height: 900 } }, mobile:
 const SCENARIOS = ["corner", "central", "exchange", "late-siege", "calm-midfield"];
 const SPARSE = ["corner", "central", "exchange"];
 const FORBIDDEN = ["0 of 0", "0 entries / 0 shots", "N/A"];
+const golden = Object.fromEntries(JSON.parse(readFileSync(new URL("../../app/testdata/states/state-lines.json", import.meta.url), "utf8")).lines.map(line => [line.Name, line.HTML]));
 const failures = [];
 const errors = [];
 const check = (name, fn) => fn().then(() => console.log(`ok ${name}`), error => { failures.push(name); console.error(`FAIL ${name}: ${error.message}`); });
@@ -148,7 +152,7 @@ try {
       for (const at of [0, 500, 1000]) {
         await seek(page, at); await page.waitForTimeout(100);
         const active = page.locator(`${snapshot}:not([hidden])`);
-        const lines = await active.locator('[data-i18n="state.teamNone"]').allTextContents();
+        const lines = await active.locator('[data-i18n="state.noneInSequence"]').allTextContents();
         assert.deepEqual(lines, [`${bastion} has no passes, carries or shots in this sequence`], `${tab} @${at}: one bastion line`);
         assert.equal(await active.locator("meter[value='0'][max='1']").count(), 0, `${tab} @${at}: no 0-of-0 lane meters`);
       }
@@ -217,7 +221,9 @@ try {
     await page.goto(`${base}/?scenario=late-siege&view=svg`, { waitUntil: "domcontentloaded" });
     const loading = page.locator('#metrics-state .state-line[data-state="loading"]');
     assert.equal(await loading.locator(".state-text").textContent(), "Loading metrics");
-    assert.equal(await loading.getAttribute("role"), "status");
+    // The host is the persistent live region; the line itself has no role.
+    assert.equal(await page.locator("#metrics-state").getAttribute("role"), "status");
+    assert.equal(await loading.getAttribute("role"), null);
     assert.equal(await loading.locator(".state-icon").getAttribute("data-icon"), "loader-circle");
     assert.equal(await loading.locator(".state-icon").getAttribute("aria-hidden"), "true");
     release();
@@ -233,7 +239,8 @@ try {
     const panelError = page.locator('#panel-status .state-line[data-state="error"]');
     await panelError.waitFor({ state: "attached" });
     assert.equal(await panelError.locator(".state-text").textContent(), "Update unavailable. Last loaded view retained.");
-    assert.equal(await panelError.getAttribute("role"), null, "the status host is already the live region");
+    assert.equal(await panelError.getAttribute("role"), null, "the line has no role");
+    assert.equal(await page.locator("#panel-status").getAttribute("role"), "status", "the status host is the live region");
     assert.ok(await page.locator("#panel-retry").isVisible());
     await page.close();
     await context.close();
@@ -247,6 +254,54 @@ try {
     assert.equal(await page.locator('#summary-passes-state [data-i18n="No passes yet"]').count(), 1);
     await press(page, '.drawer-tab[data-tab="control"]');
     await page.waitForFunction(() => document.querySelectorAll("#moments-state [data-i18n], #moment-list li:not([hidden])").length > 0);
+    await page.close();
+    await context.close();
+  });
+
+  await check("script-drawn state lines equal the Go partial", async () => {
+    const context = await browser.newContext(viewports.desktop);
+    // The page serializes both sides, so self-closing SVG children compare equally.
+    const same = async (page, selector, name) => {
+      const [got, want] = await page.locator(selector).first().evaluate((node, html) => {
+        const template = document.createElement("template");
+        template.innerHTML = html;
+        return [node.outerHTML, template.content.firstElementChild.outerHTML];
+      }, golden[name]);
+      assert.equal(got, want, `${name}: script line differs from the Go partial`);
+    };
+    const lineIn = host => `${host} > .state-line`;
+    let page = await open(context, "/?scenario=corner&view=svg");
+    await page.locator(lineIn("#metrics-state") + '[data-state="no-tracking"]').waitFor({ state: "attached" });
+    await same(page, lineIn("#metrics-state"), "tracking-gap");
+    await page.close();
+    page = await open(context, "/?scenario=late-siege&view=svg");
+    await page.waitForFunction(() => document.querySelector("#moments-state [data-i18n]")?.dataset.i18n === "No moments yet");
+    await same(page, lineIn("#moments-state"), "moments-yet");
+    await page.close();
+    page = await open(context, "/?scenario=calm-midfield&view=svg");
+    await page.waitForFunction(() => document.querySelector("#moments-state [data-i18n]")?.dataset.i18n === "No moments detected");
+    await same(page, lineIn("#moments-state"), "moments-none");
+    await page.close();
+    page = await context.newPage();
+    page.on("pageerror", error => errors.push(error.message));
+    await page.route("**/api/metrics?*", route => route.fulfill({ status: 503, contentType: "application/json", body: "{}" }));
+    await page.route("**/api/moments?*", route => route.fulfill({ status: 503, contentType: "application/json", body: "{}" }));
+    await page.goto(`${base}/?scenario=late-siege&view=svg`, { waitUntil: "networkidle" });
+    await page.locator(lineIn("#metrics-state") + '[data-state="error"]').waitFor({ state: "attached" });
+    await same(page, lineIn("#metrics-state"), "metrics-error");
+    await page.locator(lineIn("#moments-state") + '[data-state="error"]').waitFor({ state: "attached" });
+    await same(page, lineIn("#moments-state"), "moments-error");
+    await page.waitForFunction(() => document.querySelector(".pitch-shell")?.dataset.renderer === "svg", null, { timeout: 30000 });
+    if (await page.locator("#play-button").getAttribute("aria-label") === "Pause") await press(page, "#play-button");
+    let release;
+    const held = new Promise(resolve => { release = resolve; });
+    await page.route("**/experience/panel?*", async route => { await held; await route.fulfill({ status: 503, body: "unavailable" }); });
+    await press(page, '.experience-navigation [data-section="story"]');
+    await page.locator(lineIn("#panel-status") + '[data-state="loading"]').waitFor({ state: "attached" });
+    await same(page, lineIn("#panel-status"), "panel-loading");
+    release();
+    await page.locator(lineIn("#panel-status") + '[data-state="error"]').waitFor({ state: "attached" });
+    await same(page, lineIn("#panel-status"), "panel-error");
     await page.close();
     await context.close();
   });

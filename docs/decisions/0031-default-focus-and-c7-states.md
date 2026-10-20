@@ -35,11 +35,15 @@ an icon and one line of text, and for raw data a closed `<details>`. Kinds diffe
 icon shape as well as colour, following the status-badge rules (ADR 0027):
 `empty` circle-minus, `loading` loader-circle (spins unless reduced motion),
 `error` circle-alert (as the Unavailable badge) and `no-tracking` triangle-alert. The
-icon is `aria-hidden`; the text is the accessible name. Loading and error lines are
-`role="status"` unless their host already is a live region. The `state` template func
-builds lines from catalog keys (en-GB text, `data-i18n` plus `data-i18n-arg-*`), so the
-page localizer re-renders them per locale. Scripts clone the same markup from
-`<template id="state-templates">` (`state-line.ts`).
+icon is `aria-hidden`; the text is the accessible name. Lines have no role; hosts
+whose state changes (`#metrics-state`, `#moments-state`, `#panel-status`) are persistent
+`role="status"` regions, so a swapped line is announced once. The `state` template func
+builds lines from catalog keys (en-GB text, `data-i18n` plus `data-i18n-arg-*` in the
+caller's order), so the page localizer re-renders them per locale. Scripts hold no
+markup: they clone `<template id="state-templates">` (`state-line.ts`).
+`app/testdata/states/state-lines.json` pins the partial's output for every line the
+scripts draw; `TestStateLinesGolden` checks the Go side and `states-browser.mjs` checks
+that the scripts' lines serialize identically.
 
 **Where it applies (experience only; `/legacy` is unchanged and pixel-checked).**
 

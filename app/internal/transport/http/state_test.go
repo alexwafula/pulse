@@ -22,17 +22,28 @@ func TestStateLineUsesCatalogKeysAndRejectsUnknownInput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if line.Text != "Aurora Vale: no completed passes, carries or shots from 89:00 to 89:20" || line.Team != "Aurora Vale" || line.Start != "89:00" {
+	if line.Text != "Aurora Vale: no completed passes, carries or shots from 89:00 to 89:20" || fmt.Sprint(line.Args) != "[{team Aurora Vale} {start 89:00} {end 89:20}]" {
 		t.Fatalf("unexpected line %+v", line)
 	}
 	if line, _ := catalog.state(stateNoTracking, "Tracking metrics unavailable", "detail", "frame gap"); line.Detail != "frame gap" || line.Text != "Tracking metrics unavailable" {
 		t.Fatalf("a literal key renders itself and keeps the raw detail: %+v", line)
 	}
-	if line, _ := catalog.state(stateEmpty, "state.idlePlayers", "count", 9); line.Text != "9 players with no passes" || line.Count != "9" {
+	if line, _ := catalog.state(stateEmpty, "state.idlePlayers", "count", 9); line.Text != "9 players with no passes" || fmt.Sprint(line.Args) != "[{count 9}]" {
 		t.Fatalf("counts render as text: %+v", line)
 	}
-	for _, bad := range [][]any{{"team"}, {"colour", "red"}} {
-		if _, err := catalog.state(stateEmpty, "state.teamNone", bad...); err == nil {
+	// One key names a team or a player that has no pass, carry or shot (ADR 0031).
+	if line, _ := catalog.state(stateEmpty, "state.noneInSequence", "name", "Dax"); line.Text != "Dax has no passes, carries or shots in this sequence" {
+		t.Fatalf("merged key: %+v", line)
+	}
+	for _, locale := range []string{"en-GB", "sw-KE", "hi-IN"} {
+		for _, retired := range []string{"state.teamNone", "state.playerNone"} {
+			if _, ok := catalog[locale][retired]; ok {
+				t.Fatalf("%s still has %s", locale, retired)
+			}
+		}
+	}
+	for _, bad := range [][]any{{"team"}, {"Team", "x"}, {"data-x", "y"}, {"team", "a", "team", "b"}} {
+		if _, err := catalog.state(stateEmpty, "state.noneInSequence", bad...); err == nil {
 			t.Fatalf("arguments %v must fail", bad)
 		}
 	}

@@ -2,7 +2,9 @@ import { t } from "./i18n";
 
 // C7 states drawn by scripts. The markup is the server's "state" partial: match.html
 // holds one copy per kind in <template id="state-templates">, so the icon, shape and
-// structure match the server-rendered lines exactly (ADR 0031).
+// structure match the server-rendered lines exactly (ADR 0031); states-browser.mjs
+// compares these lines with app/testdata/states/state-lines.json. Arguments are written
+// in the caller's order, as the Go partial writes them.
 export type StateKind = "loading" | "error" | "no-tracking" | "empty";
 const rendered = new WeakMap<HTMLElement, string>();
 
@@ -13,8 +15,6 @@ export function renderState(host: HTMLElement, kind: StateKind, key: string, val
   const source = document.querySelector<HTMLTemplateElement>("#state-templates")?.content.querySelector<HTMLElement>(`[data-state="${kind}"]`);
   if (!source) return;
   const line = source.cloneNode(true) as HTMLElement;
-  // A host that is already a live region announces the line; a nested one would repeat it.
-  if (host.closest("[role=status],[role=alert]")) line.removeAttribute("role");
   const text = line.querySelector<HTMLElement>(".state-text")!;
   text.setAttribute("data-i18n", key);
   for (const [name, value] of Object.entries(values)) text.setAttribute(`data-i18n-arg-${name}`, String(value));

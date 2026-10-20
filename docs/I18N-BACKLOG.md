@@ -90,12 +90,11 @@ Added with the default focus and C7 states (ADR 0031). As above, the sw-KE and h
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `state.teamNone` | `{team} has no passes, carries or shots in this sequence` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.noneInSequence` | `{name} has no passes, carries or shots in this sequence` (`{name}` is a team or a player) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.teamNoPassesYet` | `{team}: no completed passes yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.teamNoRoutesYet` | `{team}: no completed passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.idlePlayers` | `{count} players with no passes` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.idlePlayer` | `{count} player with no passes` (singular, used only when `count` is 1) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.playerNone` | `{player} has no passes, carries or shots in this sequence` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.playerNoneYet` | `{player}: no passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.windowNone` | `{team}: no completed passes, carries or shots from {start} to {end}` | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `state.zeroRows` | `{count} metrics with none in either window` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
@@ -119,7 +118,9 @@ These existing visible strings were not in the catalog. `Loading moments` now re
 | `No shot attempts for this team yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 | `No tracking time accumulated yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
 
-Keep `{team}`, `{player}`, `{count}`, `{start}`, `{end}`, `{seconds}` and `{clock}`. Each line states that something is absent; a translation must not say a team defended well, lost, or is losing. `{seconds}` is one decimal place; `{clock}` is `mm:ss`. The tracking-gap line explains why model metrics are missing; the untranslated API `reason` stays in the disclosure.
+18 new keys. `state.noneInSequence` replaced `state.teamNone` and `state.playerNone`, which had the same en-GB text; the plural pairs stay separate, as `evidence.ticks`/`evidence.tickOne` do, because the catalog has no plural rules.
+
+Keep `{name}`, `{team}`, `{player}`, `{count}`, `{start}`, `{end}`, `{seconds}` and `{clock}`. Each line states that something is absent; a translation must not say a team defended well, lost, or is losing. `{seconds}` is one decimal place; `{clock}` is `mm:ss`. The tracking-gap line explains why model metrics are missing; the untranslated API `reason` stays in the disclosure.
 
 ## Summary
 

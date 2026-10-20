@@ -429,7 +429,7 @@
         <div class="drawer-panes">
           <div id="pane-control" class="drawer-pane" data-pane="control" role="tabpanel" aria-labelledby="tab-control">
             <div class="section-heading"><h3>Control field</h3><time id="metrics-clock"></time></div>
-            {{if .Experience}}<div id="metrics-state" class="state-host">{{template "state" (state "loading" "Loading metrics")}}</div>{{else}}<p id="metrics-state" class="model-label">Loading metrics</p>{{end}}
+            {{if .Experience}}<div id="metrics-state" class="state-host" role="status">{{template "state" (state "loading" "Loading metrics")}}</div>{{else}}<p id="metrics-state" class="model-label">Loading metrics</p>{{end}}
             <dl class="metric-values">
               <div><dt>Entropy</dt><dd id="metric-entropy">N/A</dd></div>
               <div><dt title="Tracking-derived reach estimate, not a count of pressure events">Pressing estimate</dt><dd id="metric-pressing">N/A</dd></div>
@@ -441,7 +441,7 @@
             <!-- Headline and team label come from /api/metrics: indexDelta of teams[0], i.e. its index minus teams[1]'s; never computed here. -->
             <dl class="metric-values control-index"><div class="metric-headline"><dt>Index difference <small id="metric-index-teams" data-no-translate hidden></small></dt><dd id="metric-index-delta">N/A</dd></div></dl>
             <div class="section-heading"><h3>Detected moments</h3><span id="moment-count"{{if .Experience}} hidden{{end}}>0</span></div>
-            {{if .Experience}}<div id="moments-state" class="state-host">{{template "state" (state "loading" "Loading moments")}}</div>{{else}}<p id="moments-state" class="model-label">Loading moments</p>{{end}}
+            {{if .Experience}}<div id="moments-state" class="state-host" role="status">{{template "state" (state "loading" "Loading moments")}}</div>{{else}}<p id="moments-state" class="model-label">Loading moments</p>{{end}}
             <ol id="moment-list" class="moment-list"></ol>
           </div>
           <!-- Pane 1: Event Timeline -->
@@ -468,7 +468,7 @@
               {{range .Graphs}}
               <div class="passing-snapshot" data-cutoff="{{.TimeMS}}" hidden>
                 {{range .Teams}}
-                {{if and $.Experience (not (index $.Active .ID))}}<div class="passing-team">{{template "state" (state "empty" "state.teamNone" "team" .Name)}}</div>
+                {{if and $.Experience (not (index $.Active .ID))}}<div class="passing-team">{{template "state" (state "empty" "state.noneInSequence" "name" .Name)}}</div>
                 {{else if and $.Experience (not .Total)}}<div class="passing-team">{{template "state" (state "empty" "state.teamNoPassesYet" "team" .Name)}}</div>
                 {{else}}
                 <div class="passing-team">
@@ -513,7 +513,7 @@
               {{range .Attacks}}
               <div class="attack-snapshot" data-cutoff="{{.TimeMS}}" hidden>
                 {{range .Teams}}
-                {{if and $.Experience (not (index $.Active .Team.ID))}}{{template "state" (state "empty" "state.teamNone" "team" .Team.Name)}}
+                {{if and $.Experience (not (index $.Active .Team.ID))}}{{template "state" (state "empty" "state.noneInSequence" "name" .Team.Name)}}
                 {{else if and $.Experience (not .TotalLanes) (not .BoxEntries) (not .Shots)}}{{template "state" (state "empty" "state.teamNoRoutesYet" "team" .Team.Name)}}
                 {{else}}
                 <h4>{{.Team.Name}}</h4>
