@@ -5,8 +5,8 @@
 //    "0 entries / 0 shots" or "N/A", at 1440 and 390 px.
 // 3. Replays with sparse tracking name the tracking gap on Live and in the Control
 //    pane; the raw API reason stays in <details>. Full 5 Hz replays show no such line.
-// 4. Zero tables, lanes, maps and windows collapse into one line; the drawer Recap pane
-//    is never empty before the end.
+// 4. Zero tables, lanes, maps and windows collapse into one line; the single Recap section
+//    shows its pending state before the end, with no duplicate drawer pane.
 // 5. Loading and error states use the shared partial: own icon, text as the name.
 // 6. /legacy is unchanged: no state lines.
 // 7. Every line the scripts draw equals the Go partial's rendering of the same case
@@ -23,6 +23,7 @@ const SCENARIOS = ["corner", "central", "exchange", "late-siege", "calm-midfield
 const SPARSE = ["corner", "central", "exchange"];
 const FORBIDDEN = ["0 of 0", "0 entries / 0 shots", "N/A"];
 const golden = Object.fromEntries(JSON.parse(readFileSync(new URL("../../app/testdata/states/state-lines.json", import.meta.url), "utf8")).lines.map(line => [line.Name, line.HTML]));
+const catalog = JSON.parse(readFileSync(new URL("../../app/web/static/locales.json", import.meta.url), "utf8"));
 const failures = [];
 const errors = [];
 const check = (name, fn) => fn().then(() => console.log(`ok ${name}`), error => { failures.push(name); console.error(`FAIL ${name}: ${error.message}`); });
@@ -164,15 +165,17 @@ try {
     assert.ok(rows.length > 0 && rows.every(([, sent, received]) => sent !== "0" || received !== "0"), "zero rows must collapse");
     const idle = await page.locator('.passing-snapshot:not([hidden]) [data-i18n^="state.idlePlayer"]').textContent();
     assert.equal(idle, `${11 - rows.length} players with no passes`);
-    // Drawer Recap before the end: the Recap section's state, with height.
+    // Recap has one sidebar destination, with a pending state before the end.
     await seek(page, 500); await page.waitForTimeout(100);
-    await press(page, '.drawer-tab[data-tab="recap"]');
-    assert.equal(await page.locator("#recap-pending .state-text").textContent(), "Recap available at the end of the sequence.");
-    assert.ok(await page.locator("#recap-pending .state-line").isVisible(), "recap pane must show its state");
-    assert.ok((await page.locator("#pane-recap").boundingBox()).height > 0, "recap pane must not be 0 px high");
-    await seek(page, 1000); await page.waitForTimeout(100);
-    assert.equal(await page.locator("#recap-pending").isVisible(), false);
-    assert.ok(await page.locator("#recap-panel").isVisible());
+    await section(page, "recap");
+    const recap = page.locator('.story-content[data-panel="recap"]');
+    assert.equal(await page.locator("#tab-recap, #pane-recap, #recap-panel, #recap-pending").count(), 0, "no duplicate drawer recap");
+    assert.equal(await recap.locator(".state-text").textContent(), "Recap available at the end of the sequence.");
+    assert.ok(await recap.locator(".state-line").isVisible(), "Recap section must show its state");
+    await seek(page, 1000); await settled(page);
+    assert.equal(await recap.locator(".state-line").count(), 0, "pending state clears at the end");
+    assert.ok(await recap.locator("[data-download-recap]").isVisible());
+    assert.ok(await recap.locator(".story-log li").count() > 0, "completed recap has source actions");
     // Insights comparison at the end: the 10 s windows hold no vale action (last at +45.3 s).
     await section(page, "insights");
     await press(page, '[data-insight-view="comparison"]'); await settled(page);
@@ -247,15 +250,24 @@ try {
   });
 
   await check("state lines re-render from their catalog keys", async () => {
-    const context = await browser.newContext(viewports.desktop);
-    const page = await open(context, "/?scenario=late-siege&view=svg&locale=sw-KE");
-    await page.waitForFunction(() => document.body.dataset.locale === "sw-KE");
-    // "No passes yet" has a NEEDS TRANSLATION draft (the English text); the key still routes.
-    assert.equal(await page.locator('#summary-passes-state [data-i18n="No passes yet"]').count(), 1);
-    await press(page, '.drawer-tab[data-tab="control"]');
-    await page.waitForFunction(() => document.querySelectorAll("#moments-state [data-i18n], #moment-list li:not([hidden])").length > 0);
-    await page.close();
-    await context.close();
+    for (const locale of ["sw-KE", "hi-IN"]) {
+      const context = await browser.newContext(viewports.desktop);
+      let page = await open(context, `/?scenario=late-siege&view=svg&locale=${locale}`);
+      assert.equal(await page.locator('#summary-passes-state [data-i18n="No passes yet"]').textContent(), catalog[locale]["No passes yet"]);
+      await press(page, '.drawer-tab[data-tab="control"]');
+      await page.waitForFunction(() => document.querySelectorAll("#moments-state [data-i18n], #moment-list li:not([hidden])").length > 0);
+      await page.close();
+      page = await open(context, `/?scenario=corner&view=svg&locale=${locale}`);
+      const [, gap, at] = /^frame gap of (\d+) ms at (\d+);/.exec(data.corner.metrics.reason);
+      for (const next of [locale, "en-GB", locale]) {
+        await page.locator("#locale").evaluate((select, value) => { select.value = value; select.dispatchEvent(new Event("change", { bubbles: true })); }, next);
+        const expected = catalog[next]["state.trackingGap"].replace("{seconds}", (Number(gap) / 1000).toFixed(1)).replace("{clock}", clock(Number(at)));
+        await page.waitForFunction(expected => document.querySelector("#metrics-label")?.textContent === expected, expected);
+        assert.equal(await page.locator("#metrics-state details code").textContent(), data.corner.metrics.reason, "raw API reason stays untranslated");
+      }
+      await page.close();
+      await context.close();
+    }
   });
 
   await check("script-drawn state lines equal the Go partial", async () => {
@@ -335,7 +347,7 @@ try {
     await page.waitForFunction(() => document.body.dataset.broadcast === "true");
     await seek(page, 1000); await page.waitForTimeout(200);
     assert.equal(await page.locator("#metrics-label").getAttribute("data-i18n"), "state.trackingGap");
-    assert.equal(await page.locator("#recap-pending").isVisible(), false, "recap state hides at the end");
+    assert.equal(await page.locator("#recap-pending, #pane-recap").count(), 0, "broadcast does not restore the removed drawer recap");
     await press(page, "#broadcast-exit");
     await page.waitForFunction(() => document.body.dataset.broadcast !== "true");
     await page.close();

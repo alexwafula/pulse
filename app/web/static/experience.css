@@ -185,6 +185,9 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .passing-team { padding: 16px 0; border: 0; border-bottom: var(--border-hairline); border-radius: 0; background: transparent; }
 .experience .passing-node circle { fill: var(--c-accent); }
 .experience .passing-node .node-number { fill: var(--c-on-accent); }
+/* Labels sit outside the circles on the light canvas, so they take the ink colour. */
+.experience .passing-node .node-name { fill: var(--c-ink); }
+.experience .passing-team-empty { margin: 8px 0 0; font-size: 13px; color: var(--c-ink-muted); }
 .experience .panel-status { min-height: 24px; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--c-ink-muted); }
 .experience #panel-retry { background: var(--c-surface); color: var(--c-accent); border: 0; width: 28px; height: 28px; }
 .experience .experience-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-bottom: 18px; }
@@ -209,7 +212,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .story-meta time { color: var(--c-accent); font-weight: 700; font-variant-numeric: tabular-nums; }
 .experience .story-action { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: var(--c-ink-muted); font-size: 11px; }
 .experience .story-details { color: var(--c-ink-muted); font-size: 11px !important; }
-.experience .story-evidence, .experience .analytics-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.experience .story-evidence { display: flex; flex-wrap: wrap; gap: 8px; }
 .experience .story-empty { color: var(--c-ink-muted); padding: 24px 0; font-size: 13px; }
 .experience .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 0; font-size: 11px; }
 .experience .chart-legend span { display: inline-flex; gap: 6px; align-items: center; }
@@ -253,7 +256,6 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience .experience-lanes label { display: grid; grid-template-columns: 50px minmax(0,1fr) 30px; gap: 10px; align-items: center; margin: 12px 0; font-size: 12px; }
 .experience .experience-lanes progress { width: 100%; height: 8px; accent-color: var(--team-away); }
 .experience .experience-lanes b { text-align: right; }
-.experience .analytics-links { padding: 18px 0; }
 .experience .comparison-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 16px 0; border-bottom: var(--border-hairline); }
 .experience .comparison-windows { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; padding: 20px 0; }
 .experience .comparison-window { min-width: 0; margin: 0; }
@@ -316,7 +318,7 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
 .experience[data-insight-view=charts] .experience-map, .experience[data-insight-view=charts] .experience-lanes { display: none; }
 .experience[data-insight-view=maps] .experience-charts, .experience[data-insight-view=maps] .chart-legend { display: none; }
 .experience[data-insight-view=maps] .story-content { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(240px,.8fr); gap: 0 26px; }
-.experience[data-insight-view=maps] .story-content > .section-heading, .experience[data-insight-view=maps] .story-content > .story-source, .experience[data-insight-view=maps] .analytics-links { grid-column: 1 / -1; }
+.experience[data-insight-view=maps] .story-content > .section-heading, .experience[data-insight-view=maps] .story-content > .story-source { grid-column: 1 / -1; }
 .experience[data-insight-view=maps] .experience-map { grid-column: 1; }
 .experience[data-insight-view=maps] .experience-lanes { grid-column: 2; }
 .experience .team-swatch { box-shadow: none; }

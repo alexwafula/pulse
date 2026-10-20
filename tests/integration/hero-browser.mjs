@@ -99,7 +99,11 @@ await check("team colours are identical before scripts, at DOMContentLoaded and 
 // indexDelta, a 2-dp magnitude (halves away from zero) naming whichever team is higher,
 // the exact value with U+2212, and the label in API order.
 const MINUS = "\u2212";
-function expectedHero(metrics, replay, tick) {
+function headlineText(locale, hundredths, team) {
+  const key = hundredths === 0 ? "index.level" : "index.higher";
+  return catalog[locale][key].replace("{team}", team).replace("{value}", (hundredths / 100).toFixed(2));
+}
+function expectedHero(metrics, replay, tick, locale = "en-GB") {
   const name = id => replay.match.teams.find(team => team.id === id).name;
   const [first, second] = metrics.teams, delta = tick.teams[first].indexDelta;
   const hundredths = Math.floor((Math.round(Math.abs(delta) * 1e4) + 50) / 100);
@@ -107,18 +111,21 @@ function expectedHero(metrics, replay, tick) {
   const [whole, fraction = ""] = exact.split(".");
   exact = `${whole}.${fraction.padEnd(4, "0")}`;
   return {
-    headline: hundredths === 0 ? "Neither team's control index is higher" : `${name(delta < 0 ? second : first)}'s control index is ${(hundredths / 100).toFixed(2)} higher`,
+    headline: headlineText(locale, hundredths, name(delta < 0 ? second : first)),
     signed: delta > 0 ? `+${exact}` : delta < 0 ? `${MINUS}${exact}` : exact,
     label: `${name(first)} − ${name(second)}`,
   };
 }
 // Team named higher, sign and "first − second" label must agree.
-function assertAgreement(shown, where) {
+function assertAgreement(shown, where, locale = "en-GB") {
   const [first, second] = shown.label.split(" − ");
+  assert.ok(first && second, `${where}: missing API-order team label`);
   assert.ok(!shown.signed.includes("-"), `${where}: U+002D in ${shown.signed}`);
-  if (shown.headline.startsWith("Neither")) return;
-  const team = shown.headline.replace(/'s control index is .*$/, "");
-  assert.equal(team, shown.signed.startsWith("+") ? first : second, `${where}: "${shown.headline}" disagrees with ${shown.signed} under "${shown.label}"`);
+  const delta = Number(shown.signed.replace(MINUS, "-"));
+  assert.ok(Number.isFinite(delta), `${where}: invalid signed value`);
+  const hundredths = Math.floor((Math.round(Math.abs(delta) * 1e4) + 50) / 100);
+  const team = delta < 0 ? second : first;
+  assert.equal(shown.headline, headlineText(locale, hundredths, team), `${where}: "${shown.headline}" disagrees with ${shown.signed} under "${shown.label}"`);
 }
 const hero = page => page.evaluate(() => ({
   headline: document.querySelector("#hero-index-headline")?.textContent.trim(),
@@ -199,13 +206,13 @@ await check("the headline number is server-rendered: present before scripts, unc
     assert.ok(held > 0, `${where}: no script was held`);
     if (metrics.trackingMetrics === "supported") {
       const start = [...metrics.ticks].reverse().find(tick => tick.timeMs <= replay.match.startMs);
-      const expected = expectedHero(metrics, replay, start);
+      const expected = expectedHero(metrics, replay, start, locale);
       assert.match(before.headline, /\d\.\d\d/, `${where}: no number before scripts`);
       assert.equal(before.signed, expected.signed, `${where}: signed value before scripts`);
       assert.equal(before.label, expected.label, `${where}: label before scripts`);
-      if (locale === "en-GB") assert.equal(before.headline, expected.headline, `${where}: headline before scripts`);
+      assert.equal(before.headline, expected.headline, `${where}: translated headline before scripts`);
       assert.ok(before.chip, `${where}: chip before scripts`);
-      assertAgreement(before, where);
+      assertAgreement(before, where, locale);
     } else {
       assert.equal(before.signed, "N/A", `${where}: corner shows a number`);
       assert.equal(before.label, "", `${where}: corner shows a label`);

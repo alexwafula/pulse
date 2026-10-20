@@ -76,7 +76,8 @@ func TestStateLinesGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read golden (run with -update-states after review): %v", err)
 	}
-	if !bytes.Equal(got, want) {
+	// Git's Windows checkout may use CRLF; compare the same markup, not checkout line endings.
+	if !bytes.Equal(got, bytes.ReplaceAll(want, []byte("\r\n"), []byte("\n"))) {
 		t.Fatalf("state partial drifted from %s:\n%s", path, got)
 	}
 }

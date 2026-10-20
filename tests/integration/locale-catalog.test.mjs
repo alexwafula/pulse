@@ -19,4 +19,17 @@ for (const locale of ["sw-KE", "hi-IN"]) {
       assert.deepEqual(tokens(translated), tokens(english), `${locale}: ${key}`);
     }
   });
+  test(`${locale}: new evidence and state labels have translated drafts, not English fallback`, () => {
+    const translatedKeys = [
+      ...Object.keys(catalog["en-GB"]).filter(key => key.startsWith("state.")),
+      "evidence.ticks", "evidence.tickOne", "Evidence trail shown under the pitch",
+      "Role outputs are advisory. Go recomputes every fact and decides publication.", "Advisory verdict",
+      "index.higher", "index.level", "Score unavailable", "content-checked recording",
+      "No passes yet", "No box entries or shots yet", "No box entries yet", "No passes, shots or box entries yet",
+      "None yet", "No completed passes or carries yet", "Details", "Loading moments",
+      "No completed passes for this team yet.", "No shot attempts for this team yet.", "No tracking time accumulated yet.",
+    ];
+    for (const key of translatedKeys) assert.notEqual(catalog[locale][key], catalog["en-GB"][key] ?? key, key);
+    assert.equal(catalog[locale]["No players with completed passes yet"], undefined, "retired duplicate key stays removed");
+  });
 }

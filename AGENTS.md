@@ -144,6 +144,9 @@ Views open on `domain.DefaultFocus` (most passes/carries/shots; vale everywhere)
 `Teams[0]`. Zero, loading, error and no-tracking states share one partial (ADR 0032):
 zero tables, lanes, maps and windows collapse into one line, sparse tracking names its
 gap with the raw reason in `<details>`, and `/legacy` is unchanged.
+The local UI review branch combines D4b-1 with the D4b-2 drawer/passing layout
+(ADR 0033): one sidebar Recap, section-stable drawer tabs, active passing nodes
+with idle summaries, and draft translations for new state/evidence labels.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)

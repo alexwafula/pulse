@@ -18,48 +18,48 @@ Since D4b-1 (ADR 0032) the experience shows a keyed line instead (`state.trackin
 
 Routing these needs format keys with placeholders (player, clock, event ID, counts) rather than one key per string.
 
-## New keys: NEEDS TRANSLATION (D3a hero, 2026-10-18)
+## D3a Hero: Draft Translations (2026-10-20)
 
-These keys were added with the hero. Their sw-KE and hi-IN values are the English text, so the catalog key and placeholder checks pass, but the strings show in English. `locale-browser.mjs` therefore cannot flag them; this table is the record. A native speaker must replace them.
+These keys were added with the hero. Their sw-KE and hi-IN values now have translated drafts, checked for placeholder preservation and English fallback. Native-language review is still required.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `index.higher` | `{team}'s control index is {value} higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `index.level` | `Neither team's control index is higher` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `Score unavailable` | `Score unavailable` (literal key; also the existing `aria-label`) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `index.higher` | `{team}'s control index is {value} higher` | DRAFT | DRAFT |
+| `index.level` | `Neither team's control index is higher` | DRAFT | DRAFT |
+| `Score unavailable` | `Score unavailable` (literal key; also the existing `aria-label`) | DRAFT | DRAFT |
 
 Keep `{team}` and `{value}`. The sentence must stay a plain comparison of two model numbers: no "winning", "ahead" or "likely".
 
-## New keys: NEEDS TRANSLATION (D3b badges, 2026-10-19)
+## D3b Badges: Draft Translations (2026-10-20)
 
-Added with the status badges. As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+Added with the status badges. The sw-KE and hi-IN tooltip values now have translated drafts, not completed human review.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `content-checked recording` | `content-checked recording` (literal key; the `title` tooltip on the "Verified (recorded)" badge) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `content-checked recording` | `content-checked recording` (literal key; the `title` tooltip on the "Verified (recorded)" badge) | DRAFT | DRAFT |
 
 The tooltip describes what was checked, a recording. A translation must not name a model or say that a model verified anything.
 
-## New keys: NEEDS TRANSLATION (D4a evidence trail, 2026-10-19)
+## D4a Evidence Trail: Draft Translations (2026-10-20)
 
-Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+Added with the evidence-trail rail. The sw-KE and hi-IN values now have translated drafts in `locales.json`; native-language review remains pending for these new strings.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `evidence.ticks` | `{count} metric ticks {start}–{end}` (plural; for example "6 metric ticks 88:09–88:11") | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `evidence.tickOne` | `{count} metric tick {clock}` (singular, used only when `count` is 1; for example "1 metric tick 88:22") | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `Evidence trail shown under the pitch` | `Evidence trail shown under the pitch` (literal key; the Evidence tab's note while a clip plays) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `evidence.ticks` | `{count} metric ticks {start}–{end}` (plural; for example "6 metric ticks 88:09–88:11") | DRAFT | DRAFT |
+| `evidence.tickOne` | `{count} metric tick {clock}` (singular, used only when `count` is 1; for example "1 metric tick 88:22") | DRAFT | DRAFT |
+| `Evidence trail shown under the pitch` | `Evidence trail shown under the pitch` (literal key; the Evidence tab's note while a clip plays) | DRAFT | DRAFT |
 
 Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
 
-## New keys: NEEDS TRANSLATION (Agent Inspector advisory labels, 2026-10-19)
+## Agent Inspector Advisory Labels: Draft Translations (2026-10-20)
 
-Added so a named model's role output never reads as that model having verified a claim. As above, the sw-KE and hi-IN values are the English text.
+Added so a named model's role output never reads as that model having verified a claim. The sw-KE and hi-IN values now have translated drafts; neither is certified as human reviewed.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `Role outputs are advisory. Go recomputes every fact and decides publication.` | literal key; note under the Inspector's reference run | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `Advisory verdict` | literal key; the Verifier record's term for its output | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Role outputs are advisory. Go recomputes every fact and decides publication.` | literal key; note under the Inspector's reference run | DRAFT | DRAFT |
+| `Advisory verdict` | literal key; the Verifier record's term for its output | DRAFT | DRAFT |
 
 A translation must keep the model's output advisory and say that Go, not the model, decides publication.
 
@@ -84,43 +84,51 @@ The hi-IN CASUAL verb now agrees with the count: `दर्ज हुआ` when t
 | CASUAL | 2 or more | `इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज हुए।` | NEEDS HUMAN REVIEW |
 | ANALYST | any | `खुले खेल की अवधि: पहले शॉट से पहले {count} सफल पास।` | NEEDS HUMAN REVIEW |
 
-## New keys: NEEDS TRANSLATION (D4b-1 states, 2026-10-19)
+## D4b-1 States: Draft Translations (2026-10-20)
 
-Added with the default focus and C7 states (ADR 0032). As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+Added with the default focus and C7 states (ADR 0032). All keys in the following two tables now have sw-KE and hi-IN drafts in `locales.json`, preserving placeholders and absence/estimate meaning. DRAFT means **NEEDS HUMAN REVIEW**, not a completed language sign-off.
 
 | Key | en-GB | sw-KE | hi-IN |
 |---|---|---|---|
-| `state.noneInSequence` | `{name} has no passes, carries or shots in this sequence` (`{name}` is a team or a player) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.teamNoPassesYet` | `{team}: no completed passes yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.teamNoRoutesYet` | `{team}: no completed passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.idlePlayers` | `{count} players with no passes` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.idlePlayer` | `{count} player with no passes` (singular, used only when `count` is 1) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.playerNoneYet` | `{player}: no passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.windowNone` | `{team}: no completed passes, carries or shots from {start} to {end}` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.zeroRows` | `{count} metrics with none in either window` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.zeroRow` | `{count} metric with none in either window` (singular) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.trackingGap` | `Control metrics unavailable: tracking has a gap of {seconds} s at {clock}` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `state.trackingUnsupported` | `Control metrics unavailable: this replay's tracking does not support them` | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No passes yet` | `No passes yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No box entries or shots yet` | `No box entries or shots yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No box entries yet` | `No box entries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No passes, shots or box entries yet` | `No passes, shots or box entries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `None yet` | `None yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No completed passes or carries yet` | `No completed passes or carries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `Details` | `Details` (literal key; the summary of the raw-reason disclosure) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.noneInSequence` | `{name} has no passes, carries or shots in this sequence` (`{name}` is a team or a player) | DRAFT | DRAFT |
+| `state.teamNoPassesYet` | `{team}: no completed passes yet` | DRAFT | DRAFT |
+| `state.teamNoRoutesYet` | `{team}: no completed passes, carries or shots yet` | DRAFT | DRAFT |
+| `state.idlePlayers` | `{count} players with no passes` (plural) | DRAFT | DRAFT |
+| `state.idlePlayer` | `{count} player with no passes` (singular, used only when `count` is 1) | DRAFT | DRAFT |
+| `state.playerNoneYet` | `{player}: no passes, carries or shots yet` | DRAFT | DRAFT |
+| `state.windowNone` | `{team}: no completed passes, carries or shots from {start} to {end}` | DRAFT | DRAFT |
+| `state.zeroRows` | `{count} metrics with none in either window` (plural) | DRAFT | DRAFT |
+| `state.zeroRow` | `{count} metric with none in either window` (singular) | DRAFT | DRAFT |
+| `state.trackingGap` | `Control metrics unavailable: tracking has a gap of {seconds} s at {clock}` | DRAFT | DRAFT |
+| `state.trackingUnsupported` | `Control metrics unavailable: this replay's tracking does not support them` | DRAFT | DRAFT |
+| `No passes yet` | `No passes yet` (literal key) | DRAFT | DRAFT |
+| `No box entries or shots yet` | `No box entries or shots yet` (literal key) | DRAFT | DRAFT |
+| `No box entries yet` | `No box entries yet` (literal key) | DRAFT | DRAFT |
+| `No passes, shots or box entries yet` | `No passes, shots or box entries yet` (literal key) | DRAFT | DRAFT |
+| `None yet` | `None yet` (literal key) | DRAFT | DRAFT |
+| `No completed passes or carries yet` | `No completed passes or carries yet` (literal key) | DRAFT | DRAFT |
+| `Details` | `Details` (literal key; the summary of the raw-reason disclosure) | DRAFT | DRAFT |
 
 These existing visible strings were not in the catalog. `Loading moments` now renders as a keyed state line; the three map strings are unchanged in place and are added so the catalog covers them. All carry the same English placeholders:
 
 | Key | sw-KE | hi-IN |
 |---|---|---|
-| `Loading moments` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No completed passes for this team yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No shot attempts for this team yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
-| `No tracking time accumulated yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Loading moments` (literal key) | DRAFT | DRAFT |
+| `No completed passes for this team yet.` (literal key) | DRAFT | DRAFT |
+| `No shot attempts for this team yet.` (literal key) | DRAFT | DRAFT |
+| `No tracking time accumulated yet.` (literal key) | DRAFT | DRAFT |
 
 18 new keys. `state.noneInSequence` replaced `state.teamNone` and `state.playerNone`, which had the same en-GB text; the plural pairs stay separate, as `evidence.ticks`/`evidence.tickOne` do, because the catalog has no plural rules.
 
 Keep `{name}`, `{team}`, `{player}`, `{count}`, `{start}`, `{end}`, `{seconds}` and `{clock}`. Each line states that something is absent; a translation must not say a team defended well, lost, or is losing. `{seconds}` is one decimal place; `{clock}` is `mm:ss`. The tracking-gap line explains why model metrics are missing; the untranslated API `reason` stays in the disclosure.
+## D4b-2 Integration (2026-10-20)
+
+The drawer reuses D4b-1's `state.noneInSequence` and `state.teamNoPassesYet`, so
+`No players with completed passes yet` is removed from all catalogs. `/legacy`
+retains the existing `No completed passes yet` line. `Metric evidence` and
+`Route evidence` are removed with the duplicate Insights links.
+
+The passing-node `aria-label` counts in the summary below come from the 2026-10-16 scan. Players with no completed pass sent or received are no longer drawn, so the live count is lower.
 
 ## Summary
 
