@@ -35,10 +35,16 @@ type comparisonView struct {
 	Seconds       int64
 	Before, After comparisonWindow
 	Rows          []comparisonRow
+	// TeamActive is false for a team without a pass, carry or shot in the
+	// replay. Empty marks two windows without any counted action; otherwise
+	// Changed holds the rows with a non-zero side and ZeroRows counts the rest.
+	TeamActive, Empty bool
+	Changed           []comparisonRow
+	ZeroRows          int
 }
 
 func compareWindows(replay domain.Replay, page pageData, at, windowMS int64, teamID string) comparisonView {
-	view := comparisonView{Seconds: windowMS / 1000}
+	view := comparisonView{Seconds: windowMS / 1000, TeamActive: page.Active[teamID]}
 	for i, team := range replay.Match.Teams {
 		if team.ID == teamID {
 			view.Team, view.TeamIndex = team, i
@@ -63,9 +69,16 @@ func compareWindows(replay domain.Replay, page pageData, at, windowMS int64, tea
 		{"Right", view.Before.Lanes[2], view.After.Lanes[2]},
 	} {
 		maximum := max(1, metric.before, metric.after)
-		view.Rows = append(view.Rows, comparisonRow{Name: metric.name, Before: metric.before, After: metric.after,
-			Delta: fmt.Sprintf("%+d", metric.after-metric.before), BeforeWidth: metric.before * 100 / maximum, AfterWidth: metric.after * 100 / maximum})
+		row := comparisonRow{Name: metric.name, Before: metric.before, After: metric.after,
+			Delta: fmt.Sprintf("%+d", metric.after-metric.before), BeforeWidth: metric.before * 100 / maximum, AfterWidth: metric.after * 100 / maximum}
+		view.Rows = append(view.Rows, row)
+		if row.Before == 0 && row.After == 0 {
+			view.ZeroRows++
+		} else {
+			view.Changed = append(view.Changed, row)
+		}
 	}
+	view.Empty = windowEmpty(view.Before) && windowEmpty(view.After)
 	return view
 }
 

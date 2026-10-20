@@ -21,8 +21,10 @@ type experiencePanel struct {
 	Recap                  []recapItem
 	Focus                  *domain.Player
 	PlayerStats            playerStoryStats
-	Analytics              experienceAnalytics
-	Comparison             comparisonView
+	// FocusActive marks a focus player with an involvement anywhere in the replay.
+	FocusActive bool
+	Analytics   experienceAnalytics
+	Comparison  comparisonView
 }
 
 type storyAction struct {
@@ -64,6 +66,8 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 		if options.mode == "player" && player.ID == options.playerID {
 			focus := player
 			panel.Focus = &focus
+			_, involvements := domain.ActionCounts(replay)
+			panel.FocusActive = involvements[player.ID] > 0
 		}
 	}
 	teams := make(map[string]string)
@@ -177,10 +181,10 @@ func experiencePanelHandler(page *template.Template, replay domain.Replay, view 
 			options.persona = "CASUAL"
 		}
 		if options.playerID == "" {
-			options.playerID = replay.Match.Players[0].ID
+			options.playerID = view.Focus.PlayerID
 		}
 		if options.teamID == "" {
-			options.teamID = replay.Match.Teams[0].ID
+			options.teamID = view.Focus.TeamID
 		}
 		if options.mapMode == "" {
 			options.mapMode = "occupancy"

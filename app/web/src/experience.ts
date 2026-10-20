@@ -1,6 +1,7 @@
 import { createIcons, Activity, Radio, BookOpen, ChartNoAxesCombined, FileText, LayoutDashboard, ListVideo, Download, RotateCcw, Map, Crosshair, Network, Route, PictureInPicture2, Maximize2, X, Clapperboard, Play, ArrowLeftRight } from "lucide";
 import { paintExperienceGraphics } from "./experience-graphics";
 import { t } from "./i18n";
+import { clearState, renderState } from "./state-line";
 const dropdownOpen = (): boolean => document.querySelector(".select2-container--open .select2-dropdown") !== null;
 
 type Section = "live" | "story" | "insights" | "recap";
@@ -244,7 +245,7 @@ content.addEventListener("click", (event) => {
 retry.addEventListener("click", refresh);
 document.addEventListener("htmx:beforeRequest", (event) => {
   if ((event.target as Element).id !== content.id) return;
-  status.textContent = "Updating"; content.setAttribute("aria-busy", "true"); retry.hidden = true;
+  renderState(status, "loading", "Updating"); content.setAttribute("aria-busy", "true"); retry.hidden = true;
 });
 document.addEventListener("htmx:afterRequest", (event) => {
   const detail = (event as CustomEvent<{ elt: HTMLElement; successful: boolean }>).detail;
@@ -258,7 +259,8 @@ document.addEventListener("htmx:afterRequest", (event) => {
   }
   if (detail.elt !== content) return;
   content.setAttribute("aria-busy", "false");
-  status.textContent = detail.successful ? "" : "Update unavailable. Last loaded view retained.";
+  if (detail.successful) clearState(status);
+  else renderState(status, "error", "Update unavailable. Last loaded view retained.");
   retry.hidden = detail.successful;
 });
 document.addEventListener("htmx:afterSwap", (event) => {

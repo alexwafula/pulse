@@ -61,6 +61,10 @@ type experienceAnalytics struct {
 	TeamIndex                 int
 	NetworkNodes              []mapNetworkNode
 	NetworkEdges              []mapNetworkEdge
+	// TeamActive is false for a team without a pass, carry or shot in the
+	// replay: its maps and lanes collapse into one line. ChartsEmpty and
+	// LanesEmpty collapse charts and lanes that are still all zero.
+	TeamActive, ChartsEmpty, LanesEmpty bool
 }
 
 func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string) experienceAnalytics {
@@ -73,6 +77,7 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 		}
 	}
 	view.TeamIndex = teamIndex
+	view.TeamActive = page.Active[view.Team.ID]
 	var passes, shots, entries []chartCount
 	for _, snapshot := range page.Graphs {
 		if snapshot.TimeMS > at {
@@ -96,6 +101,7 @@ func analyticsPanel(replay domain.Replay, page pageData, at int64, teamID string
 	for _, lane := range view.Lanes {
 		view.LaneMax = max(view.LaneMax, lane.Count)
 	}
+	view.ChartsEmpty, view.LanesEmpty = chartsEmpty(view.Charts), lanesEmpty(view.Lanes)
 	grid, err := metrics.TrackingOccupancy(replay, at, teamID, "")
 	if err == nil {
 		view.TrackingEmpty = grid.TotalPlayerMS == 0

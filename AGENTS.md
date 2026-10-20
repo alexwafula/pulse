@@ -140,6 +140,10 @@ three-call original Foundry capture retains role outputs/IDs; recorded/default
 model caps stay unchanged. Share links validate replay fingerprints and restore
 paused evidence/audience/rendering. Broadcast uses the existing pitch/clock with
 timed provenance-labelled captions. No new dependencies, services or CI changes.
+Views open on `domain.DefaultFocus` (most passes/carries/shots; vale everywhere), not
+`Teams[0]`. Zero, loading, error and no-tracking states share one partial (ADR 0032):
+zero tables, lanes, maps and windows collapse into one line, sparse tracking names its
+gap with the raw reason in `<details>`, and `/legacy` is unchanged.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -265,6 +269,7 @@ Local checks:
 - Render loop: `node tests/integration/render-loop-browser.mjs` (running local Go server; counts WebGL draw frames while paused, playing and hidden)
 - Hero (D3a): `node --test tests/integration/index-headline.test.mjs` (headline wording) and `node tests/integration/hero-browser.mjs` (running local Go server; server-rendered team kits and headline present before scripts and unchanged by hydration, headline equals `/api/metrics`, mobile pitch within 360px, paused renderer switch draws 0 frames)
 - Lower third and badges (D3b): `node tests/integration/lower-third-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; one pitch overlay at 88:11 and the corner end, distinct badge names/icons/shapes and the exact Verified tooltip, 44px transport targets, motion rows with and without reduced motion, hero headline at start/88:11/end)
+- States (D4b-1): `node tests/integration/states-browser.mjs` (running local Go server; vale and its most involved player by default in page and panels, no "0 of 0"/"0 entries / 0 shots"/"N/A" in the default view at start/mid/end at 1440/390px, tracking-gap line on corner/central/exchange, collapsed zero tables/windows/Recap pane, loading/error lines, `/legacy` unchanged)
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
 - Insight selection (ADR 0031): `node tests/integration/insight-selection-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; corner/central/exchange keep main's corner cue, late-siege shows nothing at 88:40, the corner at 88:44 and the open-play insight from 88:46)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)

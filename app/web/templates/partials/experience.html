@@ -6,20 +6,23 @@
       <span class="story-source">Source-event summary</span>
       <ol class="story-log">{{range .Recap}}<li><p>{{.Text}}</p><div class="story-evidence">{{range .EventIDs}}<button type="button" data-inspect-event="{{.}}" class="evidence-button" title="Inspect {{.}}"><i data-lucide="list-video"></i><span>{{.}}</span></button>{{end}}</div></li>{{else}}<li>No shot attempts recorded in this sequence.</li>{{end}}</ol>
       <button type="button" class="evidence-button" data-download-recap><i data-lucide="download"></i><span>Download recap</span></button>
-    {{else}}<p class="story-empty">Recap available at the end of the sequence.</p>{{end}}
+    {{else}}{{template "state" (state "empty" "Recap available at the end of the sequence.")}}{{end}}
   {{else if eq .View "analytics"}}
     {{template "experience-analytics" .}}
   {{else if eq .View "comparison"}}
     {{template "experience-comparison" .Comparison}}
   {{else}}
     <span class="story-source">Source events</span>
-    {{if .Focus}}
+    {{if and .Focus (not .PlayerStats.Involvements)}}
+    {{if .FocusActive}}{{template "state" (state "empty" "state.playerNoneYet" "player" .Focus.Name)}}{{else}}{{template "state" (state "empty" "state.noneInSequence" "name" .Focus.Name)}}{{end}}
+    {{else if .Focus}}
     <dl class="story-summary player-story-summary"><div><dt>Involvements</dt><dd>{{.PlayerStats.Involvements}}</dd></div><div><dt>Completed passes</dt><dd>{{.PlayerStats.Passes}} / {{.PlayerStats.PassAttempts}}</dd></div><div><dt>Passes received</dt><dd>{{.PlayerStats.Received}}</dd></div><div><dt>Shot attempts</dt><dd>{{.PlayerStats.Shots}}</dd></div></dl>
     {{else}}
     <dl class="story-summary"><div><dt>Actions</dt><dd>{{.Summary.Actions}}</dd></div><div><dt>Completed passes</dt><dd>{{.Summary.Passes}} / {{.Summary.PassAttempts}}</dd></div><div><dt>Shot attempts</dt><dd>{{.Summary.Shots}}</dd></div></dl>
     {{end}}
     {{$analyst := eq .Persona "ANALYST"}}
-    <ol class="story-log">{{range .Actions}}<li data-story-event="{{.ID}}"><div class="story-meta"><time>{{.Clock}}</time><span>{{.Kind}} &middot; {{.Team}}</span></div><p>{{.Text}}</p>{{if $analyst}}<p class="story-details">{{.ID}} &middot; {{.Phase}}<br>{{.Coordinates}}</p>{{end}}<div class="story-action"><span>{{.Outcome}}</span><button type="button" data-inspect-event="{{.ID}}" class="evidence-button" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></div></li>{{else}}<li class="story-empty">No matching actions at this time.</li>{{end}}</ol>
+    {{$collapsed := and .Focus (not .PlayerStats.Involvements)}}
+    <ol class="story-log">{{range .Actions}}<li data-story-event="{{.ID}}"><div class="story-meta"><time>{{.Clock}}</time><span>{{.Kind}} &middot; {{.Team}}</span></div><p>{{.Text}}</p>{{if $analyst}}<p class="story-details">{{.ID}} &middot; {{.Phase}}<br>{{.Coordinates}}</p>{{end}}<div class="story-action"><span>{{.Outcome}}</span><button type="button" data-inspect-event="{{.ID}}" class="evidence-button" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></div></li>{{else}}{{if not $collapsed}}<li class="story-empty">No matching actions at this time.</li>{{end}}{{end}}</ol>
   {{end}}
 </div>
 {{end}}
@@ -27,20 +30,24 @@
 {{define "experience-comparison"}}
 <section class="comparison" data-comparison-team="{{.Team.ID}}" data-team-index="{{.TeamIndex}}" data-available="{{.Available}}">
   <div class="comparison-heading"><strong>{{.Team.Name}}</strong><span class="story-source">Source-event comparison</span></div>
-  {{if .Available}}
+  {{if not .TeamActive}}{{template "state" (state "empty" "state.noneInSequence" "name" .Team.Name)}}
+  {{else if not .Available}}{{template "state" (state "empty" "Two complete windows are not available yet.")}}
+  {{else if .Empty}}{{template "state" (state "empty" "state.windowNone" "team" .Team.Name "start" .Before.StartClock "end" .After.EndClock)}}
+  {{else}}
   <div class="comparison-windows">
     {{template "comparison-window" .Before}}{{template "comparison-window" .After}}
   </div>
   <div class="comparison-ledger" role="table" aria-label="Earlier and recent window statistics">
     <div role="row" class="comparison-labels"><span role="columnheader">Metric</span><span role="columnheader">Earlier</span><span role="columnheader">Recent</span><span role="columnheader">Change</span></div>
-    {{range .Rows}}<div role="row" class="comparison-stat" data-metric="{{.Name}}" data-before="{{.Before}}" data-after="{{.After}}">
+    {{range .Changed}}<div role="row" class="comparison-stat" data-metric="{{.Name}}" data-before="{{.Before}}" data-after="{{.After}}">
       <span role="rowheader">{{.Name}}</span><span role="cell">{{.Before}}</span><span role="cell">{{.After}}</span><strong role="cell">{{.Delta}}</strong>
       <div class="comparison-bars" aria-hidden="true"><span style="width: {{.BeforeWidth}}%"></span><span style="width: {{.AfterWidth}}%"></span></div>
     </div>{{end}}
   </div>
+  {{if eq .ZeroRows 1}}{{template "state" (state "empty" "state.zeroRow" "count" .ZeroRows)}}{{else if .ZeroRows}}{{template "state" (state "empty" "state.zeroRows" "count" .ZeroRows)}}{{end}}
   <p class="model-label">Equal windows, same team. Observed changes, not a claim of tactical cause.</p>
   <p class="model-label">Lanes count completed pass/carry destinations relative to attacking direction. The shared boundary belongs to the recent window.</p>
-  {{else}}<p class="story-empty">Two complete windows are not available yet.</p>{{end}}
+  {{end}}
 </section>
 {{end}}
 
@@ -63,19 +70,26 @@
 
 {{define "experience-analytics"}}
 <span class="story-source">Source events &amp; tracking &middot; replay window</span>
+{{if .Analytics.ChartsEmpty}}{{template "state" (state "empty" "No passes, shots or box entries yet")}}{{else}}
 <div class="chart-legend"><span><b class="team-swatch home"></b>{{.Analytics.HomeName}}</span><span><b class="team-swatch away"></b>{{.Analytics.AwayName}}</span></div>
 <div class="experience-charts">
 {{range .Analytics.Charts}}
   <figure class="experience-chart" data-chart="{{.Name}}" data-home="{{.Home}}" data-away="{{.Away}}">
+    {{if and (not .Home) (not .Away)}}<figcaption><h4>{{.Name}}</h4></figcaption>{{template "state" (state "empty" "None yet")}}{{else}}
     <figcaption><h4>{{.Name}}</h4><span><b class="home-count">{{.Home}}</b> &middot; <b class="away-count">{{.Away}}</b></span></figcaption>
     <div class="chart-art" data-end-x="{{.EndX}}" data-home-y="{{.HomeY}}" data-away-y="{{.AwayY}}"><svg viewBox="0 0 280 100" role="img" aria-label="{{.Name}}: {{$.Analytics.HomeName}} {{.Home}}, {{$.Analytics.AwayName}} {{.Away}}, up to {{$.Clock}}">
       <title>{{.Name}} up to {{$.Clock}}</title><g class="chart-guides"><path d="M 14 16 H 266 M 14 88 H 266"></path></g><text x="0" y="20">{{.Max}}</text><text x="0" y="91">0</text><path class="chart-home-area" d="{{.HomeArea}}"></path><path class="chart-away-area" d="{{.AwayArea}}"></path><path class="chart-home" d="{{.HomePath}}"></path><path class="chart-away" d="{{.AwayPath}}"></path>
     </svg></div>
-    <div class="chart-clocks"><time>{{$.Analytics.StartClock}}</time><time>{{$.Analytics.EndClock}}</time></div>
+    <div class="chart-clocks"><time>{{$.Analytics.StartClock}}</time><time>{{$.Analytics.EndClock}}</time></div>{{end}}
   </figure>
 {{end}}
-</div>
-<section class="experience-map" aria-label="Pitch map">
+</div>{{end}}
+{{/* A team without a pass, carry or shot keeps its tracking heatmap; its event maps and lanes are one line. */}}
+{{$teamLine := and (not .Analytics.TeamActive) (ne .MapMode "occupancy")}}
+{{if $teamLine}}
+<section class="experience-map" aria-label="Pitch map" data-analytics-team="{{.Analytics.Team.ID}}">{{template "state" (state "empty" "state.noneInSequence" "name" .Analytics.Team.Name)}}</section>
+{{else}}
+<section class="experience-map" aria-label="Pitch map" data-analytics-team="{{.Analytics.Team.ID}}">
   <div class="section-heading"><h4>{{if eq .MapMode "shots"}}Shot locations{{else if eq .MapMode "network"}}Pass network{{else}}Tracking occupancy{{end}}</h4><span class="story-source">{{.Analytics.Team.AttackingDirection}} attack</span></div>
   <p class="map-team">{{.Analytics.Team.Name}}</p>
   <div class="map-art" data-map-mode="{{.MapMode}}" data-team-index="{{.Analytics.TeamIndex}}"><svg viewBox="-2 -2 109 72" class="pitch-map" role="img" aria-label="{{.Analytics.Team.Name}} {{if eq .MapMode "shots"}}shot locations{{else if eq .MapMode "network"}}completed passing network{{else}}tracking occupancy heatmap{{end}} up to {{.Clock}}" data-map-team="{{.Analytics.Team.ID}}">
@@ -103,6 +117,18 @@
     <ol class="shot-evidence">{{range .Analytics.Shots}}<li><span><time>{{.Clock}}</time> {{.Player}}<small>{{.Outcome}}</small></span><button type="button" class="evidence-button" data-inspect-event="{{.ID}}" title="Inspect {{.ID}}"><i data-lucide="list-video"></i><span>Evidence</span></button></li>{{else}}<li class="story-empty">No shot attempts for this team yet.</li>{{end}}</ol>
   {{end}}
 </section>
-<section class="experience-lanes" aria-label="Attacking lanes"><h4>Attacking lanes</h4><span class="story-source">Completed pass/carry destinations &middot; attack-relative</span><div>{{range .Analytics.Lanes}}<label><span>{{.Name}}</span><progress max="{{$.Analytics.LaneMax}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} completed passes and carries"></progress><b>{{.Count}}</b></label>{{end}}</div></section>
+{{end}}
+<section class="experience-lanes" aria-label="Attacking lanes"><h4>Attacking lanes</h4><span class="story-source">Completed pass/carry destinations &middot; attack-relative</span>{{if not .Analytics.TeamActive}}{{template "state" (state "empty" "state.noneInSequence" "name" .Analytics.Team.Name)}}{{else if .Analytics.LanesEmpty}}{{template "state" (state "empty" "No completed passes or carries yet")}}{{else}}<div>{{range .Analytics.Lanes}}<label><span>{{.Name}}</span><progress max="{{$.Analytics.LaneMax}}" value="{{.Count}}" aria-label="{{.Name}} lane: {{.Count}} completed passes and carries"></progress><b>{{.Count}}</b></label>{{end}}</div>{{end}}</section>
 <div class="analytics-links"><button type="button" class="evidence-button" data-analysis-pane="passing"><i data-lucide="network"></i><span>Passing network</span></button><button type="button" class="evidence-button" data-analysis-pane="control"><i data-lucide="activity"></i><span>Metric evidence</span></button><button type="button" class="evidence-button" data-analysis-pane="routes"><i data-lucide="route"></i><span>Route evidence</span></button></div>
 {{end}}
+
+{{/* C7 states (loading, error, no tracking, nothing to show), one partial for every
+     surface; pitch.ts and analytics.ts clone the <template> copies in match.html.
+     The icon is decorative and differs by shape per kind (ADR 0027); the text is
+     the accessible name and is re-rendered per locale from data-i18n. Lines have no
+     role: hosts that announce changes are the persistent role="status" region. */}}
+{{define "state"}}<div class="state-line" data-state="{{.Kind}}">{{template "state-icon" .Kind}}<span class="state-text" data-i18n="{{.Key}}"{{range .Args}} data-i18n-arg-{{.Name}}="{{.Value}}"{{end}}>{{.Text}}</span>{{if .Detail}}<details class="state-detail"><summary>Details</summary><code data-no-translate>{{.Detail}}</code></details>{{end}}</div>{{end}}
+
+{{/* Lucide 1.x paths: circle-minus (empty), loader-circle (loading), circle-alert
+     (error, as the Unavailable badge) and triangle-alert (no tracking). */}}
+{{define "state-icon"}}<svg class="state-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"{{if eq . "loading"}} data-icon="loader-circle"><path d="M21 12a9 9 0 1 1-6.219-8.56"/>{{else if eq . "error"}} data-icon="circle-alert"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>{{else if eq . "no-tracking"}} data-icon="triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>{{else}} data-icon="circle-minus"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>{{end}}</svg>{{end}}

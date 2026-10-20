@@ -5,6 +5,7 @@ import type { ControlField } from "./renderers/types";
 import { pressureNarration } from "./moment-narration";
 import { indexHeadline } from "./index-headline";
 import { teamKit } from "./team-colour";
+import { clearState, renderState, trackingState } from "./state-line";
 
 // indexDelta is the API's own team-minus-opponent index difference; null when the API omits it.
 type TeamTick = { finalThird: number; indexDelta: number | null };
@@ -103,6 +104,9 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
   const valuesList = element<HTMLDListElement>("#moment-values");
   const valuesLabel = element("#moment-values-label");
   const indexTeams = element("#metric-index-teams");
+  // The experience draws C7 state lines (state-line.ts); /legacy keeps its plain text.
+  const experience = document.body.classList.contains("experience");
+  const momentCount = element("#moment-count");
   // The experience hero (absent on /legacy) restates the same tick's indexDelta.
   const hero = document.querySelector<HTMLElement>(".match-hero");
   let heroKey = "";
@@ -156,6 +160,16 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       controlToggle.checked = metrics.supported && !document.body.classList.contains("experience");
       metricsLabel.textContent = metrics.supported ? metrics.label : "Tracking metrics unavailable";
       metricsState.textContent = metrics.supported ? metrics.label : metrics.reason;
+      if (experience && !metrics.supported) {
+        // Name the real cause on Live and in the pane; the raw reason goes in <details>.
+        const { key, values } = trackingState(metrics.reason, hooks.matchTime);
+        // Keyed like the state lines, so a locale change re-renders it (i18n.ts).
+        metricsLabel.setAttribute("data-i18n", key);
+        for (const [name, value] of Object.entries(values)) metricsLabel.setAttribute(`data-i18n-arg-${name}`, value);
+        metricsLabel.textContent = t(key, values);
+        renderState(metricsState, "no-tracking", key, values, metrics.reason);
+        for (const node of document.querySelectorAll<HTMLElement>("#pane-control .metric-values, #pane-control h4")) node.hidden = true;
+      }
       if (metrics.supported) {
         for (let row = 0; row < metrics.rows; row++) for (let col = 0; col < metrics.cols; col++) {
           const cell = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -170,7 +184,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
       metrics = undefined;
       controlToggle.checked = false; controlToggle.disabled = true;
       metricsLabel.textContent = "Metrics unavailable";
-      metricsState.textContent = "Metrics unavailable";
+      if (experience) renderState(metricsState, "error", "Metrics unavailable");
+      else metricsState.textContent = "Metrics unavailable";
       console.warn("Metrics unavailable", error);
     } finally {
       metricsSettled = true;
@@ -203,7 +218,8 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         row.hidden = true; momentList.append(row); rows.push({ moment, row, button });
       }
     } catch (error: unknown) {
-      momentsState.textContent = "Moments unavailable";
+      if (experience) renderState(momentsState, "error", "Moments unavailable");
+      else momentsState.textContent = "Moments unavailable";
       console.warn("Moments unavailable", error);
     }
     hooks.repaint();
@@ -221,6 +237,16 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
     element<HTMLElement>("#summary-pass-fill").style.width = `${attempts ? 100 * passes / attempts : 0}%`;
     write("#summary-attacks", t("stats.attacks", {entries:values.entries ?? 0, entry:t(values.entries === "1" ? "entry" : "entries"), shots:values.shots ?? 0, shot:t(values.shots === "1" ? "shot" : "shots")}));
     write("#summary-conversion", Number(values.entries) ? t("stats.converted", {count:values.converted ?? 0, total:values.entries ?? 0}) : "N/A");
+    if (experience) {
+      // Zero counts read as one line each, never "0 of 0" or "N/A".
+      const noPasses = attempts === 0, noAttacks = !Number(values.entries) && !Number(values.shots);
+      element("#summary-passes").hidden = noPasses;
+      element("#summary-pass-fill").parentElement!.hidden = noPasses;
+      element("#summary-passes-state").hidden = !noPasses;
+      element("#summary-attacks").hidden = noAttacks;
+      element("#summary-attacks-state").hidden = !noAttacks;
+      element("#summary-conversion").hidden = !Number(values.entries);
+    }
     for (const side of ["home", "away"] as const) {
       const count = Number(values[side]);
       write(`#${side}-pass-share`, t("stats.passes", {count, pass:t(count === 1 ? "pass" : "passes")}));
@@ -405,7 +431,11 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
         if (!row.hidden) count++;
       }
       write("#moment-count", String(count));
-      if (momentsLoaded) momentsState.textContent = count ? "" : moments.length ? "No moments yet" : "No moments detected";
+      if (experience) {
+        momentCount.hidden = count === 0;
+        if (momentsLoaded && count) clearState(momentsState);
+        else if (momentsLoaded) renderState(momentsState, "empty", moments.length ? "No moments yet" : "No moments detected");
+      } else if (momentsLoaded) momentsState.textContent = count ? "" : moments.length ? "No moments yet" : "No moments detected";
       const active = selected ?? [...moments].reverse().find(moment => clock >= moment.timeMs && clock < moment.timeMs + 3500);
       banner.hidden = !active;
       const nextBannerKey = active ? `${locale()}:${active.type}:${active.teamId}:${active.timeMs}` : "";

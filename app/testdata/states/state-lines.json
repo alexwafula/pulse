@@ -1,0 +1,33 @@
+{
+  "about": "Go's \"state\" partial for every state line scripts draw. states-browser.mjs compares the scripts' lines with these, after the browser's own HTML serialization. Regenerate: go test ./app/internal/transport/http -run StateLinesGolden -update-states",
+  "lines": [
+    {
+      "Name": "tracking-gap",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"no-tracking\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"triangle-alert\"\u003e\u003cpath d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/\u003e\u003cpath d=\"M12 9v4\"/\u003e\u003cpath d=\"M12 17h.01\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"state.trackingGap\" data-i18n-arg-seconds=\"8.0\" data-i18n-arg-clock=\"27:08\"\u003eControl metrics unavailable: tracking has a gap of 8.0 s at 27:08\u003c/span\u003e\u003cdetails class=\"state-detail\"\u003e\u003csummary\u003eDetails\u003c/summary\u003e\u003ccode data-no-translate\u003eframe gap of 8000 ms at 1628000; 5 Hz tracking (200 ms) is required\u003c/code\u003e\u003c/details\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "metrics-error",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"error\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"circle-alert\"\u003e\u003ccircle cx=\"12\" cy=\"12\" r=\"10\"/\u003e\u003cpath d=\"M12 8v4\"/\u003e\u003cpath d=\"M12 16h.01\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"Metrics unavailable\"\u003eMetrics unavailable\u003c/span\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "moments-error",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"error\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"circle-alert\"\u003e\u003ccircle cx=\"12\" cy=\"12\" r=\"10\"/\u003e\u003cpath d=\"M12 8v4\"/\u003e\u003cpath d=\"M12 16h.01\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"Moments unavailable\"\u003eMoments unavailable\u003c/span\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "moments-yet",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"empty\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"circle-minus\"\u003e\u003ccircle cx=\"12\" cy=\"12\" r=\"10\"/\u003e\u003cpath d=\"M8 12h8\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"No moments yet\"\u003eNo moments yet\u003c/span\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "moments-none",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"empty\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"circle-minus\"\u003e\u003ccircle cx=\"12\" cy=\"12\" r=\"10\"/\u003e\u003cpath d=\"M8 12h8\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"No moments detected\"\u003eNo moments detected\u003c/span\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "panel-loading",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"loading\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"loader-circle\"\u003e\u003cpath d=\"M21 12a9 9 0 1 1-6.219-8.56\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"Updating\"\u003eUpdating\u003c/span\u003e\u003c/div\u003e"
+    },
+    {
+      "Name": "panel-error",
+      "HTML": "\u003cdiv class=\"state-line\" data-state=\"error\"\u003e\u003csvg class=\"state-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" focusable=\"false\" data-icon=\"circle-alert\"\u003e\u003ccircle cx=\"12\" cy=\"12\" r=\"10\"/\u003e\u003cpath d=\"M12 8v4\"/\u003e\u003cpath d=\"M12 16h.01\"/\u003e\u003c/svg\u003e\u003cspan class=\"state-text\" data-i18n=\"Update unavailable. Last loaded view retained.\"\u003eUpdate unavailable. Last loaded view retained.\u003c/span\u003e\u003c/div\u003e"
+    }
+  ]
+}

@@ -65,7 +65,9 @@ func scenarioPreviews(catalog map[string]domain.Replay) []scenarioPreview {
 }
 
 func scenarioLibrary(catalog map[string]domain.Replay, webDir string) (http.Handler, error) {
-	page, err := template.ParseFiles(filepath.Join(webDir, "templates", "partials", "scenarios.html"), filepath.Join(webDir, "templates", "partials", "experience.html"))
+	// The library uses only the mini pitch; its states never render, so no catalog.
+	page, err := template.New("scenarios.html").Funcs(stateFuncs(nil)).
+		ParseFiles(filepath.Join(webDir, "templates", "partials", "scenarios.html"), filepath.Join(webDir, "templates", "partials", "experience.html"))
 	if err != nil {
 		return nil, err
 	}

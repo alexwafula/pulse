@@ -31,7 +31,11 @@ type pageData struct {
 	Experience   bool
 	Build        string
 	Story        experiencePanel
-	catalog      uiCatalog
+	// Focus is the team and player views open on (domain.DefaultFocus); Active
+	// marks teams with a pass, carry or shot in the full replay.
+	Focus   domain.Focus
+	Active  map[string]bool
+	catalog uiCatalog
 }
 
 func NewHandler(replay domain.Replay, webDir string) (http.Handler, error) {
@@ -63,7 +67,13 @@ func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL st
 	if err != nil {
 		return nil, err
 	}
-	page, err := template.ParseFiles(filepath.Join(webDir, "templates", "pages", "match.html"), filepath.Join(webDir, "templates", "partials", "experience.html"))
+	staticDir := filepath.Join(webDir, "static")
+	catalog, err := loadUICatalog(filepath.Join(staticDir, "locales.json"))
+	if err != nil {
+		return nil, err
+	}
+	page, err := template.New("match.html").Funcs(stateFuncs(catalog)).
+		ParseFiles(filepath.Join(webDir, "templates", "pages", "match.html"), filepath.Join(webDir, "templates", "partials", "experience.html"))
 	if err != nil {
 		return nil, err
 	}
@@ -72,17 +82,13 @@ func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL st
 	if _, err := os.Stat(designPath); err == nil {
 		designPage, _ = template.ParseFiles(designPath)
 	}
-	staticDir := filepath.Join(webDir, "static")
 	for _, name := range []string{"pitch.css", "pitch.js", "tokens.css"} {
 		if _, err := os.Stat(filepath.Join(staticDir, name)); err != nil {
 			return nil, err
 		}
 	}
 	view := replayPage(replay, graphs, attacks, scenario)
-	view.catalog, err = loadUICatalog(filepath.Join(staticDir, "locales.json"))
-	if err != nil {
-		return nil, err
-	}
+	view.catalog = catalog
 	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()

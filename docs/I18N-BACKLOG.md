@@ -14,6 +14,8 @@ Visible text beyond the review's 30: a stricter scan also selects Control-swing 
 |---|---|---|
 | `frame gap of 8000 ms at 1628000; 5 Hz tracking (200 ms) is required` (and other `reason` values) | `#metrics-state` in the Control pane, for replays without supported tracking | It is the raw `reason` field from `/api/metrics`. Metric data is not translated, and translating it needs reason codes from the API. |
 
+Since D4b-1 (ADR 0032) the experience shows a keyed line instead (`state.trackingGap`, or `state.trackingUnsupported` for other reasons) and keeps the raw `reason` inside a closed `<details>`, marked `data-no-translate`. `/legacy` still shows the raw reason.
+
 Routing these needs format keys with placeholders (player, clock, event ID, counts) rather than one key per string.
 
 ## New keys: NEEDS TRANSLATION (D3a hero, 2026-10-18)
@@ -81,6 +83,44 @@ The hi-IN CASUAL verb now agrees with the count: `दर्ज हुआ` when t
 | CASUAL | 1 | `इस खुले खेल की अवधि में पहले शॉट से पहले 1 सफल पास दर्ज हुआ।` | NEEDS HUMAN REVIEW |
 | CASUAL | 2 or more | `इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज हुए।` | NEEDS HUMAN REVIEW |
 | ANALYST | any | `खुले खेल की अवधि: पहले शॉट से पहले {count} सफल पास।` | NEEDS HUMAN REVIEW |
+
+## New keys: NEEDS TRANSLATION (D4b-1 states, 2026-10-19)
+
+Added with the default focus and C7 states (ADR 0032). As above, the sw-KE and hi-IN values are the English text, so the catalog checks pass while the string shows in English.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `state.noneInSequence` | `{name} has no passes, carries or shots in this sequence` (`{name}` is a team or a player) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.teamNoPassesYet` | `{team}: no completed passes yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.teamNoRoutesYet` | `{team}: no completed passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.idlePlayers` | `{count} players with no passes` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.idlePlayer` | `{count} player with no passes` (singular, used only when `count` is 1) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.playerNoneYet` | `{player}: no passes, carries or shots yet` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.windowNone` | `{team}: no completed passes, carries or shots from {start} to {end}` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.zeroRows` | `{count} metrics with none in either window` (plural) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.zeroRow` | `{count} metric with none in either window` (singular) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.trackingGap` | `Control metrics unavailable: tracking has a gap of {seconds} s at {clock}` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `state.trackingUnsupported` | `Control metrics unavailable: this replay's tracking does not support them` | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No passes yet` | `No passes yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No box entries or shots yet` | `No box entries or shots yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No box entries yet` | `No box entries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No passes, shots or box entries yet` | `No passes, shots or box entries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `None yet` | `None yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No completed passes or carries yet` | `No completed passes or carries yet` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Details` | `Details` (literal key; the summary of the raw-reason disclosure) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+These existing visible strings were not in the catalog. `Loading moments` now renders as a keyed state line; the three map strings are unchanged in place and are added so the catalog covers them. All carry the same English placeholders:
+
+| Key | sw-KE | hi-IN |
+|---|---|---|
+| `Loading moments` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No completed passes for this team yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No shot attempts for this team yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `No tracking time accumulated yet.` (literal key) | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+18 new keys. `state.noneInSequence` replaced `state.teamNone` and `state.playerNone`, which had the same en-GB text; the plural pairs stay separate, as `evidence.ticks`/`evidence.tickOne` do, because the catalog has no plural rules.
+
+Keep `{name}`, `{team}`, `{player}`, `{count}`, `{start}`, `{end}`, `{seconds}` and `{clock}`. Each line states that something is absent; a translation must not say a team defended well, lost, or is losing. `{seconds}` is one decimal place; `{clock}` is `mm:ss`. The tracking-gap line explains why model metrics are missing; the untranslated API `reason` stays in the disclosure.
 
 ## Summary
 
