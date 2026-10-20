@@ -132,7 +132,9 @@ func storyPanel(replay domain.Replay, page pageData, view string, at int64, opti
 			outcome = strings.ToLower(event.Outcome)
 		}
 		outcome = page.catalog.text(options.locale, outcome, nil)
-		panel.Actions = append(panel.Actions, storyAction{ID: event.ID, Clock: clockText(event.TimeMS), Kind: page.catalog.text(options.locale, event.Type, nil),
+		// The same sentence-case key the Live timeline uses ("Pass"), never the enum ("PASS").
+		kind := page.catalog.text(options.locale, event.Type[:1]+strings.ToLower(event.Type[1:]), nil)
+		panel.Actions = append(panel.Actions, storyAction{ID: event.ID, Clock: clockText(event.TimeMS), Kind: kind,
 			Team: teams[event.TeamID], Text: text, Outcome: outcome, Phase: event.PhaseID,
 			Coordinates: fmt.Sprintf("(%.1f, %.1f) to (%.1f, %.1f) m", event.From.X, event.From.Y, event.To.X, event.To.Y)})
 	}

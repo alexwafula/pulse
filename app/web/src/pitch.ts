@@ -528,10 +528,13 @@ function refreshReplayText(): void {
   const clockPeriod = document.querySelector<HTMLElement>(".clock-period");
   if (clockPeriod) clockPeriod.textContent = t(replay.match.period === 2 ? "2nd Half" : "1st Half");
   const home = replay.match.teams[0];
-  pitchStamp.textContent = t("team.stamp", {team:home.name.toUpperCase(), direction:t(home.attackingDirection)});
+  pitchStamp.textContent = t("team.stamp", {team:home.name.toUpperCase(), direction:t(home.attackingDirection).toUpperCase()});
+  // Experience pages state the direction in sentence case; /legacy keeps its capitals.
+  const experience = document.body.classList.contains("experience");
   document.querySelectorAll<HTMLElement>(".team-sub").forEach((element,index) => {
     const team = replay.match.teams[index];
-    if (team) element.textContent = t("team.direction", {team:team.name, direction:t(team.attackingDirection)});
+    const direction = t(team?.attackingDirection ?? "");
+    if (team) element.textContent = t("team.direction", {team:team.name, direction:experience ? direction : direction.toUpperCase()});
   });
   const phase = document.querySelector<HTMLElement>(".left-rail .rail-card .rail-sub");
   if (phase) phase.textContent = t("stats.window", {start:matchTime(replay.match.startMs), end:matchTime(replay.match.endMs)});
@@ -593,7 +596,8 @@ function renderEvent(): void {
     if (event) {
       currentAction.textContent = `${label(event.type)} · ${eventSentence(event)}`;
       detailTitle.textContent = t("event.at", {kind:label(event.type), clock:matchTime(event.timeMs)});
-      detailDescription.textContent = `${teamName(event.teamId)} · ${t(event.outcome)}`;
+      // Experience pages use the lowercase outcome keys Story uses; /legacy keeps the enum label.
+      detailDescription.textContent = `${teamName(event.teamId)} · ${t(document.body.classList.contains("experience") ? event.outcome.toLowerCase() : event.outcome)}`;
       if (persona === "ANALYST") detailDescription.textContent += ` · ${event.id} · ${event.from.x.toFixed(1)}, ${event.from.y.toFixed(1)} → ${event.to.x.toFixed(1)}, ${event.to.y.toFixed(1)} m`;
       eventButtons.get(nextID)?.setAttribute("aria-current", "true");
       const from = pitchPoint(event.from);
