@@ -67,6 +67,11 @@ try {
   const trailUnderPitch=target=>target.locator('#clip-trail-slot:not([hidden]) #evidence-trail').count();
   assert.equal(await trailUnderPitch(page),1,'clicked insight clip puts the trail under the pitch');
   assert.equal(await trailUnderPitch(other),1,'shared insight clip puts the trail under the pitch');
+  // D4b-2: a shared insight clip lands where the clicked one does, on the Evidence tab in Live.
+  for(const [target,who] of [[page,'clicked'],[other,'shared']]) {
+    assert.deepEqual(await target.locator('.drawer-tab[aria-selected="true"]').evaluateAll(tabs=>tabs.map(tab=>tab.dataset.tab)),['evidence'],`${who} insight clip opens the Evidence tab`);
+    assert.equal(await target.locator('body').getAttribute('data-section'),'live',`${who} insight clip opens Live`);
+  }
   assert.equal(new URL(cueURL).searchParams.get('cue'),open.cueId);
   console.log('ok second recorded agent pattern, actual trace and cue replay link');
 
