@@ -400,9 +400,9 @@ function restoreSharedEvidence(link:EvidenceLink):void {
       if(clock<range.startMs || clock>range.endMs) throw new Error("Shared evidence unavailable");
       momentClip=moment;setClip(range);for(const id of moment.reasons) eventButtons.get(id)?.classList.add("evidence-event");
     } else setClip(selection);
-    // Like a clicked moment or insight clip, a shared one shows the trail under the pitch.
+    // Like a clicked moment or insight clip, a shared one shows the trail under the pitch on the Evidence tab.
     if(momentClip || evidenceCue) placeEvidenceTrail(true);
-    setDrawerTab(momentClip?"evidence":"timeline",true,"live");
+    setDrawerTab(momentClip || evidenceCue?"evidence":"timeline",true,"live");
   }
   const control=required<HTMLInputElement>("#control-toggle");
   if(link.control && control.disabled) throw new Error("Shared evidence unavailable");

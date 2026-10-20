@@ -25,7 +25,10 @@ ArrowRight still selects Routes. A drawer tab never changes `body[data-section]`
 Live (a moment clip, the insight clip, source-event inspection).
 
 **Evidence.** The insight card's Evidence button now ends like moment Play: Live,
-Evidence tab, trail under the pitch. Trail content, evidence ids, narration and clip
+Evidence tab, trail under the pitch. A shared insight-clip link (#44's
+`restoreSharedEvidence`) restores onto the same tab; it used to restore onto Timeline.
+Share-link parameters, the replay fingerprint, the stale-link error and broadcast mode
+are unchanged. Trail content, evidence ids, narration and clip
 bounds are unchanged.
 
 **Recap.** Experience pages render no drawer Recap tab or pane (`{{if not .Experience}}`).
