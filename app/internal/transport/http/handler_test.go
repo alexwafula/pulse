@@ -235,7 +235,7 @@ func TestDemoHandler_ScenarioRouting(t *testing.T) {
 		replay   domain.Replay
 	}{{"corner", base}, {"late-siege", siege}} {
 		t.Run(tc.scenario, func(t *testing.T) {
-			packs, err := facts.CornerPacks(tc.replay)
+			packs, err := facts.PatternPacks(tc.replay)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -46,6 +46,24 @@ Run the new desktop/mobile checks against a local **recorded** setup:
 `node tests/integration/inspection-comparison-browser.mjs`.
 Replay alignment and ending checks: `node tests/integration/replay-browser.mjs`.
 
+### Pattern, sharing and broadcast preview
+
+PR #44 adds a second agent-supported
+statistic: completed passes before the first shot in a precisely bounded
+open-play window. In Late siege the rebound contains one completed pass, a carry
+and a shot. Its recorded English CASUAL response retains the original provider
+IDs and all three role outputs, separately from the old corner reproduction.
+Go still recomputes and gates every published count and source reference.
+
+The Copy evidence link icon preserves the replay, exact paused position, selected
+evidence, language, persona, renderer and camera. Broadcast mode reuses that same
+pitch fullscreen with clock-timed, honestly labelled captions. Escape returns to
+the workspace. Main releases deploy these additions with recorded mode and a
+zero model-request cap; check the released SHA on the public URL before a demo.
+See [ADR 0031](docs/decisions/0031-open-play-pattern-sharing-and-broadcast.md).
+Checks: `node --test tests/integration/evidence-link.test.mjs` and
+`node tests/integration/sharing-broadcast-browser.mjs` with local recorded Python.
+
 ## Team
 
 Three registered members: Jefferson (pipeline), Alex (agents) and Ved (design). Ownership is in [AGENTS.md](AGENTS.md#11-ownership-and-handoffs). Ved designed the Matchlens prototype that the UI is based on ([ADR 0015](docs/decisions/0015-prototype-visual-system.md#fonts-and-provenance)).

@@ -5,7 +5,7 @@ import json
 
 from .contracts import InsightRequest, InsightResponse, SCHEMA_VERSION
 from .pipeline import validate_request
-from .publication import (PUBLICATION_REASON, validate_publishable_draft,
+from .publication import (publication_reason, validate_publishable_draft,
                           validate_publishable_verification)
 
 
@@ -27,7 +27,7 @@ def load_recordings(directory: Path) -> list[tuple[InsightRequest, InsightRespon
             raise ValueError("Invalid recorded response fields")
         validate_publishable_draft(request, response["draft"])
         validate_publishable_verification(response["draft"], response["verification"])
-        if any(item["reason"] != PUBLICATION_REASON for item in response["verification"]["claims"]):
+        if any(item["reason"] != publication_reason(request["factPack"]) for item in response["verification"]["claims"]):
             raise ValueError("Recording includes unchecked verifier prose")
         provenance = record["provenance"]
         if (not isinstance(provenance, dict) or provenance.get("provider") != "Microsoft Foundry"

@@ -18,6 +18,13 @@ Delivery plan for Pulse, for a ~~**team of two**~~ **team of three registered me
 
 ## Status key
 
+Oct 19 priorities 3-5 follow-up: PR #44 (merged to main) implements
+the open-play pass-count workflow, shareable evidence links and broadcast mode.
+ADR 0031 defines precise count/evidence rules and replay URL/presentation limits.
+One approved three-call capture retained the actual new pattern's original
+provider outputs; public model calls remain disabled. Main releases deploy it in
+recorded mode with a zero model-request cap; recheck the released SHA afterwards.
+
 Oct 19 feature follow-up: Alex approved Agent Inspector and What Changed?, kept
 the existing theme, confirmed Ved's team membership/reuse permission and accepted
 the draft video. Branch `feat/agent-inspector-comparison` adds actual delivery/gate

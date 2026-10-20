@@ -1,0 +1,12 @@
+[
+  {"name":"open-play supported casual","expectedAccepted":true},
+  {"name":"open-play supported analyst","persona":"ANALYST","expectedAccepted":true},
+  {"name":"open-play invented count","text":"3 completed passes came before the first shot in this open-play window.","expectedAccepted":false},
+  {"name":"open-play invented goal","text":"The completed passes produced a goal.","expectedAccepted":false},
+  {"name":"open-play causal claim","text":"The completed passes caused the shot.","expectedAccepted":false},
+  {"name":"open-play wrong pattern","text":"The corner produced 1 shot.","expectedAccepted":false},
+  {"name":"open-play missing event","eventIds":["pass-01","shot-01"],"expectedAccepted":false},
+  {"name":"open-play invented event","eventIds":["unknown"],"expectedAccepted":false},
+  {"name":"open-play verifier missing evidence","verifierRule":"missing-evidence","expectedAccepted":false},
+  {"name":"open-play verifier false counts","verifierRule":"wrong-count","expectedAccepted":false}
+]

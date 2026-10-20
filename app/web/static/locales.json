@@ -31,6 +31,10 @@
     "index.higher":"{team}'s control index is {value} higher", "index.level":"Neither team's control index is higher"
   },
   "sw-KE": {
+    "Evidence sharing unavailable":"Kushiriki ushahidi hakupatikani",
+    "Copy evidence link":"Nakili kiungo cha ushahidi", "Broadcast mode":"Mwonekano wa matangazo", "Exit broadcast mode":"Ondoka kwenye mwonekano wa matangazo", "Synthetic replay":"Marudio ya kubuni", "Evidence link":"Kiungo cha ushahidi", "Evidence link copied":"Kiungo cha ushahidi kimenakiliwa", "Clipboard unavailable":"Ubao wa kunakili haupatikani", "Shared evidence unavailable":"Ushahidi ulioshirikiwa haupatikani",
+    "Role outputs are advisory. Go recomputes every fact and decides publication.":"Role outputs are advisory. Go recomputes every fact and decides publication.", "Advisory verdict":"Advisory verdict",
+    "Captured output":"Matokeo yaliyohifadhiwa", "Captured decision":"Uamuzi uliohifadhiwa", "Captured role outputs and source references retained.":"Matokeo ya majukumu na marejeo ya chanzo yamehifadhiwa.", "No fresh model calls. Captured provider IDs and role outputs retained.":"Hakuna miito mipya ya modeli. Vitambulisho vya mtoa huduma na matokeo ya majukumu yamehifadhiwa.", "Captured agent run":"Utekelezaji wa mawakala uliohifadhiwa", "Original capture for this recorded output.":"Rekodi asili ya matokeo haya yaliyohifadhiwa.",
     "playback.window":"{start} - {end} · 1×", "playback.postroll":"Mwendo uliorekodiwa unaendelea hadi {end}", "playback.trackingTail":"Ufuatiliaji unaendelea hadi {end}",
     "Evidence replay":"Marudio ya ushahidi", "Evidence replay complete":"Marudio ya ushahidi yamekamilika", "Sequence complete":"Mfululizo umekamilika", "All actions recorded":"Matukio yote yamerekodiwa", "No actions recorded":"Hakuna matukio yaliyorekodiwa", "Replay sequence":"Rudia mfululizo", "View recap":"Angalia muhtasari",
     "inspection.delivery":"Uwasilishaji na ukaguzi wa Go: {ms} ms (si muda wa modeli kuzalisha maandishi)",
@@ -89,6 +93,10 @@
     "content-checked recording":"content-checked recording"
   },
   "hi-IN": {
+    "Evidence sharing unavailable":"साक्ष्य साझा करना उपलब्ध नहीं है",
+    "Copy evidence link":"साक्ष्य लिंक कॉपी करें", "Broadcast mode":"प्रसारण मोड", "Exit broadcast mode":"प्रसारण मोड से बाहर निकलें", "Synthetic replay":"काल्पनिक रीप्ले", "Evidence link":"साक्ष्य लिंक", "Evidence link copied":"साक्ष्य लिंक कॉपी हुआ", "Clipboard unavailable":"क्लिपबोर्ड उपलब्ध नहीं है", "Shared evidence unavailable":"साझा साक्ष्य उपलब्ध नहीं है",
+    "Role outputs are advisory. Go recomputes every fact and decides publication.":"Role outputs are advisory. Go recomputes every fact and decides publication.", "Advisory verdict":"Advisory verdict",
+    "Captured output":"दर्ज किया गया परिणाम", "Captured decision":"दर्ज किया गया निर्णय", "Captured role outputs and source references retained.":"भूमिकाओं के परिणाम और स्रोत संदर्भ सुरक्षित हैं।", "No fresh model calls. Captured provider IDs and role outputs retained.":"कोई नई मॉडल कॉल नहीं। प्रदाता आईडी और भूमिकाओं के परिणाम सुरक्षित हैं।", "Captured agent run":"दर्ज किया गया एजेंट निष्पादन", "Original capture for this recorded output.":"इस संग्रहीत परिणाम का मूल रिकॉर्ड।",
     "playback.window":"{start} - {end} · 1×", "playback.postroll":"रिकॉर्ड की गई गति {end} तक जारी रहती है", "playback.trackingTail":"ट्रैकिंग {end} तक जारी रहती है",
     "Evidence replay":"साक्ष्य रीप्ले", "Evidence replay complete":"साक्ष्य रीप्ले पूरा हुआ", "Sequence complete":"क्रम पूरा हुआ", "All actions recorded":"सभी घटनाएँ दर्ज हो गई हैं", "No actions recorded":"कोई घटना दर्ज नहीं है", "Replay sequence":"क्रम फिर चलाएँ", "View recap":"सारांश देखें",
     "inspection.delivery":"डिलीवरी और Go जाँच: {ms} ms (मॉडल जनरेशन का समय नहीं)",

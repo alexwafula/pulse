@@ -55,8 +55,8 @@ The corner-to-first-shot builder, conservative independently checking Go cue gat
 Python template HTTP service and browser Evidence replay now work locally.
 Go-calculated passing snapshots and pass evidence are rendered below the pitch.
 Python has file prompts and a tested bounded three-role workflow. Default HTTP
-mode is template-only; opt-in `foundry` can publish only approved corner-shot
-wording after independent Python/Go checks. `foundry-shadow` still publishes
+mode is template-only; opt-in `foundry` can publish only approved event-backed
+pattern wording after independent Python/Go checks. `foundry-shadow` still publishes
 templates. Recorded publishing tests are not evidence of live model quality.
 Three authored local scenarios plus seeded 11v11 late-siege/calm-midfield replays,
 attacking-route metrics, persona controls and
@@ -133,6 +133,13 @@ Replay follow-up (decision 0029) unifies exact source-event inspection in
 Live, prepares bounded 1x action clips and separates recorded shot postroll from
 unchanged evidence windows. Scenario/clip completion and tracking-tail states
 offer replay/recap/scenario actions; no football or post-sequence motion is invented.
+Priority 3-5 work (decision 0031, PR #44) adds a second narrow agent-supported metric,
+open-play completed passes before a phase's first shot (20-second maximum), with
+Go source recomputation and shared Go/Python positive/negative examples. Its
+three-call original Foundry capture retains role outputs/IDs; recorded/default
+model caps stay unchanged. Share links validate replay fingerprints and restore
+paused evidence/audience/rendering. Broadcast uses the existing pitch/clock with
+timed provenance-labelled captions. No new dependencies, services or CI changes.
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)
@@ -192,9 +199,9 @@ event kinds, COMMENTARY cues, CASUAL/ANALYST and en-GB/sw-KE/hi-IN templates:
 ## 7. Pulse runtime agents
 
 Current set: **Explainer, Narrator, Verifier**, run by a thin async workflow with
-an opt-in Foundry REST backend. The publishing path is constrained to the recorded
-corner-shot fact, tested with fake backends and one approved live workflow, not
-broad live-model evaluations. Microsoft Agent
+an opt-in Foundry REST backend. The publishing path is constrained to corner-shot
+and open-play pass-count facts, tested with fake backends and bounded approved
+captures, not broad live-model evaluations. Microsoft Agent
 Framework, Recap, and additional personas remain future work.
 
 ### 7.1 Rules for every Pulse agent
@@ -259,6 +266,7 @@ Local checks:
 - Hero (D3a): `node --test tests/integration/index-headline.test.mjs` (headline wording) and `node tests/integration/hero-browser.mjs` (running local Go server; server-rendered team kits and headline present before scripts and unchanged by hydration, headline equals `/api/metrics`, mobile pitch within 360px, paused renderer switch draws 0 frames)
 - Lower third and badges (D3b): `node tests/integration/lower-third-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; one pitch overlay at 88:11 and the corner end, distinct badge names/icons/shapes and the exact Verified tooltip, 44px transport targets, motion rows with and without reduced motion, hero headline at start/88:11/end)
 - Design tokens: `node tests/integration/tokens-browser.mjs` (running local Go server; team colour by identity across scenarios and renderers, audited contrast pairs, no Inter on `/`, `/legacy` pixels against `PULSE_LEGACY_BASELINE`, reduced-motion scrolling)
+- Insight selection (ADR 0031): `node tests/integration/insight-selection-browser.mjs` (running local Go server; set `PULSE_INSIGHT_SOURCE=python-recorded` with the recorded service; corner/central/exchange keep main's corner cue, late-siege shows nothing at 88:40, the corner at 88:44 and the open-play insight from 88:46)
 - Replay library: `npm run test:library` (fixture-backed previews, filters, dialog focus, guided demo, fact-check provenance and evidence links)
 - Shared agent business-rule examples: `go test ./app/internal/domain` and the Python command above. A complete cross-language schema runner remains future work.
 

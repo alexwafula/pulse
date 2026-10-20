@@ -1,0 +1,84 @@
+{
+  "request": {
+    "schemaVersion": "2.0.0",
+    "factPack": {
+      "schemaVersion": "2.0.0",
+      "id": "pack-open-b45ec52f10c16f9a",
+      "matchId": "match-vale-bastion-siege",
+      "period": 2,
+      "windowStartMs": 5323830,
+      "windowEndMs": 5325317,
+      "facts": [
+        {
+          "id": "fact-open-b45ec52f10c16f9a",
+          "metric": "open_play_passes_before_shot",
+          "value": 1,
+          "unit": "passes",
+          "teamId": "vale",
+          "timeStartMs": 5323830,
+          "timeEndMs": 5325317,
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ],
+          "attributes": {
+            "phaseId": "phase-siege-rebound"
+          }
+        }
+      ]
+    },
+    "locale": "en-GB",
+    "persona": "CASUAL"
+  },
+  "response": {
+    "schemaVersion": "2.0.0",
+    "draft": {
+      "schemaVersion": "2.0.0",
+      "id": "draft-pack-open-b45ec52f10c16f9a",
+      "factPackId": "pack-open-b45ec52f10c16f9a",
+      "locale": "en-GB",
+      "persona": "CASUAL",
+      "text": "1 completed pass came before the first shot in this open-play window.",
+      "claims": [
+        {
+          "id": "claim-fact-open-b45ec52f10c16f9a",
+          "text": "1 completed pass came before the first shot in this open-play window.",
+          "factIds": [
+            "fact-open-b45ec52f10c16f9a"
+          ],
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ]
+        }
+      ]
+    },
+    "verification": {
+      "schemaVersion": "2.0.0",
+      "draftId": "draft-pack-open-b45ec52f10c16f9a",
+      "status": "VERIFIED",
+      "claimsChecked": 1,
+      "claimsPassed": 1,
+      "claims": [
+        {
+          "claimId": "claim-fact-open-b45ec52f10c16f9a",
+          "supported": true,
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ],
+          "reason": "Supported by the computed open-play pass-count fact."
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "provider": "Microsoft Foundry",
+    "deployment": "pulse-insights",
+    "recordedAt": "2026-10-19T16:12:23.072205+00:00",
+    "traceFile": "agents/inspections/open-play-casual.en-GB.json"
+  }
+}

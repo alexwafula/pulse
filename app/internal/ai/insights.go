@@ -22,7 +22,7 @@ func Template(pack domain.FactPack, locale, persona string) (domain.InsightRespo
 		return domain.InsightResponse{}, fmt.Errorf("unsupported template audience")
 	}
 	if pack.SchemaVersion != domain.SchemaVersion || len(pack.Facts) != 1 || pack.Period < 1 || pack.Period > 4 || pack.WindowStartMS < 0 || pack.WindowEndMS < pack.WindowStartMS {
-		return domain.InsightResponse{}, fmt.Errorf("template requires one computed corner fact")
+		return domain.InsightResponse{}, fmt.Errorf("template requires one supported computed fact")
 	}
 	fact := pack.Facts[0]
 	count, ok := fact.Value.(int)
@@ -31,10 +31,16 @@ func Template(pack domain.FactPack, locale, persona string) (domain.InsightRespo
 			count, ok = 1, true
 		}
 	}
-	if !ok || count != 1 || fact.Metric != "set_piece_shots" || fact.Unit != "shots" || len(fact.EventIDs) != 2 {
+	text := templateTexts[locale][persona]
+	if fact.Metric == "open_play_passes_before_shot" {
+		var err error
+		text, err = openPlayTemplate(pack, locale, persona)
+		if err != nil {
+			return domain.InsightResponse{}, err
+		}
+	} else if !ok || count != 1 || fact.Metric != "set_piece_shots" || fact.Unit != "shots" || len(fact.EventIDs) != 2 {
 		return domain.InsightResponse{}, fmt.Errorf("unsupported corner fact")
 	}
-	text := templateTexts[locale][persona]
 	draft := domain.NarrationDraft{SchemaVersion: domain.SchemaVersion, ID: "draft-" + pack.ID,
 		FactPackID: pack.ID, Locale: locale, Persona: persona, Text: text,
 		Claims: []domain.Claim{{ID: "claim-" + fact.ID, Text: text, FactIDs: []string{fact.ID}, EventIDs: append([]string{}, fact.EventIDs...)}}}
@@ -108,7 +114,7 @@ func RequestWithMode(ctx context.Context, endpoint string, pack domain.FactPack,
 // Cue recomputes the fact pack and checks both the words and complete evidence.
 // A model's VERIFIED label never substitutes for the deterministic checks.
 func Cue(replay domain.Replay, pack domain.FactPack, response domain.InsightResponse, locale, persona string) (domain.OverlayCue, error) {
-	computed, err := facts.CornerPacks(replay)
+	computed, err := facts.PatternPacks(replay)
 	if err != nil {
 		return domain.OverlayCue{}, err
 	}
@@ -138,10 +144,10 @@ func Cue(replay domain.Replay, pack domain.FactPack, response domain.InsightResp
 			shot = e
 		}
 	}
-	if corner == nil || shot == nil || corner.Type != "CORNER" || corner.Outcome != "COMPLETE" || shot.Type != "SHOT" ||
+	if fact.Metric == "set_piece_shots" && (corner == nil || shot == nil || corner.Type != "CORNER" || corner.Outcome != "COMPLETE" || shot.Type != "SHOT" ||
 		corner.TeamID != fact.TeamID || shot.TeamID != fact.TeamID || corner.PhaseID != shot.PhaseID ||
 		corner.TimeMS != pack.WindowStartMS || shot.TimeMS != pack.WindowEndMS || shot.TimeMS-corner.TimeMS > 12000 ||
-		fact.TimeStartMS != corner.TimeMS || fact.TimeEndMS != shot.TimeMS {
+		fact.TimeStartMS != corner.TimeMS || fact.TimeEndMS != shot.TimeMS) {
 		return domain.OverlayCue{}, fmt.Errorf("cue gate: invalid source events")
 	}
 	if err := response.Draft.Validate(pack); err != nil {

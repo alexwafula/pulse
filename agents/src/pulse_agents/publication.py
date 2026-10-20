@@ -2,13 +2,25 @@
 
 from copy import deepcopy
 
-from .contracts import InsightRequest, NarrationDraft, VerificationResult, validate_verification
+from .contracts import FactPack, InsightRequest, NarrationDraft, VerificationResult, validate_verification
 from .pipeline import insights
+from .patterns import pattern_text
 
 PUBLICATION_REASON = "Supported by the computed corner-shot fact."
 
 
-def approved_wordings(persona: str) -> tuple[str, ...]:
+def publication_reason(pack: FactPack) -> str:
+    if len(pack["facts"]) == 1 and pack["facts"][0]["metric"] == "open_play_passes_before_shot":
+        return "Supported by the computed open-play pass-count fact."
+    return PUBLICATION_REASON
+
+
+def approved_wordings(persona: str, pack: FactPack | None = None) -> tuple[str, ...]:
+    if pack is not None and len(pack["facts"]) == 1 and pack["facts"][0]["metric"] == "open_play_passes_before_shot":
+        text = pattern_text(pack, "en-GB", persona)
+        count = int(pack["facts"][0]["value"])
+        noun = "pass" if count == 1 else "passes"
+        return (text, f"Before the first shot in this open-play window: {count} completed {noun} recorded.")
     if persona == "CASUAL":
         return ("The corner produced 1 shot.",
                 "A shot followed the corner: 1 shot in this sequence.",
@@ -25,8 +37,8 @@ def validate_publishable_draft(request: InsightRequest, draft: NarrationDraft) -
         raise ValueError("Translated locales are template-only pending language review")
     expected = deepcopy(insights(request)["draft"])
     text = draft.get("text")
-    if text not in approved_wordings(request["persona"]):
-        raise ValueError("Narration is outside the approved corner-shot language")
+    if text not in approved_wordings(request["persona"], request["factPack"]):
+        raise ValueError("Narration is outside the approved source-backed language")
     expected["text"] = text
     expected["claims"][0]["text"] = text
     if draft != expected:

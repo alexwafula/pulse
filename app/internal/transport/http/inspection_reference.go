@@ -39,7 +39,15 @@ type agentReference struct {
 }
 
 func loadAgentReference(webDir string) *agentReference {
-	file, err := os.Open(filepath.Join(webDir, "..", "..", "agents", "inspections", "corner-casual.en-GB.json"))
+	return loadReferenceFile(webDir, "corner-casual.en-GB.json", "reproduction-not-original-capture")
+}
+
+func loadAgentReferences(webDir string) []*agentReference {
+	return []*agentReference{loadAgentReference(webDir), loadReferenceFile(webDir, "open-play-casual.en-GB.json", "captured-agent-run")}
+}
+
+func loadReferenceFile(webDir, name, kind string) *agentReference {
+	file, err := os.Open(filepath.Join(webDir, "..", "..", "agents", "inspections", name))
 	if err != nil {
 		return nil
 	}
@@ -50,7 +58,7 @@ func loadAgentReference(webDir string) *agentReference {
 	}
 	var reference agentReference
 	if json.Unmarshal(data, &reference) != nil || reference.Version != "pulse-agent-reference-v1" ||
-		reference.Kind != "reproduction-not-original-capture" || !reference.Accepted ||
+		reference.Kind != kind || !reference.Accepted ||
 		reference.ModelCalls != 3 || len(reference.Observations) != 3 {
 		return nil
 	}
@@ -76,7 +84,11 @@ func matchingReference(reference *agentReference, replay domain.Replay, pack dom
 		return nil
 	}
 	claim := response.Draft.Claims[0]
-	claim.Text = "The corner produced 1 shot."
+	template, err := ai.Template(pack, "en-GB", "CASUAL")
+	if err != nil {
+		return nil
+	}
+	claim.Text = template.Draft.Text
 	if !sameJSON(reference.Observations[0].Output, claim) || !sameJSON(reference.Observations[1].Output, response.Draft) {
 		return nil
 	}
@@ -85,7 +97,7 @@ func matchingReference(reference *agentReference, replay domain.Replay, pack dom
 		return nil
 	}
 	for i := range checked.Claims {
-		checked.Claims[i].Reason = ai.PublicationReason
+		checked.Claims[i].Reason = ai.PublicationReasonFor(pack)
 	}
 	if !reflect.DeepEqual(checked, response.Verification) {
 		return nil

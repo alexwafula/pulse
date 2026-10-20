@@ -55,6 +55,8 @@
         <option value="calm-midfield" {{if eq .Scenario "calm-midfield"}}selected{{end}}>Calm midfield (11v11)</option>
       </select>
       {{if .Experience}}<button type="button" id="scenario-library-open" class="scenario-library-button" aria-haspopup="dialog"><i data-lucide="clapperboard"></i><span>Scenarios</span></button>{{end}}
+      <button type="button" id="share-button" class="icon-button workspace-tool" {{if not .Experience}}hidden{{end}} aria-label="Copy evidence link" title="Copy evidence link"><i data-lucide="copy"></i></button>
+      <button type="button" id="broadcast-toggle" class="icon-button workspace-tool" {{if not .Experience}}hidden{{end}} aria-label="Broadcast mode" title="Broadcast mode" aria-pressed="false"><i data-lucide="presentation"></i></button>
       
       <button type="button" id="run-demo-button" class="demo-button" aria-pressed="false" title="Run end-to-end automated demo" {{if .Experience}}hidden{{end}}>
         <i data-lucide="play"></i><span>Run demo</span>
@@ -213,6 +215,10 @@
           <span id="metrics-label" class="model-label" role="status">Loading metrics</span>
         </div>
         <div class="pitch-shell">
+          <div class="broadcast-hud">
+            <div class="broadcast-fixture"><strong>Pulse</strong><span>{{(index .Match.Teams 0).Name}} &middot; {{(index .Match.Teams 1).Name}}</span><small>Synthetic replay</small><time id="broadcast-clock">{{.StartClock}}</time></div>
+            <div class="broadcast-tools"><button type="button" id="broadcast-copy" class="icon-button" aria-label="Copy evidence link" title="Copy evidence link"><i data-lucide="copy"></i></button><button type="button" id="broadcast-exit" class="icon-button" aria-label="Exit broadcast mode" title="Exit broadcast mode"><i data-lucide="x"></i></button></div>
+          </div>
           <div id="pitch-loading" class="pitch-loading" role="status" aria-live="polite" hidden>
             <span class="loading-spinner" aria-hidden="true"></span>
             <span>Loading match data…</span>
@@ -278,6 +284,7 @@
               <span id="result-detail"></span>
             </div>
           </div>
+          <section id="broadcast-caption" class="broadcast-caption" aria-live="polite" hidden><div class="broadcast-caption-meta"><span id="broadcast-status" class="status-badge"></span><span id="broadcast-estimate" class="estimate-chip" hidden>model estimate, uncalibrated</span><button type="button" id="broadcast-evidence" class="icon-button" aria-label="Evidence" title="Evidence"><i data-lucide="list-video"></i></button></div><p id="broadcast-text"></p></section>
           
           <div class="scene-tools">
             <button type="button" id="camera-reset" class="icon-button" aria-label="Reset 3D camera angle" title="Reset 3D camera angle" hidden><i data-lucide="camera"></i></button>
@@ -287,6 +294,9 @@
         </div>
         
         <p id="renderer-status" class="renderer-status" role="status" hidden></p>
+        <p id="shared-position-error" class="shared-position-error" role="alert" hidden>Shared evidence unavailable</p>
+        <span id="share-announcement" class="sr-only" role="status"></span>
+        <dialog id="share-link-dialog" class="share-link-dialog" aria-labelledby="share-link-heading"><header><h2 id="share-link-heading">Evidence link</h2><button type="button" id="share-link-close" class="icon-button" title="Close" aria-label="Close"><i data-lucide="x"></i></button></header><label for="share-link-value">Evidence link</label><div class="share-link-field"><input id="share-link-value" type="url" readonly><button type="button" id="share-link-copy" class="icon-button" aria-label="Copy evidence link" title="Copy evidence link"><i data-lucide="copy"></i></button></div></dialog>
 
         <!-- BOTTOM SCRUBBER & TRANSPORT -->
         <div class="transport">

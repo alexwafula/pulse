@@ -1,0 +1,239 @@
+{
+  "version": "pulse-agent-reference-v1",
+  "kind": "captured-agent-run",
+  "capturedAt": "2026-10-19T16:12:23.072205+00:00",
+  "deployment": "pulse-insights",
+  "request": {
+    "schemaVersion": "2.0.0",
+    "factPack": {
+      "schemaVersion": "2.0.0",
+      "id": "pack-open-b45ec52f10c16f9a",
+      "matchId": "match-vale-bastion-siege",
+      "period": 2,
+      "windowStartMs": 5323830,
+      "windowEndMs": 5325317,
+      "facts": [
+        {
+          "id": "fact-open-b45ec52f10c16f9a",
+          "metric": "open_play_passes_before_shot",
+          "value": 1,
+          "unit": "passes",
+          "teamId": "vale",
+          "timeStartMs": 5323830,
+          "timeEndMs": 5325317,
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ],
+          "attributes": {
+            "phaseId": "phase-siege-rebound"
+          }
+        }
+      ]
+    },
+    "locale": "en-GB",
+    "persona": "CASUAL"
+  },
+  "response": {
+    "schemaVersion": "2.0.0",
+    "draft": {
+      "schemaVersion": "2.0.0",
+      "id": "draft-pack-open-b45ec52f10c16f9a",
+      "factPackId": "pack-open-b45ec52f10c16f9a",
+      "locale": "en-GB",
+      "persona": "CASUAL",
+      "text": "1 completed pass came before the first shot in this open-play window.",
+      "claims": [
+        {
+          "id": "claim-fact-open-b45ec52f10c16f9a",
+          "text": "1 completed pass came before the first shot in this open-play window.",
+          "factIds": [
+            "fact-open-b45ec52f10c16f9a"
+          ],
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ]
+        }
+      ]
+    },
+    "verification": {
+      "schemaVersion": "2.0.0",
+      "draftId": "draft-pack-open-b45ec52f10c16f9a",
+      "status": "VERIFIED",
+      "claimsChecked": 1,
+      "claimsPassed": 1,
+      "claims": [
+        {
+          "claimId": "claim-fact-open-b45ec52f10c16f9a",
+          "supported": true,
+          "eventIds": [
+            "evt-25",
+            "evt-26",
+            "evt-27"
+          ],
+          "reason": "Supported by the computed open-play pass-count fact."
+        }
+      ]
+    }
+  },
+  "accepted": true,
+  "narratorAttempts": 1,
+  "modelCalls": 3,
+  "observations": [
+    {
+      "role": "explainer",
+      "responseId": "chatcmpl-EakG9F51sPkRcwt5XnV17OKXxQ1uy",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792426337,
+      "observedAt": "2026-10-19T16:12:17.728806+00:00",
+      "durationMs": 3116,
+      "usage": {
+        "completion_tokens": 69,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 10,
+          "engine_ttft_ms": 25,
+          "engine_ttlt_ms": 756,
+          "pre_inference_ms": 86,
+          "service_tbt_ms": 11,
+          "service_ttft_ms": 1013,
+          "service_ttlt_ms": 1739,
+          "user_visible_ttft_ms": 927
+        },
+        "prompt_tokens": 446,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 515
+      },
+      "output": {
+        "id": "claim-fact-open-b45ec52f10c16f9a",
+        "text": "1 completed pass came before the first shot in this open-play window.",
+        "factIds": [
+          "fact-open-b45ec52f10c16f9a"
+        ],
+        "eventIds": [
+          "evt-25",
+          "evt-26",
+          "evt-27"
+        ]
+      }
+    },
+    {
+      "role": "narrator",
+      "responseId": "chatcmpl-EakGBZQfSE3CVuTwzMtUPf4qa4yPn",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792426339,
+      "observedAt": "2026-10-19T16:12:20.540173+00:00",
+      "durationMs": 2810,
+      "usage": {
+        "completion_tokens": 144,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 12,
+          "engine_ttft_ms": 51,
+          "engine_ttlt_ms": 1832,
+          "pre_inference_ms": 88,
+          "service_tbt_ms": 12,
+          "service_ttft_ms": 564,
+          "service_ttlt_ms": 2331,
+          "user_visible_ttft_ms": 476
+        },
+        "prompt_tokens": 596,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 740
+      },
+      "output": {
+        "schemaVersion": "2.0.0",
+        "id": "draft-pack-open-b45ec52f10c16f9a",
+        "factPackId": "pack-open-b45ec52f10c16f9a",
+        "locale": "en-GB",
+        "persona": "CASUAL",
+        "text": "1 completed pass came before the first shot in this open-play window.",
+        "claims": [
+          {
+            "id": "claim-fact-open-b45ec52f10c16f9a",
+            "text": "1 completed pass came before the first shot in this open-play window.",
+            "factIds": [
+              "fact-open-b45ec52f10c16f9a"
+            ],
+            "eventIds": [
+              "evt-25",
+              "evt-26",
+              "evt-27"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "role": "verifier",
+      "responseId": "chatcmpl-EakGEKfoEFXplvksBQBLVsWbfWThS",
+      "model": "gpt-4.1-mini-2025-04-14",
+      "created": 1792426342,
+      "observedAt": "2026-10-19T16:12:23.069406+00:00",
+      "durationMs": 2528,
+      "usage": {
+        "completion_tokens": 113,
+        "completion_tokens_details": {
+          "accepted_prediction_tokens": 0,
+          "audio_tokens": 0,
+          "reasoning_tokens": 0,
+          "rejected_prediction_tokens": 0
+        },
+        "latency_checkpoint": {
+          "engine_tbt_ms": 12,
+          "engine_ttft_ms": 38,
+          "engine_ttlt_ms": 1403,
+          "pre_inference_ms": 86,
+          "service_tbt_ms": 12,
+          "service_ttft_ms": 588,
+          "service_ttlt_ms": 1948,
+          "user_visible_ttft_ms": 503
+        },
+        "prompt_tokens": 684,
+        "prompt_tokens_details": {
+          "audio_tokens": 0,
+          "cached_tokens": 0
+        },
+        "total_tokens": 797
+      },
+      "output": {
+        "schemaVersion": "2.0.0",
+        "draftId": "draft-pack-open-b45ec52f10c16f9a",
+        "status": "VERIFIED",
+        "claimsChecked": 1,
+        "claimsPassed": 1,
+        "claims": [
+          {
+            "claimId": "claim-fact-open-b45ec52f10c16f9a",
+            "supported": true,
+            "eventIds": [
+              "evt-25",
+              "evt-26",
+              "evt-27"
+            ],
+            "reason": "Fact pack confirms exactly 1 completed open-play pass before the first shot in this window, matching claim and event IDs."
+          }
+        ]
+      }
+    }
+  ]
+}

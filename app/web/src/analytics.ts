@@ -394,6 +394,7 @@ export function createAnalytics(replay: Replay, scenario: string, hooks: Hooks) 
 
   return {
     async load(): Promise<void> { await Promise.all([loadMetrics(), loadMoments()]); },
+    findMoment(type:string,timeMs:number,teamId:string):Moment|undefined { return moments.find(moment=>moment.type===type && moment.timeMs===timeMs && moment.teamId===teamId); },
     render(clock: number, cue: Cue | undefined, selected: Moment | undefined, clip = false): ControlField | undefined {
       renderSummary(clock);
       const control = renderMetrics(clock);

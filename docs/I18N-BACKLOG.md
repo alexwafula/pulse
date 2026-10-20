@@ -50,6 +50,38 @@ Added with the evidence-trail rail. As above, the sw-KE and hi-IN values are the
 
 Keep `{count}`, `{start}`, `{end}` and `{clock}`. The count and times come from the API's `tickTimesMs`. The en dash between the times is part of the format. The label sits next to the chip "model estimate, uncalibrated", which is already translated. A translation must call these samples of model metrics, not facts, events or predictions.
 
+## New keys: NEEDS TRANSLATION (Agent Inspector advisory labels, 2026-10-19)
+
+Added so a named model's role output never reads as that model having verified a claim. As above, the sw-KE and hi-IN values are the English text.
+
+| Key | en-GB | sw-KE | hi-IN |
+|---|---|---|---|
+| `Role outputs are advisory. Go recomputes every fact and decides publication.` | literal key; note under the Inspector's reference run | NEEDS TRANSLATION | NEEDS TRANSLATION |
+| `Advisory verdict` | literal key; the Verifier record's term for its output | NEEDS TRANSLATION | NEEDS TRANSLATION |
+
+A translation must keep the model's output advisory and say that Go, not the model, decides publication.
+
+## Open-play insight templates: NEEDS HUMAN REVIEW (sw-KE, 2026-10-19)
+
+The open-play pass-count insight (ADR 0031) is a template in Go (`app/internal/ai/open_play.go`) and Python (`agents/src/pulse_agents/patterns.py`), not a catalog key. Its sw-KE text now agrees with the count: singular when the count is 1, plural otherwise. Both forms are drafts written without a native speaker and need review. The en-GB sentences are unchanged, because the recorded capture is bound to them.
+
+| Persona | Count | sw-KE | Status |
+|---|---|---|---|
+| CASUAL | 1 | `Pasi 1 iliyokamilika ilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.` | NEEDS HUMAN REVIEW |
+| CASUAL | 2 or more | `Pasi {count} zilizokamilika zilitangulia shuti la kwanza katika kipindi hiki cha mchezo wazi.` | NEEDS HUMAN REVIEW |
+| ANALYST | 1 | `Kipindi cha mchezo wazi: pasi 1 iliyokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
+| ANALYST | 2 or more | `Kipindi cha mchezo wazi: pasi {count} zilizokamilika kabla ya shuti lake la kwanza.` | NEEDS HUMAN REVIEW |
+
+## Open-play insight templates: NEEDS HUMAN REVIEW (hi-IN, 2026-10-20)
+
+The hi-IN CASUAL verb now agrees with the count: `दर्ज हुआ` when the count is 1 (late-siege), `दर्ज हुए` otherwise. ANALYST has no verb and is unchanged. Both forms are drafts written without a native speaker and need review. en-GB is unchanged.
+
+| Persona | Count | hi-IN | Status |
+|---|---|---|---|
+| CASUAL | 1 | `इस खुले खेल की अवधि में पहले शॉट से पहले 1 सफल पास दर्ज हुआ।` | NEEDS HUMAN REVIEW |
+| CASUAL | 2 or more | `इस खुले खेल की अवधि में पहले शॉट से पहले {count} सफल पास दर्ज हुए।` | NEEDS HUMAN REVIEW |
+| ANALYST | any | `खुले खेल की अवधि: पहले शॉट से पहले {count} सफल पास।` | NEEDS HUMAN REVIEW |
+
 ## Summary
 
 | Pattern | Count |

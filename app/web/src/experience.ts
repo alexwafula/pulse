@@ -81,6 +81,7 @@ library.addEventListener("click", event => {
 });
 document.addEventListener("pulse:demo-complete", () => selectSection("recap"));
 document.addEventListener("pulse:open-recap", () => selectSection("recap"));
+document.addEventListener("pulse:show-live", () => selectSection("live",false));
 
 function graphics(): void {
   disposeGraphics?.();

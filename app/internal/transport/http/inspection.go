@@ -38,7 +38,7 @@ type inspectionFeed struct {
 
 // Both routes execute the same delivery and publication checks. The browser
 // requests the envelope once; opening the Inspector makes no extra agent call.
-func insightHandler(replay domain.Replay, packs []domain.FactPack, agentsURL string, inspect bool, reference *agentReference) http.HandlerFunc {
+func insightHandler(replay domain.Replay, packs []domain.FactPack, agentsURL string, inspect bool, references ...*agentReference) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", "GET")
@@ -55,7 +55,7 @@ func insightHandler(replay domain.Replay, packs []domain.FactPack, agentsURL str
 		}
 		locale := requestLocale(r)
 		result := inspectionFeed{Version: "pulse-inspection-v1", Feed: domain.CueFeed{SchemaVersion: domain.SchemaVersion, Cues: []domain.OverlayCue{}}, Inspections: []insightInspection{}}
-		source := "go-template"
+		feedSource := ""
 		for _, pack := range packs {
 			start := time.Now()
 			response, err := ai.Template(pack, locale, persona)
@@ -90,17 +90,29 @@ func insightHandler(replay domain.Replay, packs []domain.FactPack, agentsURL str
 				return
 			}
 			result.Feed.Cues = append(result.Feed.Cues, cue)
-			w.Header().Set("X-Pulse-Insight-Source", source)
+			if feedSource == "" {
+				feedSource = source
+			} else if feedSource != source {
+				feedSource = "mixed"
+			}
 			if inspect {
+				var reference *agentReference
+				for _, candidate := range references {
+					if matched := matchingReference(candidate, replay, pack, response, locale, persona); matched != nil {
+						reference = matched
+						break
+					}
+				}
 				result.Inspections = append(result.Inspections, insightInspection{CueID: cue.ID, Source: source,
 					DeliveryMS: time.Since(start).Milliseconds(), RemoteOutcome: outcome, FactPack: pack,
 					Response: response, GatePassed: true, Safety: checkInjectedClaim(replay, pack, locale, persona),
-					Reference: matchingReference(reference, replay, pack, response, locale, persona)})
+					Reference: reference})
 			}
 		}
 		if len(packs) == 0 {
-			w.Header().Set("X-Pulse-Insight-Source", source)
+			feedSource = "go-template"
 		}
+		w.Header().Set("X-Pulse-Insight-Source", feedSource)
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-store")
 		if inspect {
@@ -119,12 +131,15 @@ func checkInjectedClaim(replay domain.Replay, pack domain.FactPack, locale, pers
 	}
 	_, fallbackErr := ai.Cue(replay, pack, template, locale, persona)
 	text := "The corner produced 2 shots."
+	if pack.Facts[0].Metric == "open_play_passes_before_shot" {
+		text = "There were 99 completed passes before the shot."
+	}
 	template.Draft.Text = text
 	template.Draft.Claims[0].Text = text
 	template.Verification.Status = "VERIFIED"
 	template.Verification.ClaimsChecked, template.Verification.ClaimsPassed = 1, 1
 	template.Verification.Claims = []domain.ClaimResult{{ClaimID: template.Draft.Claims[0].ID, Supported: true,
-		EventIDs: append([]string{}, template.Draft.Claims[0].EventIDs...), Reason: ai.PublicationReason}}
+		EventIDs: append([]string{}, template.Draft.Claims[0].EventIDs...), Reason: ai.PublicationReasonFor(pack)}}
 	_, rejected := ai.Cue(replay, pack, template, locale, persona)
 	return inspectionSafety{InjectedText: text, Rejected: rejected != nil, FallbackPassed: fallbackErr == nil}
 }
