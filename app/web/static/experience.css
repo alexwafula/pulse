@@ -506,3 +506,5 @@ html:has(body.experience) { color-scheme: light; background: #f2f3f5; }
   .experience .drawer-tab { flex: 1 1 auto; min-height: 44px; padding: 0 4px; font-size: 13px; }
 }
 @media (max-width: 374px) { .experience .drawer-tabs { flex-wrap: wrap; } }
+/* Story lists grow with the page, so no card is cut by a nested scroll box. */
+.experience[data-section=story] .story-log { max-height: none; overflow: visible; }
