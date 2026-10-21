@@ -407,3 +407,14 @@ The passing-node `aria-label` counts in the summary below come from the 2026-10-
 | `Central entry starting positions` | svg@aria-label |
 | `Corner chance starting positions` | svg@aria-label |
 | `Passing exchange starting positions` | svg@aria-label |
+
+## Pre-freeze polish: direction and kind casing (2026-10-20)
+
+No keys were added. Experience pages now show direction, outcome and Story event kinds in sentence case from existing keys:
+
+| Key | Change | Used by |
+|---|---|---|
+| `LEFT`, `RIGHT` | New en-GB values `left`/`right`; sw-KE `KUSHOTO`/`KULIA` lowercased to `kushoto`/`kulia` (casing only); hi-IN unchanged | Hero direction (`team.direction`) and the Pitch maps direction line. The pitch stamp upper-cases the value, so it reads as before; `/legacy` upper-cases it too and is unchanged |
+| `Pass`, `Carry`, `Shot`, `Cross`, `Corner`, `Clearance` | Unchanged; Story now uses them instead of the enum keys (`PASS` …) | Story event kinds, as in the Live timeline |
+| `complete`, `incomplete`, `blocked` | Unchanged; the Live selected action now uses them instead of `COMPLETE` … on experience pages | `#detail-description` |
+

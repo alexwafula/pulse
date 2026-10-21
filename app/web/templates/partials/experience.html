@@ -90,7 +90,7 @@
 <section class="experience-map" aria-label="Pitch map" data-analytics-team="{{.Analytics.Team.ID}}">{{template "state" (state "empty" "state.noneInSequence" "name" .Analytics.Team.Name)}}</section>
 {{else}}
 <section class="experience-map" aria-label="Pitch map" data-analytics-team="{{.Analytics.Team.ID}}">
-  <div class="section-heading"><h4>{{if eq .MapMode "shots"}}Shot locations{{else if eq .MapMode "network"}}Pass network{{else}}Tracking occupancy{{end}}</h4><span class="story-source">{{.Analytics.Team.AttackingDirection}} attack</span></div>
+  <div class="section-heading"><h4>{{if eq .MapMode "shots"}}Shot locations{{else if eq .MapMode "network"}}Pass network{{else}}Tracking occupancy{{end}}</h4><span class="story-source" data-i18n="team.direction" data-i18n-arg-team="{{.Analytics.Team.Name}}" data-i18n-term-direction="{{.Analytics.Team.AttackingDirection}}">{{.Analytics.Team.Name}} &bull; Attacking {{if eq .Analytics.Team.AttackingDirection "LEFT"}}left{{else}}right{{end}}</span></div>
   <p class="map-team">{{.Analytics.Team.Name}}</p>
   <div class="map-art" data-map-mode="{{.MapMode}}" data-team-index="{{.Analytics.TeamIndex}}"><svg viewBox="-2 -2 109 72" class="pitch-map" role="img" aria-label="{{.Analytics.Team.Name}} {{if eq .MapMode "shots"}}shot locations{{else if eq .MapMode "network"}}completed passing network{{else}}tracking occupancy heatmap{{end}} up to {{.Clock}}" data-map-team="{{.Analytics.Team.ID}}">
     {{template "mini-pitch"}}

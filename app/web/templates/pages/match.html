@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#090e0c">
   <title>Pulse | {{(index .Match.Teams 0).Name}} vs {{(index .Match.Teams 1).Name}}</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%232c5e77'/%3E%3Cpath d='M6 17h5l3-7 4 13 3-6h5' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/static/tokens.css">
   <link rel="stylesheet" href="/static/pitch.css">
   <link rel="stylesheet" href="/static/select2.css">
@@ -76,7 +77,6 @@
       </div>
       
       <span class="header-badge">Synthetic fixture</span>
-      {{if .Experience}}<div class="experience-mini-score" aria-label="Match clock"><span>{{index .TeamInitials 0}}</span><span aria-hidden="true">&middot;</span><span>{{index .TeamInitials 1}}</span><time id="experience-clock">{{.StartClock}}</time></div>{{end}}
     </div>
   </header>
   {{if .Experience}}
@@ -101,9 +101,9 @@
     <section class="match-hero" data-index="{{if .Hero.HasValue}}value{{else}}none{{end}}">
       <p class="hero-fixture"><span class="fixture-label">{{.ScenarioName}}</span></p>
       <div class="hero-teams">
-        <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}" data-team-kit="{{index .TeamKits 0}}"><span class="team-swatch home"></span><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 0).Name}}</span><span class="team-sub">{{(index .Match.Teams 0).Name}} &bull; Attacking {{(index .Match.Teams 0).AttackingDirection}}</span></span></div>
+        <div class="team-name home" data-team-id="{{(index .Match.Teams 0).ID}}" data-team-kit="{{index .TeamKits 0}}"><span class="team-swatch home"></span><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 0).Name}}</span><span class="team-sub">{{(index .Match.Teams 0).Name}} &bull; Attacking {{if eq (index .Match.Teams 0).AttackingDirection "LEFT"}}left{{else}}right{{end}}</span></span></div>
         <div class="hero-clock"><time id="match-clock" class="match-clock">{{.StartClock}}</time><span class="clock-period">{{if eq .Match.Period 2}}2nd Half{{else if eq .Match.Period 1}}1st Half{{else}}Extra Time{{end}}</span><span class="score-unavailable" aria-label="Score unavailable" title="Score is not recorded in this replay">Score unavailable</span></div>
-        <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}" data-team-kit="{{index .TeamKits 1}}"><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 1).Name}}</span><span class="team-sub">{{(index .Match.Teams 1).Name}} &bull; Attacking {{(index .Match.Teams 1).AttackingDirection}}</span></span><span class="team-swatch away"></span></div>
+        <div class="team-name away" data-team-id="{{(index .Match.Teams 1).ID}}" data-team-kit="{{index .TeamKits 1}}"><span class="team-meta"><span class="team-name-text">{{(index .Match.Teams 1).Name}}</span><span class="team-sub">{{(index .Match.Teams 1).Name}} &bull; Attacking {{if eq (index .Match.Teams 1).AttackingDirection "LEFT"}}left{{else}}right{{end}}</span></span><span class="team-swatch away"></span></div>
       </div>
       <!-- First paint: /api/metrics' own start tick, rendered by the server (index_headline.go). analytics.ts
            updates it for later ticks with the same rules (index-headline.ts). teams[0]'s indexDelta, API team order. -->
@@ -398,7 +398,7 @@
               <label id="story-player-label" class="experience-select" hidden>Player <select name="playerId" aria-label="Story player">{{range .Match.Players}}<option value="{{.ID}}"{{if eq .ID $.Focus.PlayerID}} selected{{end}}>#{{.Number}} {{.Name}}</option>{{end}}</select></label>
             </div>
             <div id="map-controls" class="experience-controls" hidden>
-              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-insight-view="comparison" aria-pressed="false"><i data-lucide="arrow-left-right"></i><span>What changed?</span></button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
+              <div class="insight-views" role="group" aria-label="Insight view"><button type="button" data-insight-view="charts" aria-pressed="true">Match graphs</button><button type="button" data-insight-view="maps" aria-pressed="false">Pitch maps</button><button type="button" data-insight-view="comparison" aria-pressed="false">What changed?</button><button type="button" data-analysis-pane="control" aria-pressed="false">Model &amp; moments</button><button type="button" data-analysis-pane="passing" aria-pressed="false">Passing detail</button><button type="button" data-analysis-pane="routes" aria-pressed="false">Routes</button></div>
               <label class="experience-select">Team <select name="teamId" aria-label="Map team">{{range .Match.Teams}}<option value="{{.ID}}"{{if eq .ID $.Focus.TeamID}} selected{{end}}>{{.Name}}</option>{{end}}</select></label>
               <div class="story-modes" role="group" aria-label="Pitch map">
                 <button type="button" data-map-mode="network" aria-pressed="false"><i data-lucide="network"></i><span>Pass network</span></button>

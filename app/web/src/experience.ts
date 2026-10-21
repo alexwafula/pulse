@@ -196,7 +196,6 @@ document.querySelector<HTMLButtonElement>("[data-open-charts]")!.addEventListene
 document.addEventListener("pulse:clock", (event) => {
   const clock = (event as CustomEvent<ClockEvent>).detail;
   atInput.value = String(clock.timeMs);
-  document.querySelector<HTMLElement>("#experience-clock")!.textContent = `${String(Math.floor(clock.timeMs / 60000)).padStart(2, "0")}:${String(Math.floor(clock.timeMs / 1000) % 60).padStart(2, "0")}`;
   if (panel.hidden) return;
   if (!clock.playing) refresh();
   else if (pendingRefresh === undefined) pendingRefresh = setTimeout(() => { pendingRefresh = undefined; refresh(); }, Math.max(0, 1000 - (performance.now() - lastRefresh)));
