@@ -1,0 +1,70 @@
+.experience .scenario-brief { margin: 0 0 12px; border: 1px solid #d8e1e8; border-radius: 14px; background: #fff; padding: 12px 16px; }
+.scenario-brief summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; cursor: pointer; font-size: 12px; min-height: 24px; }
+.scenario-brief summary::after { content: "+"; margin-left: auto; font-size: 20px; color: #2c5e77; }
+.scenario-brief[open] summary::after { content: "−"; }
+.scenario-brief summary > span:last-child { color: #5b6c7d; font-size: 11px; }
+.scenario-brief p { font-size: 13px; line-height: 1.6; margin: 10px 0 0; }
+.brief-tag, .scenario-story-tag { display: inline-block; border-radius: 6px; background: #e8f0f6; color: #28536c; padding: 4px 7px; font-size: 10px; font-weight: 700; letter-spacing: .03em; }
+.scenario-meta .scenario-context { color: #33475a; font-size: 13px; line-height: 1.55; margin-top: 12px; }
+.scenario-meta .scenario-watch { font-size: 12px; line-height: 1.55; border-top: 1px solid #dde6ec; padding-top: 10px; }
+.scenario-meta .scenario-watch strong { color: #2c5e77; }
+.experience .scenario-tile .scenario-meta { display: flex; flex-direction: column; align-items: flex-start; }
+.experience .scenario-tile .scenario-actions { margin-top: auto; padding-top: 12px; }
+.match-lab { margin: 14px 0; padding: 17px; border: 1px solid #d8e1e8; border-radius: 16px; background: #fff; }
+.lab-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.lab-kicker { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #536c80; font-weight: 750; }
+.lab-heading h2 { margin: 3px 0 12px; font-size: 19px; color: #1c2838; }
+.lab-source { font-size: 10px; color: #5b6c7d; }
+.window-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 14px; }
+.window-label { grid-column: 1 / -1; color: #617487; font-size: 11px; }
+.window-team { display: flex; flex-direction: column; gap: 5px; padding: 11px 12px; border-radius: 10px; background: #f2f6f9; font-size: 12px; }
+.window-team strong { color: #1c2838; font-weight: 700; }
+.window-team span { font-variant-numeric: tabular-nums; color: #456078; font-size: 11px; }
+.lab-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; border-top: 1px solid #e3eaf0; padding-top: 12px; font-size: 12px; }
+.spotlight-switch, .shot-switch { display: flex; align-items: center; gap: 5px; cursor: pointer; min-height: 44px; }
+.spotlight-picker { display: flex; gap: 8px; align-items: center; min-width: 0; flex: 1; max-width: 255px; }
+.spotlight-picker .select2-container { min-width: 120px; flex: 1; }
+.spotlight-detail { border-top: 1px solid #e3eaf0; margin-top: 12px; padding-top: 12px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.spotlight-detail[hidden], .shot-lens[hidden] { display: none; }
+.spotlight-detail strong { font-size: 15px; }
+.spotlight-detail p { font-size: 12px; color: #456078; margin: 6px 0; }
+.spotlight-detail small { color: #617487; font-size: 10px; }
+.spotlight-events { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.spotlight-events button { border: 1px solid #c5d5e2; background: #edf4f9; color: #2c5e77; border-radius: 7px; font-size: 11px; padding: 8px; min-height: 44px; }
+.shot-lens { display: grid; grid-template-columns: 1fr minmax(150px, .85fr); gap: 18px; border-top: 1px solid #e3eaf0; padding-top: 18px; margin-top: 14px; }
+.shot-lens h3 { font-size: 17px; margin: 6px 0 12px; }
+.shot-numbers { display: flex; gap: 20px; }
+.shot-numbers > span { display: flex; flex-direction: column; gap: 3px; }
+.shot-numbers strong { font-size: 26px; font-variant-numeric: tabular-nums; color: #1f526f; }
+.shot-numbers small, .shot-copy > small { display: block; color: #617487; font-size: 10px; line-height: 1.5; }
+.shot-copy p { font-size: 12px; color: #456078; }
+.shot-copy button { margin: 0 0 8px; min-height: 44px; }
+#shot-diagram { width: 100%; align-self: center; border-radius: 10px; }
+.shot-wedge { fill: rgb(250 199 70 / 25%); stroke: #ffdb78; stroke-width: .7; }
+#match-annotations .shot-wedge { stroke-width: 2; }
+.spotlight-trace { fill: none; stroke: #ffe18c; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.spotlight-ring { fill: none; stroke: #ffe18c; stroke-width: 4; }
+@media(max-width:560px) {
+ .match-lab { padding: 12px; } .lab-heading { align-items: flex-start; } .lab-source { max-width: 100px; line-height: 1.5; text-align: right; }
+ .lab-controls { gap: 8px 14px; } .spotlight-picker { max-width: none; } .shot-lens { grid-template-columns: 1fr; } .shot-numbers strong { font-size: 23px; }
+ .scenario-brief summary > span:last-child { flex-basis: 100%; } .scenario-brief summary::after { position: absolute; right: 26px; }
+}
+
+/* Keep the reading tools below the match controls in the mobile flow. */
+@media(max-width:600px) {
+ .experience .pitch-column > .section-heading, .experience .pitch-column > .pitch-overlay-tools { order: 0; }
+ .experience .lab-controls { display: grid; grid-template-columns: minmax(0,1fr) auto; }
+ .experience .lab-controls .spotlight-picker { grid-column: 1 / -1; grid-row: 2; max-width: none; width: 100%; }
+ .experience .lab-controls .spotlight-picker .select2-container { width: 100% !important; min-width: 0; }
+ .experience .lab-controls .shot-switch { grid-column: 2; grid-row: 1; }
+ .experience .lab-controls .spotlight-switch { grid-column: 1; grid-row: 1; }
+ .experience .scenario-brief summary { padding-right: 20px; position: relative; }
+ .experience .scenario-brief summary::after { right: 0; }
+}
+.experience .lab-controls input[type=checkbox] { width: 18px; height: 18px; flex: 0 0 18px; accent-color: #2c5e77; }
+.experience:not([data-section=live]) #match-lab, .experience:not([data-section=live]) #scenario-brief { display: none; }
+
+.shot-mini { position: absolute; top: 14px; left: 14px; max-width: calc(100% - 105px); padding: 10px 12px; border-radius: 8px; border-left: 3px solid #ffdc78; background: #122d26ed; color: #fff4ce; font-size: 12px; font-weight: 650; line-height: 1.5; pointer-events: none; z-index: 3; }
+.shot-mini[hidden] { display: none; }
+.experience:not([data-section=live]) .shot-mini { display: none; }
+@media(max-width:600px) { .shot-mini { top: 8px; left: 8px; padding: 6px 8px; font-size: 10px; } }

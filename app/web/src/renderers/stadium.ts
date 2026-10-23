@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createAnnotations } from "./annotations";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCharacterFactory, poseCharacter } from "./characters";
 import { kitColours, type CameraMode, type ControlField, type PitchRenderer, type RenderPlayer, type SceneState } from "./types";
@@ -12,8 +13,10 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   renderer.domElement.setAttribute("role","img");
   renderer.domElement.setAttribute("aria-label","Football stadium with articulated players and a textured ball");
   Object.assign(renderer.domElement.dataset, { presentation: "stadium", teamColours: kitColours(players) });
-  const camera = new THREE.PerspectiveCamera(34,1,.5,600);
-  const controls = new OrbitControls(camera,renderer.domElement);
+  const perspective = new THREE.PerspectiveCamera(34,1,.5,600);
+  const plan = new THREE.OrthographicCamera(-59,59,39,-39,.5,600);
+  let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera = perspective;
+  const controls = new OrbitControls<THREE.PerspectiveCamera | THREE.OrthographicCamera>(camera,renderer.domElement);
   controls.enableDamping = true; controls.enablePan = false;
   controls.minDistance = 18; controls.maxDistance = 190;
   controls.minPolarAngle = .15; controls.maxPolarAngle = Math.PI/2.15;
@@ -79,9 +82,9 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     const goalX = side*52.5;
     const postMat = material(0xffffff);
     for (const z of [-3.66,3.66]) {
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,2.44,10),postMat); post.position.set(goalX,1.22,z); scene.add(post);
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,2.44,10),postMat); post.position.set(goalX,1.22,z); scene.add(post);
     }
-    const bar = new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,7.32,10),postMat); bar.rotation.x = Math.PI/2; bar.position.set(goalX,2.44,0); scene.add(bar);
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,7.32,10),postMat); bar.rotation.x = Math.PI/2; bar.position.set(goalX,2.44,0); scene.add(bar);
     const net = new THREE.Mesh(new THREE.BoxGeometry(2.6,2.44,7.32,5,6,14),new THREE.MeshBasicMaterial({ color:0xffffff,wireframe:true,transparent:true,opacity:.3 }));
     net.position.set(goalX+side*1.3,1.22,0); scene.add(net);
     const penaltyX = side < 0 ? 11 : 94;
@@ -94,6 +97,9 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   const createCharacter = createCharacterFactory(textures);
   const sideColour = (home: boolean): string => players.find(player => player.home === home)?.colour || (home ? "#f47761" : "#48bed3");
   const controlColours = [sideColour(true), sideColour(false)];
+  const contactMaterial=new THREE.MeshBasicMaterial({color:0x102818,transparent:true,opacity:.22,depthWrite:false});
+  const contactGeometry=new THREE.CircleGeometry(.36,16);
+  const contacts=new Map(players.map(player=>{const shadow=new THREE.Mesh(contactGeometry,contactMaterial); shadow.rotation.x=-Math.PI/2; shadow.position.y=.015; scene.add(shadow); return [player.id,shadow];}));
   const characters = new Map(players.map(player => { const character = createCharacter(player); scene.add(character.root); return [player.id,character]; }));
   const ballCanvas = document.createElement("canvas"); ballCanvas.width = 256; ballCanvas.height = 128;
   const bc = ballCanvas.getContext("2d")!; bc.fillStyle = "#f5f5ef"; bc.fillRect(0,0,256,128);
@@ -102,9 +108,12 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     bc.beginPath(); for (let i=0;i<5;i++) { const a=i*Math.PI*2/5; const px=x+14*Math.cos(a), py=y+14*Math.sin(a); if (i===0) bc.moveTo(px,py); else bc.lineTo(px,py); } bc.closePath(); bc.fill();
   }
   const ballTexture = new THREE.CanvasTexture(ballCanvas); ballTexture.colorSpace = THREE.SRGBColorSpace; textures.push(ballTexture);
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(.42,24,18),new THREE.MeshStandardMaterial({ map:ballTexture,roughness:.55 })); ball.castShadow = true; scene.add(ball);
-  const ballShadow = new THREE.Mesh(new THREE.CircleGeometry(.65,24),new THREE.MeshBasicMaterial({ color:0x09180f,transparent:true,opacity:.3,depthWrite:false }));
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(.11,24,18),new THREE.MeshStandardMaterial({ map:ballTexture,roughness:.55 })); ball.castShadow = true; scene.add(ball);
+  const ballShadow = new THREE.Mesh(new THREE.CircleGeometry(.21,24),new THREE.MeshBasicMaterial({ color:0x09180f,transparent:true,opacity:.3,depthWrite:false }));
   ballShadow.rotation.x = -Math.PI/2; ballShadow.position.y = .025; scene.add(ballShadow);
+  // A restrained ground locator keeps a regulation-sized ball readable at broadcast distance.
+  const ballLocator = new THREE.Mesh(new THREE.RingGeometry(.28,.36,24),new THREE.MeshBasicMaterial({ color:0xfff3b0,transparent:true,opacity:.65,depthWrite:false,side:THREE.DoubleSide }));
+  ballLocator.rotation.x=-Math.PI/2; scene.add(ballLocator);
   const selectedRing = new THREE.Mesh(new THREE.RingGeometry(.9,1.08,36),new THREE.MeshBasicMaterial({ color:0xffe9a1,transparent:true,opacity:.9,depthWrite:false,side:THREE.DoubleSide }));
   selectedRing.rotation.x = -Math.PI/2; selectedRing.position.y = .07; selectedRing.visible = false; scene.add(selectedRing);
   const tag = document.createElement("div"); tag.className = "stadium-player-tag"; tag.hidden = true; tag.setAttribute("aria-hidden","true"); host.append(tag);
@@ -113,22 +122,44 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   let lastControl: ControlField | undefined;
   const pathGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]);
   const path = new THREE.Line(pathGeometry,new THREE.LineDashedMaterial({ color:0xffefb1,dashSize:1.2,gapSize:.7,transparent:true,opacity:.8 })); scene.add(path);
+  const updateAnnotations = createAnnotations(scene);
   let mode: CameraMode = "broadcast", state: SceneState | undefined, followCamera = true;
-  controls.addEventListener("start",() => { followCamera = false; });
+  controls.addEventListener("start",() => { followCamera = false; controls.enableDamping=true; });
 
   function frameCamera(): void {
     if (!followCamera) return;
-    const x = ball.position.x, z = ball.position.z;
-    if (mode === "tactical") { camera.position.set(0,130,40); controls.target.set(0,0,0); camera.fov = 44; }
-    else if (mode === "follow") { camera.position.set(x-6,14,z+29); controls.target.set(x,1,z); camera.fov = 42; }
-    else { camera.position.set(x*.8,36,78); controls.target.set(x*.8,0,z*.35); camera.fov = 34; }
-    // Narrow screens widen the view rather than cropping the action off screen.
-    if (camera.aspect < 1.5) camera.fov += 6;
+    camera=mode==="tactical"?plan:perspective;
+    controls.object=camera;
+    controls.minPolarAngle=mode==="tactical"?.001:.15;
+    const focus=state?.cameraFocus;
+    const x=(focus?.x??52.5)-52.5, z=34-(focus?.y??34);
+    if (mode === "tactical") {
+      // Near-plan view: complete team shape, with almost no perspective foreshortening.
+      camera.position.set(0,130,.01); controls.target.set(0,0,0);
+      const halfHeight=Math.max(39,59/Math.max(.4,perspective.aspect));
+      plan.top=halfHeight; plan.bottom=-halfHeight; plan.left=-halfHeight*perspective.aspect; plan.right=halfHeight*perspective.aspect;
+    } else if (mode === "follow") {
+      camera.position.set(x-3,15,z+23); controls.target.set(x,0,z-2); perspective.fov=50;
+    } else {
+      const spread=focus?.spread??27;
+      const targetX=Math.max(-37,Math.min(37,x*.86));
+      const targetZ=Math.max(-19,Math.min(19,z*.65));
+      camera.position.set(targetX*.96,25+spread*.24,targetZ+43);
+      controls.target.set(targetX,0,targetZ); perspective.fov=47;
+    }
+    if(mode!=="tactical" && perspective.aspect<1.3) perspective.fov+=10;
+    // Automatic cameras must land on exactly the same pose after pause/rewind.
+    controls.enableDamping=false;
     camera.updateProjectionMatrix(); controls.update();
+  }
+  function restoreAutomatic(): void {
+    // Consume manual damping before setting the exact replay-derived camera pose.
+    controls.enableDamping=false; controls.update();
+    followCamera=true; plan.zoom=1; perspective.zoom=1; frameCamera();
   }
   function resize(): void {
     const width = Math.max(1,host.clientWidth), height = Math.max(1,host.clientHeight);
-    renderer.setSize(width,height); camera.aspect = width/height; frameCamera(); camera.updateProjectionMatrix();
+    renderer.setSize(width,height); perspective.aspect = width/height; frameCamera(); camera.updateProjectionMatrix();
   }
   function positionTag(): void {
     const actor = state?.selectedPlayer ? characters.get(state.selectedPlayer) : undefined;
@@ -136,7 +167,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     selectedRing.visible = !!actor; tag.hidden = !actor;
     if (!actor || !player) return;
     selectedRing.position.set(actor.root.position.x,.07,actor.root.position.z);
-    const position = actor.root.position.clone(); position.y = 4.7; position.project(camera);
+    const position = actor.root.position.clone(); position.y = 2.5; position.project(camera);
     if (position.z < -1 || position.z > 1 || Math.abs(position.x) > 1 || Math.abs(position.y) > 1) { tag.hidden = true; return; }
     const width = host.clientWidth, height = host.clientHeight;
     const x = Math.max(64,Math.min(width-64,(position.x+1)/2*width));
@@ -148,13 +179,18 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   return {
     update(next) {
       state = next;
+      updateAnnotations(next);
       for (const [id,point] of next.players) {
         const character = characters.get(id); if (!character) continue;
         character.root.position.set(point.x-52.5,0,34-point.y);
-        poseCharacter(character,next.timeMs ?? 0,next.velocities?.get(id) ?? { x:0,y:0 },{ x:next.ball.x-point.x,y:next.ball.y-point.y });
+        contacts.get(id)?.position.set(point.x-52.5,.015,34-point.y);
+        poseCharacter(character,next.timeMs ?? 0,next.velocities?.get(id) ?? { x:0,y:0 },{ x:next.ball.x-point.x,y:next.ball.y-point.y },next.motion?.get(id));
       }
-      ball.position.set(next.ball.x-52.5,.42+(next.ball.z ?? 0),34-next.ball.y);
-      ball.rotation.set((34-next.ball.y)/.42,0,-(next.ball.x-52.5)/.42);
+      ball.position.set(next.ball.x-52.5,.11+(next.ball.z ?? 0),34-next.ball.y);
+      ball.rotation.set((34-next.ball.y)/.11,0,-(next.ball.x-52.5)/.11);
+      ballLocator.position.set(ball.position.x,.03,ball.position.z);
+      ballLocator.visible=(next.ball.z??0)<.5;
+      ballShadow.material.opacity=.3/(1+(next.ball.z??0)*.4);
       ballShadow.position.set(ball.position.x,.025,ball.position.z);
       ballShadow.scale.setScalar(1+(next.ball.z ?? 0)*.1);
       if (next.control !== lastControl) {
@@ -179,10 +215,13 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
         vertices.needsUpdate = true; pathGeometry.computeBoundingSphere(); path.computeLineDistances();
       }
       frameCamera(); positionTag();
+      renderer.domElement.dataset.cameraMode=mode;
+      renderer.domElement.dataset.ballScreen=JSON.stringify(ball.position.clone().project(camera).toArray());
+      renderer.domElement.dataset.cameraPose=JSON.stringify([...camera.position.toArray(),...controls.target.toArray(),mode==="tactical"?plan.top:perspective.fov]);
     },
     draw() { const moving = controls.update(); positionTag(); renderer.render(scene,camera); return moving; },
-    resetCamera() { followCamera = true; frameCamera(); },
-    setCamera(value) { mode = value; followCamera = true; frameCamera(); },
+    resetCamera() { restoreAutomatic(); },
+    setCamera(value) { mode = value; restoreAutomatic(); },
     destroy() {
       observer.disconnect(); controls.dispose(); tag.remove();
       const geometry = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>();

@@ -20,6 +20,7 @@ type pageData struct {
 	Recap        []recapItem
 	Scenario     string
 	ScenarioName string
+	Brief        scenarioBrief
 	TeamInitials []string
 	TeamKits     []string
 	Hero         heroView
@@ -88,10 +89,12 @@ func scenarioHandler(scenario string, replay domain.Replay, webDir, agentsURL st
 		}
 	}
 	view := replayPage(replay, graphs, attacks, scenario)
+	view.Brief = briefingFor(scenario)
 	view.catalog = catalog
 	view.Story = storyPanel(replay, view, "story", replay.Match.StartMS, experienceOptions{mode: "live", persona: "CASUAL"})
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/api/match-details", matchDetailsHandler(replay))
 	mux.HandleFunc("/api/metrics", tracking.serveMetrics)
 	mux.HandleFunc("/api/moments", tracking.serveMoments)
 	mux.HandleFunc("/experience/panel", experiencePanelHandler(page, replay, view))

@@ -17,10 +17,10 @@ try {
   await page.goto(`${base}/?scenario=corner&view=svg`,{waitUntil:"networkidle"});
   await page.locator("#scenario-library-open").click();
   await page.waitForSelector(".scenario-tile");
-  assert.equal(await page.locator(".scenario-tile").count(),5);
+  assert.equal(await page.locator(".scenario-tile").count(),6);
   assert.equal(await page.locator("#play-button").getAttribute("aria-label"),"Play","Opening library pauses replay");
   assert.equal(await page.locator('.scenario-tile[aria-current="true"]').getAttribute("data-scenario-id"),"corner");
-  for(const id of ["corner","central","exchange","late-siege","calm-midfield"]) {
+  for(const id of ["corner","central","exchange","late-siege","calm-midfield","end-to-end"]) {
    const replay=await (await page.request.get(`${base}/api/replay?scenario=${id}`)).json();
    const tile=page.locator(`[data-scenario-id="${id}"]`);
    assert.equal(Number(await tile.getAttribute("data-player-count")),replay.match.players.length);
@@ -28,7 +28,7 @@ try {
    assert.equal(await tile.locator("circle").count(),replay.tracking[0].players.length+2,"Recorded players, ball and centre circle");
   }
   await page.locator('[data-scenario-filter="full"]').click();
-  assert.equal(await page.locator(".scenario-tile:visible").count(),2);
+  assert.equal(await page.locator(".scenario-tile:visible").count(),3);
   await page.locator('[data-scenario-filter="short"]').click();
   assert.equal(await page.locator(".scenario-tile:visible").count(),3);
   await page.locator("#scenario-search").fill("nonsense");

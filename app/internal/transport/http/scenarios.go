@@ -16,13 +16,14 @@ type scenarioPlayer struct {
 
 type scenarioPreview struct {
 	ID, Name, Home, Away, Duration, Window, Kind string
+	Brief                                        scenarioBrief
 	Players, Events, Frames                      int
 	Positions                                    []scenarioPlayer
 	BallX, BallY                                 float64
 }
 
 func scenarioName(id string) string {
-	names := map[string]string{"corner": "Corner chance", "central": "Central entry", "exchange": "Passing exchange", "late-siege": "Late siege", "calm-midfield": "Calm midfield"}
+	names := map[string]string{"corner": "Corner chance", "central": "Central entry", "exchange": "Passing exchange", "late-siege": "Late siege", "calm-midfield": "Calm midfield", "end-to-end": "End to end"}
 	if name := names[id]; name != "" {
 		return name
 	}
@@ -36,6 +37,7 @@ func scenarioPreviews(catalog map[string]domain.Replay) []scenarioPreview {
 		view := scenarioPreview{ID: id, Name: scenarioName(id), Home: match.Teams[0].Name, Away: match.Teams[1].Name,
 			Duration: clockText(match.EndMS - match.StartMS), Window: clockText(match.StartMS) + " - " + clockText(match.EndMS),
 			Players: len(match.Players), Events: len(replay.Events), Frames: len(replay.Tracking), Kind: "short"}
+		view.Brief = briefingFor(id)
 		colours := make(map[string]string, len(match.Players))
 		counts := make(map[string]int)
 		for _, player := range match.Players {
@@ -58,6 +60,9 @@ func scenarioPreviews(catalog map[string]domain.Replay) []scenarioPreview {
 	sort.Slice(views, func(i, j int) bool {
 		if (views[i].ID == "late-siege") != (views[j].ID == "late-siege") {
 			return views[i].ID == "late-siege"
+		}
+		if (views[i].ID == "end-to-end") != (views[j].ID == "end-to-end") {
+			return views[i].ID == "end-to-end"
 		}
 		return views[i].Name < views[j].Name
 	})

@@ -1,3 +1,10 @@
+> Oct 23 local review exception: Alex approved a separate-branch scenario/UI
+> improvement pass: briefings, one two-sided replay, shot geometry, contextual
+> stats and presentation-only Player Spotlight. The same branch now includes the
+> approved pitch animation/camera follow-up (ADR 0035). ADR 0034 records scenario scope. Publishing
+> and deployment remain pending Alex's local review; this does not complete any
+> parked agent, Speech, streaming or Play Fingerprint milestone.
+
 # PHASES.md
 
 Delivery plan for Pulse, for a ~~**team of two**~~ **team of three registered members: Jefferson, Alex and Ved** (updated Oct 19). Ved made the Matchlens prototype that is the design basis for the UI (ADR 0015). Read `AGENTS.md` first for rules and the repo map. Dates are Africa/Nairobi (EAT). Tick boxes as work completes, and record changes of plan at the bottom.

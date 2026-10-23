@@ -1,0 +1,247 @@
+{
+  "schemaVersion": "2.0.0",
+  "name": "end-to-end",
+  "matchId": "match-vale-bastion-end-to-end",
+  "seed": 23,
+  "period": 2,
+  "startMs": 4020000,
+  "endMs": 4110000,
+  "pitch": {
+    "lengthM": 105,
+    "widthM": 68
+  },
+  "squadPath": "data/squads/fictional-league.json",
+  "shapeModel": "balanced-v1",
+  "teams": [
+    {
+      "id": "vale",
+      "name": "Aurora Vale",
+      "attackingDirection": "RIGHT",
+      "formation": "4-4-2"
+    },
+    {
+      "id": "bastion",
+      "name": "Bastion City",
+      "attackingDirection": "LEFT",
+      "formation": "4-4-2"
+    }
+  ],
+  "beats": [
+    {
+      "id": "flow-01",
+      "kind": "PASS",
+      "phaseId": "vale-build",
+      "actorId": "vale-4",
+      "target": {
+        "x": 45,
+        "y": 38
+      },
+      "holdTimeMs": 3500,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-7",
+      "from": {
+        "x": 34,
+        "y": 27
+      }
+    },
+    {
+      "id": "flow-02",
+      "kind": "CARRY",
+      "phaseId": "vale-build",
+      "actorId": "vale-7",
+      "target": {
+        "x": 51,
+        "y": 37
+      },
+      "holdTimeMs": 1700,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-03",
+      "kind": "PASS",
+      "phaseId": "vale-build",
+      "actorId": "vale-7",
+      "target": {
+        "x": 60,
+        "y": 52
+      },
+      "holdTimeMs": 2500,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-6"
+    },
+    {
+      "id": "flow-04",
+      "kind": "PASS",
+      "phaseId": "vale-build",
+      "actorId": "vale-6",
+      "target": {
+        "x": 64,
+        "y": 39
+      },
+      "holdTimeMs": 2500,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-8"
+    },
+    {
+      "id": "flow-05",
+      "kind": "PASS",
+      "phaseId": "vale-build",
+      "actorId": "vale-8",
+      "target": {
+        "x": 61,
+        "y": 32
+      },
+      "holdTimeMs": 1700,
+      "outcome": "INCOMPLETE"
+    },
+    {
+      "id": "flow-06",
+      "kind": "CARRY",
+      "phaseId": "bastion-break",
+      "actorId": "bastion-8",
+      "target": {
+        "x": 54,
+        "y": 30
+      },
+      "holdTimeMs": 3000,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-07",
+      "kind": "PASS",
+      "phaseId": "bastion-break",
+      "actorId": "bastion-8",
+      "target": {
+        "x": 42,
+        "y": 14
+      },
+      "holdTimeMs": 4000,
+      "outcome": "COMPLETE",
+      "recipientId": "bastion-6"
+    },
+    {
+      "id": "flow-08",
+      "kind": "CARRY",
+      "phaseId": "bastion-break",
+      "actorId": "bastion-6",
+      "target": {
+        "x": 33,
+        "y": 18
+      },
+      "holdTimeMs": 1600,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-09",
+      "kind": "PASS",
+      "phaseId": "bastion-break",
+      "actorId": "bastion-6",
+      "target": {
+        "x": 24,
+        "y": 31
+      },
+      "holdTimeMs": 3000,
+      "outcome": "COMPLETE",
+      "recipientId": "bastion-10"
+    },
+    {
+      "id": "flow-10",
+      "kind": "SHOT",
+      "phaseId": "bastion-break",
+      "actorId": "bastion-10",
+      "target": {
+        "x": 10,
+        "y": 33
+      },
+      "holdTimeMs": 4500,
+      "outcome": "BLOCKED"
+    },
+    {
+      "id": "flow-11",
+      "kind": "CLEARANCE",
+      "phaseId": "vale-response",
+      "actorId": "vale-1",
+      "target": {
+        "x": 32,
+        "y": 46
+      },
+      "holdTimeMs": 4500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-12",
+      "kind": "PASS",
+      "phaseId": "vale-response",
+      "actorId": "vale-2",
+      "target": {
+        "x": 43,
+        "y": 48
+      },
+      "holdTimeMs": 6000,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-7"
+    },
+    {
+      "id": "flow-13",
+      "kind": "CARRY",
+      "phaseId": "vale-response",
+      "actorId": "vale-7",
+      "target": {
+        "x": 51,
+        "y": 43
+      },
+      "holdTimeMs": 1500,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-14",
+      "kind": "PASS",
+      "phaseId": "vale-response",
+      "actorId": "vale-7",
+      "target": {
+        "x": 66,
+        "y": 20
+      },
+      "holdTimeMs": 5000,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-9"
+    },
+    {
+      "id": "flow-15",
+      "kind": "CARRY",
+      "phaseId": "vale-response",
+      "actorId": "vale-9",
+      "target": {
+        "x": 77,
+        "y": 18
+      },
+      "holdTimeMs": 2000,
+      "outcome": "COMPLETE"
+    },
+    {
+      "id": "flow-16",
+      "kind": "PASS",
+      "phaseId": "vale-response",
+      "actorId": "vale-9",
+      "target": {
+        "x": 89,
+        "y": 30
+      },
+      "holdTimeMs": 4000,
+      "outcome": "COMPLETE",
+      "recipientId": "vale-11"
+    },
+    {
+      "id": "flow-17",
+      "kind": "SHOT",
+      "phaseId": "vale-response",
+      "actorId": "vale-11",
+      "target": {
+        "x": 102,
+        "y": 37
+      },
+      "holdTimeMs": 4500,
+      "outcome": "INCOMPLETE"
+    }
+  ]
+}
