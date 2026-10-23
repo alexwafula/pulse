@@ -17,7 +17,7 @@ func NewDemoHandler(base domain.Replay, webDir, agentsURL string) (http.Handler,
 	if err != nil {
 		return nil, err
 	}
-	for _, name := range []string{"late-siege", "calm-midfield"} {
+	for _, name := range []string{"late-siege", "calm-midfield", "end-to-end"} {
 		for _, dir := range []string{"data/scenarios", "../../../../data/scenarios", "../../../data/scenarios", "../../data/scenarios"} {
 			if replay, err := simulator.Load(dir + "/" + name + ".json"); err == nil {
 				catalog[name] = replay

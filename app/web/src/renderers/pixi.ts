@@ -31,6 +31,8 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
   world.addChild(lines);
   const path = new Graphics();
   world.addChild(path);
+  const annotations = new Graphics();
+  world.addChild(annotations);
   const tokens = new Map<string, Container>();
   const sideColour = (home: boolean): string | number => players.find((player) => player.home === home)?.colour || (home ? 0xf47761 : 0x48bed3);
   const controlColours = stadium ? [sideColour(true), sideColour(false)] : [0xf47761, 0x48bed3];
@@ -79,6 +81,14 @@ export async function createPixi(host: HTMLElement, players: RenderPlayer[]): Pr
       }
       for (const [id, point] of state.players) tokens.get(id)?.position.set(point.x, 68 - point.y);
       ball.position.set(state.ball.x, 68 - state.ball.y);
+      annotations.clear();
+      if (state.shot) annotations.poly([state.shot.from,...state.shot.posts].flatMap(p=>[p.x,68-p.y])).fill({color:0xffd76b,alpha:.18}).stroke({color:0xffde83,width:.25});
+      if (state.trail?.length) {
+        state.trail.forEach((p,i)=>{if(i===0) annotations.moveTo(p.x,68-p.y);else annotations.lineTo(p.x,68-p.y);});
+        annotations.stroke({color:0xffde83,width:.5});
+        const point=state.selectedPlayer && state.players.get(state.selectedPlayer);
+        if(point) annotations.circle(point.x,68-point.y,2.4).stroke({color:0xffde83,width:.45});
+      }
       path.clear();
       if (state.path) {
         const a = state.path.from, b = state.path.to;

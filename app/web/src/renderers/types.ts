@@ -15,6 +15,8 @@ export type SceneState = {
   control?: ControlField;
   selectedPlayer?: string;
   timeMs?: number;
+  trail?: Position[];
+  shot?: { from: Position; posts: [Position, Position] };
   velocities?: Map<string, { x: number; y: number }>;
 };
 export interface PitchRenderer {

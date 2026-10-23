@@ -361,3 +361,22 @@ node tests/integration/analytics-browser.mjs
 The browser bundles and fonts include third-party software. Names, versions,
 licences and upstream links are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 The font licence files are in [app/web/static/fonts](app/web/static/fonts).
+
+## Scenario and broadcast review
+
+The local scenario/broadcast feature adds **End to end**, a fictional 90-second
+11v11 passage with actions and shot attempts from both sides. Open
+`/?scenario=end-to-end` after local startup. The original five fixtures remain
+available. Expand **Match briefing**, play at 1x, then use **Read the game** below
+the pitch for a trailing-20-second comparison, Player Spotlight and Shot lens.
+Shot lens shows geometry and the recorded outcome; it does not estimate goal
+probability. Spotlight highlights the chosen player with an eight-second movement
+trail and source-event links. Pause, seeking and the evidence return control all
+use the existing replay clock. See ADR 0034 for calculation/translation limits.
+
+Focused browser check against the running local server:
+
+```powershell
+$env:PULSE_URL = 'http://127.0.0.1:8180'
+node tests/integration/match-lab-browser.mjs
+```

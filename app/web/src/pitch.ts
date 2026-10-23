@@ -12,6 +12,7 @@ import { setBadge } from "./status-badge";
 import { mountLowerThird } from "./lower-third";
 import { actionPlaybackRange, advancePlayback, evidencePlaybackRange, trackingFrameIndex, type PlaybackRange } from "./playback";
 import { evidenceURL, readEvidenceLink, replayKey, type EvidenceLink, type LinkSelection } from "./evidence-link";
+import { createMatchLab, type MatchDetails } from "./match-lab";
 import { createPresentation } from "./broadcast";
 
 const scrollBehavior = (): ScrollBehavior => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
@@ -333,7 +334,8 @@ async function switchView(view: string): Promise<void> {
 
 let replay: Replay;
 let clock = 0;
-let speed = 4;
+let speed = document.body.classList.contains("experience") ? 1 : 4;
+let matchLab: ReturnType<typeof createMatchLab>;
 let playing = false;
 let previousFrameTime = 0;
 let frame = 0;
@@ -609,7 +611,7 @@ function renderEvent(): void {
       eventStart.setAttribute("cx", String(from.x));
       eventStart.setAttribute("cy", String(from.y));
     } else {
-      currentAction.textContent = t("event.building", {team:replay.match.teams[0].name});
+      currentAction.textContent = t("event.building", {team:teamName(replay.events[0].teamId)});
       detailTitle.textContent = "Awaiting first action";
       detailDescription.textContent = t("event.start", {clock:matchTime(replay.match.startMs)});
     }
@@ -652,6 +654,7 @@ function renderPlaybackStatus(): void {
 function render(): void {
   renderPositions();
   renderEvent();
+  matchLab?.update(clock, sceneState, inspectedAction?.id);
   renderInsight();
   const cue = evidenceCue ?? [...cues].reverse().find(item => clock >= item.startMs && clock <= item.endMs);
   sceneState.control = analytics?.render(clock, cue, momentClip, evidenceCue !== undefined || momentClip !== undefined);
@@ -882,6 +885,13 @@ async function start(): Promise<void> {
     }
     createPlayers();
     createTimeline();
+    if (document.querySelector("#match-lab")) {
+      void fetch(`/api/match-details?${scenarioQuery()}`, {cache:"no-store"}).then(async response=>{
+        if(!response.ok) throw new Error("Match details unavailable");
+        const details=await response.json() as MatchDetails;
+        matchLab=createMatchLab(replay,details,render,id=>inspectAt(NaN,id));render();
+      }).catch(()=>{ const status=document.querySelector("#window-stats");if(status) status.textContent=t("Match details unavailable"); });
+    }
     document.addEventListener("pulse:replay-window", event => {
       const detail = (event as CustomEvent<{startMs:number;endMs:number}>).detail;
       if (!detail || !Number.isSafeInteger(detail.startMs) || !Number.isSafeInteger(detail.endMs) || detail.startMs < replay.match.startMs || detail.endMs > clock || detail.endMs <= detail.startMs) return;

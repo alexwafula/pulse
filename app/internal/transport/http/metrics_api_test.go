@@ -33,7 +33,7 @@ func apiScenarios(t *testing.T) (http.Handler, map[string]domain.Replay) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"late-siege", "calm-midfield"} {
+	for _, name := range []string{"late-siege", "calm-midfield", "end-to-end"} {
 		r, err := simulator.Load(filepath.Join("..", "..", "..", "..", "data", "scenarios", name+".json"))
 		if err != nil {
 			t.Fatal(err)

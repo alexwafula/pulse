@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { createAnnotations } from "./annotations";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCharacterFactory, poseCharacter } from "./characters";
 import { kitColours, type CameraMode, type ControlField, type PitchRenderer, type RenderPlayer, type SceneState } from "./types";
@@ -113,6 +114,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   let lastControl: ControlField | undefined;
   const pathGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]);
   const path = new THREE.Line(pathGeometry,new THREE.LineDashedMaterial({ color:0xffefb1,dashSize:1.2,gapSize:.7,transparent:true,opacity:.8 })); scene.add(path);
+  const updateAnnotations = createAnnotations(scene);
   let mode: CameraMode = "broadcast", state: SceneState | undefined, followCamera = true;
   controls.addEventListener("start",() => { followCamera = false; });
 
@@ -121,7 +123,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     const x = ball.position.x, z = ball.position.z;
     if (mode === "tactical") { camera.position.set(0,130,40); controls.target.set(0,0,0); camera.fov = 44; }
     else if (mode === "follow") { camera.position.set(x-6,14,z+29); controls.target.set(x,1,z); camera.fov = 42; }
-    else { camera.position.set(x*.8,36,78); controls.target.set(x*.8,0,z*.35); camera.fov = 34; }
+    else { camera.position.set(0,72,88); controls.target.set(0,0,0); camera.fov = Math.max(44, 2*Math.atan(62/(114*Math.max(.4,camera.aspect)))*180/Math.PI); }
     // Narrow screens widen the view rather than cropping the action off screen.
     if (camera.aspect < 1.5) camera.fov += 6;
     camera.updateProjectionMatrix(); controls.update();
@@ -148,6 +150,7 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
   return {
     update(next) {
       state = next;
+      updateAnnotations(next);
       for (const [id,point] of next.players) {
         const character = characters.get(id); if (!character) continue;
         character.root.position.set(point.x-52.5,0,34-point.y);

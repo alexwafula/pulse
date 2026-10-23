@@ -26,6 +26,8 @@ type Script struct {
 	// Expect narrows data-quality rules for this script only. Absent fields
 	// keep the default rule.
 	Expect *Expectations `json:"expect,omitempty"`
+	// ShapeModel is opt-in: existing fixtures retain their original movement.
+	ShapeModel string `json:"shapeModel,omitempty"`
 }
 
 // Expectations are per-script data-quality expectations read by checkdata.
