@@ -1,6 +1,7 @@
 > Oct 23 local review exception: Alex approved a separate-branch scenario/UI
 > improvement pass: briefings, one two-sided replay, shot geometry, contextual
-> stats and presentation-only Player Spotlight. ADR 0034 records scope. Publishing
+> stats and presentation-only Player Spotlight. The same branch now includes the
+> approved pitch animation/camera follow-up (ADR 0035). ADR 0034 records scenario scope. Publishing
 > and deployment remain pending Alex's local review; this does not complete any
 > parked agent, Speech, streaming or Play Fingerprint milestone.
 

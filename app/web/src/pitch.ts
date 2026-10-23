@@ -12,6 +12,7 @@ import { setBadge } from "./status-badge";
 import { mountLowerThird } from "./lower-third";
 import { actionPlaybackRange, advancePlayback, evidencePlaybackRange, trackingFrameIndex, type PlaybackRange } from "./playback";
 import { evidenceURL, readEvidenceLink, replayKey, type EvidenceLink, type LinkSelection } from "./evidence-link";
+import { createReplayMotion } from "./replay-motion";
 import { createMatchLab, type MatchDetails } from "./match-lab";
 import { createPresentation } from "./broadcast";
 
@@ -352,7 +353,7 @@ const attackClock = required<HTMLElement>("#attack-clock");
 let activeAttackSnapshot: HTMLElement | undefined;
 // Only /legacy has the drawer Recap pane; experience pages show Recap in its sidebar section.
 const recapPanel = document.querySelector<HTMLElement>("#recap-panel");
-const framePlayers = new Map<number, Map<string, TrackedPlayer>>();
+let replayMotion: ReturnType<typeof createReplayMotion>;
 let publishedClock = "";
 const presentation=createPresentation(render);
 let presentationSpeed:number|undefined;
@@ -555,19 +556,21 @@ function renderPositions(): void {
   const second = frames[Math.min(index + 1, frames.length - 1)];
   const duration = second.timeMs - first.timeMs;
   const fraction = duration > 0 ? (clock - first.timeMs) / duration : 0;
-  const nextPlayers = framePlayers.get(second.timeMs)!;
+  sceneState.motion ??= new Map();
+  sceneState.cameraFocus = replayMotion.camera(index, clock);
   sceneState.players.clear();
   sceneState.velocities?.clear();
   sceneState.timeMs = clock;
 
   for (const tracked of first.players) {
-    const next = nextPlayers.get(tracked.playerId) ?? tracked;
-    const position = {
-      x: interpolate(tracked.x, next.x, fraction),
-      y: interpolate(tracked.y, next.y, fraction),
+    const smooth = replayMotion.sample(tracked.playerId, index, clock);
+    const position = document.body.classList.contains("experience") ? { x:smooth.x, y:smooth.y } : {
+      x:interpolate(tracked.x,second.players.find(p=>p.playerId===tracked.playerId)!.x,fraction),
+      y:interpolate(tracked.y,second.players.find(p=>p.playerId===tracked.playerId)!.y,fraction),
     };
     sceneState.players.set(tracked.playerId, position);
-    sceneState.velocities?.set(tracked.playerId, { x: duration > 0 ? (next.x - tracked.x) * 1000 / duration : 0, y: duration > 0 ? (next.y - tracked.y) * 1000 / duration : 0 });
+    sceneState.velocities?.set(tracked.playerId, { x:smooth.vx, y:smooth.vy });
+    sceneState.motion.set(tracked.playerId, replayMotion.pose(tracked.playerId,index,clock));
     const point = pitchPoint(position);
     playerElements.get(tracked.playerId)?.setAttribute("transform", `translate(${point.x} ${point.y})`);
   }
@@ -865,9 +868,7 @@ async function start(): Promise<void> {
     if (replay.schemaVersion !== "2.0.0" || replay.tracking.length < 2) {
       throw new Error("Unsupported replay data");
     }
-    for (const frame of replay.tracking) {
-      framePlayers.set(frame.timeMs, new Map(frame.players.map((player) => [player.playerId, player])));
-    }
+    replayMotion = createReplayMotion(replay);
     const finalAction = replay.events[replay.events.length - 1];
     finalActionRange = finalAction ? actionPlaybackRange(replay, finalAction) : undefined;
     clock = replay.match.startMs;

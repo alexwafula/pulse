@@ -153,6 +153,12 @@ adds a sixth 11v11 two-sided replay with opt-in generator movement, scenario
 briefings, a Go-owned match-details presentation API, shot geometry and Player
 Spotlight. It preserves all five old fixtures and the shared contracts/gate.
 It is not published or deployed. New scenario copy/translation scope is in ADR 0034.
+The same branch adds deterministic bounded player interpolation, distance-driven
+foot targets and recorded-action poses, plus automatic Broadcast/Follow composition
+and orthographic Tactical framing (ADR 0035). These are presentation only; source
+positions, scenario generation, metrics and evidence clocks are unchanged.
+Run the scripts in `tests/integration/`: `replay-motion.mjs`,
+`character-poses.mjs` and `motion-browser.mjs` (browser checks need a local server).
 
 ```
 Generator/replayer (Go) -> Event Hubs -> Match engine (Go, Container Apps) <-MCP-> Agent service (Python)

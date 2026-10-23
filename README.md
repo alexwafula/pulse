@@ -380,3 +380,19 @@ Focused browser check against the running local server:
 $env:PULSE_URL = 'http://127.0.0.1:8180'
 node tests/integration/match-lab-browser.mjs
 ```
+
+
+The same review branch also improves 3D pitch movement and cameras (ADR 0035).
+Use **Broadcast** for a moving view of the play, **Tactical** for an orthographic
+team-shape overview, or **Follow ball** for a closer angle. Drag to orbit manually;
+the camera reset restores automatic framing. Player poses use source travel and
+recorded kick/first-touch cues. The avatars remain procedural and the scripted
+football routes are unchanged.
+
+Motion validation:
+
+```powershell
+node tests/integration/replay-motion.mjs
+node tests/integration/character-poses.mjs
+node tests/integration/motion-browser.mjs
+```

@@ -19,8 +19,8 @@ Alex's review of the local preview.
   apply. Old scripts default to their original movement; their fixtures are
   unchanged. Reserved lineHeightM/compactness settings remain reserved.
 - Main experience starts at 1x. Guided demo pacing and /legacy remain unchanged.
-  Broadcast camera offers a stable full-pitch overview; follow/manual cameras
-  remain available.
+  The initial Broadcast overview is superseded by the approved animation/camera
+  follow-up in ADR 0035; Tactical retains the complete-pitch overview.
 - `/api/match-details?scenario=...` is presentation data calculated in Go:
   shot distance to the opposing goal centre, angle between nominal 7.32 m
   goalposts, inclusive trailing-20-second team counts, and cumulative player

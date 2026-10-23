@@ -8,7 +8,10 @@ export const kitColours = (players: RenderPlayer[]): string =>
   [...new Map(players.map((player) => [player.teamId, player.colour]))].map(([id, colour]) => `${id}:${colour}`).join(" ");
 export type ControlField = { cols: number; rows: number; values: number[]; homeTeamGrid: boolean };
 export type CameraMode = "broadcast" | "tactical" | "follow";
+export type PlayerMotion = { distance: number; gait?: number; heading: number; turn: number; action?: { kind: "kick" | "receive"; phase: number; strength: number; heading: number } };
 export type SceneState = {
+  motion?: Map<string, PlayerMotion>;
+  cameraFocus?: Position & { spread: number };
   players: Map<string, Position>;
   ball: Position;
   path?: { from: Position; to: Position };
