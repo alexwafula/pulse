@@ -1,10 +1,11 @@
 # 0035: Replay footwork and camera composition
 
-Status: Local review on feat/scenario-broadcast-experience; not published.
+Status: Reviewed locally; approved for merge to main. Azure rollout follows main CI.
 Date: 2026-10-23
 
 Alex approved implementation after the pitch realism research and explicitly
-requested the existing scenario branch. This extends the local freeze exception.
+requested the existing scenario branch. On 2026-10-26 Alex reviewed the local
+camera and pass-stat follow-up and requested merging PR #49 to build the demo.
 
 ## Decision
 
@@ -61,6 +62,34 @@ match-lab, analytics and render-loop browser suites. The render-loop check measu
 zero paused/hidden draws and 73 3D frames during its 1.5-second active sample on
 this Windows machine. This short sample is not a hardware-independent benchmark.
 Recorded agent mode was verified; no paid calls or cloud deployment were used.
+
+## Motion follow-up (2026-10-26)
+
+Keep the same source-driven model while giving the procedural actors more visible
+weight and response. The replay cache now exposes analytic acceleration from the
+existing Hermite paths; the body uses it for bounded forward lean and lateral
+balance. Replay-clock breathing, low-amplitude idle sway, step bounce, arm flex
+and toe-off add life without changing a player's tracked root position. Kick
+poses select a foot from the ball's side when the source direction supports it,
+and the extension peaks at the recorded event timestamp. The recording, event
+data, scenario routes and metrics remain unchanged.
+
+For the motion follow-up, `npm run check:web` and `npm run build:web` passed.
+
+## Broadcast framing follow-up (2026-10-26)
+
+Comparison with the live 3D view showed that the local Broadcast camera held too
+much field around the active play. Keep the same replay-derived focus, but bring
+the camera closer and lower it, with a modest lengthwise angle. Track the focus
+across the pitch width at 84% with a 25 m clamp. Map the existing smoothed spread
+estimate to a 33.5-36.5 m field offset and 22-24.5 m height, and use a 45-degree
+lens. This is about 16% closer at the busiest reference moment; the framing eases
+wider as more players gather. Follow and Tactical keep their current camera poses.
+
+`npm run check:web` and `npm run build:web` passed after this camera adjustment.
+The local preview was reviewed. The browser sweep keeps the ball in frame at 21
+points in all six scenarios at desktop and mobile widths; the main release remains
+pending.
 
 
 ## Research references

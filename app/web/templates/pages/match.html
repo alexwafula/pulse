@@ -187,6 +187,7 @@
           <strong class="rail-value" id="summary-passes"{{if .Experience}} hidden{{end}}>0 of 0</strong>
           {{if .Experience}}<div id="summary-passes-state" class="rail-state">{{template "state" (state "empty" "No passes yet")}}</div>{{end}}
           <div class="rail-mini-bar"{{if .Experience}} hidden{{end}}><div id="summary-pass-fill" style="width: 0%;"></div></div>
+          <span class="rail-sub">Completed / attempted through current clock</span>
         </div>
 
         <div class="rail-card">
@@ -614,13 +615,13 @@
 </html>
 {{define "share-bar"}}
       <!-- Computed Share Bar (strict computed numbers: completed passes, NEVER possession) -->
-      <div class="computed-share-bar" role="region" aria-label="Completed passes share">
+      <div class="computed-share-bar" role="region" aria-label="Completed passes through current clock">
         <div class="share-labels">
           <span class="share-home-val">
             <span class="share-desktop" id="home-pass-share">0 completed passes</span>
             <span class="share-mobile" id="home-pass-share-mobile">0 passes</span>
           </span>
-          <span class="share-title">Completed passes (replay window)</span>
+          <span class="share-title">Completed passes through current clock</span>
           <span class="share-away-val">
             <span class="share-desktop" id="away-pass-share">0 completed passes</span>
             <span class="share-mobile" id="away-pass-share-mobile">0 passes</span>
@@ -630,6 +631,6 @@
           <div class="share-fill-home" id="home-pass-fill" style="width: 0%;"></div>
           <div class="share-fill-away" id="away-pass-fill" style="width: 0%;"></div>
         </div>
-        <span class="share-caption">Completed passes (replay window)</span>
+        <span class="share-caption">Completed passes through current clock</span>
       </div>
 {{end}}

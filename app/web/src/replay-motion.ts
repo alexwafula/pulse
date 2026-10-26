@@ -3,7 +3,7 @@ import type { PlayerMotion, Position } from "./renderers/types";
 
 const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
 const angle = (v: number): number => Math.atan2(Math.sin(v), Math.cos(v));
-type Sample = Position & { vx: number; vy: number; distance: number; heading: number; turn: number };
+type Sample = Position & { vx: number; vy: number; ax: number; ay: number; distance: number; heading: number; turn: number };
 type Knot = Position & { time: number; distance: number; gait: number; heading: number; vx: number; vy: number };
 
 /** Monotone Hermite tangents: pass through samples without overshooting either coordinate. */
@@ -11,9 +11,9 @@ function tangent(before: number, here: number, after: number, dt0: number, dt1: 
   const a = (here-before)/dt0, b = (after-here)/dt1;
   return a*b <= 0 ? 0 : 2*a*b/(a+b);
 }
-function curve(a: number, b: number, va: number, vb: number, dt: number, t: number): [number, number] {
+function curve(a: number, b: number, va: number, vb: number, dt: number, t: number): [number, number, number] {
   const d = (b-a)/dt;
-  if (d === 0) return [a, 0];
+  if (d === 0) return [a, 0, 0];
   let m = va/d, n = vb/d;
   m = Math.max(0,m); n = Math.max(0,n);
   const length = Math.hypot(m,n);
@@ -21,7 +21,8 @@ function curve(a: number, b: number, va: number, vb: number, dt: number, t: numb
   va=m*d; vb=n*d;
   const t2=t*t, t3=t2*t;
   return [(2*t3-3*t2+1)*a+(t3-2*t2+t)*dt*va+(-2*t3+3*t2)*b+(t3-t2)*dt*vb,
-    ((6*t2-6*t)*a+(3*t2-4*t+1)*dt*va+(-6*t2+6*t)*b+(3*t2-2*t)*dt*vb)/dt];
+    ((6*t2-6*t)*a+(3*t2-4*t+1)*dt*va+(-6*t2+6*t)*b+(3*t2-2*t)*dt*vb)/dt,
+    ((12*t-6)*a+(6*t-4)*dt*va+(-12*t+6)*b+(6*t-2)*dt*vb)/(dt*dt)];
 }
 
 /** Presentation cache only. No changes to replay data, events or football metrics. */
@@ -54,8 +55,8 @@ export function createReplayMotion(replay: Replay) {
     const knots=tracks.get(id)!;
     const a=knots[index], b=knots[Math.min(index+1,knots.length-1)];
     const dt=Math.max(.001,(b.time-a.time)/1000), t=clamp((time-a.time)/(dt*1000),0,1);
-    const [x,vx]=curve(a.x,b.x,a.vx,b.vx,dt,t), [y,vy]=curve(a.y,b.y,a.vy,b.vy,dt,t);
-    return { x,y,vx,vy,distance:a.distance+(b.distance-a.distance)*t,
+    const [x,vx,ax]=curve(a.x,b.x,a.vx,b.vx,dt,t), [y,vy,ay]=curve(a.y,b.y,a.vy,b.vy,dt,t);
+    return { x,y,vx,vy,ax,ay,distance:a.distance+(b.distance-a.distance)*t,
       heading:a.heading+(b.heading-a.heading)*t,turn:(b.heading-a.heading)/dt };
   }
   // Causal low-pass camera composition is baked once, so seeking is independent of playback history.
@@ -101,7 +102,9 @@ export function createReplayMotion(replay: Replay) {
     }
     const knots=tracks.get(id)!; const a=knots[index],b=knots[Math.min(index+1,knots.length-1)];
     const t=clamp((time-a.time)/Math.max(1,b.time-a.time),0,1);
-    return {distance:p.distance,gait:a.gait+(b.gait-a.gait)*t,heading:p.heading,turn:p.turn,action};
+    const sin=Math.sin(p.heading), cos=Math.cos(p.heading);
+    return {distance:p.distance,gait:a.gait+(b.gait-a.gait)*t,heading:p.heading,turn:p.turn,
+      forwardAcceleration:p.ax*sin-p.ay*cos,lateralAcceleration:p.ax*cos+p.ay*sin,action};
   }
   return { sample, camera, pose };
 }

@@ -1,9 +1,9 @@
 > Oct 23 local review exception: Alex approved a separate-branch scenario/UI
 > improvement pass: briefings, one two-sided replay, shot geometry, contextual
-> stats and presentation-only Player Spotlight. The same branch now includes the
-> approved pitch animation/camera follow-up (ADR 0035). ADR 0034 records scenario scope. Publishing
-> and deployment remain pending Alex's local review; this does not complete any
-> parked agent, Speech, streaming or Play Fingerprint milestone.
+> stats and presentation-only Player Spotlight. Alex reviewed the local camera
+> and pass-stat follow-up on Oct 26 and requested merging PR #49 to main; Azure
+> release verification remains pending CI and `/version`. This does not complete
+> any parked agent, Speech, streaming or Play Fingerprint milestone.
 
 # PHASES.md
 

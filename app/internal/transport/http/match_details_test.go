@@ -28,33 +28,72 @@ func TestShotDetailsGeometryAndDirections(t *testing.T) {
 
 func TestMatchDetailsWindowCutoffsAndRewind(t *testing.T) {
 	_, catalog := apiScenarios(t)
-	replay := catalog["end-to-end"]
-	details := buildMatchDetails(replay)
-	if len(details.Shots) != 2 {
-		t.Fatal("both teams' shots must be described")
-	}
-	first := replay.Events[0]
-	for _, window := range details.Windows {
-		for _, team := range replay.Match.Teams {
-			want := detailCounts{}
-			for _, event := range replay.Events {
-				if event.TimeMS <= window.TimeMS && event.TimeMS >= window.TimeMS-20000 && event.TeamID == team.ID {
-					if event.Type == "PASS" && event.Outcome == "COMPLETE" {
-						want.Passes++
+	for name, replay := range catalog {
+		t.Run(name, func(t *testing.T) {
+			details := buildMatchDetails(replay)
+			if name == "end-to-end" && len(details.Shots) != 2 {
+				t.Fatal("both teams' shots must be described")
+			}
+			for _, snapshot := range details.Windows {
+				wantPlayers := make(map[string]detailCounts, len(replay.Match.Players))
+				for _, player := range replay.Match.Players {
+					wantPlayers[player.ID] = detailCounts{}
+				}
+				wantTeams := make(map[string]detailCounts, len(replay.Match.Teams))
+				for _, team := range replay.Match.Teams {
+					wantTeams[team.ID] = detailCounts{}
+				}
+				for _, event := range replay.Events {
+					if event.TimeMS > snapshot.TimeMS {
+						continue
+					}
+					player := wantPlayers[event.ActorID]
+					if event.Type == "PASS" {
+						player.PassAttempts++
+						if event.Outcome == "COMPLETE" {
+							player.Passes++
+							recipient := wantPlayers[event.RecipientID]
+							recipient.Received++
+							wantPlayers[event.RecipientID] = recipient
+						}
 					}
 					if event.Type == "SHOT" {
-						want.Shots++
+						player.Shots++
+					}
+					wantPlayers[event.ActorID] = player
+					if event.TimeMS < snapshot.TimeMS-20000 {
+						continue
+					}
+					team := wantTeams[event.TeamID]
+					if event.Type == "PASS" {
+						team.PassAttempts++
+						if event.Outcome == "COMPLETE" {
+							team.Passes++
+						}
+					}
+					if event.Type == "SHOT" {
+						team.Shots++
+					}
+					wantTeams[event.TeamID] = team
+				}
+				for _, team := range replay.Match.Teams {
+					if snapshot.Teams[team.ID] != wantTeams[team.ID] {
+						t.Fatalf("wrong team window at %d for %s: got %+v want %+v", snapshot.TimeMS, team.ID, snapshot.Teams[team.ID], wantTeams[team.ID])
+					}
+				}
+				for _, player := range replay.Match.Players {
+					if snapshot.Players[player.ID] != wantPlayers[player.ID] {
+						t.Fatalf("wrong player totals at %d for %s: got %+v want %+v", snapshot.TimeMS, player.ID, snapshot.Players[player.ID], wantPlayers[player.ID])
 					}
 				}
 			}
-			if window.Teams[team.ID] != want {
-				t.Fatalf("wrong window at %d", window.TimeMS)
+			first := replay.Events[0]
+			if details.Windows[0].Players[first.ActorID].Passes != 0 || details.Windows[0].Players[first.ActorID].PassAttempts != 0 {
+				t.Fatal("future pass leaked into opening snapshot")
 			}
-		}
+		})
 	}
-	if details.Windows[0].Players[first.ActorID].Passes != 0 {
-		t.Fatal("future pass leaked into opening snapshot")
-	}
+	replay := catalog["end-to-end"]
 	handler := matchDetailsHandler(replay)
 	response := httptest.NewRecorder()
 	handler(response, httptest.NewRequest("POST", "/api/match-details", nil))

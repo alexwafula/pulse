@@ -43,6 +43,28 @@ try{
   assert.equal(new Set(poses).size,3,"camera presets have distinct composition");
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await page.close();
+  for(const scenario of ["corner","central","exchange","late-siege","calm-midfield","end-to-end"]){
+   const review=await browser.newPage({viewport:{width,height:width===1440?1000:844}});
+   review.on("pageerror",error=>errors.push(error.message));
+   await review.goto(`${base}/?scenario=${scenario}&view=three`,{waitUntil:"networkidle"});
+   const pitch=review.locator("#canvas-host canvas");await pitch.waitFor();
+   if(await review.locator("#play-button").getAttribute("aria-label")==="Pause") await review.locator("#play-button").click();
+   await review.locator("#camera-mode").selectOption("broadcast",{force:true});
+   for(const value of Array.from({length:21},(_,i)=>i*50)){
+    await review.locator("#seek").evaluate((input,value)=>{input.value=String(value);input.dispatchEvent(new Event("input",{bubbles:true}));},value);
+    await review.waitForTimeout(70);
+    const point=JSON.parse(await pitch.getAttribute("data-ball-screen"));
+    assert.ok(Math.abs(point[0])<.94&&Math.abs(point[1])<.94&&Math.abs(point[2])<1,scenario+" broadcast keeps ball in frame at "+value+": "+point);
+    const pose=JSON.parse(await pitch.getAttribute("data-camera-pose"));
+    const distance=Math.hypot(pose[0]-pose[3],pose[1]-pose[4],pose[2]-pose[5]);
+    assert.equal(pose[6],45,scenario+" broadcast camera keeps the tighter sideline lens");
+    assert.ok(distance<54.5,scenario+" broadcast stays closer to play than the previous wide framing: "+distance);
+   }
+   await review.locator("#seek").evaluate(input=>{input.value="460";input.dispatchEvent(new Event("input",{bubbles:true}));});
+   await review.waitForTimeout(120);
+   await review.locator(".pitch-shell").screenshot({path:path.join(output,scenario+"-broadcast-"+width+".png")});
+   await review.close();
+  }
  }
- assert.deepEqual(errors,[]);console.log("PASS: all camera modes, ball framing across full replay, pause/rewind, desktop/mobile. "+output);
+ assert.deepEqual(errors,[]);console.log("PASS: all camera modes; broadcast ball framing across all six scenarios at desktop/mobile samples; pause/rewind. "+output);
 }finally{await browser.close();}

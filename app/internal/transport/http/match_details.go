@@ -16,9 +16,10 @@ type shotDetail struct {
 	Posts        [2]domain.Point `json:"posts"`
 }
 type detailCounts struct {
-	Passes   int `json:"passes"`
-	Shots    int `json:"shots"`
-	Received int `json:"received"`
+	Passes       int `json:"passes"`
+	PassAttempts int `json:"passAttempts"`
+	Shots        int `json:"shots"`
+	Received     int `json:"received"`
 }
 type detailWindow struct {
 	TimeMS  int64                   `json:"timeMs"`
@@ -78,11 +79,14 @@ func buildMatchDetails(replay domain.Replay) matchDetails {
 				break
 			}
 			player := window.Players[event.ActorID]
-			if event.Type == "PASS" && event.Outcome == "COMPLETE" {
-				player.Passes++
-				recipient := window.Players[event.RecipientID]
-				recipient.Received++
-				window.Players[event.RecipientID] = recipient
+			if event.Type == "PASS" {
+				player.PassAttempts++
+				if event.Outcome == "COMPLETE" {
+					player.Passes++
+					recipient := window.Players[event.RecipientID]
+					recipient.Received++
+					window.Players[event.RecipientID] = recipient
+				}
 			}
 			if event.Type == "SHOT" {
 				player.Shots++
@@ -92,8 +96,11 @@ func buildMatchDetails(replay domain.Replay) matchDetails {
 				continue
 			}
 			team := window.Teams[event.TeamID]
-			if event.Type == "PASS" && event.Outcome == "COMPLETE" {
-				team.Passes++
+			if event.Type == "PASS" {
+				team.PassAttempts++
+				if event.Outcome == "COMPLETE" {
+					team.Passes++
+				}
 			}
 			if event.Type == "SHOT" {
 				team.Shots++

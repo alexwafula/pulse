@@ -4,6 +4,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { createCharacterFactory, poseCharacter } from "./characters";
 import { kitColours, type CameraMode, type ControlField, type PitchRenderer, type RenderPlayer, type SceneState } from "./types";
 
+const clamp = (value: number, min: number, max: number): number => Math.max(min,Math.min(max,value));
+
 export function createStadium(host: HTMLElement, players: RenderPlayer[]): PitchRenderer {
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x142c21);
   const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -143,9 +145,12 @@ export function createStadium(host: HTMLElement, players: RenderPlayer[]): Pitch
     } else {
       const spread=focus?.spread??27;
       const targetX=Math.max(-37,Math.min(37,x*.86));
-      const targetZ=Math.max(-19,Math.min(19,z*.65));
-      camera.position.set(targetX*.96,25+spread*.24,targetZ+43);
-      controls.target.set(targetX,0,targetZ); perspective.fov=47;
+      const targetZ=clamp(z*.84,-25,25);
+      // Frame the active cluster more like a sideline camera; spread eases the
+      // shot wider as more players gather, while the low-pass focus avoids cuts.
+      const crowd=clamp((spread-23)/12,0,1);
+      camera.position.set(targetX+12,22+crowd*2.5,targetZ+33.5+crowd*3);
+      controls.target.set(targetX,0,targetZ); perspective.fov=45;
     }
     if(mode!=="tactical" && perspective.aspect<1.3) perspective.fov+=10;
     // Automatic cameras must land on exactly the same pose after pause/rewind.

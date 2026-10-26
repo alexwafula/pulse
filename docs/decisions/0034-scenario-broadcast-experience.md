@@ -1,11 +1,12 @@
 # 0034: Scenario briefings, two-sided play and broadcast measurements
 
-Status: Local feature branch for review; not published or deployed.
+Status: Reviewed locally; approved for merge to main. Azure rollout follows main CI.
 Date: 2026-10-23
 
 Alex authorized this isolated UI/scenario improvement pass after the research
-review. Work stays on `feat/scenario-broadcast-experience`; publication requires
-Alex's review of the local preview.
+review. On 2026-10-26 Alex reviewed the local preview and requested that PR #49
+be merged to main to build the submission demo. Deployment is not considered
+complete until the release workflow and `/version` confirm it.
 
 ## Scope
 
@@ -23,9 +24,13 @@ Alex's review of the local preview.
   follow-up in ADR 0035; Tactical retains the complete-pitch overview.
 - `/api/match-details?scenario=...` is presentation data calculated in Go:
   shot distance to the opposing goal centre, angle between nominal 7.32 m
-  goalposts, inclusive trailing-20-second team counts, and cumulative player
-  counts. It is not an agent fact pack or an xG/scoring-probability model.
-  Snapshots include expiry cutoffs so rewind and window expiry are exact.
+  goalposts, inclusive trailing-20-second team completed/attempted pass counts,
+  and cumulative player pass attempts and counts. It is not an agent fact pack
+  or an xG/scoring-probability model. Snapshots include expiry cutoffs so rewind
+  and window expiry are exact.
+- The recent-play card shows completed/attempted passes for its 20-second window;
+  pass completion and each team's completed-pass total below it are labelled as
+  cumulative through the current replay clock.
 - Shot lens shows the source outcome and measured geometry on the pitch and in
   a tactical inset. It appears only after that shot, and can replay its action
   using the existing evidence controls. Rewind removes future information.
@@ -63,3 +68,14 @@ covers 320/390/768/1440 px; the feature suite covers SVG/Pixi/Three at 1440/390 
 Desktop/mobile screenshots were visually reviewed. No Azure deployment or live
 model evaluation was performed by this change. New fixture: 17 events, 22 players,
 451 tracking frames, max measured player speed 6.80 m/s, minimum separation 0.57 m.
+
+### Review follow-up (2026-10-26)
+
+The local pass-stat follow-up adds team attempts to the recent window and player
+attempts to cumulative Spotlight counts. `scenario-pass-stats-browser.mjs`
+compares recent counts at five replay positions and cumulative totals at the end
+of all six scenarios. `motion-browser.mjs` checks Broadcast framing at 21 points
+in each scenario on desktop and mobile, and all three camera modes across the
+full End to end replay. Go detail tests, `npm run check:web`, `npm run build:web`,
+and both browser checks passed. The current framing and stat labels were reviewed
+locally; the main release remains pending.

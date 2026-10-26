@@ -4,7 +4,7 @@ import type { SceneState, Position } from "./renderers/types";
 import { t, locale } from "./i18n";
 
 type Event = Replay["events"][number];
-type Counts = {passes:number;shots:number;received:number};
+type Counts = {passes:number;passAttempts:number;shots:number;received:number};
 export type MatchDetails = {shots:{eventId:string;distanceM:number;angleDegrees:number;posts:[Position,Position]}[];windows:{timeMs:number;teams:Record<string,Counts>;players:Record<string,Counts>}[]};
 const ns = "http://www.w3.org/2000/svg";
 const write = (node: Element, value: string): void => { if (node.textContent !== value) node.textContent = value; };
@@ -56,14 +56,14 @@ export function createMatchLab(replay: Replay, details: MatchDetails, repaint: (
       const snapshot=[...details.windows].reverse().find(item=>item.timeMs<=clock)!;
       const heading=document.createElement("span"); heading.className="window-label"; heading.textContent=t("lab.window",{start:time(windowStart),end:time(clock)});
       const rows = replay.match.teams.map(team=>{
-        const counts=snapshot.teams[team.id], node=document.createElement("span");node.className="window-team";
+        const counts=snapshot.teams[team.id], node=document.createElement("span");node.className="window-team";node.dataset.teamId=team.id;node.dataset.passCompleted=String(counts.passes);node.dataset.passAttempts=String(counts.passAttempts);
         const name=document.createElement("strong"),value=document.createElement("span"); name.textContent=team.name;
-        value.textContent=t("lab.teamStats",{passes:counts.passes,shots:counts.shots}); node.append(name,value);return node;
+        value.textContent=t("lab.teamStats",{passes:counts.passes,passAttempts:counts.passAttempts,shots:counts.shots}); node.append(name,value);return node;
       });stats.replaceChildren(heading,...rows);
       if (toggle.checked) {
         const selected=replay.match.players.find(p=>p.id===player.value)!;
         write(get("#spotlight-name"),`#${selected.number} ${selected.name}`);
-        write(get("#spotlight-stats"),t("lab.playerStats",{passes:snapshot.players[selected.id].passes,received:snapshot.players[selected.id].received,shots:snapshot.players[selected.id].shots}));
+        write(get("#spotlight-stats"),t("lab.playerStats",{passes:snapshot.players[selected.id].passes,passAttempts:snapshot.players[selected.id].passAttempts,received:snapshot.players[selected.id].received,shots:snapshot.players[selected.id].shots}));
         list.replaceChildren(...past.filter(e=>e.actorId===selected.id||e.recipientId===selected.id).slice(-3).map(e=>{const b=document.createElement("button");b.type="button";b.dataset.spotlightEvent=e.id;b.textContent=`${time(e.timeMs)} · ${t(e.type.toLowerCase())}`;return b;}));
       }
     }

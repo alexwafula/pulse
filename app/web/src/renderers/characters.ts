@@ -135,14 +135,27 @@ export function poseCharacter(character: Character, timeMs: number, velocity: { 
   const action=motion?.action;
   const envelope=action ? Math.sin(Math.PI*action.phase)**2 : 0;
   const facing=heading+(action?clamp(wrap(action.heading-heading),-.65,.65)*envelope*.8:0);
+  const phase=cycle*Math.PI*2;
+  const forwardAcceleration=motion?.forwardAcceleration??0;
+  const lateralAcceleration=motion?.lateralAcceleration??(motion?.turn??0)*speed;
+  const breathing=motion?Math.sin(timeMs*.001*Math.PI*.7+character.phase)*.004:0;
+  const idleSway=motion?Math.sin(timeMs*.001*.65+character.phase)*.009*(1-amount):0;
+  const turnLean=clamp(lateralAcceleration/48,-.18,.18);
   character.root.rotation.y=facing;
   const travelHeading=speed>.15?Math.atan2(velocity.x,-velocity.y):facing;
   const sideways=wrap(travelHeading-facing);
-  const lean=clamp((motion?.turn??0)*speed*.012,-.16,.16);
-  character.body.rotation.set(0,0,0);
-  character.body.position.y=-.06-amount*.12;
-  character.chest.rotation.set(amount*.09-envelope*.12,Math.sin(cycle*Math.PI*2)*amount*.06,lean*.4);
+  const forwardLean=clamp(forwardAcceleration/55,-.11,.13);
+  const bounce=(.5-.5*Math.cos(phase*2))*.028*amount;
+  character.body.rotation.set(0,0,-turnLean*.28);
+  character.body.position.set(idleSway-clamp(lateralAcceleration*.0015,-.018,.018),-.06-amount*.12+bounce+breathing,0);
+  character.chest.rotation.set(clamp(amount*.07+forwardLean-envelope*.045,-.2,.22),
+    Math.sin(phase)*amount*.035+turnLean*.18,turnLean+idleSway*.8);
   character.head.rotation.y=clamp(wrap(Math.atan2(toBall.x,-toBall.y)-facing),-.7,.7);
+  character.head.rotation.x=clamp(-forwardLean*.35+Math.sin(phase)*amount*.012,-.08,.08);
+
+  const actionHeading=action?.kind==="kick"?action.heading:facing;
+  const ballSide=toBall.x*Math.cos(actionHeading)+toBall.y*Math.sin(actionHeading);
+  const actionLeg=ballSide>.12?1:ballSide<-.12?0:(Math.cos(phase)>=0?1:0);
 
   character.hips.forEach((hip,index)=>{
     const p=((cycle+index*.5)%1+1)%1;
@@ -151,12 +164,12 @@ export function poseCharacter(character: Character, timeMs: number, velocity: { 
     // Stride and stance duration blend between walking, jogging and sprinting.
     let forward=(p<stance ? .5-p/stance : -.5+swing)*stride*stance*Math.min(1,speed/.6);
     let lift=p<stance?0:Math.sin(Math.PI*swing)*(.12+.14*amount)*Math.min(1,speed/.6);
-    if(index===1 && action) {
+    if(index===actionLeg && action) {
       const a=action.phase;
-      // Wind-up, contact (35%), then a decaying follow-through.
-      const kick=a<.35 ? -.32*Math.sin(a/.35*Math.PI) : .72*Math.sin((a-.35)/.65*Math.PI);
+      // Wind-up, maximum extension at the recorded event, then recovery.
+      const kick=a<.18 ? -.24*smooth(a/.18) : a<.35 ? -.24+1.04*smooth((a-.18)/.17) : .8*(1-smooth((a-.35)/.65));
       forward=forward*(1-envelope)+(action.kind==="receive"?.16*envelope:kick*action.strength);
-      lift=Math.max(lift,envelope*(.14+.18*action.strength));
+      lift=Math.max(lift,envelope*(action.kind==="receive"?.09:.1+.12*action.strength));
     }
     const z=forward*Math.cos(sideways), x=forward*Math.sin(sideways);
     const down=.94+character.body.position.y-.055-lift;
@@ -170,6 +183,10 @@ export function poseCharacter(character: Character, timeMs: number, velocity: { 
     if(character.ankles?.[index]) character.ankles[index].rotation.set(-hip.rotation.x-knee,0,-hip.rotation.z);
     const wave=Math.sin((p+.1)*Math.PI*2);
     character.shoulders[index].rotation.set(wave*(.2+.45*amount)*amount-envelope*.28,0,(index?-1:1)*(.12+envelope*.25));
-    character.elbows[index].rotation.x=-(.25+.8*amount+envelope*.15);
+    character.elbows[index].rotation.x=-(.25+.8*amount+envelope*.15+.08*Math.cos((p+.1)*Math.PI*2)*amount);
+    if(character.ankles?.[index]) {
+      const toeOff=p<stance?smooth(p/stance):0;
+      character.ankles[index].rotation.x+=.14*toeOff-.1*Math.sin(Math.PI*swing)*amount;
+    }
   });
 }
