@@ -36,6 +36,9 @@ func Generate(script Script, seed int64) (*domain.Replay, error) {
 		return nil, fmt.Errorf("invalid match window: start=%d end=%d", script.StartMS, script.EndMS)
 	}
 
+	if script.ShapeModel != "" && script.ShapeModel != "balanced-v1" {
+		return nil, fmt.Errorf("unknown shapeModel %q", script.ShapeModel)
+	}
 	rng := rand.New(rand.NewSource(seed))
 
 	// Sort teams and players for strict deterministic order
@@ -85,7 +88,7 @@ func Generate(script Script, seed int64) (*domain.Replay, error) {
 	playerStates := make(map[string]*simPlayerState, len(script.Players))
 	for _, pc := range script.Players {
 		tc := teamMap[pc.TeamID]
-		anchor := BaseAnchor(tc.Formation, pc.Slot, tc.AttackingDirection, script.Pitch)
+		anchor := playerAnchor(script, tc, pc.Slot)
 		playerStates[pc.ID] = &simPlayerState{
 			config: pc,
 			pos:    anchor,
@@ -548,7 +551,7 @@ func computePlayerTargetPos(
 	activeBeat *beatInterval,
 	nextBeat *beatInterval,
 ) domain.Point {
-	baseAnchor := BaseAnchor(tc.Formation, ps.config.Slot, tc.AttackingDirection, script.Pitch)
+	baseAnchor := playerAnchor(script, tc, ps.config.Slot)
 
 	// Case 1: Actor of active beat during hold time or start
 	if activeBeat != nil && ps.config.ID == activeBeat.beat.ActorID {
@@ -577,6 +580,10 @@ func computePlayerTargetPos(
 	// Case 4: Recipient of next upcoming beat
 	if nextBeat != nil && ps.config.ID == nextBeat.beat.RecipientID {
 		return nextBeat.to
+	}
+
+	if script.ShapeModel == "balanced-v1" {
+		return balancedTarget(script, tc, ps.config, ball, activeBeat, nextBeat)
 	}
 
 	// Case 5: Off-ball player tactical shifting

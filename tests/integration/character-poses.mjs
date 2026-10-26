@@ -30,3 +30,24 @@ assert.deepEqual(character.root.position.toArray(),[12,0,-5],"poses may never mo
 assert.equal(avatarSeed("vale-4"),avatarSeed("vale-4"));
 assert.notEqual(avatarSeed("vale-4"),avatarSeed("bastion-4"));
 console.log("Character pose checks passed: source-clock gait, pause/rewind determinism, coordinate heading and no fabricated movement.");
+
+// A paused source distance must freeze gait even if an unrelated wall clock advances.
+const pose={distance:14,gait:3.2,heading:.8,turn:.3};
+poseCharacter(character,1000,{x:4,y:0},{x:8,y:2},pose);
+const distancePose=snapshot();
+poseCharacter(character,9000,{x:4,y:0},{x:8,y:2},pose);
+assert.deepEqual(snapshot(),distancePose,"gait is distance-driven, not wall-clock driven");
+poseCharacter(character,1000,{x:4,y:0},{x:8,y:2},{...pose,action:{kind:"kick",phase:.6,strength:1,heading:.8}});
+assert.notDeepEqual(snapshot(),distancePose,"recorded kick articulates a different pose");
+poseCharacter(character,1000,{x:4,y:0},{x:8,y:2},{...pose,action:{kind:"receive",phase:.6,strength:.35,heading:.8}});
+assert.notDeepEqual(snapshot(),distancePose,"recorded first touch articulates a different pose");
+// Check FK heel height during stance at a range of source speeds.
+for(const speed of [0,1,3,6.5]) {
+ const amount=speed/6.5,stance=.6-.24*amount;
+ const gait=stance*.4-character.phase/(2*Math.PI);
+ poseCharacter(character,0,{x:0,y:-speed},{x:0,y:-10},{distance:0,gait,heading:0,turn:0});
+ const h=character.hips[0].rotation.x,k=character.knees[0].rotation.x;
+ const heelY=.94+character.body.position.y-.46*Math.cos(h)-.43*Math.cos(h+k)-.045;
+ assert.ok(heelY>=-.002&&heelY<.035,"stance foot remains on turf: "+heelY);
+}
+console.log("PASS: distance gait, grounded stance and event articulation.");

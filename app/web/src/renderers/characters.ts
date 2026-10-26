@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { RenderPlayer } from "./types";
+import type { RenderPlayer, PlayerMotion } from "./types";
 
 export type Character = {
   root: THREE.Group;
@@ -11,6 +11,7 @@ export type Character = {
   shoulders: THREE.Group[];
   elbows: THREE.Group[];
   phase: number;
+  ankles?: THREE.Group[];
 };
 
 export function avatarSeed(id: string): number {
@@ -82,7 +83,8 @@ export function createCharacterFactory(textures: THREE.Texture[]): (player: Rend
     const trim = material(0xf4f5ef);
     const shirt = new THREE.MeshStandardMaterial({ map: shirtTexture(player), roughness: .72 });
     const root = new THREE.Group(), body = new THREE.Group(), chest = new THREE.Group();
-    root.name = `player:${player.id}`; root.scale.setScalar(1.9); root.add(body); body.add(chest);
+    root.name = `player:${player.id}`; root.scale.setScalar(1); root.add(body); body.add(chest);
+    const ankles: THREE.Group[] = [];
     const hips: THREE.Group[] = [], knees: THREE.Group[] = [], shoulders: THREE.Group[] = [], elbows: THREE.Group[] = [];
     function mesh(shape: THREE.BufferGeometry, mat: THREE.Material, parent: THREE.Object3D, position: [number,number,number] = [0,0,0], scale: [number,number,number] = [1,1,1]): THREE.Mesh {
       const part = new THREE.Mesh(shape,mat); part.position.set(...position); part.scale.set(...scale); part.castShadow = true; parent.add(part); return part;
@@ -93,7 +95,8 @@ export function createCharacterFactory(textures: THREE.Texture[]): (player: Rend
       mesh(geometry.shortLeg,shorts,hip,[0,-.07,0]); mesh(geometry.thigh,skin,hip,[0,-.02,0]);
       const knee = new THREE.Group(); knee.position.y = -.46; hip.add(knee);
       mesh(geometry.shin,socks,knee); mesh(geometry.sockBand,trim,knee,[0,-.03,0]);
-      mesh(geometry.boot,boots,knee,[0,-.43,.045],[1.05,.72,2.3]); mesh(geometry.sole,sole,knee,[0,-.475,.045]);
+      const ankle = new THREE.Group(); ankle.position.y = -.43; knee.add(ankle); ankles.push(ankle);
+      mesh(geometry.boot,boots,ankle,[0,0,.045],[1.05,.72,2.3]); mesh(geometry.sole,sole,ankle,[0,-.045,.045]);
       hips.push(hip); knees.push(knee);
       const shoulder = new THREE.Group(); shoulder.position.set(side*.235,1.5,0); chest.add(shoulder);
       mesh(geometry.sleeve,kit,shoulder); mesh(geometry.upperArm,skin,shoulder,[0,-.24,0]);
@@ -112,27 +115,78 @@ export function createCharacterFactory(textures: THREE.Texture[]): (player: Rend
     if (seed % 3 === 0) mesh(geometry.curls,hair,head,[0,.05,-.01],[1,.86,1]);
     else mesh(geometry.hair,hair,head,[0,.012,-.004],[.96,1.06,1.06]);
     if (seed % 4 === 0) mesh(geometry.bun,hair,head,[0,.09,-.1]);
-    return { root, body, chest, head, hips, knees, shoulders, elbows, phase: seed % 100 / 10 };
+    return { root, body, chest, head, hips, knees, shoulders, elbows, ankles, phase: seed % 100 / 10 };
   };
 }
 
-export function poseCharacter(character: Character, timeMs: number, velocity: { x: number; y: number }, toBall: { x: number; y: number }): void {
-  const speed = Math.hypot(velocity.x,velocity.y);
-  const amount = Math.min(1,speed/6.5);
-  const phase = amount > 0 ? timeMs/1000*8 + character.phase : character.phase;
-  const heading = speed > .15 ? Math.atan2(velocity.x,-velocity.y) : Math.atan2(toBall.x,-toBall.y);
-  character.root.rotation.y = heading;
-  character.hips.forEach((hip,index) => {
-    const wave = Math.sin(phase+index*Math.PI);
-    hip.rotation.x = -wave*.7*amount - (1-amount)*.06;
-    character.knees[index].rotation.x = Math.max(0,-Math.cos(phase+index*Math.PI))*1.3*amount + .16;
-    character.shoulders[index].rotation.x = wave*.65*amount;
-    character.shoulders[index].rotation.z = (index ? -1 : 1)*.12;
-    character.elbows[index].rotation.x = -(.25+.95*amount);
+const clamp = (v: number, lo: number, hi: number): number => Math.max(lo,Math.min(hi,v));
+const wrap = (v: number): number => Math.atan2(Math.sin(v),Math.cos(v));
+const smooth = (v: number): number => { const t=clamp(v,0,1); return t*t*(3-2*t); };
+
+/** Two-bone foot targets. Stance travels backwards with the root; swing clears the turf.
+ * All inputs are replay-time samples: no accumulated animation state, even after a seek. */
+export function poseCharacter(character: Character, timeMs: number, velocity: { x: number; y: number }, toBall: { x: number; y: number }, motion?: PlayerMotion): void {
+  const speed=Math.hypot(velocity.x,velocity.y), amount=clamp(speed/6.5,0,1);
+  const heading=motion?.heading ?? (speed>.15?Math.atan2(velocity.x,-velocity.y):Math.atan2(toBall.x,-toBall.y));
+  const stride=.95+speed*.32;
+  // Integrating distance removes the treadmill effect from a time-only walk cycle.
+  // Gait phase is integrated once from recorded distance and speed, avoiding phase jumps.
+  const cycle=motion ? (motion.gait??motion.distance/2.1)+character.phase/(2*Math.PI) : timeMs/1000*1.7+character.phase;
+  const action=motion?.action;
+  const envelope=action ? Math.sin(Math.PI*action.phase)**2 : 0;
+  const facing=heading+(action?clamp(wrap(action.heading-heading),-.65,.65)*envelope*.8:0);
+  const phase=cycle*Math.PI*2;
+  const forwardAcceleration=motion?.forwardAcceleration??0;
+  const lateralAcceleration=motion?.lateralAcceleration??(motion?.turn??0)*speed;
+  const breathing=motion?Math.sin(timeMs*.001*Math.PI*.7+character.phase)*.004:0;
+  const idleSway=motion?Math.sin(timeMs*.001*.65+character.phase)*.009*(1-amount):0;
+  const turnLean=clamp(lateralAcceleration/48,-.18,.18);
+  character.root.rotation.y=facing;
+  const travelHeading=speed>.15?Math.atan2(velocity.x,-velocity.y):facing;
+  const sideways=wrap(travelHeading-facing);
+  const forwardLean=clamp(forwardAcceleration/55,-.11,.13);
+  const bounce=(.5-.5*Math.cos(phase*2))*.028*amount;
+  character.body.rotation.set(0,0,-turnLean*.28);
+  character.body.position.set(idleSway-clamp(lateralAcceleration*.0015,-.018,.018),-.06-amount*.12+bounce+breathing,0);
+  character.chest.rotation.set(clamp(amount*.07+forwardLean-envelope*.045,-.2,.22),
+    Math.sin(phase)*amount*.035+turnLean*.18,turnLean+idleSway*.8);
+  character.head.rotation.y=clamp(wrap(Math.atan2(toBall.x,-toBall.y)-facing),-.7,.7);
+  character.head.rotation.x=clamp(-forwardLean*.35+Math.sin(phase)*amount*.012,-.08,.08);
+
+  const actionHeading=action?.kind==="kick"?action.heading:facing;
+  const ballSide=toBall.x*Math.cos(actionHeading)+toBall.y*Math.sin(actionHeading);
+  const actionLeg=ballSide>.12?1:ballSide<-.12?0:(Math.cos(phase)>=0?1:0);
+
+  character.hips.forEach((hip,index)=>{
+    const p=((cycle+index*.5)%1+1)%1;
+    const stance=.6-.24*amount;
+    const swing=p<stance?0:smooth((p-stance)/(1-stance));
+    // Stride and stance duration blend between walking, jogging and sprinting.
+    let forward=(p<stance ? .5-p/stance : -.5+swing)*stride*stance*Math.min(1,speed/.6);
+    let lift=p<stance?0:Math.sin(Math.PI*swing)*(.12+.14*amount)*Math.min(1,speed/.6);
+    if(index===actionLeg && action) {
+      const a=action.phase;
+      // Wind-up, maximum extension at the recorded event, then recovery.
+      const kick=a<.18 ? -.24*smooth(a/.18) : a<.35 ? -.24+1.04*smooth((a-.18)/.17) : .8*(1-smooth((a-.35)/.65));
+      forward=forward*(1-envelope)+(action.kind==="receive"?.16*envelope:kick*action.strength);
+      lift=Math.max(lift,envelope*(action.kind==="receive"?.09:.1+.12*action.strength));
+    }
+    const z=forward*Math.cos(sideways), x=forward*Math.sin(sideways);
+    const down=.94+character.body.position.y-.055-lift;
+    const vertical=Math.hypot(down,x);
+    const reach=clamp(Math.hypot(vertical,z),.15,.889), upper=.46, lower=.43;
+    hip.rotation.order="ZXY";
+    hip.rotation.x=Math.atan2(-z,vertical)-Math.acos(clamp((upper*upper+reach*reach-lower*lower)/(2*upper*reach),-1,1));
+    hip.rotation.z=clamp(Math.atan2(x,down),-.45,.45);
+    const knee= Math.PI-Math.acos(clamp((upper*upper+lower*lower-reach*reach)/(2*upper*lower),-1,1));
+    character.knees[index].rotation.x=knee;
+    if(character.ankles?.[index]) character.ankles[index].rotation.set(-hip.rotation.x-knee,0,-hip.rotation.z);
+    const wave=Math.sin((p+.1)*Math.PI*2);
+    character.shoulders[index].rotation.set(wave*(.2+.45*amount)*amount-envelope*.28,0,(index?-1:1)*(.12+envelope*.25));
+    character.elbows[index].rotation.x=-(.25+.8*amount+envelope*.15+.08*Math.cos((p+.1)*Math.PI*2)*amount);
+    if(character.ankles?.[index]) {
+      const toeOff=p<stance?smooth(p/stance):0;
+      character.ankles[index].rotation.x+=.14*toeOff-.1*Math.sin(Math.PI*swing)*amount;
+    }
   });
-  character.body.rotation.x = .1*amount;
-  character.body.position.y = Math.abs(Math.cos(phase))*.045*amount;
-  character.chest.rotation.y = -Math.sin(phase)*.12*amount;
-  const ballHeading = Math.atan2(toBall.x,-toBall.y) - heading;
-  character.head.rotation.y = Math.max(-.8,Math.min(.8,Math.atan2(Math.sin(ballHeading),Math.cos(ballHeading))));
 }
