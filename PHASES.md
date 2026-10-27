@@ -7,7 +7,7 @@
 
 # PHASES.md
 
-Delivery plan for Pulse, for a ~~**team of two**~~ **team of three registered members: Jefferson, Alex and Ved** (updated Oct 19). Ved made the Matchlens prototype that is the design basis for the UI (ADR 0015). Read `AGENTS.md` first for rules and the repo map. Dates are Africa/Nairobi (EAT). Tick boxes as work completes, and record changes of plan at the bottom.
+Delivery plan for Pulse, for a ~~**team of two**~~ **team of four registered members: Jefferson, Alex, Ved and Dhruvi Parekh** (updated Oct 27). Ved made the Matchlens prototype that is the design basis for the UI (ADR 0015). Read `AGENTS.md` first for rules and the repo map. Dates are Africa/Nairobi (EAT). Tick boxes as work completes, and record changes of plan at the bottom.
 
 ## How this plan works
 
@@ -389,12 +389,13 @@ by another teammate remain pending; these changes do not complete the phase exit
 
 | Date | Change | By |
 |---|---|---|
+| Oct 27 | Added Dhruvi Parekh as the fourth registered team member (`AGENTS.md`, `README.md`, `PHASES.md`, `docs/`), updated submission/project-page copy for PR #49 (`aed03f9`), and refreshed the local demo capture. | Team |
 | Oct 19 | Recorded Ved's confirmed permission for the Matchlens prototype (ADR 0015) and closed the Known gap. The team is three registered members: Jefferson, Alex and Ved. | Jefferson + Claude |
 | Oct 18 | Rebased on `08eafa9`. Re-verified freeze rows F (#30) and A1–A6 (#32) as DONE, and re-ran the local checks plus `locale-browser.mjs`. Registration marked done on Jefferson's confirmation. Added the Matchlens reference hash to Decisions and the missing-LICENSE Known gap. | Jefferson + Claude |
 | Oct 17 | Gave every item a status checked against `main` at `4aa3813`, with evidence. Added the Status key, Dates, Decisions, Freeze plan and Known gaps sections. Folded in the still-accurate parts of closed PR #19 (metrics decisions, metrics risks, contract v2.1 list). Dropped its outdated claims (Azure blocked, PR #18 in review). Play Fingerprint marked parked (Oct 13). | Jefferson + Claude |
 | Oct 15 | Reviewed the supplied local prototype, fixed Select2/HTMX settle duplication and added replay browsing plus explicit fact-check provenance. Localisation drafts and UI tests do not complete native review, streaming, cloud reliability or broader agent evaluation. Feature review branch only until merged. | Alex + Codex |
 | Oct 13 | Deployed Go/Python on Azure using GitHub-built, container-smoke-tested images. Public desktop/mobile checks pass for replay, all renderers, Story, charts/maps and evidence. Recorded Foundry mode makes no runtime model calls. Python insights require a service token; the reported internal-ingress boundary remains an Azure follow-up. Streaming/soak tests and broader agent evaluations remain pending. | Alex + Codex |
-| Oct 5 | Initial plan for a two-person team (the team is now three registered members, Jefferson, Alex and Ved; see the header) | |
+| Oct 5 | Initial plan for a two-person team (the team is now four registered members: Jefferson, Alex, Ved and Dhruvi Parekh; see the header) | |
 | Oct 6 | Added Play Fingerprint (gated Should, tasks FP1 to FP9, Oct 13 gate, Oct 17 hard stop), Pulse Daily (Should, MP3 only), new cut-order positions, trademark and synthetic-data audit items, two risks | |
 | Oct 6 | Contract v2 aligns field names, enums, locales and coordinates; preserve the corner demo, start with COMMENTARY and direct HTTP; message models/tests ready, runtime agents pending. | Alex + Codex |
 | Oct 6 | Alex requested a local Three.js/PixiJS/SVG comparison before pushing. Replay clock and contracts unchanged; this experience spike does not complete the agent or SSE phases. | Alex + Codex |

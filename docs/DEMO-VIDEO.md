@@ -2,56 +2,46 @@
 
 The reproducible capture uses the actual local UI with English captions, no
 voice synthesis, music, real football footage or provider-console mockups.
-It is a **draft pending human approval**, not an uploaded final submission.
-Alex accepted this existing draft on Oct 19. Public upload remains pending;
-the Inspector/comparison additions require a refreshed capture if shown in the
-final submission, rather than implying the old video already contains them.
-The caption band is outside the app. The script refuses non-loopback URLs,
-checks Python is in recorded mode and requires the checked corner recording.
+The caption band is rendered outside the app frame. The script refuses non-loopback URLs,
+checks Python is in `recorded` mode and requires the checked corner and open-play recordings.
 
 ```powershell
 $env:PULSE_MODEL_REQUEST_CAP = '0'
-.\scripts\start-local.ps1 -AgentMode recorded
+.\scripts\start-local.ps1 -AgentMode recorded -SkipWebBuild
 node scripts/capture-demo.mjs
 ```
 
 Only start the launcher if no local Pulse setup is already listening.
 Use `PULSE_URL`, `PULSE_AGENT_URL` and `CHROME_PATH` for alternate local ports or
-Chrome location. Playwright's existing recording helper must be installed;
-missing FFmpeg support is a setup error, not a reason to add a new dependency.
-The script records roughly 100 seconds; slower captures fail at 115 seconds.
+Chrome location. The script records roughly 90–100 seconds; slower captures fail at 115 seconds (well under the 2-minute official limit).
 
 Output: `docs/media/demo-draft/pulse-demo.webm` plus `capture.json` with the
 scene captions and timings. Large video files are ignored by Git; upload the
-reviewed file to a public video platform rather than growing the source repo.
+reviewed file to YouTube or Vimeo rather than committing binary video to the source repo.
 
-Oct 18 capture: **87.40 seconds**, 1440x1000 VP8/WebM, no audio. Sample frames
-were decoded and inspected for pressure, source shot positions and recorded
-Fact check. This does not replace the representative's complete watch-through.
+## Storyboard / narration (Oct 27 refresh — 14 scenes)
 
-## Storyboard / narration
-
-| Scene | What the viewer sees / point to make |
-|---|---|
-| Opening | Fictional 3D replay; inspectable football stories |
-| Pressure | Go-detected moment, template badge, both source actions and ticks |
-| Analyst | Same count and window; model estimate explicitly uncalibrated |
-| Charts | Replay-derived cumulative statistics |
-| Heatmap / shots | Player-time, not possession; recorded source shot positions |
-| Corner | Verified (recorded), never fresh model generation |
-| Fact check | Checked claim, exact fact and source event references |
-| Evidence | The corner and shot replay on one match clock |
-| Persona / locale | Analyst template; translation drafts honestly labelled |
-| Recap | Deterministic recap, evidence and text download |
-| Closing | Actual stack; Azure hosting and opt-in bounded Foundry integration |
+| Scene | Scenario | What the viewer sees / point to make |
+|---|---|---|
+| 1. Opening | `end-to-end` | 3D Broadcast camera on two-sided 11v11 synthetic replay; inspectable football stories |
+| 2. Read the game | `end-to-end` | Go-calculated **Shot Lens** geometry (distance & goalpost angle) and 8-second **Player Spotlight** trail |
+| 3. Open-play insight | `late-siege` | `Verified (recorded)` open-play pass-count insight with **Agent Inspector** showing captured 3-role Foundry provenance |
+| 4. Sustained pressure | `late-siege` | Go-detected pressure moment, `Template` badge, citing both source actions and metric ticks |
+| 5. Analyst view | `late-siege` | Action count, source window, and canonical `model estimate, uncalibrated` label |
+| 6. Match graphs | `late-siege` | Go-calculated cumulative pass, box-entry and shot charts synchronized with rewind |
+| 7. Heatmap | `late-siege` | Sample-and-hold player-time occupancy heatmap (not touches or possession) |
+| 8. What changed? | `late-siege` | Adjacent 20-second same-team window comparison with side-by-side pitch diagrams |
+| 9. Corner insight | `corner` | `Verified (recorded)` set-piece insight with zero runtime model calls |
+| 10. Fact check & Safety test | `corner` | **Fact check** claims/events + **Agent Inspector Safety test** rejecting an injected bad claim (`Rejected by Go gate. Safe template passed.`) |
+| 11. Evidence Trail | `corner` | Clicking **Evidence** replays the exact corner-to-shot clip on the shared match clock |
+| 12. Broadcast mode | `corner` | Full-viewport **Broadcast mode** with match-timed, provenance-labelled captions |
+| 13. Persona & Locales | `corner` | **Analyst** template switch + **Kiswahili (`sw-KE`)** / **Hindi (`hi-IN`)** localized interface and templates |
+| 14. Recap & Stack | `corner` | Deterministic sequence **Recap** with text download; Go + Python agents + HTMX + TypeScript on Azure Container Apps & Microsoft Foundry |
 
 ## Publish checklist
 
-Watch start to finish, check duration below two minutes, caption readability,
-nonblank/moving pitch and correct labels. Resolve the human items in
-[submission readiness](SUBMISSION-READINESS.md). Confirm the video matches the
-final deployed SHA. Upload publicly or via a publicly accessible unlisted link
-on an accepted platform, then test it signed out. Add the final video URL and
-judge instructions to the project page; no video-platform account is connected
-here, so upload is a representative action. See the
+Watch `docs/media/demo-draft/pulse-demo.webm` start to finish, check duration below two minutes, caption readability,
+nonblank/moving pitch and correct labels. Upload publicly or via a publicly accessible unlisted link
+on an accepted platform (YouTube or Vimeo), then test it while signed out. Add the final video URL and
+judge instructions to the project page. See the
 [official video requirements](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).

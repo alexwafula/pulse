@@ -1,8 +1,8 @@
-# Project-page copy
+# Project-page copy (Ready to paste into Hackathon Portal)
 
-Updated October 18, 2026. Hosting and one bounded live workflow were demonstrated;
-the public judge demo deliberately uses recorded output and deterministic templates,
-not fresh model calls. The readiness additions are local until merged/deployed.
+Updated October 27, 2026 (`main` at `aed03f9`, PR #49 merged). Replaces the October 8 registration draft with the complete, deployed and verified feature set.
+
+---
 
 ## Title
 
@@ -12,117 +12,75 @@ Pulse: Football Insights You Can Verify
 
 Turn synthetic football events into clear, evidence-linked match stories, with an interactive pitch, tactical analytics and audience-aware explanations.
 
+## Challenge
+
+The Synthetic Match Insights Engine for Premier League Studio
+
 ## Keywords
 
-football analytics, explainable AI, synthetic data, sports storytelling,
-multi-agent systems, Go, Python, TypeScript, Three.js, Microsoft Foundry, Azure
+Multilingual Storytelling, Football Analytics, synthetic-data, explainable AI, multi-agent systems, Go, Python, TypeScript, Three.js, Microsoft Foundry, Azure Container Apps
 
-## Description
+---
+
+## Description (Copy & Paste into Portal)
 
 ### Football stories need more than a scoreline
 
-Pulse is an explainable football-insights prototype for fans, analysts and
-streaming experiences. It connects match actions to understandable stories
-and lets viewers inspect the evidence behind an insight instead of simply
-trusting an AI-generated sentence.
+Pulse is an explainable football-insights engine for fans, studio analysts and streaming overlays. It connects synthetic match actions to understandable tactical stories and lets viewers inspect and replay the exact source events behind every insight instead of blindly trusting an AI-generated sentence.
 
 ### Facts first, explanations second
 
-Our Go engine replays fictional football sequences on one shared match clock,
-calculates statistics and builds evidence-linked fact packs. A browser pitch
-shows player movement and ball actions in 3D or 2D. Passing networks show who
-connected with whom, while attacking-route panels track lane usage, penalty-area
-entries and entry-to-shot conversion under an explicit attribution rule.
+Our deterministic Go engine replays synthetic football sequences on one shared match clock, computes spatial and event statistics, and builds evidence-linked fact packs. The browser workspace renders player movement and ball actions in **3D (Three.js)**, **2D (PixiJS)**, or **SVG**, with automatic **Broadcast**, orthographic **Tactical**, and **Follow ball** camera framing, monotone Hermite player interpolation, and distance-driven procedural footwork.
 
-The prototype includes three authored scenarios and two seeded 11v11 sequences, Casual and Analyst
-explanations, clickable evidence replay and a downloadable sequence recap.
-Rewinding also rewinds the statistics, so future actions cannot appear as
-current evidence. All clubs, players and match data in the demo are fictional.
+Pulse ships with **six synthetic scenarios**—three authored tactical passages (*Corner chance*, *Central entry*, *Passing exchange*) and three seeded 11v11 replays (*Late siege*, *End to end* two-sided play, and *Calm midfield*):
+- **Match Briefing & Read the Game:** Spoiler-free setup prompts, trailing 20-second team pass comparisons, **Shot Lens** geometry (distance to goal centre and visible angle between the 7.32 m goalposts), and **Player Spotlight** (trailing 8-second movement trail and source-event links).
+- **Insights & What Changed?:** Go-calculated passing networks, attacking-lane progression, sample-and-hold player-time occupancy heatmaps, evidenced shot maps, and **What changed?** (adjacent 10/20/30-second same-team window comparisons with pitch diagrams and bounded window replay).
+- **Story, Recap & Sharing:** Clock-bounded *Live story*, *Catch up*, *Highlights*, and *Player focus* views, a deterministic downloadable text **Recap** at sequence end, replay-fingerprinted **Copy evidence links** that restore exact paused state, and fullscreen **Broadcast mode** with match-timed, provenance-labelled captions. Rewinding the clock rewinds every chart, map, and stat so future actions never leak into current evidence. All clubs, players, kits, and match data are 100% synthetic and fictional.
 
-### Purposeful agent collaboration
+### Purposeful multi-agent collaboration & Agent Inspector
 
-Three Python agents are wired: an Explainer selects supported meaning,
-a Narrator adapts the wording for the viewer, and a Verifier checks each claim
-against the fact pack. Their workflow has bounded retries and deterministic
-template fallback. One explicitly capped, English Casual corner workflow passed
-Python and independent Go checks on October 13. The public Azure demo serves that
-stored response as **Verified (recorded)** only when the complete request matches;
-other supported requests use templates. This is not a general live-model quality
-claim. The recording declares Foundry/model metadata; original provider-response
-provenance remains pending. Model agreement alone cannot override Go's gate.
+Three specialized Python agents collaborate over structured JSON Schema contracts (`FactPack` -> `NarrationDraft` -> `VerificationResult`) backed by **Microsoft Foundry (`gpt-4.1-mini`, `2025-04-14`)**:
+1. **Explainer:** Selects supported tactical meaning from the Go fact pack with cited fact IDs.
+2. **Narrator:** Adapts phrasing for the selected audience persona (**Casual** or **Analyst**) within strict character and claim rules.
+3. **Verifier:** Checks every claim and ordered source event ID against the fact pack. Rejections trigger a single bounded retry before falling back to a deterministic template (`FALLBACK_TEMPLATE`).
 
-Oct 19 branch addition (include only after deployment): Agent Inspector exposes
-source facts, delivery and independent publication checks. A separately captured
-three-role Foundry reference run reproduces the stored response and retains actual
-provider IDs, role outputs, usage and timings; it does not recover original-capture
-provenance. What Changed? compares equal, elapsed source-event windows for one
-team, with pitch diagrams and replay links. It reports observed changes, not cause.
+Model agreement alone never publishes prose: the **Go cue gate** independently recomputes the fact pack from source replay events and verifies every claim before delivery. Two narrow event-backed patterns are enabled for model-verified publication (`set_piece_shots` after a corner and `open_play_passes_before_shot` in a 20-second open-play phase), guarded by 40 offline adversarial boundary evaluations (zero false accepts) and shared Go/Python contract examples.
 
-### Deployment and current limits
+Beneath any displayed insight, **Agent Inspector** exposes the computed fact pack, delivery timing, independent Go gate check, retained three-role Foundry completion records (response IDs, token usage, role outputs), and an interactive **Safety test** where judges can inject a fabricated claim and watch the Go gate reject it and recover to a safe template.
 
-Go and Python are deployed to Azure Container Apps, with GitHub Actions builds,
-Azure Container Registry and service-authenticated insight requests. Microsoft
-Foundry is provisioned for opt-in bounded development runs; public model calls
-remain disabled. Console logs are available in Log Analytics.
+### Cloud deployment, localization & honest boundaries
 
-The readiness branch adds evidence-backed sustained-pressure templates. These
-are **not model-verified**. Tracking-derived control values are uncalibrated
-model estimates. English, Kiswahili and Hindi interface/template options exist;
-Kiswahili/Hindi remain drafts pending native review. Recaps are deterministic,
-scores are unavailable, and no goal, live event streaming or speech is claimed.
+Go (`pulse-web`) and Python (`pulse-agents`) run on **Azure Container Apps** in South Africa North, built and smoke-tested via passwordless GitHub Actions OIDC federation into Azure Container Registry, with service-token authentication between services and Log Analytics ingestion. To guarantee zero quota or latency failures during judging through November 10, the public demo runs in **`recorded` mode** (model request cap `0`), serving request-matched Foundry outputs labelled **`Verified (recorded)`** and deterministic **`Template`** fallbacks with zero runtime model calls.
 
-Pulse's goal is simple: make football intelligence understandable, inspectable
-and adaptable, without allowing an AI model to invent the match.
+Interface copy and deterministic templates support **English (`en-GB`)**, **Kiswahili (`sw-KE`)**, and **Hindi (`hi-IN`)**; non-English requests are template-only and never claim LLM verification. Spatial pitch-control, pressing, and Control vs Chaos values are explicitly labelled **`model estimate, uncalibrated`**, sustained-pressure explanations are labelled **`Template / Not model-verified`**, heatmaps measure tracking player-time rather than touches, and scores remain unavailable rather than `0:0`.
 
-## Challenge
+Pulse's goal is simple: make football intelligence understandable, inspectable and adaptable, without allowing an AI model to invent the match.
 
-Select the **Inside the Game** challenge belonging to this hackathon. The exact
-dropdown label still needs checking on your project form. Do not select a
-different Microsoft event just because its wording also mentions agents.
+---
 
-If the form instead asks for a prize category, **Best Multi-Agent System Prize**
-is a candidate for the bounded specialized workflow; do not describe the recorded
-public demo as a fresh live-agent evaluation. The official
-rules also list Foundry and Azure categories; their existence does not mean
-the project automatically qualifies for a prize or any unimplemented claim.
-[Official rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
+## Writing Code
 
-## Writing code
+Yes
 
-Yes.
-
-## Code repository
+## Code Repository
 
 https://github.com/alexwafula/pulse
 
-Before final submission, confirm this repository link shows the latest tested
-features and keep the project description aligned with what actually runs.
+## Live Demo URL (for Judges)
 
-## Skills needed / joining
+- **Main Match Workspace:** https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/
+- **End-to-End 11v11 Two-Sided Replay:** https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=end-to-end&view=three
+- **Verified (recorded) Corner Insight & Agent Inspector:** https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three
 
-Choose **Yes** if you are actively welcoming more contributors; otherwise
-choose **No**. Suggested skills: Python agent development, Microsoft Foundry,
-Azure Container Apps, Go, TypeScript/Three.js, football analytics, evaluation
-and testing, UI/UX, native Kiswahili review, and demo-video editing.
+## Team Members
 
-Suggested joining text:
-
-We welcome focused contributions in Python agent verification, Foundry/Azure
-integration, TypeScript visualization, synthetic football scenarios and native
-Kiswahili review. Please coordinate shared-contract changes with the team.
+Four registered team members:
+- **Jefferson Gakuya** — Pipeline, Go engine, metrics, cue gate & web experience
+- **Alex Wafula** — Python agents, Microsoft Foundry integration, evaluations & Azure deployment
+- **Ved Shah** — UI/UX design & Matchlens visual system prototype
+- **Dhruvi Parekh** — Product, QA, scenario verification & submission readiness
 
 ## Media
 
-Use the actual product screenshots in `docs/media/`. The readiness recording
-script is `node scripts/capture-demo.mjs` against the local recorded service.
-See [demo script and upload checklist](DEMO-VIDEO.md) and
-[judge instructions](JUDGE-INSTRUCTIONS.md). All footage is fictional replay;
-recorded/template output must not be described as fresh AI generation.
-
-The official final submission calls for a functioning-demo video under two
-minutes, a public video URL on an accepted platform, and a public GitHub repo.
-Screenshots alone are not a replacement for that final video.
-[Submission requirements](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
-
-Avoid unlicensed real-match footage, club marks, copyrighted music and secrets.
-Publish only after [permission and review sign-offs](SUBMISSION-READINESS.md).
+- Upload `docs/media/demo-draft/pulse-demo.webm` (under 2 minutes, 1440x1000 captioned product capture, zero real-world trademarks or unlicensed music) to YouTube or Vimeo (public or unlisted-public, verified while signed out) and paste the link on the project page.
+- Upload up to 4 product screenshots from `docs/media/` (`pulse-experience-live.png`, `pulse-experience-graphs.png`, `pulse-experience-heatmap.png`, `pulse-evidence.png`).

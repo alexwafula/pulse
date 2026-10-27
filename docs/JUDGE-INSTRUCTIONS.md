@@ -2,90 +2,57 @@
 
 ## Open the demo
 
-[Launch Pulse](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three&locale=en-GB&persona=CASUAL).
-No login, API key or installation is needed. Use a recent desktop/mobile browser.
+- **Launch Pulse (Corner Chance — Verified Recorded Insight & Agent Inspector):**
+  [https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three&locale=en-GB&persona=CASUAL](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three&locale=en-GB&persona=CASUAL)
+- **Launch Pulse (End to End — 90s Two-Sided 11v11, Shot Lens & Player Spotlight):**
+  [https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=end-to-end&view=three](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=end-to-end&view=three)
+- **Launch Pulse (Late Siege — 11v11 Open-Play Insight, Sustained Pressure & What Changed?):**
+  [https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=late-siege&view=three](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=late-siege&view=three)
+
+No login, API key or installation is needed. Use a recent desktop or mobile browser.
 Cold starts are possible; allow the page to finish loading. If 3D is unavailable,
-select 2D or SVG. `/version` and the build label identify the deployed revision.
-
+select **2D** or **SVG**. `/version` and the footer build label identify the deployed revision.
 These instructions also apply locally at `http://127.0.0.1:8080/`.
-Readiness-branch fixes are not live until the tested change is merged/deployed.
 
-## Three-minute walkthrough
+---
 
-1. **Corner chance:** press Play or drag the timeline to its end. Inspect the
-   explanation beside the pitch. It reports one shot after a corner, not a goal.
-2. Expand **Fact check**. Inspect the fact ID, source event IDs and counts.
-   **Verified (recorded)** means a stored, request-matched response passed the
-   checks again; the public demo makes no fresh model calls. If Python is
-   unavailable, a safe deterministic template is labelled **Template** instead.
-3. Click **Evidence** to replay the corner and shot; **Return to match** restores
-   your position. Switch **Analyst** to compare the same facts in another style.
-4. Open **Scenarios**, choose **Late siege**, pause and seek to the end. Open
-   **Control** in Live, or **Model & moments** in Insights. Click **Sustained
-   pressure**: Live replays the window with its source events and metric ticks.
-   On the readiness build, its explanation says **Template / Not model-verified**.
-5. In **Insights**, compare **Match graphs** and **Pitch maps**: pass network,
-   heatmap and shots. Choose Aurora Vale for shot locations. Clicking a shot or
-   its Evidence button returns to the corresponding source action in Live.
-6. Open **Story** for clock-bounded Catch up, Highlights and Player focus. At
-   the sequence end, **Recap** offers a deterministic source-event summary and
-   text download. Rewind: future actions disappear from those views.
+## Three-minute judge walkthrough
 
-## Inspector and comparison branch
+### 1. End to End (Two-Sided 11v11, Cameras, Shot Lens & Player Spotlight)
+1. Open **Scenarios** (`Clapperboard` button in the header) and choose **End to end (11v11)**.
+2. Expand **Match briefing** above the pitch for the spoiler-free setup, then press **Play** (or switch camera modes between **Broadcast**, **Tactical**, and **Follow ball**).
+3. Click any **Shot** event in the right-hand **Timeline** (or seek past a shot) and scroll below the pitch to **Read the game**:
+   - **Shot lens** displays the exact distance to the opposing goal centre, the visible angle between the 7.32 m goalposts, and a tactical SVG inset. Click **Replay this shot** to watch the bounded action clip.
+   - Check **Player Spotlight** and pick a player to highlight them on the pitch with an 8-second recorded movement trail, cumulative pass completion, and clickable source-event chips.
 
-These additions are local to `feat/agent-inspector-comparison` until merged/deployed.
-For **corner**, seek to the end and expand **Agent Inspector** beneath the insight.
-Inspect the actual source fact, delivery outcome and independent Go gate. Open
-**Foundry reference run** for the separately captured Oct 19 three-role outputs,
-provider response IDs, token usage and observed durations. It is a reproduction,
-not a recovered trace of the original recording or fresh generation on this visit.
-**Safety test** contains a deliberately wrong injected claim; Show test result
-reveals the real Go rejection and checked fallback, not a model failure claim.
+### 2. Corner Chance (Verified Recorded Insight, Fact Check, Agent Inspector & Safety Test)
+1. Open **Scenarios -> Corner chance**, pause, and drag the timeline scrubber to the end (`28:00`).
+2. Inspect the **Match insight** card beside the pitch (`The corner produced 1 shot.`). It carries the **`Verified (recorded)`** badge.
+3. Expand **Fact check** to inspect the computed fact ID (`fact-corner-...`), claim counts, and source event IDs (`evt-06`, `evt-07`).
+4. Expand **Agent Inspector** beneath Fact check:
+   - View the 5-step pipeline verification summary and Go gate check.
+   - Expand **Foundry reference run** to inspect the three captured `gpt-4.1-mini` role outputs (**Explainer**, **Narrator**, **Verifier**), provider completion IDs, token usage, and latency.
+   - Expand **Safety test** and click **Show test result**: Go injects a fabricated claim (`The corner produced 2 shots.`), rejects it at the deterministic cue gate, and proves the safe template fallback passes.
+5. Click **Evidence** on the insight card to replay the exact corner-to-shot window at 1x with the Evidence Trail beneath the pitch, then click **Return to match**.
 
-For **Late siege**, seek to the end, choose **Insights -> What changed?**, and
-select **Aurora Vale** plus a 20-second window. Compare the earlier/recent counts,
-lane destinations and source actions. Replay either window on the existing pitch;
-Return to match restores the prior clock. The earlier replay stops one millisecond
-before the shared boundary to exclude the recent window's first action. Individual
-evidence buttons inspect their source event in Live. The comparison icon beside
-a detected moment opens that team's windows ending at detection. Rewinding before
-two full windows hides the comparison, not replacing missing data with invented values.
+### 3. Late Siege (Open-Play Pass-Count Insight, Sustained Pressure, What Changed? & Broadcast Mode)
+1. Open **Scenarios -> Late siege (11v11)**, pause, and drag the scrubber to the end (`89:20`).
+2. In **English / Casual**, inspect the **Open-play pass-count insight** (`1 completed pass came before the first shot in this open-play window.`). Expand **Agent Inspector -> Captured agent run** to see the original 3-role Foundry capture for `evt-25`, `evt-26`, `evt-27`.
+3. In the right drawer, click **Control** and select **Sustained pressure**: Live replays the detected pressure window citing both source events and metric ticks, explicitly labelled **`Template / Not model-verified`**. Switch to **Analyst** in the header to see action counts and the canonical **`model estimate, uncalibrated`** label.
+4. Click **Insights** in the top navigation bar:
+   - Compare **Match graphs** (cumulative passes, box entries, shots) and **Pitch maps** (pass network, player-time occupancy heatmap, and evidenced shot locations).
+   - Click **What changed?** and select **20 seconds**: compare adjacent earlier vs. recent 20-second windows for Aurora Vale with side-by-side pitch diagrams and **Replay window** buttons.
+5. Click the **Copy evidence link** icon (`Copy` button in the header) while paused on any evidence clip or timestamp, or click **Broadcast mode** (`Presentation` icon) to expand the pitch fullscreen with match-timed, provenance-labelled captions (`Escape` exits).
+6. Switch **Language** (`English`, `Kiswahili`, `Hindi`) to see localized interface copy and deterministic templates, then open **Recap** to view and download the source-event match summary.
 
-## Priorities 3-5: open-play insight, evidence links and broadcast
+---
 
-Merged to main via PR #44 and deployed by the main release workflow:
+## Label meanings & honest boundaries
 
-1. Open Late siege, seek to the end in English/Casual and inspect the open-play
-   pass-count explanation. Fact check cites the pass, carry and shot. Inspector
-   shows **Captured agent run** with its original three role records. A stored
-   VERIFIED response is still labelled **Verified (recorded)**, not fresh AI.
-2. Inspect an action or replay a moment, pause, and use **Copy evidence link**.
-   Open it in another browser: same scenario, precise paused position, source
-   selection, locale, persona, renderer and camera. A changed/stale replay
-   displays an error, never a silently substituted action.
-3. Select **Broadcast mode** (presentation icon). The same pitch fills the
-   viewport; source explanations enter/expire on match time with their status.
-   It starts at 1x for reading. Play/pause, replay, evidence and sharing still
-   work; Escape/Exit returns to the workspace. No streaming integration or
-   broadcast hardware is claimed.
+- **Synthetic & fictional only:** All clubs (*Aurora Vale*, *Bastion City*, etc.), players, and match sequences are fictional. No real match footage or Premier League marks are used.
+- **`Verified (recorded)` vs `Template`:** Public Azure hosting runs with a model request cap of `0` (`recorded` mode) so judges never hit rate limits or quota errors. `Verified (recorded)` means a stored Microsoft Foundry `gpt-4.1-mini` output was matched to the complete request and passed both Python and Go verification gates. Unmatched or translated requests use deterministic `Template` fallbacks.
+- **`model estimate, uncalibrated`:** Tracking-derived pitch control, pressing intensity, tactical entropy, and Control vs Chaos values are uncalibrated mathematical heuristics, not calibrated probabilities or possession shares. Heatmaps show sample-and-hold player-time, not touches.
+- **Unavailable score:** Fixtures record tactical sequences without a full-match scoreline; the header states `Score unavailable` rather than implying `0:0`.
 
-## Label meanings
-
-All teams, players and sequences are fictional. No real match footage is used.
-Tracking metrics are **model estimate, uncalibrated**: they are not possession,
-event counts or independently established tactical truth. Heatmaps show
-tracking player-time, not touches. No goal/result is recorded; unavailable is
-not 0:0. Player focus is a view filter, not a new agent persona.
-
-Alex accepted the existing native-language/Swahili review. New Inspector/comparison
-technical copy has draft translations; it is not covered by that earlier review.
-Translated insight requests are deterministic and never labelled model-verified.
-Speech, SSE/live ingestion, broader agent wording and model-quality scores
-are not part of this demo. See [provenance](RECORDING-PROVENANCE.md).
-
-Source: [public repository](https://github.com/alexwafula/pulse).
-The team must verify the submitted revision using these steps in a clean browser
-and keep the working URL available throughout judging.
-For the team's EAT calendar, keep it available until at least Nov 11, 2026,
-11:00 AM EAT (after Nov 10, 11:59 PM Pacific). Confirm against the
-[official timing/testing rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
+Source repository: [https://github.com/alexwafula/pulse](https://github.com/alexwafula/pulse).
+Keep the deployment funded and available through at least **Nov 11, 2026, 11:00 AM EAT** (after judging ends Nov 10, 11:59 PM PT).

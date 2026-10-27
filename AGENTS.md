@@ -322,11 +322,12 @@ Never:
 
 ## 11. Ownership and handoffs
 
-Three registered engineers: Jefferson, Alex and Ved.
+Four registered team members: Jefferson, Alex, Ved and Dhruvi Parekh.
 
 - **Pipeline engineer (Jefferson):** `app/`, `data/`, `infra/azure/`, web shell and overlay island, engine metrics, MCP tool server, cue gate, delivery.
 - **Agents engineer (Alex):** `agents/`, prompts, locales, `tests/evaluations/`, Speech integration, Foundry wiring and tracing.
 - **Design engineer (Ved):** the Matchlens prototype that is the visual basis of the UI (ADR 0015) and `docs/design/`. No code ownership: UI code changes go through the Pipeline engineer.
+- **Product, QA and submission readiness (Dhruvi Parekh):** scenario review, evaluation verification, documentation and submission packaging.
 - **Shared:** `contracts/`, `tests/integration/`, `docs/`, CI. Announce changes before merging.
 
 The two sides stub each other: the engine ships recorded fact packs, the agent service ships a template-only mode. Neither side blocks on the other.

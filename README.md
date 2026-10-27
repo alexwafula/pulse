@@ -66,7 +66,7 @@ Checks: `node --test tests/integration/evidence-link.test.mjs` and
 
 ## Team
 
-Three registered members: Jefferson (pipeline), Alex (agents) and Ved (design). Ownership is in [AGENTS.md](AGENTS.md#11-ownership-and-handoffs). Ved designed the Matchlens prototype that the UI is based on ([ADR 0015](docs/decisions/0015-prototype-visual-system.md#fonts-and-provenance)).
+Four registered members: Jefferson (pipeline), Alex (agents), Ved (design) and Dhruvi Parekh (product, QA and submission readiness). Ownership is in [AGENTS.md](AGENTS.md#11-ownership-and-handoffs). Ved designed the Matchlens prototype that the UI is based on ([ADR 0015](docs/decisions/0015-prototype-visual-system.md#fonts-and-provenance)).
 
 ## Planned stack
 - Go: simulator, statistics, replay and HTTP/SSE server
