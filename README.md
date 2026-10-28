@@ -8,6 +8,10 @@ and tracking data.
 [Open Pulse on Azure](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/)
 or [inspect the verified corner insight](https://pulse-web.redflower-fe41736a.southafricanorth.azurecontainerapps.io/?scenario=corner&view=three).
 
+## Demo video
+
+[Watch the Pulse hackathon demo on YouTube](https://youtu.be/260f1t1QPBw).
+
 Go and Python are deployed in South Africa North. The public demo uses reviewed,
 recorded corner output, labelled `Verified (recorded)`, with template fallback.
 It makes no runtime model calls; Azure hosting still consumes credits. Python
